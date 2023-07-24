@@ -12,49 +12,150 @@ module.exports = (/** @type {string} */ input) => {
 	 * @returns {string | undefined}
 	 * 
 	 * @typedef TypeDefinition
-	 * @property {Consumer} consumeConstructor
+	 * @property {Consumer} consumeOptionalConstructor
 	 * @property {Consumer=} consumeType
 	 * @property {number | true=} hasGenerics
+	 * @property {true=} stringable
 	 */
 	/**
 	 * @satisfies {Record<string, TypeDefinition>}
 	 */
 	const types = {
+		dec: {
+			stringable: true,
+			consumeOptionalConstructor () {
+				return consumeOptionalDecimal();
+			},
+		},
+		int: {
+			stringable: true,
+			consumeOptionalConstructor () {
+				return consumeOptionalInteger();
+			},
+		},
+		bool: {
+			stringable: true,
+			consumeOptionalConstructor () {
+				return consumeOptional("true") ?? consumeOptional("false");
+			},
+		},
+		string: {
+			stringable: true,
+			consumeOptionalConstructor () {
+				const s = i;
+				if (!consumeOptional('"'))
+					return undefined;
+
+				assertNotWhiteSpaceAndNewLine();
+
+				const block = consumeOptionalBlockStart();
+
+				let string = "";
+				String: for (; i < input.length; i++) {
+					if (block)
+						string += "\\n".repeat(consumeOptionalNewBlockLine(true));
+
+					const char = input[i];
+					switch (char) {
+						case "\\":
+							i++;
+							if (consumeOptionalNewBlockLine(true)) {
+								consumeOptionalIndent();
+								i--;
+								break;
+							}
+
+							const escapeChar = input[i];
+							switch (escapeChar) {
+								case "r":
+								case "n":
+								case "t":
+								case "\\":
+								case "$":
+									string += char + escapeChar;
+									break;
+								case '"':
+									string += escapeChar;
+									break;
+								default:
+									throw compileError("Unexpected escape character");
+							}
+							break;
+						case "$":
+						case "`":
+							string += `\\${char}`;
+							break;
+						case "*":
+							const e = i;
+							i++;
+							const word = consumeOptionalWord();
+							if (!word) {
+								i--;
+								string += "*";
+								break;
+							}
+
+							i--;
+							const type = vars[word].type;
+							if (!getType(type).stringable)
+								throw compileError(e, `Type '${type}' is not stringable`);
+
+							string += `\${_${word}}`
+							break;
+						case "\r":
+							break;
+						case "\n":
+							break String;
+						case "\t":
+							string += "\\t";
+							break;
+						default:
+							string += char;
+					}
+				}
+
+
+				if (block)
+					consumeBlockEnd();
+
+				return "`" + string + "`";
+			}
+		},
 		"[]": {
 			hasGenerics: 1,
-			consumeConstructor () {
+			consumeOptionalConstructor () {
 				throw compileError("Array implementation incomplete");
 			},
 		},
 		"{}": {
 			hasGenerics: true,
-			consumeConstructor () {
+			consumeOptionalConstructor () {
 				throw compileError("Record implementation incomplete");
 			},
 		},
 		"!": {
-			consumeConstructor () {
+			consumeOptionalConstructor () {
 				const input = consumeType();
 
 				throw compileError("Function implementation incomplete");
 			},
 		},
-		int: {
-			consumeConstructor () {
-				return consumeOptionalInteger();
+		"*": {
+			consumeOptionalConstructor () {
+				throw compileError("Can't construct value for any type");
 			},
-		},
-		dec: {
-			consumeConstructor () {
-				return consumeOptionalDecimal();
-			},
-		},
-		"bool": {
-			consumeConstructor () {
-				return consumeOptional("true") ?? consumeOptional("false");
-			},
-		},
+		}
 	};
+
+	for (const [typeName, typeDef] of Object.entries(types)) {
+		typeDef[Symbol.toStringTag] = `types.${typeName}`;
+	}
+
+	/**
+	 * @param {TypeName} type 
+	 * @returns {TypeDefinition}
+	 */
+	const getType = (type) => types[type];
 
 	const numericTypes = /** @type {const} */ (["int", "dec"]);
 
@@ -159,7 +260,7 @@ module.exports = (/** @type {string} */ input) => {
 	 */
 	const vars = {};
 
-	const getLineStart = () => input.lastIndexOf("\n", i) + 1;
+	const getLineStart = () => input.lastIndexOf("\n", i - 1) + 1;
 	const getLineEnd = () => {
 		let index = input.indexOf("\n", i);
 		if (index === -1)
@@ -220,32 +321,65 @@ module.exports = (/** @type {string} */ input) => {
 		|| isLetter(charCode)
 		|| isDigit(charCode);
 
-	const consumeIndent = () => {
+	/**
+	 * Consume indent up to expected #
+	 * @param {number=} expected 
+	 * @returns Undefined if not enough indentation found, otherwise indentations consumed
+	 */
+	const consumeOptionalIndent = (/** @type {number=} */ expected) => {
 		let indent = 0;
-		for (; i < input.length; i++)
-			if (input[i] === "\t")
-				indent++;
-			else
+		for (; i < input.length; i++) {
+			if (indent === expected)
 				break;
+
+			if (input[i] !== "\t")
+				break;
+
+			indent++;
+		}
+
+		if (expected !== undefined && indent !== expected)
+			return undefined;
 
 		return indent;
 	};
 
-	const consumeOptionalWhiteSpace = () => {
+	const consumeIndent = (/** @type {number=} */ expected) => {
+		const result = consumeOptionalIndent(expected);
+		if (result === undefined)
+			throw compileError("Not enough indentation");
+		return result;
+	};
+
+	const consumeOptionalWhiteSpace = (errorOnIndentation = true) => {
 		let consumed = false;
 		for (; i < input.length; i++)
-			if (input[i] === "\t")
-				throw compileError("Indentation may only be used at the start of lines");
-			else if (input[i] === " ")
+			if (input[i] === " ")
 				consumed = true;
+			else if (input[i] === "\t" && errorOnIndentation)
+				throw compileError("Indentation may only be used at the start of lines");
 			else
 				break;
 
 		return consumed;
 	};
 
+	const consumeOptionalComment = () => {
+		const e = i;
+		consumeOptionalWhiteSpace(false);
+		if (!consumeOptional("; ")) {
+			i = e;
+			return;
+		}
+
+		for (; i < input.length; i++)
+			if (input[i] === "\n")
+				break;
+	}
+
 	const consumeOptionalNewLine = () => {
 		const e = i;
+		consumeOptionalComment();
 		while (consumeOptional("\r"));
 		if (consumeOptional("\n"))
 			return true;
@@ -254,21 +388,53 @@ module.exports = (/** @type {string} */ input) => {
 		return false;
 	};
 
-	const consumeOptionalNewBlockLine = () => {
-		const e = i;
-		while (consumeOptional("\r"));
-		if (consumeOptional("\n") && consumeIndent() === indent)
-			return true;
+	/**
+	 * Loop:
+	 * - Consumes newline. If not encountering a newline, return number of consumed newlines
+	 * - Consumes indentation to expected #
+	 * 	- If encountering more, throw
+	 * 	- If encountering less, return number of consumed newlines and return to before consuming most recent newline
+	 * 	- If encountering right amount
+	 * 		- If the rest of the line is blank, throw
+	 * 		- Else continue
+	 * @param {boolean} ignoreExtraIndentation `true` to disable throwing on extra indentation
+	 * @returns Lines consumed
+	 */
+	const consumeOptionalNewBlockLine = (ignoreExtraIndentation = false) => {
+		let consumed = 0;
+		while (true) {
+			let iPreConsumeLine = i;
+			if (!consumeOptionalNewLine())
+				return consumed;
 
-		i = e;
-		return false;
+			let iPreConsumeIndent = i;
+			const encounteredIndent = consumeOptionalIndent(indent);
+			if (encounteredIndent === undefined) {
+				i = iPreConsumeLine;
+				return consumed;
+			}
+
+			if (!ignoreExtraIndentation) {
+				const iBeforeExtraIndentation = i;
+				if (consumeOptionalIndent())
+					throw compileError(iBeforeExtraIndentation, "Too much indentation");
+			}
+
+			const e = i;
+			if (consumeOptionalNewLine()) {
+				i = e;
+				throw compileError(iPreConsumeIndent, "Unexpected indentation on empty line");
+			}
+
+			consumed++;
+		}
 	};
 
-	const consumeNewLine = () => {
-		let e = i;
-		if (!consumeOptional("\n"))
-			throw compileError(e, "Expected newline");
-	};
+	// const consumeNewLine = () => {
+	// 	let e = i;
+	// 	if (!consumeOptional("\n"))
+	// 		throw compileError(e, "Expected newline");
+	// };
 
 	/** @returns {true} */
 	const consumeWhiteSpace = () => {
@@ -279,12 +445,16 @@ module.exports = (/** @type {string} */ input) => {
 
 	const assertNotWhiteSpaceAndNewLine = () => {
 		const s = i;
-		consumeOptionalWhiteSpace();
+		if (!consumeOptionalWhiteSpace())
+			return;
+
 		const e = i;
 		if (consumeOptionalNewLine()) {
 			i = e;
 			throw compileError(s, "Extraneous whitespace before newline");
 		}
+
+		i = s;
 	}
 
 	const consumeWord = () => {
@@ -323,15 +493,18 @@ module.exports = (/** @type {string} */ input) => {
 	};
 
 	const consumeOptionalDecimal = () => {
-		let int = consumeOptionalInteger();
-		if (consumeOptional(".")) {
-			const dec = consumeOptionalInteger();
-			if (!dec)
-				return undefined;
+		const int = consumeOptionalInteger();
+		if (int === undefined)
+			return undefined;
 
-			return `${int}.${dec}`;
-		}
-		return int;
+		if (!consumeOptional("."))
+			return undefined;
+
+		const dec = consumeOptionalInteger();
+		if (!dec)
+			return undefined;
+
+		return `${int}.${dec}`;
 	};
 
 	const consumeDecimal = () => {
@@ -383,7 +556,7 @@ module.exports = (/** @type {string} */ input) => {
 
 	/**
 	 * @typedef Type
-	 * @property {TypeName | "*"} type
+	 * @property {TypeName} type
 	 * @property {Type[]} generics
 	 */
 
@@ -427,7 +600,7 @@ module.exports = (/** @type {string} */ input) => {
 		if (!typedef)
 			throw compileError("There is no type '" + type + "'");
 
-		return typedef.consumeConstructor();
+		return typedef.consumeOptionalConstructor();
 	};
 
 	const consumeTypeConstructor = (/** @type {Type} */ type) => {
@@ -481,14 +654,18 @@ module.exports = (/** @type {string} */ input) => {
 	 * @returns {Value}
 	 */
 	const consumeExpression = (/** @type {Type=} */ expectedType) => {
+		const e = i;
 		let operandA = consumeUnaryExpression();
 
 		while (true) {
 			consumeOptionalWhiteSpace() || consumeOptionalNewLine();
 
 			const operator = consumeOptionalOperator(binaryOperators);
-			if (!operator)
+			if (!operator) {
+				if (expectedType && expectedType.type !== "*" && operandA.type !== expectedType.type)
+					throw compileError(e, `Expected '${expectedType.type}', got '${operandA.type}'`);
 				return operandA;
+			}
 
 			consumeWhiteSpace();
 
@@ -554,42 +731,69 @@ module.exports = (/** @type {string} */ input) => {
 			return false;
 
 		indent++;
+
+		const e = i;
+		const consumedIndent = consumeIndent();
+		if (consumedIndent < indent)
+			throw compileError(e, `Not enough indentation. Expected ${indent}, found ${consumedIndent}`);
+		else if (consumedIndent > indent)
+			throw compileError(e, `Too much indentation. Expected ${indent}, found ${consumedIndent}`);
+		return true;
+	}
+
+	const consumeBlockEnd = () => {
+		indent--;
+		while (consumeOptional("\r"));
+		consume("\n");
+
 		const e = i;
 		const consumedIndent = consumeIndent();
 		if (consumedIndent < indent)
 			throw compileError(e, "Not enough indentation");
 		else if (consumedIndent > indent)
 			throw compileError(e, "Too much indentation");
+
 		return true;
 	}
 
 	const consumeDeclaration = () => {
+		let e = i;
+		if (consumeOptionalIndent())
+			throw compileError(e, "Unexpected indentation, expected type");
+
 		const type = consumeType();
 
 		consumeWhiteSpace();
 
+		e = i;
 		const name = consumeWord();
+		if (vars[name])
+			throw compileError(e, `Declaration '${name}' already exists ('${vars[name].type}' type)`);
 
 		consumeWhiteSpace();
 
 		consume("=");
 
-		if (type.type === "*" || !consumeOptionalBlockStart()) {
-			assertNotWhiteSpaceAndNewLine();
+		assertNotWhiteSpaceAndNewLine();
 
-			if (type.type === "*") {
-				const typeName = consumeOptionalTypeName();
-				if (!typeName)
-					throw compileError("Inferred declarations require explicit type names for construction");
+		if (type.type === "*") {
+			consumeWhiteSpace();
 
-				type.type = typeName;
+			const typeName = consumeOptionalTypeName();
+			if (!typeName)
+				throw compileError("Inferred declarations require explicit type names for construction");
 
-				if (/** @type {TypeDefinition} */ (types[typeName]).hasGenerics)
-					throw compileError(`Type '${typeName}' was automatically inferred, but it expects generics`);
-			}
+			type.type = typeName;
 
-			consumeOptionalBlockStart();
+			if (/** @type {TypeDefinition} */ (types[typeName]).hasGenerics)
+				throw compileError(`Type '${typeName}' was automatically inferred, but it expects generics`);
 		}
+
+		assertNotWhiteSpaceAndNewLine();
+		const block = consumeOptionalBlockStart();
+
+		if (!block)
+			consumeWhiteSpace();
 
 		/** @type {Value | undefined} */
 		let value;
@@ -600,8 +804,45 @@ module.exports = (/** @type {string} */ input) => {
 			value = { type: type.type, value: consumeTypeConstructor(type) };
 		}
 
+		if (block)
+			consumeBlockEnd();
+
 		vars[name] = value;
 		return `const _${name} = ${value.value};`;
+	};
+
+	const consumeOptionalBlock = () => {
+		if (!consumeOptional("=>"))
+			return undefined;
+
+		if (!consumeOptionalBlockStart())
+			throw compileError("Expected code block");
+	};
+
+	const consumeOptionalDocumentation = () => {
+		if (!consumeOptional(";; "))
+			return "";
+
+		let documentation = "/**";
+		while (true) {
+			if (!consumeOptional("  "))
+				documentation += "\n" + "\t".repeat(indent) + " *";
+
+			documentation += " ";
+			for (; i < input.length; i++) {
+				if (input[i] === "\n") {
+					documentation += "\n" + "\t".repeat(indent) + " *";
+					break;
+				} else if (input[i] !== "\r")
+					documentation += input[i];
+			}
+
+			if (!consumeOptionalNewBlockLine())
+				throw compileError("Expected additional documentation or documented declaration");
+
+			if (!consumeOptional(";; "))
+				return `${documentation}/\n`;
+		}
 	};
 
 	const consumeProgram = () => {
@@ -616,6 +857,12 @@ module.exports = (/** @type {string} */ input) => {
 
 				if (i && i === e)
 					throw compileError("Expected newline");
+
+				output += consumeOptionalDocumentation();
+
+				const block = consumeOptionalBlock();
+				if (block)
+					output += block + "\n";
 
 				output += consumeDeclaration() + "\n";
 			}
