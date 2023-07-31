@@ -1,0 +1,9 @@
+{
+	"private": "true",
+	"scripts": {
+		"play": "node th.js playground.th -w"
+	},
+	"dependencies": {
+		"source-map": "0.7.4"
+	}
+}
