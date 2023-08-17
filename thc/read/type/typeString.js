@@ -22,9 +22,10 @@ module.exports = {
 
 		/** @type {ThetaLiteralString["segments"]} */
 		const segments = [""];
+		let pendingNewlines = "";
 		String: for (; reader.i < reader.input.length; reader.i++) {
 			if (block)
-				segments[segments.length - 1] += "\\n".repeat(consumeNewBlockLineOptional(reader, true));
+				pendingNewlines += "\\n".repeat(consumeNewBlockLineOptional(reader, true));
 
 			const char = reader.input[reader.i];
 			switch (char) {
@@ -43,10 +44,12 @@ module.exports = {
 						case "t":
 						case "\\":
 						case "$":
-							segments[segments.length - 1] += char + escapeChar;
+							segments[segments.length - 1] += pendingNewlines + char + escapeChar;
+							pendingNewlines = "";
 							break;
 						case '"':
-							segments[segments.length - 1] += escapeChar;
+							segments[segments.length - 1] += pendingNewlines + escapeChar;
+							pendingNewlines = "";
 							break;
 						default:
 							throw reader.error("Unexpected escape character");
@@ -54,7 +57,8 @@ module.exports = {
 					break;
 				case "$":
 				case "`":
-					segments[segments.length - 1] += `\\${char}`;
+					segments[segments.length - 1] += pendingNewlines + `\\${char}`;
+					pendingNewlines = "";
 					break;
 				case "*":
 					const e = reader.i;
@@ -62,7 +66,8 @@ module.exports = {
 					const word = consumeWordOptional(reader);
 					if (!word) {
 						reader.i--;
-						segments[segments.length - 1] += "*";
+						segments[segments.length - 1] += pendingNewlines + "*";
+						pendingNewlines = "";
 						break;
 					}
 
@@ -70,6 +75,9 @@ module.exports = {
 					const type = reader.getDeclaration(word.value).valueType;
 					if (!reader.getType(type).stringable)
 						throw reader.error(e, `Type '${type}' is not stringable`);
+
+					segments[segments.length - 1] += pendingNewlines;
+					pendingNewlines = "";
 
 					segments.push({
 						type: "get",
@@ -82,13 +90,13 @@ module.exports = {
 				case "\n":
 					break String;
 				case "\t":
-					segments[segments.length - 1] += "\\t";
+					pendingNewlines += pendingNewlines + "\\t";
 					break;
 				default:
-					segments[segments.length - 1] += char;
+					segments[segments.length - 1] += pendingNewlines + char;
+					pendingNewlines = "";
 			}
 		}
-
 
 		if (block)
 			consumeBlockEnd(reader);

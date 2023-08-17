@@ -36,7 +36,6 @@ function relToCwd (file) {
 			timeout = setTimeout(() => compileAll(files), 10);
 		};
 
-		fs.watch(`${thcPath}.js`, { persistent: true }, recompile).on("error", console.error);
 		fs.watch(thcPath, { persistent: true, recursive: true }, recompile).on("error", console.error);
 	}
 })();
@@ -93,7 +92,7 @@ async function compile (filename) {
 	}
 
 	// only ESWriter output type atm
-	/** @type {typeof import("./thc/write/ESWriter") | undefined */
+	/** @type {typeof import("./thc/write/ESWriter") | undefined} */
 	let outputType;
 	try {
 		outputType = require(path.join(thcPath, "write/ESWriter.js"));
