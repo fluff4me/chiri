@@ -8,6 +8,7 @@ const consumeUnsignedIntegerOptional = require("./consumeUnsignedIntegerOptional
  */
 module.exports = reader => {
 	const e = reader.i;
+	const position = reader.getPosition();
 	const negative = reader.consumeOptional("-") ?? "";
 
 	const int = consumeUnsignedIntegerOptional(reader);
@@ -30,6 +31,7 @@ module.exports = reader => {
 	return {
 		type: "literal",
 		subType: "dec",
-		value: `${negative}${int.value}.${dec.value}`
+		value: `${negative}${int.value}.${dec.value}`,
+		position,
 	};
 };

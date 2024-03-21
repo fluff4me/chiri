@@ -5,6 +5,7 @@
  * @returns {ChiriLiteralNumeric | undefined}
  */
 module.exports = reader => {
+	const i = reader.i;
 	let intStr = "";
 	for (; reader.i < reader.input.length; reader.i++)
 		if (reader.isDigit())
@@ -19,5 +20,6 @@ module.exports = reader => {
 		type: "literal",
 		subType: "uint",
 		value: intStr,
+		position: reader.getPosition(i),
 	};
 };

@@ -54,43 +54,87 @@
  * @property {ChiriPosition} position
  */
 
-/** 
+/**
  * @typedef ChiriLiteralUndefined
  * @property {"literal"} type
  * @property {"undefined"} subType
  * @property {ChiriPosition} position
+ * @property {undefined=} value
  */
 
-/** 
- * @typedef ChiriLiteralOther
- * @property {"literal"} type
- * @property {"other"} subType
- * @property {string} valueType
- * @property {unknown} value
+// /**
+//  * @typedef ChiriLiteralOther
+//  * @property {"literal"} type
+//  * @property {"other"} subType
+//  * @property {string} valueType
+//  * @property {unknown} value
+//  */
+
+/**
+ * @typedef {ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBoolean | ChiriLiteralUndefined} ChiriLiteralValue
  */
 
 /**
- * @typedef {ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBoolean | ChiriLiteralUndefined | ChiriLiteralOther} ChiriLiteralValue
- */
-
-/**
- * @typedef ChiriGet
+ * @typedef ChiriVariableReference
  * @property {"get"} type
  * @property {ChiriWord} name
  * @property {string} valueType
  */
 
 /**
- * @typedef {ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriGet} ChiriExpressionOperand
+ * @typedef {ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference} ChiriExpressionOperand
  */
 
 /**
- * @typedef ChiriConstantDeclaration
- * @property {"declaration"} type
- * @property {"constant"} subType
+ * @typedef ChiriCompilerVariable
+ * @property {"variable"} type
  * @property {string} valueType
  * @property {ChiriWord} name
- * @property {ChiriExpressionOperand} expression
+ * @property {ChiriExpressionOperand=} expression
+ * @property {ChiriPosition} position
+ */
+
+/**
+ * @typedef ChiriProperty
+ * @property {"property"} type
+ * @property {true=} isCustomProperty
+ * @property {ChiriText} property
+ * @property {ChiriValueText} value
+ * @property {ChiriPosition} position
+ */
+
+/**
+ * @typedef ChiriInterpolationVariable
+ * @property {"interpolation-variable"} type
+ * @property {ChiriWord} name
+ * @property {ChiriPosition} position
+ */
+
+/**
+ * @typedef ChiriInterpolationProperty
+ * @property {"interpolation-property"} type
+ * @property {ChiriWord} name
+ * @property {ChiriPosition} position
+ */
+
+/**
+ * @typedef ChiriTextRaw
+ * @property {"text-raw"} type
+ * @property {string} text
+ * @property {ChiriPosition} position
+ */
+
+/**
+ * @typedef ChiriText
+ * @property {"text"} type
+ * @property {(ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand)[]} content
+ * @property {ChiriPosition} position
+ */
+
+/**
+ * @typedef ChiriValueText
+ * @property {"text"} type
+ * @property {(ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand)[]} content
  * @property {ChiriPosition} position
  */
 
@@ -108,17 +152,52 @@
  */
 
 /**
- * @typedef {ChiriConstantDeclaration} ChiriDeclaration
- */
-
-/**
  * @typedef ChiriDocumentation
  * @property {"documentation"} type
  * @property {string} content
  */
 
 /**
- * @typedef {ChiriIIFE | ChiriDeclaration | ChiriDocumentation} ChiriStatement
+ * @typedef ChiriMixin
+ * @property {"mixin"} type
+ * @property {ChiriWord} name
+ * @property {ChiriStatement[]} content
+ */
+
+/**
+ * @typedef ChiriMixinUse
+ * @property {"mixin-use"} type
+ * @property {ChiriWord} name
+ * @property {Record<string, ChiriExpressionOperand>} variables
+ */
+
+/**
+ * @typedef ChiriRuleMain
+ * @property {"rule"} type
+ * @property {"main"} subType
+ * @property {ChiriText} className
+ * @property {ChiriStatement[]} content
+ */
+
+/**
+ * @typedef ChiriRuleState
+ * @property {"rule"} type
+ * @property {"state"} subType
+ * @property {string} state
+ * @property {ChiriStatement[]} content
+ */
+
+/**
+ * @typedef {ChiriRuleMain | ChiriRuleState} ChiriRule
+ */
+
+/**
+ * @typedef ChiriBody
+ * @property {ChiriStatement[]} content
+ */
+
+/**
+ * @typedef {ChiriIIFE | ChiriCompilerVariable | ChiriProperty | ChiriMixin | ChiriDocumentation | ChiriRule | ChiriMixinUse} ChiriStatement
  */
 
 /**

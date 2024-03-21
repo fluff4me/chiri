@@ -21,13 +21,21 @@ module.exports = (reader, ignoreExtraIndentation = false) => {
 	while (true) {
 		let iPreConsumeLine = reader.i;
 		if (!consumeOptionalNewLine(reader))
+			// no more newlines! return the number of newlines that we consumed
 			return consumed;
 
 		let iPreConsumeIndent = reader.i;
-		const encounteredIndent = consumeOptionalIndent(reader, reader.indent);
-		if (encounteredIndent === undefined) {
-			reader.i = iPreConsumeLine;
-			return consumed;
+		let encounteredIndent;
+		while (true) {
+			encounteredIndent = consumeOptionalIndent(reader, reader.indent);
+			if (encounteredIndent !== reader.indent) {
+				if (reader.consumeOptional("\r") || reader.consumeOptional("\n"))
+					continue;
+
+				reader.i = iPreConsumeLine;
+				return consumed;
+			}
+			break;
 		}
 
 		if (!ignoreExtraIndentation) {
@@ -37,7 +45,7 @@ module.exports = (reader, ignoreExtraIndentation = false) => {
 		}
 
 		const e = reader.i;
-		if (consumeOptionalNewLine(reader)) {
+		if (encounteredIndent && consumeOptionalNewLine(reader)) {
 			reader.i = e;
 			throw reader.error(iPreConsumeIndent, "Unexpected indentation on empty line");
 		}

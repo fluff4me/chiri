@@ -1,5 +1,6 @@
 //@ts-check
-const args = { "*": /** @type {string[]} */([]) };
+
+const args = /** @type {Record<string, string | true> & { "*": string[] }} */(/** @type {any} */ ({ "*": [] }));
 for (let i = 2; i < process.argv.length; i++) {
 	const arg = process.argv[i];
 	if (arg[0] === "-" && (arg[2] || arg[1] !== "-")) {
@@ -21,15 +22,21 @@ const path = require("path");
 const ansi = require("./ansi");
 const chcPath = path.resolve("chc");
 
+/**
+ * @param {string} file
+ */
 function relToCwd (file) {
 	return path.relative(process.cwd(), file);
 }
 
 (async () => {
 	const files = args["*"].map(file => path.resolve(file));
-	compileAll(files, args.w);
+	compileAll(files, !!args.w);
 
 	if (args.w) {
+		/**
+		 * @type {NodeJS.Timeout | undefined}
+		 */
 		let timeout;
 		const recompile = () => {
 			clearTimeout(timeout);
@@ -40,11 +47,17 @@ function relToCwd (file) {
 	}
 })();
 
+/**
+ * @param {string[]} files
+ */
 async function compileAll (files, watch = false) {
 	for (const file of files) {
 		await compile(file);
 		if (watch) {
 			console.log(ansi.label + "watch", ansi.path + relToCwd(file), ansi.reset);
+			/**
+			 * @type {NodeJS.Timeout | undefined}
+			 */
 			let timeout;
 			fs.watch(file, { persistent: true }, () => {
 				clearTimeout(timeout);
@@ -56,6 +69,8 @@ async function compileAll (files, watch = false) {
 
 /** @param {string} filename */
 async function compile (filename) {
+	const start = performance.now();
+
 	const ch = await fsp.readFile(filename, "utf8")
 		.catch(err => {
 			console.error(ansi.err + "Failed to read input file", filename, err, ansi.reset);
@@ -77,11 +92,13 @@ async function compile (filename) {
 
 		try {
 			await fsp.writeFile(basename + ".ast.json", JSON.stringify(ast, null, "\t"));
-		} catch (err) {
+		} catch (e) {
+			const err = /** @type {Error} */(e);
 			console.error(ansi.err + "Failed to write AST JSON file", ansi.reset + "\n" + (err.stack ?? err.message));
 		}
 
-	} catch (err) {
+	} catch (e) {
+		const err = /** @type {Error} */(e);
 		let message = err.message;
 		let stack = err.stack;
 		const enomdl = message.startsWith("Cannot find module");
@@ -96,7 +113,8 @@ async function compile (filename) {
 	let outputType;
 	try {
 		outputType = require(path.join(chcPath, "write/ESWriter.js"));
-	} catch (err) {
+	} catch (e) {
+		const err = /** @type {Error} */(e);
 		let message = err.message;
 		let stack = err.stack;
 		const enomdl = message.startsWith("Cannot find module");
@@ -112,7 +130,8 @@ async function compile (filename) {
 	let js = "";
 	try {
 		js = new outputType(ast, basename).write();
-	} catch (err) {
+	} catch (e) {
+		const err = /** @type {Error} */(e);
 		let message = err.message;
 		let stack = err.stack;
 		const enomdl = message.startsWith("Cannot find module");
@@ -121,6 +140,23 @@ async function compile (filename) {
 		console.error(ansi.err + message, ansi.reset + stack);
 	}
 
-	console.log(ansi.label + "chc", ansi.path + relToCwd(filename), ansi.label + "=>", ansi.path + relToCwd(outFile), ansi.reset);
+	const elapsed = performance.now() - start;
+	console.log(ansi.label + "chc", ansi.path + relToCwd(filename), ansi.label + "=>", ansi.path + relToCwd(outFile), ansi.label + formatElapsed(elapsed));
 	return fsp.writeFile(outFile, js);
+}
+
+/**
+ * @param {number} elapsed 
+ */
+function formatElapsed (elapsed) {
+	if (elapsed < 1)
+		return `${Math.floor(elapsed * 1_000)} μs`;
+
+	if (elapsed < 1_000)
+		return `${Math.floor(elapsed)} ms`;
+
+	if (elapsed < 60_000)
+		return `${+(elapsed / 1_000).toFixed(2)} s`;
+
+	return `${+(elapsed / 60_000).toFixed(2)} m`;
 }

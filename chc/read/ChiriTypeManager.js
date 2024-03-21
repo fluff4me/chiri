@@ -30,6 +30,10 @@ const types = {
 };
 
 const numericTypes = /** @type {const} */ (["uint", "int", "dec"]);
+/**
+ * @param {string} type 
+ */
+const isNumeric = type => /** @type {readonly string[]} */ (numericTypes).includes(type);
 
 /**
  * @typedef {keyof typeof types} TypeName
@@ -154,5 +158,34 @@ module.exports = class ChiriTypeManager {
 
 		for (const operator of unaryBooleanOperators)
 			this.registerUnaryOperator(operator, "bool");
+	}
+
+	clone () {
+		const man = new ChiriTypeManager();
+		man.types = { ...this.types };
+		man.unaryOperators = Object.fromEntries(Object.entries(this.unaryOperators)
+			.map(([key, record]) => [key, { ...record }]));
+		man.binaryOperators = Object.fromEntries(Object.entries(this.binaryOperators)
+			.map(([key, record]) => [key, Object.fromEntries(Object.entries(record)
+				.map(([key, record]) => [key, { ...record }]))]));
+		return man;
+	}
+
+	/**
+	 * @param {string} type 
+	 * @param {string} toType 
+	 */
+	isAssignable (type, toType) {
+		if (toType === "*")
+			return true;
+
+		if (type === "*")
+			// this should never happen
+			throw new Error("Tried to assign value of unknown type");
+
+		if (isNumeric(type) && isNumeric(toType))
+			return minNumericPrecision(type, toType) === toType;
+
+		return type === toType;
 	}
 }

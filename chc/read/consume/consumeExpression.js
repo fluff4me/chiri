@@ -2,17 +2,18 @@
 
 const consumeDecimalOptional = require("./consumeDecimalOptional");
 const consumeNewBlockLineOptional = require("./consumeNewBlockLineOptional");
+const consumeStringOptional = require("./consumeStringOptional");
 const consumeUnsignedIntegerOptional = require("./consumeUnsignedIntegerOptional");
 const consumeIntegerOptional = require("./consumeUnsignedIntegerOptional");
 const consumeWhiteSpace = require("./consumeWhiteSpace");
 const consumeWhiteSpaceOptional = require("./consumeWhiteSpaceOptional");
 const consumeWordOptional = require("./consumeWordOptional");
 
-const empy = {};
+const empy = /** @type {never} */({});
 
 /** 
  * @param {import("../ChiriReader")} reader 
- * @param {ChiriType=} expectedType
+ * @param {string=} expectedType
  * @returns {ChiriExpressionOperand}
  */
 module.exports = (reader, expectedType) => {
@@ -20,14 +21,14 @@ module.exports = (reader, expectedType) => {
 	const operand = consumeExpression(reader);
 
 	const typeName = getOperandTypeName(operand);
-	if (expectedType && expectedType.name.value !== "*" && typeName !== expectedType.name.value)
-		throw reader.error(e, `Expected '${expectedType.name.value}', got '${typeName}'`);
+	if (expectedType && expectedType !== "*" && typeName !== expectedType)
+		throw reader.error(e, `Expected '${expectedType}', got '${typeName}'`);
 
 	return operand;
 };
 
 /** @param {ChiriExpressionOperand} operand */
-const getOperandTypeName = operand => operand.type === "literal" && operand.subType !== "other" ? operand.subType : operand.valueType;
+const getOperandTypeName = operand => operand.type === "literal" /*&& operand.subType !== "other"*/ ? operand.subType : operand.valueType;
 
 /** 
  * @param {import("../ChiriReader")} reader 
@@ -47,22 +48,26 @@ const consumeOperand = reader => {
 	if (numeric)
 		return numeric;
 
+	const string = consumeStringOptional(reader);
+	if (string)
+		return string;
+
 	let e = reader.i;
-	if (reader.consumeOptional("."))
+	if (reader.consumeOptional("_"))
 		return { type: "literal", subType: "undefined", position: reader.getPosition(e) };
 
 	e = reader.i;
 	const word = consumeWordOptional(reader);
 	if (word) {
-		const declaration = reader.getDeclarationOptional(word.value);
-		if (declaration)
+		const variable = reader.getVariableOptional(word.value);
+		if (variable)
 			return {
 				type: "get",
 				name: word,
-				valueType: declaration.valueType,
+				valueType: variable.valueType,
 			};
 
-		throw reader.error(e, `No declaration '${word.value}'`);
+		throw reader.error(e, `No variable '${word.value}'`);
 	}
 
 	throw reader.error("Unknown expression operand type");
@@ -90,14 +95,17 @@ const consumeExpression = reader => {
 
 	const binaryOperators = reader.getBinaryOperators();
 	while (true) {
+		const p = reader.i;
 		if (!consumeWhiteSpaceOptional(reader) || consumeNewBlockLineOptional(reader))
 			return operandA;
 
 		const operandATypeName = getOperandTypeName(operandA);
 		const operatorsForType = binaryOperators[operandATypeName] ?? empy;
 		const operator = consumeOperatorOptional(reader, operatorsForType);
-		if (!operator)
+		if (!operator) {
+			reader.i = p;
 			return operandA;
+		}
 
 		consumeWhiteSpace(reader);
 
