@@ -4,6 +4,7 @@
 		"lib": ["ES2023"],
 		"allowJs": true,
 		"noEmit": true,
-		"strict": true
+		"strict": true,
+		"moduleResolution": "node"
 	}
 }

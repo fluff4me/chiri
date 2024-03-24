@@ -1,5 +1,5 @@
 const ChiriReader = require("../ChiriReader");
-const getMixinParameters = require("../util/getMixinParameters");
+const getMixinParameters = require("../../util/getMixinParameters");
 const consumeExpression = require("./consumeExpression");
 const consumeWhiteSpaceOptional = require("./consumeWhiteSpaceOptional");
 const consumeWord = require("./consumeWord");

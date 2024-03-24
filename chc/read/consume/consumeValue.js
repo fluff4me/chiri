@@ -60,6 +60,13 @@ module.exports = (reader, multiline) => {
 		textStart = reader.getPosition();
 	}
 
+	if (text)
+		content.push({
+			type: "text-raw",
+			position: textStart,
+			text,
+		});
+
 	return {
 		type: "text",
 		content,

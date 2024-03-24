@@ -12,8 +12,29 @@ const consumeBlockEnd = require("./consume/consumeBlockEnd");
 const consumeRuleMainOptional = require("./consume/consumeRuleMainOptional");
 const consumeRuleStateOptional = require("./consume/consumeRuleStateOptional");
 const consumeMixinUseOptional = require("./consume/consumeMixinUseOptional");
+const consumeImportOptional = require("./consume/consumeImportOptional");
+const fsp = require("fs/promises");
+const relToCwd = require("../util/relToCwd");
+
+const lib = path.join(path.dirname(path.dirname(__dirname)), "lib");
 
 class ChiriReader {
+
+	/**
+	 * @param {string} filename 
+	 * @param {string=} cwd
+	 */
+	static async load (filename, cwd) {
+		filename = path.resolve(filename);
+		if (!filename.endsWith(".chiri"))
+			filename += ".chiri";
+		const ch = await fsp.readFile(filename, "utf8")
+			.catch(err => {
+				console.error(ansi.err + "Failed to read input file", filename, err, ansi.reset);
+				return "";
+			});
+		return new ChiriReader(filename, ch, cwd);
+	}
 
 	types = new ChiriTypeManager();
 
@@ -23,27 +44,34 @@ class ChiriReader {
 	/** @type {number=} */
 	#errorStart = undefined;
 
-	/** @type {ChiriText} */
-	componentName = {
-		type: "text",
-		content: [],
-		position: { line: -1, column: -1 },
-	};
 	i = 0;
 	indent = 0;
-	multiline = true;
-	isSubReader = false;
-	errored = false;
+	#multiline = true;
+	#isSubReader = false;
+	#errored = false;
 
 	/**
 	 * @param {string} filename 
 	 * @param {string} input 
+	 * @param {string=} cwd
 	 */
-	constructor (filename, input) {
+	constructor (filename, input, cwd) {
 		/** @readonly */
 		this.filename = filename;
 		/** @readonly */
+		this.basename = path.join(path.dirname(filename), path.basename(filename, path.extname(filename)));
+		/** @readonly */
+		this.dirname = path.dirname(filename);
+		/** @readonly */
+		this.cwd = cwd ?? this.dirname;
+		/** @readonly */
 		this.input = input;
+		/** @type {ChiriText} */
+		this.componentName = {
+			type: "text",
+			content: [],
+			position: { line: -1, column: -1, file: filename },
+		};
 	}
 
 	/**
@@ -53,12 +81,12 @@ class ChiriReader {
 		const reader = new ChiriReader(this.filename, this.input);
 		reader.i = this.i;
 		reader.indent = this.indent;
-		reader.multiline = multiline;
+		reader.#multiline = multiline;
 		reader.#lastLineNumber = this.#lastLineNumber;
 		reader.#lastLineNumberPosition = this.#lastLineNumberPosition;
 		reader.#statements = [...this.#statements];
 		reader.types = this.types.clone();
-		reader.isSubReader = true;
+		reader.#isSubReader = true;
 		reader.componentName = {
 			...this.componentName,
 			content: this.componentName.content.slice(),
@@ -73,7 +101,7 @@ class ChiriReader {
 	update (reader) {
 		this.i = reader.i;
 		this.indent = reader.indent;
-		this.errored = reader.errored;
+		this.#errored = reader.#errored;
 	}
 
 	/** 
@@ -136,19 +164,24 @@ class ChiriReader {
 		return this.types.binaryOperators;
 	}
 
-	/** @returns {ChiriAST} */
-	read () {
-		let ignoreNewLineRequirement = this.isSubReader;
+	/** @returns {Promise<ChiriAST>} */
+	async read () {
+		/** @type {Record<string, string>} */
+		const source = {
+			[this.filename]: this.input,
+		};
+
+		let ignoreNewLineRequirement = this.#isSubReader;
 		try {
 			while (true) {
 				let e = this.i;
-				if (this.multiline)
+				if (this.#multiline)
 					while (consumeNewBlockLineOptional(this));
 
 				if (this.i >= this.input.length)
 					break;
 
-				if (this.i && this.i === e && this.multiline && !ignoreNewLineRequirement) {
+				if (this.i && this.i === e && this.#multiline && !ignoreNewLineRequirement) {
 					if (consumeBlockEnd(this))
 						break;
 
@@ -169,10 +202,10 @@ class ChiriReader {
 					this.#statements.push(macro);
 				}
 
-				if (this.errored)
+				if (this.#errored)
 					break;
 
-				const mixin = consumeMixinOptional(this);
+				const mixin = await consumeMixinOptional(this);
 				if (mixin) {
 					// this.#variables[mixin.name.value] = this.#statements.length;
 					this.#statements.push(mixin);
@@ -188,14 +221,27 @@ class ChiriReader {
 					this.#statements.push(property);
 				}
 
-				const rule = consumeRuleMainOptional(this) || consumeRuleStateOptional(this);
+				const rule = (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this));
 				if (rule)
 					this.#statements.push(rule);
 
-				if (this.errored)
+				const imp = consumeImportOptional(this);
+				if (imp) {
+					const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? lib : require.resolve(imp.module);
+					const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path);
+					if (source[filename])
+						throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`);
+
+					const sub = await ChiriReader.load(filename, this.cwd);
+					const ast = await sub.read();
+					Object.assign(source, ast.source);
+					this.#statements.push(...ast.statements);
+				}
+
+				if (this.#errored)
 					break;
 
-				if (!this.multiline)
+				if (!this.#multiline)
 					break;
 
 				if (this.i === e)
@@ -203,13 +249,12 @@ class ChiriReader {
 			}
 
 		} catch (err) {
-			this.errored = true;
+			this.#errored = true;
 			this.logLine(this.#errorStart, /** @type {Error} */(err));
 		}
 
 		return {
-			filename: this.filename,
-			source: this.input,
+			source,
 			statements: this.#statements,
 		};
 	}
@@ -349,6 +394,7 @@ class ChiriReader {
 	/** @returns {ChiriPosition} */
 	getPosition (at = this.i) {
 		return {
+			file: this.filename,
 			line: this.getLineNumber(at) + 1,
 			column: this.getColumnNumber(at) + 1,
 		}

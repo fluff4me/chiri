@@ -51,6 +51,13 @@ module.exports = reader => {
 		textStart = reader.getPosition();
 	}
 
+	if (text)
+		content.push({
+			type: "text-raw",
+			position: textStart,
+			text,
+		});
+
 	return {
 		type: "text",
 		content,

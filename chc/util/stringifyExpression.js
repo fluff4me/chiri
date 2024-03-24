@@ -1,4 +1,4 @@
-const ChiriReader = require("../ChiriReader");
+const ChiriReader = require("../read/ChiriReader");
 const resolveExpression = require("./resolveExpression");
 
 /**

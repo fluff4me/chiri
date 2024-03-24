@@ -4,9 +4,9 @@ const consumeWordInterpolated = require("./consumeWordInterpolated");
 
 /**
  * @param {ChiriReader} reader 
- * @returns {ChiriRuleMain=}
+ * @returns {Promise<ChiriRuleMain | undefined>}
  */
-module.exports = reader => {
+module.exports = async reader => {
 	const prefix = reader.consumeOptional(".", "&-");
 	if (!prefix)
 		return undefined;
@@ -17,12 +17,10 @@ module.exports = reader => {
 
 	reader.consume(":");
 
-	const body = consumeBody(reader, sub => sub.componentName.content.push(...className.content));
-
 	return {
 		type: "rule",
 		subType: "main",
 		className,
-		...body
+		...await consumeBody(reader, sub => sub.componentName.content.push(...className.content)),
 	}
 };

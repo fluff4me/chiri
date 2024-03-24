@@ -140,6 +140,7 @@
 
 /**
  * @typedef ChiriPosition
+ * @property {string} file
  * @property {number} line
  * @property {number} column
  */
@@ -202,7 +203,6 @@
 
 /**
  * @typedef ChiriAST
- * @property {string} filename
- * @property {string} source
+ * @property {Record<string, string>} source Source file content keyed by file path
  * @property {ChiriStatement[]} statements
  */

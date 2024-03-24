@@ -1,13 +1,16 @@
 {
-	"private": "true",
+	"name": "chiri",
+	"version": "1.0.0",
 	"scripts": {
-		"play": "node ch.js playground.ch -w"
+		"play": "node chiri.js playground.chiri -w"
 	},
 	"dependencies": {
-		"source-map": "0.7.4"
+		"source-map": "0.7.4",
+		"chokidar": "3.6.0"
 	},
 	"devDependencies": {
 		"typescript": "5.4.3",
-		"@types/node": "20.11.30"
+		"@types/node": "20.11.30",
+		"dotenv": "16.4.5"
 	}
 }

@@ -1,16 +1,14 @@
 const ChiriReader = require("../ChiriReader");
 const assertNotWhiteSpaceAndNewLine = require("../assert/assertNotWhiteSpaceAndNewLine");
 const consumeBlockStartOptional = require("./consumeBlockStartOptional");
-const consumeIndentOptional = require("./consumeIndentOptional");
-const consumeWhiteSpace = require("./consumeWhiteSpace");
 const consumeWhiteSpaceOptional = require("./consumeWhiteSpaceOptional");
 
 /**
  * @param {ChiriReader} reader
  * @param {(sub: ChiriReader) => any=} initialiser
- * @returns {ChiriBody} 
+ * @returns {Promise<ChiriBody>} 
  */
-module.exports = (reader, initialiser) => {
+module.exports = async (reader, initialiser) => {
 	assertNotWhiteSpaceAndNewLine(reader);
 
 	const multiline = consumeBlockStartOptional(reader);
@@ -22,7 +20,8 @@ module.exports = (reader, initialiser) => {
 
 	const sub = reader.sub(multiline);
 	initialiser?.(sub);
-	const content = sub.read().statements;
+	const ast = await sub.read();
+	const content = ast.statements;
 	reader.update(sub);
 	return {
 		content,

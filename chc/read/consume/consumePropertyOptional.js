@@ -1,6 +1,7 @@
 const ChiriReader = require("../ChiriReader");
 const consumeBlockStartOptional = require("./consumeBlockStartOptional");
 const consumeValue = require("./consumeValue");
+const consumeWhiteSpace = require("./consumeWhiteSpace");
 const consumeWordInterpolated = require("./consumeWordInterpolated");
 
 /**
@@ -15,6 +16,10 @@ module.exports = reader => {
 	const isCustomProperty = reader.consumeOptional("$");
 
 	const property = consumeWordInterpolated(reader);
+
+	reader.consume(":");
+	consumeWhiteSpace(reader);
+
 	const value = consumeValue(reader, !!consumeBlockStartOptional(reader));
 
 	return {
