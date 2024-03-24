@@ -5,6 +5,6 @@ const path = require("path");
  * @param {string=} cwd
  */
 module.exports = function relToCwd (file, cwd = process.cwd()) {
-	return path.relative(process.cwd(), file)
+	return (file.startsWith(cwd) ? path.relative(cwd, file) : file)
 		.replaceAll("\\", "/");
 }

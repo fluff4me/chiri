@@ -19,6 +19,9 @@ module.exports = reader => {
 		return undefined;
 
 	const mixin = reader.getMixin(word.value);
+	if (!mixin)
+		throw reader.error(start, `No declaration for %${word.value}`);
+
 	const parameters = getMixinParameters(mixin)
 		.sort((a, b) => +!!a.expression - +!!b.expression);
 

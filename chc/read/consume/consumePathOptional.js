@@ -76,6 +76,7 @@ const consumeNodeModuleNameOptional = reader => {
  * @typedef ChiriPath
  * @property {string=} module
  * @property {string} path
+ * @property {number} i
  */
 
 /**
@@ -108,5 +109,6 @@ module.exports = reader => {
 	return {
 		module: moduleName,
 		path,
+		i: s,
 	};
 };

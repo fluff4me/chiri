@@ -59,7 +59,7 @@ const consumeOperand = reader => {
 	e = reader.i;
 	const word = consumeWordOptional(reader);
 	if (word) {
-		const variable = reader.getVariableOptional(word.value);
+		const variable = reader.getVariable(word.value);
 		if (variable)
 			return {
 				type: "get",

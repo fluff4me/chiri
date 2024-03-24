@@ -15,6 +15,7 @@ const consumeMixinUseOptional = require("./consume/consumeMixinUseOptional");
 const consumeImportOptional = require("./consume/consumeImportOptional");
 const fsp = require("fs/promises");
 const relToCwd = require("../util/relToCwd");
+const prefixError = require("../util/prefixError");
 
 const lib = path.join(path.dirname(path.dirname(__dirname)), "lib");
 
@@ -28,11 +29,7 @@ class ChiriReader {
 		filename = path.resolve(filename);
 		if (!filename.endsWith(".chiri"))
 			filename += ".chiri";
-		const ch = await fsp.readFile(filename, "utf8")
-			.catch(err => {
-				console.error(ansi.err + "Failed to read input file", filename, err, ansi.reset);
-				return "";
-			});
+		const ch = await fsp.readFile(filename, "utf8");
 		return new ChiriReader(filename, ch, cwd);
 	}
 
@@ -107,7 +104,7 @@ class ChiriReader {
 	/** 
 	 * @param {string} name
 	 */
-	getVariableOptional (name) {
+	getVariable (name) {
 		return this.#statements.findLast(/** @returns {statement is ChiriCompilerVariable} */ statement =>
 			statement.type === "variable" && statement.name.value === name);
 	}
@@ -115,29 +112,9 @@ class ChiriReader {
 	/** 
 	 * @param {string} name
 	 */
-	getVariable (name) {
-		const variable = this.getVariableOptional(name);
-		if (!variable)
-			throw this.error(`No declaration for #${name}`);
-		return variable;
-	}
-
-	/** 
-	 * @param {string} name
-	 */
-	getMixinOptional (name) {
+	getMixin (name) {
 		return this.#statements.findLast(/** @returns {statement is ChiriMixin} */ statement =>
 			statement.type === "mixin" && statement.name.value === name);
-	}
-
-	/** 
-	 * @param {string} name
-	 */
-	getMixin (name) {
-		const variable = this.getMixinOptional(name);
-		if (!variable)
-			throw this.error(`No declaration for %${name}`);
-		return variable;
 	}
 
 	/** @param {string} name */
@@ -232,7 +209,16 @@ class ChiriReader {
 					if (source[filename])
 						throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`);
 
-					const sub = await ChiriReader.load(filename, this.cwd);
+					let sub;
+					try {
+						sub = await ChiriReader.load(filename, this.cwd);
+					} catch (e) {
+						const err = /** @type {Error} */(e);
+						this.#errorStart = this.i;
+						this.i = imp.i;
+						const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error");
+						throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`);
+					}
 					const ast = await sub.read();
 					Object.assign(source, ast.source);
 					this.#statements.push(...ast.statements);
