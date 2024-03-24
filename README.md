@@ -47,8 +47,8 @@ The output of the above code is the following, but the js and css files are mini
 // index.js
 
 const ChiriClasses = {
-    "button-main": [],
-    "button-secondary": []
+    "button-main": ["borderless", "text-purple"],
+    "button-secondary": ["border-2", "text-blue"]
 };
 
 export default ChiriClasses;
