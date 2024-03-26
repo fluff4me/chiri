@@ -5,6 +5,8 @@
 		"allowJs": true,
 		"noEmit": true,
 		"strict": true,
-		"moduleResolution": "node"
+		"moduleResolution": "node",
+		"alwaysStrict": true,
+		"checkJs": true
 	}
 }

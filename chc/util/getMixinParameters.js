@@ -3,5 +3,6 @@
  * @returns {ChiriCompilerVariable[]}
  */
 module.exports = mixin => {
-	return mixin.content.filter(statement => statement.type === "variable");
+	return mixin.content.filter(/** @type {(statement: ChiriStatement) => statement is ChiriCompilerVariable} */ statement =>
+		statement.type === "variable");
 };

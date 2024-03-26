@@ -54,6 +54,7 @@ module.exports = reader => {
 				type: "literal",
 				subType: "boolean",
 				value: true,
+				position: word.position,
 			};
 			continue;
 		}

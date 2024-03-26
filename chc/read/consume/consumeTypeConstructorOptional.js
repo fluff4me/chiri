@@ -11,13 +11,14 @@ module.exports = (reader, type) => {
 	if (!result)
 		return undefined;
 
-	if (result.type === "literal")
-		return result;
+	if ("type" in result && result.type === "literal")
+		return /** @type {ChiriLiteralValue} */(result);
 
-	return {
-		type: "literal",
-		subType: "other",
-		valueType: type.name.value,
-		value: result,
-	};
+	throw reader.error(`Invalid result from ${type.name.value} constructor`);
+	// return {
+	// 	type: "literal",
+	// 	subType: "other",
+	// 	valueType: type.name.value,
+	// 	value: result,
+	// };
 };

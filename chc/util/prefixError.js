@@ -10,7 +10,7 @@ module.exports = (error, prefix) => {
 		stack = error.stack;
 	else {
 		stack = new Error().stack;
-		stack = stack.slice(stack.indexOf("\n") + 1);
+		stack = stack?.slice(stack.indexOf("\n") + 1);
 	}
 
 	return Object.assign(new Error(), {

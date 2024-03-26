@@ -15,7 +15,7 @@ const resolveExpression = (reader, expression) => {
 			return resolveLiteralValue(reader, expression);
 
 		case "get":
-			return resolveExpression(reader, reader.getVariable(expression.name.value).expression);
+			return resolveExpression(reader, reader.getVariable(expression.name.value)?.expression);
 
 		case "expression":
 			switch (expression.subType) {

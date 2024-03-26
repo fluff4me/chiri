@@ -1,7 +1,6 @@
 // @ts-check
 
 const consumeIntegerOptional = require("../consume/consumeIntegerOptional");
-const consumeUnsignedIntegerOptional = require("../consume/consumeUnsignedIntegerOptional");
 
 /** @type {import("../ChiriTypeManager").ChiriTypeDefinition} */
 module.exports = {

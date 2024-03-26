@@ -20,7 +20,7 @@ module.exports = (reader, text, mode) => {
 				result += `var(--${value.name.value})`;
 				continue;
 			case "interpolation-variable":
-				result += stringifyExpression(reader, reader.getVariable(value.name.value).expression);
+				result += stringifyExpression(reader, reader.getVariable(value.name.value)?.expression);
 				continue;
 			default:
 				result += stringifyExpression(reader, value);
