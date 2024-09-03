@@ -1,5 +1,6 @@
 // @ts-check
 
+const consumeCommentOptional = require("./consumeCommentOptional");
 const consumeOptionalIndent = require("./consumeIndentOptional");
 const consumeOptionalNewLine = require("./consumeNewLineOptional");
 
@@ -45,7 +46,7 @@ module.exports = (reader, ignoreExtraIndentation = false) => {
 		}
 
 		const e = reader.i;
-		if (encounteredIndent && consumeOptionalNewLine(reader)) {
+		if (encounteredIndent && !consumeCommentOptional(reader) && consumeOptionalNewLine(reader)) {
 			reader.i = e;
 			throw reader.error(iPreConsumeIndent, "Unexpected indentation on empty line");
 		}

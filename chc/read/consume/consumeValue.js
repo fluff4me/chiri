@@ -3,21 +3,22 @@
 const consumeExpression = require("./consumeExpression");
 const consumeNewBlockLineOptional = require("./consumeNewBlockLineOptional");
 const consumeWord = require("./consumeWord");
+const consumeWordInterpolated = require("./consumeWordInterpolated");
 
 /** 
  * @param {import("../ChiriReader")} reader
  * @param {boolean} multiline
- * @returns {ChiriText}
+ * @returns {ChiriValueText}
  */
 module.exports = (reader, multiline) => {
 	const e = reader.i;
 	const start = reader.getPosition();
 
-	/** @type {ChiriText["content"]} */
+	/** @type {ChiriValueText["content"]} */
 	const content = [];
 
 	let textStart = start;
-	let text = reader.input[reader.i++];
+	let text = "";
 	for (; reader.i < reader.input.length; reader.i++) {
 		if (reader.input[reader.i] === "\n") {
 			if (!multiline || !consumeNewBlockLineOptional(reader))
@@ -30,31 +31,31 @@ module.exports = (reader, multiline) => {
 		if (reader.input[reader.i] === "\r")
 			continue;
 
-		if (reader.input[reader.i] !== "#") {
+		const varType = reader.consumeOptional("#{", "$");
+		if (!varType) {
 			text += reader.input[reader.i];
 			continue;
 		}
 
-		if (text)
+		if (text) {
 			content.push({
 				type: "text-raw",
 				position: textStart,
 				text,
 			});
+		}
 
-		if (reader.input[reader.i + 1] === "{") {
-			reader.consume("#{");
+		if (varType === "$") {
+			const property = consumeWordInterpolated(reader);
+			content.push({
+				type: "interpolation-property",
+				name: property,
+				position: property.position,
+			});
+
+		} else {
 			content.push(consumeExpression(reader));
 		}
-		// else {
-		// 	const position = reader.getPosition();
-		// 	const word = consumeWord(reader);
-		// 	content.push({
-		// 		type: "interpolation-variable",
-		// 		name: word,
-		// 		position,
-		// 	})
-		// }
 
 		text = "";
 		textStart = reader.getPosition();

@@ -5,10 +5,11 @@ const consumeWhiteSpaceOptional = require("./consumeWhiteSpaceOptional");
 
 /**
  * @param {ChiriReader} reader
+ * @param {ChiriContext} context
  * @param {(sub: ChiriReader) => any=} initialiser
  * @returns {Promise<ChiriBody>} 
  */
-module.exports = async (reader, initialiser) => {
+module.exports = async (reader, context, initialiser) => {
 	assertNotWhiteSpaceAndNewLine(reader);
 
 	const multiline = consumeBlockStartOptional(reader);
@@ -18,7 +19,10 @@ module.exports = async (reader, initialiser) => {
 			content: [],
 		};
 
-	const sub = reader.sub(multiline);
+	if (reader.peek("\r\n", "\n"))
+		throw reader.error(reader.i - reader.getColumnNumber(), "Unexpected indentation on empty line");
+
+	const sub = reader.sub(multiline, context);
 	initialiser?.(sub);
 	const ast = await sub.read();
 	const content = ast.statements;

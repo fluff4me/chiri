@@ -6,21 +6,26 @@ const consumeWordInterpolated = require("./consumeWordInterpolated");
 
 /**
  * @param {ChiriReader} reader 
- * @returns {Promise<ChiriRuleState | undefined>}
+ * @returns {Promise<ChiriRule | undefined>}
  */
 module.exports = async reader => {
 	const prefix = reader.consumeOptional(":");
 	if (!prefix)
 		return undefined;
 
+	const position = reader.getPosition();
 	const state = reader.consume(...STATES);
 
 	reader.consume(":");
 
 	return {
 		type: "rule",
-		subType: "state",
-		state,
-		...await consumeBody(reader),
+		className: undefined,
+		state: {
+			type: "text",
+			content: [{ type: "text-raw", text: state, position }],
+			position,
+		},
+		...await consumeBody(reader, "rule"),
 	}
 };

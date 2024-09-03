@@ -1,0 +1,49 @@
+#function border-shorthand:
+	#string of
+	#string[] affects ??= [of]
+	#shorthand #{of}:
+		#var subproperties = ["width", "style", "color"]
+		#each affects as var affected:
+			#each subproperties as var subproperty:
+				#{affected}-#{subproperty}
+				#content
+
+#border-shorthand
+	of="border"
+	affects=[
+		"border"
+		"border-top"
+		"border-left"
+		"border-right"
+		"border-bottom"
+		"border-inline"
+		"border-inline-start"
+		"border-inline-end"
+		"border-block"
+		"border-block-start"
+		"border-block-end"
+
+#border-shorthand of="border-top"
+#border-shorthand of="border-left"
+#border-shorthand of="border-right"
+#border-shorthand of="border-bottom"
+
+#border-shorthand
+	of="border-inline"
+	affects=[
+		"border-inline"
+		"border-inline-start"
+		"border-inline-end"
+
+#border-shorthand of="border-inline-start"
+#border-shorthand of="border-inline-end"
+
+#border-shorthand
+	of="border-block"
+	affects=[
+		"border-block"
+		"border-block-start"
+		"border-block-end"
+
+#border-shorthand of="border-block-start"
+#border-shorthand of="border-block-end"

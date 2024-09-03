@@ -1,0 +1,8 @@
+$font-small: 16px
+$font-large: 32px
+
+$space-1: 2px
+$space-2: 4px
+$space-3: 8px
+$space-4: 16px
+$space-5: 32px

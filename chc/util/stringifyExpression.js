@@ -1,16 +1,17 @@
-const ChiriReader = require("../read/ChiriReader");
+const ChiriCompiler = require("../write/ChiriCompiler");
 const resolveExpression = require("./resolveExpression");
+const resolveLiteralValue = require("./resolveLiteralValue");
 
 /**
- * @param {ChiriReader} reader
- * @param {ChiriExpressionOperand=} expression
+ * @param {ChiriCompiler} compiler
+ * @param {ChiriExpressionOperand | string | number | boolean=} expression
  * @returns {string}
  */
-const stringifyExpression = (reader, expression) => {
-	if (!expression)
+const stringifyExpression = (compiler, expression) => {
+	if (expression === undefined)
 		return "";
 
-	const resolved = resolveExpression(reader, expression);
+	const resolved = typeof expression === "object" ? resolveExpression(compiler, expression) : expression;
 	switch (typeof resolved) {
 		case "number":
 		case "boolean":
@@ -20,8 +21,10 @@ const stringifyExpression = (reader, expression) => {
 		case "string":
 			return resolved;
 		default:
-			throw reader.error(`Expression resolved to unstringifiable type "${typeof resolved}"`);
+			throw compiler.error(`Expression resolved to unstringifiable type "${typeof resolved}"`);
 	}
 };
+
+resolveLiteralValue.stringifyExpression = stringifyExpression;
 
 module.exports = stringifyExpression;

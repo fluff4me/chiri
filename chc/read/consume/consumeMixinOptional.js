@@ -57,6 +57,7 @@ module.exports = async reader => {
 	return {
 		type: "mixin",
 		name,
-		...await consumeBody(reader),
+		used: false,
+		...await consumeBody(reader, "mixin"),
 	}
 };

@@ -1,11 +1,12 @@
-const ChiriReader = require("../read/ChiriReader");
-const stringifyExpression = require("./stringifyExpression");
+const ChiriCompiler = require("../write/ChiriCompiler");
+
+let stringifier;
 
 /**
- * @param {ChiriReader} reader 
+ * @param {ChiriCompiler} compiler 
  * @param {ChiriLiteralValue} expression 
  */
-module.exports = (reader, expression) => {
+const resolveLiteralValue = (compiler, expression) => {
 	const subType = expression.subType;
 	switch (subType) {
 		case "dec":
@@ -18,9 +19,14 @@ module.exports = (reader, expression) => {
 			return undefined;
 		case "string":
 			return expression.segments
-				.map(segment => typeof segment === "string" ? segment : stringifyExpression(reader, segment))
+				.map(segment => typeof segment === "string" ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
 				.join("");
 		default:
 			throw new Error(`Unable to resolve literal value type ${subType}`);
 	}
 };
+
+/** @type {(compiler: ChiriCompiler, expression?: ChiriExpressionOperand | string | number | boolean) => string=} */
+resolveLiteralValue.stringifyExpression = undefined;
+
+module.exports = resolveLiteralValue;

@@ -69,4 +69,10 @@ module.exports = reader => {
 			.map(param => `${param.expression ? "[" : ""}${param.valueType} ${param.name.value}${param.expression ? "]?" : ""}`)
 			.join(", ")}`);
 
+	mixin.used = true;
+	return {
+		type: "mixin-use",
+		name: word,
+		variables: assignments,
+	};
 };

@@ -1,27 +1,27 @@
-const ChiriReader = require("../read/ChiriReader");
+const ChiriCompiler = require("../write/ChiriCompiler");
 const resolveLiteralValue = require("./resolveLiteralValue");
 
 /**
- * @param {ChiriReader} reader 
+ * @param {ChiriCompiler} compiler 
  * @param {ChiriExpressionOperand=} expression
  * @returns {undefined | number | boolean | string}
  */
-const resolveExpression = (reader, expression) => {
+const resolveExpression = (compiler, expression) => {
 	if (!expression)
 		return undefined;
 
 	switch (expression.type) {
 		case "literal":
-			return resolveLiteralValue(reader, expression);
+			return resolveLiteralValue(compiler, expression);
 
 		case "get":
-			return resolveExpression(reader, reader.getVariable(expression.name.value)?.expression);
+			return compiler.getVariable(expression.name.value);
 
 		case "expression":
 			switch (expression.subType) {
 				case "unary": {
 					/** @type {any} */
-					const operand = resolveExpression(reader, expression.operand);
+					const operand = resolveExpression(compiler, expression.operand);
 					switch (expression.operator) {
 						case "!":
 							return !operand;
@@ -32,14 +32,14 @@ const resolveExpression = (reader, expression) => {
 						case "~":
 							return ~operand;
 						default:
-							throw reader.error(`Unable to resolve unary operator "${expression.operator}"`);
+							throw compiler.error(`Unable to resolve unary operator "${expression.operator}"`);
 					}
 				}
 				case "binary": {
 					/** @type {any} */
-					const operandA = resolveExpression(reader, expression.operandA);
+					const operandA = resolveExpression(compiler, expression.operandA);
 					/** @type {any} */
-					const operandB = resolveExpression(reader, expression.operandB);
+					const operandB = resolveExpression(compiler, expression.operandB);
 					switch (expression.operator) {
 						case "+":
 							return operandA + operandB;
@@ -68,7 +68,7 @@ const resolveExpression = (reader, expression) => {
 						case "^":
 							return operandA ^ operandB;
 						default:
-							throw reader.error(`Unable to resolve binary operator "${expression.operator}"`);
+							throw compiler.error(`Unable to resolve binary operator "${expression.operator}"`);
 					}
 				}
 			}

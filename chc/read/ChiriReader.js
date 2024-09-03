@@ -36,7 +36,13 @@ class ChiriReader {
 	types = new ChiriTypeManager();
 
 	/** @type {ChiriStatement[]} */
+	#outerStatements = [];
+
+	/** @type {ChiriStatement[]} */
 	#statements = [];
+
+	/** @type {ChiriStatement[]} */
+	#rootStatements = [];
 
 	/** @type {number=} */
 	#errorStart = undefined;
@@ -51,8 +57,9 @@ class ChiriReader {
 	 * @param {string} filename 
 	 * @param {string} input 
 	 * @param {string=} cwd
+	 * @param {ChiriContext=} context
 	 */
-	constructor (filename, input, cwd) {
+	constructor (filename, input, cwd, context) {
 		/** @readonly */
 		this.filename = filename;
 		/** @readonly */
@@ -63,31 +70,24 @@ class ChiriReader {
 		this.cwd = cwd ?? this.dirname;
 		/** @readonly */
 		this.input = input;
-		/** @type {ChiriText} */
-		this.componentName = {
-			type: "text",
-			content: [],
-			position: { line: -1, column: -1, file: filename },
-		};
+		/** @readonly */
+		this.context = context;
 	}
 
 	/**
 	 * @param {boolean} multiline 
+	 * @param {ChiriContext} context
 	 */
-	sub (multiline) {
-		const reader = new ChiriReader(this.filename, this.input);
+	sub (multiline, context) {
+		const reader = new ChiriReader(this.filename, this.input, undefined, context);
 		reader.i = this.i;
 		reader.indent = this.indent;
 		reader.#multiline = multiline;
 		reader.#lastLineNumber = this.#lastLineNumber;
 		reader.#lastLineNumberPosition = this.#lastLineNumberPosition;
-		reader.#statements = [...this.#statements];
+		reader.#outerStatements = [...this.#outerStatements, ...this.#statements];
 		reader.types = this.types.clone();
 		reader.#isSubReader = true;
-		reader.componentName = {
-			...this.componentName,
-			content: this.componentName.content.slice(),
-		};
 		return reader;
 	}
 
@@ -105,16 +105,22 @@ class ChiriReader {
 	 * @param {string} name
 	 */
 	getVariable (name) {
-		return this.#statements.findLast(/** @returns {statement is ChiriCompilerVariable} */ statement =>
-			statement.type === "variable" && statement.name.value === name);
+		return undefined
+			?? this.#outerStatements.findLast(/** @returns {statement is ChiriCompilerVariable} */ statement =>
+				statement.type === "variable" && statement.name.value === name)
+			?? this.#statements.findLast(/** @returns {statement is ChiriCompilerVariable} */ statement =>
+				statement.type === "variable" && statement.name.value === name);
 	}
 
 	/** 
 	 * @param {string} name
 	 */
 	getMixin (name) {
-		return this.#statements.findLast(/** @returns {statement is ChiriMixin} */ statement =>
-			statement.type === "mixin" && statement.name.value === name);
+		return undefined
+			?? this.#outerStatements.findLast(/** @returns {statement is ChiriMixin} */ statement =>
+				statement.type === "mixin" && statement.name.value === name)
+			?? this.#statements.findLast(/** @returns {statement is ChiriMixin} */ statement =>
+				statement.type === "mixin" && statement.name.value === name);
 	}
 
 	/** @param {string} name */
@@ -151,6 +157,9 @@ class ChiriReader {
 		let ignoreNewLineRequirement = this.#isSubReader;
 		try {
 			while (true) {
+				if (this.#errored)
+					break;
+
 				let e = this.i;
 				if (this.#multiline)
 					while (consumeNewBlockLineOptional(this));
@@ -177,30 +186,34 @@ class ChiriReader {
 					// if (macro.type === "variable")
 					// 	this.#variables[macro.name.value] = this.#statements.length;
 					this.#statements.push(macro);
+					continue;
 				}
-
-				if (this.#errored)
-					break;
 
 				const mixin = await consumeMixinOptional(this);
 				if (mixin) {
 					// this.#variables[mixin.name.value] = this.#statements.length;
 					this.#statements.push(mixin);
+					continue;
 				}
 
 				const mixinUse = consumeMixinUseOptional(this);
 				if (mixinUse) {
 					this.#statements.push(mixinUse);
+					continue;
 				}
 
 				const property = consumePropertyOptional(this);
 				if (property) {
-					this.#statements.push(property);
+					const statementsContainer = this.#isSubReader ? this.#statements : this.#rootStatements;
+					statementsContainer.push(property);
+					continue;
 				}
 
 				const rule = (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this));
-				if (rule)
+				if (rule) {
 					this.#statements.push(rule);
+					continue;
+				}
 
 				const imp = consumeImportOptional(this);
 				if (imp) {
@@ -220,8 +233,10 @@ class ChiriReader {
 						throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`);
 					}
 					const ast = await sub.read();
+					this.#errored ||= sub.#errored;
 					Object.assign(source, ast.source);
 					this.#statements.push(...ast.statements);
+					continue;
 				}
 
 				if (this.#errored)
@@ -237,6 +252,13 @@ class ChiriReader {
 		} catch (err) {
 			this.#errored = true;
 			this.logLine(this.#errorStart, /** @type {Error} */(err));
+		}
+
+		if (this.#rootStatements.length) {
+			this.#statements.unshift({
+				type: "root",
+				content: this.#rootStatements,
+			});
 		}
 
 		return {
@@ -262,7 +284,7 @@ class ChiriReader {
 		const err = typeof errOrMessage === "string" ? undefined : errOrMessage;
 		const message = typeof errOrMessage === "string" ? errOrMessage : undefined;
 
-		const filename = ansi.path + path.relative(process.cwd(), this.filename) + ansi.filepos + `:${lineNumber + 1}:${columnNumber + 1}`;
+		const filename = this.formatFilePos(lineNumber, columnNumber);
 		console[err ? "error" : "info"](filename
 			+ ansi.label + (errOrMessage ? " - " : "")
 			+ ansi.reset + (!err ? message ?? "" : ansi.err + err.message) + "\n"
@@ -271,6 +293,18 @@ class ChiriReader {
 			+ ansi.reset
 			+ (!err?.stack ? ""
 				: `\n${err.stack.slice(err.stack.indexOf("\n", start === undefined ? 0 : err.stack.indexOf("\n") + 1) + 1)}`));
+	}
+
+	formatFilename () {
+		return ansi.path + path.relative(process.cwd(), this.filename).replaceAll("\\", "/");
+	}
+
+	formatFilePos (lineNumber = this.getLineNumber(), columnNumber = this.getColumnNumber()) {
+		return this.formatFilename() + ansi.filepos + `:${lineNumber + 1}:${columnNumber + 1}` + ansi.reset;
+	}
+
+	formatFilePosAt (at = this.i) {
+		return this.formatFilePos(this.getLineNumber(at), this.getColumnNumber(at));
 	}
 
 	/**
@@ -306,6 +340,21 @@ class ChiriReader {
 					continue NextString;
 
 			this.i += string.length;
+			return string;
+		}
+
+		return undefined;
+	}
+
+	/**
+	 * @param {...string} strings 
+	 */
+	peek (...strings) {
+		NextString: for (const string of strings) {
+			for (let j = 0; j < string.length; j++)
+				if (this.input[this.i + j] !== string[j])
+					continue NextString;
+
 			return string;
 		}
 
@@ -391,21 +440,24 @@ class ChiriReader {
 	/** @type {number} */
 	#lastLineNumberPosition = 0;
 	getLineNumber (at = this.i) {
-		const recalc = at < this.#lastLineNumberPosition;
-		if (recalc) {
-			const stack = new Error().stack;
-			console.warn(ansi.err + "Recalculating line number from start :(", ansi.reset + "\n" + stack?.slice(stack.indexOf("\n", stack.indexOf("\n") + 1) + 1));
-		}
+		let lastLineNumberPosition = this.#lastLineNumberPosition;
+		const recalc = at < lastLineNumberPosition;
+
+		const lastPos = !recalc ? "" : this.formatFilePosAt(lastLineNumberPosition);
 
 		let newlines = recalc ? 0 : this.#lastLineNumber;
-		let j = recalc ? 0 : this.#lastLineNumberPosition
+		let j = recalc ? 0 : lastLineNumberPosition
 		for (; j < at; j++)
 			if (this.input[j] === "\n")
 				newlines++;
 
-		if (!recalc) {
-			this.#lastLineNumber = newlines;
-			this.#lastLineNumberPosition = at;
+		this.#lastLineNumber = newlines;
+		this.#lastLineNumberPosition = at;
+
+		if (recalc) {
+			const newPos = this.formatFilePos();
+			const stack = new Error().stack;
+			console.warn(`${ansi.err}Forced to recalculate line number! ${ansi.label}Was: ${lastPos} ${ansi.label}Now: ${newPos}${ansi.reset}\n${stack?.slice(stack.indexOf("\n", stack.indexOf("\n") + 1) + 1)}`);
 		}
 
 		return newlines;

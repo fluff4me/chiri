@@ -1,6 +1,6 @@
 const Writer = require("./Writer");
 
-module.exports = class ESWriter extends Writer {
+module.exports = class CSSWriter extends Writer {
 
 	/**
 	 * @param {ChiriAST} ast
@@ -8,6 +8,6 @@ module.exports = class ESWriter extends Writer {
 	 * @param {ChiriWriteConfig=} config 
 	 */
 	constructor (ast, dest, config) {
-		super(ast, dest, { extension: ".js", ...config });
+		super(ast, dest, { extension: ".css", ...config });
 	}
 }

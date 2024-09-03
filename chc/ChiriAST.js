@@ -1,10 +1,4 @@
 /**
- * @typedef ChiriIIFE
- * @property {"iife"} type
- * @property {ChiriStatement[]} statements
- */
-
-/**
  * @typedef ChiriType
  * @property {"type"} type
  * @property {ChiriWord} name
@@ -113,7 +107,7 @@
 /**
  * @typedef ChiriInterpolationProperty
  * @property {"interpolation-property"} type
- * @property {ChiriWord} name
+ * @property {ChiriText} name
  * @property {ChiriPosition} position
  */
 
@@ -127,14 +121,14 @@
 /**
  * @typedef ChiriText
  * @property {"text"} type
- * @property {(ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand)[]} content
+ * @property {(ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[]} content
  * @property {ChiriPosition} position
  */
 
 /**
  * @typedef ChiriValueText
  * @property {"text"} type
- * @property {(ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand)[]} content
+ * @property {(ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand | string)[]} content
  * @property {ChiriPosition} position
  */
 
@@ -159,10 +153,17 @@
  */
 
 /**
+ * @typedef ChiriRoot
+ * @property {"root"} type
+ * @property {ChiriStatement[]} content
+ */
+
+/**
  * @typedef ChiriMixin
  * @property {"mixin"} type
  * @property {ChiriWord} name
  * @property {ChiriStatement[]} content
+ * @property {boolean} used
  */
 
 /**
@@ -173,23 +174,15 @@
  */
 
 /**
- * @typedef ChiriRuleMain
+ * @typedef ChiriRule
  * @property {"rule"} type
- * @property {"main"} subType
- * @property {ChiriText} className
+ * @property {ChiriText | undefined} className
+ * @property {ChiriText | undefined} state
  * @property {ChiriStatement[]} content
  */
 
 /**
- * @typedef ChiriRuleState
- * @property {"rule"} type
- * @property {"state"} subType
- * @property {string} state
- * @property {ChiriStatement[]} content
- */
-
-/**
- * @typedef {ChiriRuleMain | ChiriRuleState} ChiriRule
+ * @typedef {"mixin" | "rule"} ChiriContext
  */
 
 /**
@@ -198,11 +191,17 @@
  */
 
 /**
- * @typedef {ChiriIIFE | ChiriCompilerVariable | ChiriProperty | ChiriMixin | ChiriDocumentation | ChiriRule | ChiriMixinUse} ChiriStatement
+ * @typedef {ChiriCompilerVariable | ChiriProperty | ChiriMixin | ChiriDocumentation | ChiriRule | ChiriMixinUse | ChiriRoot} ChiriStatement
  */
 
 /**
  * @typedef ChiriAST
  * @property {Record<string, string>} source Source file content keyed by file path
  * @property {ChiriStatement[]} statements
+ */
+
+
+/**
+ * @typedef ChiriWriteConfig
+ * @property {`.${string}`} extension
  */

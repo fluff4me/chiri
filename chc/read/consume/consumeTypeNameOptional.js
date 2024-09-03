@@ -14,7 +14,8 @@ module.exports = reader => {
 		return undefined;
 
 	if (!reader.getTypeOptional(type.value))
-		throw reader.error(e, "There is no type '" + type.value + "'");
+		return undefined;
+	// throw reader.error(e, "There is no type '" + type.value + "'");
 
 	return type;
 };

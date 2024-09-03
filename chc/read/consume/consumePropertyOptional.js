@@ -12,6 +12,9 @@ module.exports = reader => {
 	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
 		return undefined;
 
+	if (reader.input[reader.i] === "#" && reader.input[reader.i + 1] !== "{")
+		return undefined;
+
 	const position = reader.getPosition();
 	const isCustomProperty = reader.consumeOptional("$");
 

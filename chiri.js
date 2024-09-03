@@ -22,7 +22,7 @@ const chokidar = require("chokidar");
 const ansi = require("./ansi");
 const prefixError = require("./chc/util/prefixError");
 const relToCwd = require("./chc/util/relToCwd");
-const streamJson = require("./chc/util/streamJson");
+const ChiriCompiler = require("./chc/write/ChiriCompiler.js");
 const chcPath = path.resolve("chc");
 
 try { require("dotenv").config(); } catch { }
@@ -86,16 +86,21 @@ async function compile (filename) {
 
 	const ast = await reader.read();
 
-	if (process.env.CHIRI_AST)
+	if (process.env.CHIRI_AST) {
+		const streamJson = require("./chc/util/streamJson");
 		await streamJson(reader.basename + ".ast.json", ast)
 			.catch(e => { throw prefixError(e, "Failed to write AST JSON file"); });
+	}
 
 	const outFile = reader.basename;
 
+	const ChiriCompiler = require("./chc/write/ChiriCompiler.js");
+	const compiler = new ChiriCompiler(ast, outFile);
+	compiler.compile();
+	await compiler.writeFiles();
 
 	const elapsed = performance.now() - start;
 	console.log(ansi.label + "chiri", ansi.path + relToCwd(filename), ansi.label + "=>", ansi.path + relToCwd(outFile), ansi.label + formatElapsed(elapsed));
-	// return fsp.writeFile(outFile, js);
 }
 
 /**

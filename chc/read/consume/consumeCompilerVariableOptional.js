@@ -1,7 +1,7 @@
 // @ts-check
 
 const consumeExpression = require("./consumeExpression");
-const { consumeType } = require("./consumeType");
+const { consumeType, consumeTypeOptional } = require("./consumeType");
 const consumeWhiteSpace = require("./consumeWhiteSpace");
 const consumeWhiteSpaceOptional = require("./consumeWhiteSpaceOptional");
 const consumeWord = require("./consumeWord");
@@ -9,21 +9,27 @@ const consumeWordOptional = require("./consumeWordOptional");
 
 /** 
  * @param {import("../ChiriReader")} reader 
- * @returns {ChiriCompilerVariable}
+ * @returns {ChiriCompilerVariable | undefined}
  */
 module.exports = reader => {
+	const save = reader.savePosition();
 	const position = reader.getPosition();
 	let e = reader.i;
 	reader.consume("#");
 
 	const varWord = consumeWordOptional(reader, "var");
-	/** @type {ChiriType} */
-	const type = !varWord ? consumeType(reader)
+	/** @type {ChiriType | undefined} */
+	const type = !varWord ? consumeTypeOptional(reader)
 		: {
 			type: "type",
 			name: { ...varWord, value: "*" },
 			generics: [],
 		};
+
+	if (!type) {
+		reader.restorePosition(save);
+		return undefined;
+	}
 
 	consumeWhiteSpace(reader);
 

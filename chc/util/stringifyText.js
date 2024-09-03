@@ -1,31 +1,36 @@
 const ChiriReader = require("../read/ChiriReader");
+const ChiriCompiler = require("../write/ChiriCompiler");
 const stringifyExpression = require("./stringifyExpression");
 
 /**
- * @param {ChiriReader} reader
+ * @param {ChiriCompiler} compiler
  * @param {ChiriValueText} text
- * @param {"compiletime" | "runtime"} mode
  * @returns {string}
  */
-module.exports = (reader, text, mode) => {
+const stringifyText = (compiler, text) => {
 	let result = "";
 	for (const value of text.content) {
+		if (typeof value === "string") {
+			result += value;
+			continue;
+		}
+
 		switch (value.type) {
 			case "text-raw":
 				result += value.text;
 				continue;
 			case "interpolation-property":
-				if (mode === "compiletime")
-					throw new Error("Can't produce a compile-time string for a CSS custom property");;
-				result += `var(--${value.name.value})`;
+				result += `var(--${stringifyText(compiler, value.name)})`;
 				continue;
 			case "interpolation-variable":
-				result += stringifyExpression(reader, reader.getVariable(value.name.value)?.expression);
+				result += stringifyExpression(compiler, compiler.getVariable(value.name.value));
 				continue;
 			default:
-				result += stringifyExpression(reader, value);
+				result += stringifyExpression(compiler, value);
 		}
 	}
 
 	return result;
 };
+
+module.exports = stringifyText;

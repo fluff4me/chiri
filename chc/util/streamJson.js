@@ -11,15 +11,18 @@ const fs = require("fs");
 module.exports = async function streamJson (file, data) {
 	const stream = /** @type {AWriteStream} */(fs.createWriteStream(file));
 	let hold = "";
-	stream.awrite = chunk => new Promise((resolve, reject) => {
+	const awrite = stream.awrite = (chunk, force = false) => new Promise((resolve, reject) => {
 		hold += chunk;
-		if (hold.length < 8192)
+		if (hold.length < 8192 && !force)
 			return resolve();
 
 		stream.write(hold, err => err ? reject(err) : resolve());
 		hold = "";
 	});
 	await write(stream, data, "");
+	if (hold)
+		await awrite("", true);
+
 	stream.end();
 	stream.close();
 };
@@ -34,10 +37,8 @@ async function write (stream, data, indent) {
 		case "bigint":
 		case "function":
 		case "symbol":
-			throw new Error(`Can't convert ${typeof data} to JSON`);
-
 		case "undefined":
-			return;
+			throw new Error(`Can't convert ${typeof data} to JSON`);
 
 		case "boolean":
 		case "number":
@@ -48,7 +49,7 @@ async function write (stream, data, indent) {
 
 	// data is "object"
 	if (data === null) {
-		await stream.awrite(JSON.stringify(data));
+		await stream.awrite("null");
 		return;
 	}
 
@@ -60,7 +61,7 @@ async function write (stream, data, indent) {
 			for (let i = 0; i < data.length; i++) {
 				await write(stream, data[i], indent);
 				if (i !== data.length - 1)
-					await stream.awrite(",");
+					await stream.awrite(`,\n${indent}`);
 			}
 			indent = indent.slice(0, -1);
 			await stream.awrite(`\n${indent}`);
@@ -76,6 +77,9 @@ async function write (stream, data, indent) {
 		await stream.awrite(`\n${indent}`);
 		for (let i = 0; i < entries.length; i++) {
 			const [key, value] = entries[i];
+			if (value === undefined)
+				continue;
+
 			await stream.awrite(`${JSON.stringify(key)}: `);
 			await write(stream, value, indent);
 			if (i !== entries.length - 1)
