@@ -16,6 +16,9 @@ const stringifyText = (compiler, text) => {
 		}
 
 		switch (value.type) {
+			case "text":
+				result += stringifyText(compiler, value);
+				continue;
 			case "text-raw":
 				result += value.text;
 				continue;

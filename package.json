@@ -9,7 +9,7 @@
 		"chokidar": "3.6.0"
 	},
 	"devDependencies": {
-		"typescript": "5.4.3",
+		"typescript": "5.5.4",
 		"@types/node": "20.11.30",
 		"dotenv": "16.4.5"
 	}

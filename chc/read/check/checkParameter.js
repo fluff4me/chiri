@@ -1,20 +1,18 @@
 // @ts-check
 
+const consumeCommentOptional = require("../consume/consumeCommentOptional");
 const consumeNewLineOptional = require("../consume/consumeNewLineOptional");
 const consumeWhiteSpaceOptional = require("../consume/consumeWhiteSpaceOptional");
+const consumeWordOptional = require("../consume/consumeWordOptional");
 
 /** @param {import("../ChiriReader")} reader */
 module.exports = reader => {
-	const s = reader.i;
 	const savedPosition = reader.savePosition();
-	if (!consumeWhiteSpaceOptional(reader))
-		return;
 
-	const e = reader.i;
-	if (consumeNewLineOptional(reader)) {
-		reader.i = e;
-		throw reader.error(s, "Extraneous whitespace before newline");
-	}
+	if (!consumeWordOptional(reader))
+		return false;
 
+	const result = reader.consumeOptional("=", "\r\n", " ");
 	reader.restorePosition(savedPosition);
+	return result;
 };

@@ -40,9 +40,11 @@ module.exports = reader => {
 	if (type)
 		consumeWhiteSpaceOptional(reader);
 
+	const assignment = /** @type {"??=" | "=" | undefined} */(reader.consumeOptional("??=", "="));
+
 	/** @type {ChiriExpressionOperand | undefined} */
 	let expression;
-	if (reader.consumeOptional("??=")) {
+	if (assignment) {
 		consumeWhiteSpaceOptional(reader);
 		expression = consumeExpression(reader, type.name.value);
 	} else {
@@ -55,5 +57,6 @@ module.exports = reader => {
 		name,
 		expression,
 		position,
+		assignment,
 	}
 };

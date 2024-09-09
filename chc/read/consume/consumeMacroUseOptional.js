@@ -1,15 +1,27 @@
 const ChiriReader = require("../ChiriReader");
 const consumeCompilerVariable = require("./consumeCompilerVariableOptional");
 const consumeWordOptional = require("./consumeWordOptional");
+const macroDebug = require("./macro/macroDebug");
+const macroFunction = require("./macro/macroFunction");
+const macroImport = require("./macro/macroImport");
+const macroOnce = require("./macro/macroOnce");
 
 /**
  * @param {ChiriReader} reader 
  */
-module.exports = reader => {
+module.exports = async reader => {
 	if (reader.input[reader.i] !== "#" || reader.input[reader.i + 1] === "{")
 		return undefined;
 
-	const result = consumeCompilerVariable(reader);
+	if (macroOnce(reader))
+		return undefined;
+
+	const result = undefined
+		?? macroImport(reader)
+		?? macroDebug(reader)
+		?? await macroFunction(reader)
+		?? consumeCompilerVariable(reader)
+
 	if (!result) {
 		const saved = reader.savePosition();
 		const e = reader.i;

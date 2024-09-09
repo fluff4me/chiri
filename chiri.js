@@ -24,6 +24,7 @@ const prefixError = require("./chc/util/prefixError");
 const relToCwd = require("./chc/util/relToCwd");
 const ChiriCompiler = require("./chc/write/ChiriCompiler.js");
 const chcPath = path.resolve("chc");
+const libPath = path.resolve("lib");
 
 try { require("dotenv").config(); } catch { }
 
@@ -82,7 +83,7 @@ async function compile (filename) {
 			delete require.cache[key];
 
 	const ChiriReader = require("./chc/read/ChiriReader.js");
-	const reader = await ChiriReader.load(filename);
+	const reader = /** @type {ChiriReader} */(await ChiriReader.load(filename));
 
 	const ast = await reader.read();
 
@@ -124,7 +125,7 @@ function formatElapsed (elapsed) {
 	compileAll(files, !!args.w);
 
 	if (args.w && process.env.CHIRI_ENV === "dev") {
-		chokidar.watch(chcPath, { ignoreInitial: true })
+		chokidar.watch([chcPath, libPath], { ignoreInitial: true })
 			.on("all", async (event, filename) => {
 				if (queuedCompileAll)
 					return; // skip

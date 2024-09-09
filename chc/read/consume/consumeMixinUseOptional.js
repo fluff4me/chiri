@@ -1,9 +1,10 @@
 const ChiriReader = require("../ChiriReader");
-const getMixinParameters = require("../../util/getMixinParameters");
+const getMixinParameters = require("../../util/getFunctionParameters");
 const consumeExpression = require("./consumeExpression");
 const consumeWhiteSpaceOptional = require("./consumeWhiteSpaceOptional");
 const consumeWord = require("./consumeWord");
 const consumeWordOptional = require("./consumeWordOptional");
+const consumeFunctionParameters = require("./consumeFunctionParameters");
 
 /**
  * @param {ChiriReader} reader 
@@ -22,52 +23,9 @@ module.exports = reader => {
 	if (!mixin)
 		throw reader.error(start, `No declaration for %${word.value}`);
 
-	const parameters = getMixinParameters(mixin)
-		.sort((a, b) => +!!a.expression - +!!b.expression);
+	const assignments = consumeFunctionParameters(reader, start, mixin);
 
-	/** @type {Record<string, ChiriExpressionOperand>} */
-	const assignments = {};
-	while (consumeWhiteSpaceOptional(reader)) {
-		const e = reader.i;
-		const word = consumeWordOptional(reader);
-		const parameter = word && parameters.find(param => param.name.value === word.value);
-		if (!parameter) {
-			const expected = parameters
-				.filter(param => !assignments[param.name.value])
-				.map(param => `${param.expression ? "[" : ""}${param.valueType} ${param.name.value}${param.expression ? "]?" : ""}`)
-				.join(", ");
-			if (!expected)
-				throw reader.error(e, `Unexpected parameter for %${mixin.name.value}`);
-			throw reader.error(e, `Expected parameter for %${mixin.name.value}, any of: ${expected}`);
-		}
-
-		if (assignments[word.value])
-			throw reader.error(`Already assigned  #${word.value} for %${mixin.name.value}`);
-
-		const expectedType = parameter.valueType;
-
-		if (!reader.consumeOptional("=")) {
-			if (!reader.types.isAssignable("bool", expectedType))
-				throw reader.error(e, `Unable to set #${word.value} to true, expected ${expectedType}`);
-
-			assignments[word.value] = {
-				type: "literal",
-				subType: "boolean",
-				value: true,
-				position: word.position,
-			};
-			continue;
-		}
-
-		assignments[word.value] = consumeExpression(reader, expectedType);
-	}
-
-	const missing = parameters.filter(parameter => !parameter.expression && !assignments[parameter.name.value]);
-	if (missing.length)
-		throw reader.error(start, `Missing parameters for %${word.value}: ${parameters
-			.filter(param => !assignments[param.name.value])
-			.map(param => `${param.expression ? "[" : ""}${param.valueType} ${param.name.value}${param.expression ? "]?" : ""}`)
-			.join(", ")}`);
+	// if ()
 
 	mixin.used = true;
 	return {

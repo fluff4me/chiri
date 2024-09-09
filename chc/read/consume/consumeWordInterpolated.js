@@ -60,6 +60,7 @@ module.exports = reader => {
 
 	return {
 		type: "text",
+		valueType: "string",
 		content,
 		position: reader.getPosition(e),
 	};

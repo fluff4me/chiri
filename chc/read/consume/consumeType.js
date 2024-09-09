@@ -19,7 +19,7 @@ const consumeType = module.exports.consumeType = reader => {
  */
 const consumeTypeOptional = module.exports.consumeTypeOptional = reader => {
 	const e = reader.i;
-	const typeName = consumeWordOptional(reader, "*") ?? consumeTypeNameOptional(reader);
+	const typeName = consumeTypeNameOptional(reader);
 	if (!typeName)
 		return undefined;
 

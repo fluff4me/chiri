@@ -70,6 +70,7 @@ module.exports = (reader, multiline) => {
 
 	return {
 		type: "text",
+		valueType: "string",
 		content,
 		position: start,
 	};

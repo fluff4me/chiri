@@ -5,14 +5,13 @@ const consumeDocumentationOptional = require("./consume/consumeDocumentationOpti
 const ChiriTypeManager = require("./ChiriTypeManager");
 const consumeMixinOptional = require("./consume/consumeMixinOptional");
 const path = require("path");
-const consumeMacroOptional = require("./consume/consumeMacroOptional");
+const consumeMacroOptional = require("./consume/consumeMacroUseOptional");
 const consumeNewBlockLineOptional = require("./consume/consumeNewBlockLineOptional");
 const consumePropertyOptional = require("./consume/consumePropertyOptional");
 const consumeBlockEnd = require("./consume/consumeBlockEnd");
 const consumeRuleMainOptional = require("./consume/consumeRuleMainOptional");
 const consumeRuleStateOptional = require("./consume/consumeRuleStateOptional");
 const consumeMixinUseOptional = require("./consume/consumeMixinUseOptional");
-const consumeImportOptional = require("./consume/consumeImportOptional");
 const fsp = require("fs/promises");
 const relToCwd = require("../util/relToCwd");
 const prefixError = require("../util/prefixError");
@@ -24,11 +23,16 @@ class ChiriReader {
 	/**
 	 * @param {string} filename 
 	 * @param {string=} cwd
+	 * @param {Set<string>=} once
 	 */
-	static async load (filename, cwd) {
+	static async load (filename, cwd, once) {
 		filename = path.resolve(filename);
 		if (!filename.endsWith(".chiri"))
 			filename += ".chiri";
+
+		if (once?.has(filename))
+			return undefined;
+
 		const ch = await fsp.readFile(filename, "utf8");
 		return new ChiriReader(filename, ch, cwd);
 	}
@@ -52,6 +56,8 @@ class ChiriReader {
 	#multiline = true;
 	#isSubReader = false;
 	#errored = false;
+	/** @type {Set<string>} */
+	once = new Set();
 
 	/**
 	 * @param {string} filename 
@@ -72,6 +78,11 @@ class ChiriReader {
 		this.input = input;
 		/** @readonly */
 		this.context = context;
+	}
+
+	setOnce () {
+		this.once.add(this.filename);
+		return true;
 	}
 
 	/**
@@ -176,18 +187,65 @@ class ChiriReader {
 
 				ignoreNewLineRequirement = false;
 
-				e = this.i;
 				const documentation = consumeDocumentationOptional(this);
 				if (documentation)
 					this.#statements.push(documentation);
 
-				const macro = consumeMacroOptional(this);
-				if (macro) {
+				e = this.i;
+
+				////////////////////////////////////
+				//#region Macro
+
+				const macro = await consumeMacroOptional(this);
+				if (macro?.type === "variable") {
 					// if (macro.type === "variable")
 					// 	this.#variables[macro.name.value] = this.#statements.length;
 					this.#statements.push(macro);
 					continue;
 				}
+
+				if (macro?.type === "import") {
+					for (const imp of macro.paths) {
+						const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? lib : require.resolve(imp.module);
+						const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path);
+						if (source[filename])
+							throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`);
+
+						let sub;
+						try {
+							sub = await ChiriReader.load(filename, this.cwd, this.once);
+
+						} catch (e) {
+							const err = /** @type {Error} */(e);
+							this.#errorStart = this.i;
+							this.i = imp.i;
+							const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error");
+							throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`);
+						}
+
+						if (sub) {
+							sub.once = this.once;
+							const ast = await sub.read();
+
+							this.#errored ||= sub.#errored;
+							Object.assign(source, ast.source);
+							this.#statements.push(...ast.statements);
+						}
+					}
+
+					continue;
+				}
+
+				if (macro?.type === "function-use" || macro?.type === "function") {
+					this.#statements.push(macro);
+					continue;
+				}
+
+				if (macro)
+					throw this.error(e, "Not supported this macro result type yet");
+
+				//#endregion
+				////////////////////////////////////
 
 				const mixin = await consumeMixinOptional(this);
 				if (mixin) {
@@ -212,30 +270,6 @@ class ChiriReader {
 				const rule = (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this));
 				if (rule) {
 					this.#statements.push(rule);
-					continue;
-				}
-
-				const imp = consumeImportOptional(this);
-				if (imp) {
-					const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? lib : require.resolve(imp.module);
-					const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path);
-					if (source[filename])
-						throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`);
-
-					let sub;
-					try {
-						sub = await ChiriReader.load(filename, this.cwd);
-					} catch (e) {
-						const err = /** @type {Error} */(e);
-						this.#errorStart = this.i;
-						this.i = imp.i;
-						const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error");
-						throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`);
-					}
-					const ast = await sub.read();
-					this.#errored ||= sub.#errored;
-					Object.assign(source, ast.source);
-					this.#statements.push(...ast.statements);
 					continue;
 				}
 
@@ -344,6 +378,21 @@ class ChiriReader {
 		}
 
 		return undefined;
+	}
+
+	/**
+	 * @param  {...string} strings 
+	 */
+	consumeUntil (...strings) {
+		let consumed = "";
+		for (; this.i < this.input.length; this.i++) {
+			if (this.peek(...strings))
+				break;
+
+			consumed += this.input[this.i];
+		}
+
+		return consumed;
 	}
 
 	/**

@@ -85,13 +85,6 @@ const consumeNodeModuleNameOptional = reader => {
 };
 
 /**
- * @typedef ChiriPath
- * @property {string=} module
- * @property {string} path
- * @property {number} i
- */
-
-/**
  * @param {ChiriReader} reader 
  * @returns {ChiriPath=}
  */

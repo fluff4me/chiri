@@ -103,6 +103,7 @@ module.exports = class ChiriCompiler {
 					/** @type {ChiriText} */
 					const selector = !className.length ? containingSelector : {
 						type: "text",
+						valueType: "string",
 						content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
 						position: /** @type {ChiriPosition} */(statement.className?.position ?? statement.state?.position),
 					};
