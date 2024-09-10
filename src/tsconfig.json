@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"lib": ["ES2023"],
+		"module": "UMD",
+		"strict": true,
+		"moduleResolution": "node",
+        "experimentalDecorators": true,
+		"skipLibCheck": true,
+        "noImplicitOverride": true,
+		"outDir": "../out",
+		"esModuleInterop": true,
+		"declaration": true,
+        "incremental": true,
+		"preserveWatchOutput": true,
+		"pretty": true
+	},
+	"include": [ "**/*.ts" ]
+}
