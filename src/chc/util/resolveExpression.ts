@@ -16,7 +16,6 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 		case "expression":
 			switch (expression.subType) {
 				case "unary": {
-					/** @type {any} */
 					const operand: any = resolveExpression(compiler, expression.operand)
 					switch (expression.operator) {
 						case "!":
@@ -32,9 +31,7 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 					}
 				}
 				case "binary": {
-					/** @type {any} */
 					const operandA: any = resolveExpression(compiler, expression.operandA)
-					/** @type {any} */
 					const operandB: any = resolveExpression(compiler, expression.operandB)
 					switch (expression.operator) {
 						case "+":

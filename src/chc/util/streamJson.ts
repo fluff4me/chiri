@@ -21,11 +21,6 @@ export default async function (file: string, data: any) {
 	stream.close()
 }
 
-/**
- * @param {AWriteStream} stream 
- * @param {any} data 
- * @param {string} indent
- */
 async function write (stream: AWriteStream, data: any, indent: string) {
 	switch (typeof data) {
 		case "bigint":

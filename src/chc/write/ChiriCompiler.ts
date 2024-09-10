@@ -37,9 +37,6 @@ export default class ChiriCompiler {
 		return this.#scopes[this.#scopes.length - 1]
 	}
 
-	/** 
-	 * @param {string} name
-	 */
 	getVariable (name: string) {
 		return this.scope.variables[name]
 	}
@@ -48,9 +45,6 @@ export default class ChiriCompiler {
 		this.compileStatements(this.ast.statements)
 	}
 
-	/**
-	 * @param {ChiriStatement[]} statements 
-	 */
 	compileStatements (statements: ChiriStatement[]) {
 		for (const statement of statements) {
 			switch (statement.type) {

@@ -73,10 +73,6 @@ export default class ChiriReader {
 		return true
 	}
 
-	/**
-	 * @param {boolean} multiline 
-	 * @param {ChiriContext} context
-	 */
 	sub (multiline: boolean, context: ChiriContext) {
 		const reader = new ChiriReader(this.filename, this.input, undefined, context)
 		reader.i = this.i
@@ -101,17 +97,17 @@ export default class ChiriReader {
 
 	getVariable (name: string) {
 		return undefined
-			?? this.#outerStatements.findLast(/** @returns {statement is ChiriCompilerVariable} */(statement): statement is ChiriCompilerVariable =>
+			?? this.#outerStatements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
-			?? this.#statements.findLast(/** @returns {statement is ChiriCompilerVariable} */(statement): statement is ChiriCompilerVariable =>
+			?? this.#statements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
 	}
 
 	getMixin (name: string) {
 		return undefined
-			?? this.#outerStatements.findLast(/** @returns {statement is ChiriMixin} */(statement): statement is ChiriMixin =>
+			?? this.#outerStatements.findLast((statement): statement is ChiriMixin =>
 				statement.type === "mixin" && statement.name.value === name)
-			?? this.#statements.findLast(/** @returns {statement is ChiriMixin} */(statement): statement is ChiriMixin =>
+			?? this.#statements.findLast((statement): statement is ChiriMixin =>
 				statement.type === "mixin" && statement.name.value === name)
 	}
 
@@ -134,9 +130,7 @@ export default class ChiriReader {
 		return this.types.binaryOperators
 	}
 
-	/** @returns {Promise<ChiriAST>} */
 	async read (): Promise<ChiriAST> {
-		/** @type {Record<string, string>} */
 		const source: Record<string, string> = {
 			[this.filename]: this.input,
 		}
@@ -277,11 +271,7 @@ export default class ChiriReader {
 		}
 	}
 
-	/**
-	 * @param {number=} start
-	 * @param {(Error | string)=} errOrMessage
-	 */
-	logLine (start: number | undefined, errOrMessage: (Error | string) | undefined) {
+	logLine (start?: number, errOrMessage?: Error | string) {
 		const line = this.getCurrentLine(undefined, true)
 			.replace(/\r/g, ansi.whitespace + "\u240D" + ansi.reset)
 			.replace(/\n/g, ansi.whitespace + "\u240A" + ansi.reset)
@@ -317,9 +307,6 @@ export default class ChiriReader {
 		return this.formatFilePos(this.getLineNumber(at), this.getColumnNumber(at))
 	}
 
-	/**
-	 * @param {...string} strings 
-	 */
 	consume (...strings: string[]) {
 		NextString: for (const string of strings) {
 			for (let j = 0; j < string.length; j++)
@@ -340,9 +327,6 @@ export default class ChiriReader {
 				: "any of" + strings.map(string => `'${string}'`).join(", ")))
 	}
 
-	/**
-	 * @param {...string} strings 
-	 */
 	consumeOptional (...strings: string[]) {
 		NextString: for (const string of strings) {
 			for (let j = 0; j < string.length; j++)
@@ -371,9 +355,6 @@ export default class ChiriReader {
 		return consumed
 	}
 
-	/**
-	 * @param {...string} strings 
-	 */
 	peek (...strings: string[]) {
 		NextString: for (const string of strings) {
 			for (let j = 0; j < string.length; j++)
@@ -412,9 +393,6 @@ export default class ChiriReader {
 		return index + 1
 	}
 
-	/** 
-	 * @returns {ChiriPositionState}
-	 */
 	savePosition (): ChiriPositionState {
 		return {
 			i: this.i,
@@ -422,16 +400,13 @@ export default class ChiriReader {
 			lastLineNumberPosition: this.#lastLineNumberPosition,
 		}
 	}
-	/**
-	 * @param {ChiriPositionState} state 
-	 */
+
 	restorePosition (state: ChiriPositionState) {
 		this.#lastLineNumberPosition = state.lastLineNumberPosition
 		this.#lastLineNumber = state.lastLineNumber
 		this.i = state.i
 	}
 
-	/** @returns {ChiriPosition} */
 	getPosition (at = this.i): ChiriPosition {
 		return {
 			file: this.filename,
@@ -440,10 +415,8 @@ export default class ChiriReader {
 		}
 	}
 
-	/** @type {number} */
-	#lastLineNumber: number = 0
-	/** @type {number} */
-	#lastLineNumberPosition: number = 0
+	#lastLineNumber = 0
+	#lastLineNumberPosition = 0
 	getLineNumber (at = this.i) {
 		const lastLineNumberPosition = this.#lastLineNumberPosition
 		const recalc = at < lastLineNumberPosition
