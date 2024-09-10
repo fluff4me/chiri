@@ -1,8 +1,13 @@
 {
 	"name": "chiri",
 	"version": "1.0.0",
+	"bin": {
+		"chiri": "out/chiri.js"
+	},
+	"main": "out/chiri.js",
+	"types": "out/chiri.d.ts",
 	"scripts": {
-		"play": "node tsc2.js && concurrently --prefix none \"node tsc2.js --watch\" \"node out/chiri.js playground.chiri -w\""
+		"play": "node tsc2.js && concurrently --prefix none \"node tsc2.js --watch\" \"chiri playground.chiri -w\""
 	},
 	"dependencies": {
 		"source-map": "0.7.4",

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 import chokidar from "chokidar"
 import dotenv from "dotenv"
