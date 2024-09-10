@@ -1,29 +1,29 @@
-import { ChiriWord } from "../../ChiriAST";
-import ChiriReader from "../ChiriReader";
+import type { ChiriWord } from "../../ChiriAST"
+import type ChiriReader from "../ChiriReader"
 
 export default (reader: ChiriReader, expectedWord?: string): ChiriWord => {
-	const e = reader.i;
+	const e = reader.i
 	if (expectedWord) {
 		return {
 			type: "word",
 			value: reader.consume(expectedWord),
 			position: reader.getPosition(e),
-		};
+		}
 	}
 
 	if (!reader.isLetter())
-		throw reader.error("Words must start with a letter");
+		throw reader.error("Words must start with a letter")
 
-	let word = reader.input[reader.i++];
+	let word = reader.input[reader.i++]
 	for (; reader.i < reader.input.length; reader.i++)
 		if (reader.isWordChar())
-			word += reader.input[reader.i];
+			word += reader.input[reader.i]
 		else
-			break;
+			break
 
 	return {
 		type: "word",
 		value: word,
 		position: reader.getPosition(e),
-	};
-};
+	}
+}

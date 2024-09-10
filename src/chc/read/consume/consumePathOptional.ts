@@ -1,5 +1,5 @@
-import { ChiriPath } from "../../ChiriAST";
-import ChiriReader from "../ChiriReader";
+import type { ChiriPath } from "../../ChiriAST"
+import type ChiriReader from "../ChiriReader"
 
 const isValidPathCharacter = {
 	...{}
@@ -33,20 +33,20 @@ const isValidPathCharacter = {
 	, haiku: undefined
 	, netbsd: undefined
 	, openbsd: undefined
-	, sunos: undefined
-}[process.platform];
+	, sunos: undefined,
+}[process.platform]
 
 if (!isValidPathCharacter)
-	throw new Error(`Unsupported platform '${process.platform}'`);
+	throw new Error(`Unsupported platform '${process.platform}'`)
 
 const consumePathSegment = (reader: ChiriReader): string => {
-	let segment = "";
+	let segment = ""
 	while (isValidPathCharacter(reader.input.charCodeAt(reader.i))) {
-		segment += reader.input[reader.i];
-		reader.i++;
+		segment += reader.input[reader.i]
+		reader.i++
 	}
-	return segment;
-};
+	return segment
+}
 
 const isValidNodeModuleCharacter = (c: number) => false
 	|| (c >= 97 && c <= 122) // a-z
@@ -56,49 +56,49 @@ const isValidNodeModuleCharacter = (c: number) => false
 	|| c === 95 // _
 
 const consumeNodeModuleNameOptional = (reader: ChiriReader): string | undefined => {
-	const s = reader.i;
+	const s = reader.i
 	switch (reader.input[reader.i]) {
-		case "_": case ".": return undefined;
+		case "_": case ".": return undefined
 	}
 
-	let moduleName = "";
+	let moduleName = ""
 	while (isValidNodeModuleCharacter(reader.input.charCodeAt(reader.i))) {
-		moduleName += reader.input[reader.i];
-		reader.i++;
+		moduleName += reader.input[reader.i]
+		reader.i++
 	}
 
 	if (moduleName.length && moduleName.length <= 214 && reader.input[reader.i++] === ":")
-		return moduleName;
+		return moduleName
 
-	reader.i = s;
-	return undefined;
-};
+	reader.i = s
+	return undefined
+}
 
 export default (reader: ChiriReader): ChiriPath | undefined => {
-	const s = reader.i;
-	let path: string | undefined = "";
+	const s = reader.i
+	let path: string | undefined = ""
 
-	const moduleName = consumeNodeModuleNameOptional(reader);
+	const moduleName = consumeNodeModuleNameOptional(reader)
 
-	const absolute = !moduleName && reader.consumeOptional("/");
+	const absolute = !moduleName && reader.consumeOptional("/")
 	if (absolute)
-		path += "/";
+		path += "/"
 
-	reader.i--;
+	reader.i--
 	do {
-		reader.i++;
-		path += `/${consumePathSegment(reader)}`;
-	} while (reader.input[reader.i] === "/");
-	path = (path || undefined)?.slice(1);
+		reader.i++
+		path += `/${consumePathSegment(reader)}`
+	} while (reader.input[reader.i] === "/")
+	path = (path || undefined)?.slice(1)
 
 	if (!path) {
-		reader.i = s;
-		return undefined;
+		reader.i = s
+		return undefined
 	}
 
 	return {
 		module: moduleName,
 		path,
 		i: s,
-	};
-};
+	}
+}

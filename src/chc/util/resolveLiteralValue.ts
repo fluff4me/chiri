@@ -1,28 +1,28 @@
-import { ChiriExpressionOperand, ChiriLiteralValue } from "../ChiriAST";
-import ChiriCompiler from "../write/ChiriCompiler";
+import type { ChiriExpressionOperand, ChiriLiteralValue } from "../ChiriAST"
+import type ChiriCompiler from "../write/ChiriCompiler"
 
 function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralValue) {
-	const subType = expression.subType;
+	const subType = expression.subType
 	switch (subType) {
 		case "dec":
 		case "int":
 		case "uint":
-			return +expression.value;
+			return +expression.value
 		case "boolean":
-			return expression.value;
+			return expression.value
 		case "undefined":
-			return undefined;
+			return undefined
 		case "string":
 			return expression.segments
 				.map(segment => typeof segment === "string" ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
-				.join("");
+				.join("")
 		default:
-			throw new Error(`Unable to resolve literal value type ${subType}`);
+			throw new Error(`Unable to resolve literal value type ${subType}`)
 	}
 }
 
 namespace resolveLiteralValue {
-	export let stringifyExpression: (compiler: ChiriCompiler, expression?: ChiriExpressionOperand | string | number | boolean) => string | undefined;
+	export let stringifyExpression: (compiler: ChiriCompiler, expression?: ChiriExpressionOperand | string | number | boolean) => string | undefined
 }
 
-export default resolveLiteralValue;
+export default resolveLiteralValue

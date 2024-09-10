@@ -1,4 +1,4 @@
-module.exports = /** @type {import("eslint").Linter.BaseConfig & import("@typescript-eslint/utils").TSESLint.Linter.ConfigType} */ ({
+module.exports = /** @type {import("eslint").Linter.BaseConfig & import("@typescript-eslint/utils").TSESLint.Linter.Config} */ ({
 	root: true,
 	parser: "@typescript-eslint/parser",
 	parserOptions: {
@@ -25,9 +25,21 @@ module.exports = /** @type {import("eslint").Linter.BaseConfig & import("@typesc
 		"prefer-const": ["warn", { "destructuring": "all" }],
 		"no-inner-declarations": ["off"],
 		"no-unexpected-multiline": ["off"], // sometimes i want to do zero indexing on a new line
-		"semi": ["warn", "never"],
 
 		// typescript-eslint
+		"@typescript-eslint/semi": ["warn", "never"],
+		"@typescript-eslint/member-delimiter-style": ["warn", {
+			multiline: { delimiter: "none" },
+			overrides: {
+				interface: {
+					singleline: { delimiter: "semi", requireLast: false },
+				},
+				typeLiteral: {
+					singleline: { delimiter: "comma", requireLast: false },
+				},
+			}
+		}],
+
 		"@typescript-eslint/no-unused-vars": ["off"], // literally just what typescript already has, no thanks
 		"@typescript-eslint/no-explicit-any": ["off"], // `any` is a useful type mostly for type arguments. It should be avoided by writing good, strongly-typed code, not warned in all uses
 		"@typescript-eslint/await-thenable": ["off"], // this has a warning built in to TS (the ... under the `await`)

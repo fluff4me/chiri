@@ -1,29 +1,29 @@
-import { ChiriMixinUse } from "../../ChiriAST";
-import ChiriReader from "../ChiriReader";
-import consumeFunctionParameters from "./consumeFunctionParameters";
-import consumeWordOptional from "./consumeWordOptional";
+import type { ChiriMixinUse } from "../../ChiriAST"
+import type ChiriReader from "../ChiriReader"
+import consumeFunctionParameters from "./consumeFunctionParameters"
+import consumeWordOptional from "./consumeWordOptional"
 
 export default (reader: ChiriReader): ChiriMixinUse | undefined => {
-	const start = reader.i;
+	const start = reader.i
 	if (!reader.consumeOptional("%"))
-		return undefined;
+		return undefined
 
-	const word = consumeWordOptional(reader);
+	const word = consumeWordOptional(reader)
 	if (!word)
-		return undefined;
+		return undefined
 
-	const mixin = reader.getMixin(word.value);
+	const mixin = reader.getMixin(word.value)
 	if (!mixin)
-		throw reader.error(start, `No declaration for %${word.value}`);
+		throw reader.error(start, `No declaration for %${word.value}`)
 
-	const assignments = consumeFunctionParameters(reader, start, mixin);
+	const assignments = consumeFunctionParameters(reader, start, mixin)
 
 	// if ()
 
-	mixin.used = true;
+	mixin.used = true
 	return {
 		type: "mixin-use",
 		name: word,
 		variables: assignments,
-	};
-};
+	}
+}

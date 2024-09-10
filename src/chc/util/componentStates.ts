@@ -1,4 +1,3 @@
-
 export const STATE_MAP = {
 	"hover": ":hover:not(:has(:hover))",
 	"active": ":active:not(:has(:active))",
@@ -8,6 +7,6 @@ export const STATE_MAP = {
 	":active": ":active",
 	":focus": ":has(:focus-visible)",
 	":focus-any": ":focus-within",
-};
+}
 
-export const STATES = Object.keys(STATE_MAP);
+export const STATES = Object.keys(STATE_MAP)

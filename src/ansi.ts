@@ -6,4 +6,4 @@ export default {
 	err: "\x1b[91m",
 	ok: "\x1b[92m",
 	whitespace: "\x1b[38;5;240m",
-};
+}

@@ -1,8 +1,6 @@
-const consumeFunctionBodyOptional = require("../consume/consumeFunctionBodyOptional");
-const consumeOptionalString = require("../consume/consumeStringOptional");
+import type { ChiriTypeDefinition } from "../ChiriTypeManager"
+import consumeFunctionBodyOptional from "../consume/consumeFunctionBodyOptional"
 
-/** @type {import("../ChiriTypeManager").ChiriTypeDefinition} */
-module.exports = {
-	/** @returns {ChiriLiteralString | undefined} */
+export default {
 	consumeOptionalConstructor: consumeFunctionBodyOptional,
-};
+} as ChiriTypeDefinition

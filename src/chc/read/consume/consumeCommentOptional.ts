@@ -1,19 +1,19 @@
 
 
-import ChiriReader from "../ChiriReader";
-import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional";
+import type ChiriReader from "../ChiriReader"
+import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 
 export default (reader: ChiriReader) => {
-	const e = reader.i;
-	consumeWhiteSpaceOptional(reader, false);
+	const e = reader.i
+	consumeWhiteSpaceOptional(reader, false)
 	if (!reader.consumeOptional("; ")) {
-		reader.i = e;
-		return false;
+		reader.i = e
+		return false
 	}
 
 	for (; reader.i < reader.input.length; reader.i++)
 		if (reader.input[reader.i] === "\n")
-			break;
+			break
 
-	return true;
-};
+	return true
+}

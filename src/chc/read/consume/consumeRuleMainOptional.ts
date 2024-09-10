@@ -1,18 +1,18 @@
-import { ChiriRule } from "../../ChiriAST";
-import ChiriReader from "../ChiriReader";
-import consumeBody from "./consumeBody";
-import consumeWordInterpolated from "./consumeWordInterpolated";
+import type { ChiriRule } from "../../ChiriAST"
+import type ChiriReader from "../ChiriReader"
+import consumeBody from "./consumeBody"
+import consumeWordInterpolated from "./consumeWordInterpolated"
 
 export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 	if (reader.context === "mixin")
-		return undefined;
+		return undefined
 
-	const prefix = reader.consumeOptional(reader.context === "rule" ? "&-" : ".");
+	const prefix = reader.consumeOptional(reader.context === "rule" ? "&-" : ".")
 	if (!prefix)
-		return undefined;
+		return undefined
 
-	const className = consumeWordInterpolated(reader);
-	reader.consume(":");
+	const className = consumeWordInterpolated(reader)
+	reader.consume(":")
 
 	return {
 		type: "rule",
@@ -20,4 +20,4 @@ export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 		state: undefined,
 		...await consumeBody(reader, "rule"),
 	}
-};
+}

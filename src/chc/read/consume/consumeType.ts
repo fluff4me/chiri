@@ -1,53 +1,53 @@
 
 
-import { ChiriType } from "../../ChiriAST";
-import ChiriReader from "../ChiriReader";
-import consumeTypeNameOptional from "./consumeTypeNameOptional";
-import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional";
+import type { ChiriType } from "../../ChiriAST"
+import type ChiriReader from "../ChiriReader"
+import consumeTypeNameOptional from "./consumeTypeNameOptional"
+import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 
 export const consumeType = (reader: ChiriReader) => {
-	const e = reader.i;
-	const type = consumeTypeOptional(reader);
+	const e = reader.i
+	const type = consumeTypeOptional(reader)
 	if (!type)
-		throw reader.error(e, "Expected type");
-	return type;
-};
+		throw reader.error(e, "Expected type")
+	return type
+}
 
 export const consumeTypeOptional = (reader: ChiriReader): ChiriType | undefined => {
-	const e = reader.i;
-	const typeName = consumeTypeNameOptional(reader);
+	const e = reader.i
+	const typeName = consumeTypeNameOptional(reader)
 	if (!typeName)
-		return undefined;
+		return undefined
 
 	const type: ChiriType = {
 		type: "type",
 		name: typeName,
-		generics: []
-	};
+		generics: [],
+	}
 
 	if (typeName.value === "*")
-		return type;
+		return type
 
-	const definition = reader.getType(typeName.value);
+	const definition = reader.getType(typeName.value)
 	if (definition.hasGenerics) {
-		consumeWhiteSpaceOptional(reader);
-		type.generics = consumeGenerics(reader, definition.hasGenerics === true ? undefined : definition.hasGenerics);
-	};
+		consumeWhiteSpaceOptional(reader)
+		type.generics = consumeGenerics(reader, definition.hasGenerics === true ? undefined : definition.hasGenerics)
+	}
 
-	return type;
-};
+	return type
+}
 
 const consumeGenerics = (reader: ChiriReader, quantity?: number) => {
-	const generics = [];
+	const generics = []
 	if (quantity)
 		for (let g = 0; g < quantity; g++)
-			generics.push(consumeType(reader));
+			generics.push(consumeType(reader))
 	else
 		while (true) {
-			const type = consumeTypeOptional(reader);
+			const type = consumeTypeOptional(reader)
 			if (type)
-				generics.push(type);
-			else break;
+				generics.push(type)
+			else break
 		}
-	return generics;
-};
+	return generics
+}

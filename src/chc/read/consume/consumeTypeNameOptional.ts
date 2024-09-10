@@ -1,21 +1,21 @@
 
 
-import ChiriReader from "../ChiriReader";
-import consumeWordOptional from "./consumeWordOptional";
+import type ChiriReader from "../ChiriReader"
+import consumeWordOptional from "./consumeWordOptional"
 
 export default (reader: ChiriReader) => {
-	const e = reader.i;
+	const e = reader.i
 
 	const type = consumeWordOptional(reader, "[]") // internal array type
 		?? consumeWordOptional(reader, "{}") // internal object type
-		?? consumeWordOptional(reader);
+		?? consumeWordOptional(reader)
 
 	if (!type)
-		return undefined;
+		return undefined
 
 	if (!reader.getTypeOptional(type.value))
-		return undefined;
+		return undefined
 	// throw reader.error(e, "There is no type '" + type.value + "'");
 
-	return type;
-};
+	return type
+}

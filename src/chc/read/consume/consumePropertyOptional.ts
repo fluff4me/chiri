@@ -1,26 +1,26 @@
-import { ChiriProperty } from "../../ChiriAST";
-import ChiriReader from "../ChiriReader";
-import consumeBlockStartOptional from "./consumeBlockStartOptional";
-import consumeValue from "./consumeValue";
-import consumeWhiteSpace from "./consumeWhiteSpace";
-import consumeWordInterpolated from "./consumeWordInterpolated";
+import type { ChiriProperty } from "../../ChiriAST"
+import type ChiriReader from "../ChiriReader"
+import consumeBlockStartOptional from "./consumeBlockStartOptional"
+import consumeValue from "./consumeValue"
+import consumeWhiteSpace from "./consumeWhiteSpace"
+import consumeWordInterpolated from "./consumeWordInterpolated"
 
 export default (reader: ChiriReader): ChiriProperty | undefined => {
 	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
-		return undefined;
+		return undefined
 
 	if (reader.input[reader.i] === "#" && reader.input[reader.i + 1] !== "{")
-		return undefined;
+		return undefined
 
-	const position = reader.getPosition();
-	const isCustomProperty = reader.consumeOptional("$");
+	const position = reader.getPosition()
+	const isCustomProperty = reader.consumeOptional("$")
 
-	const property = consumeWordInterpolated(reader);
+	const property = consumeWordInterpolated(reader)
 
-	reader.consume(":");
-	consumeWhiteSpace(reader);
+	reader.consume(":")
+	consumeWhiteSpace(reader)
 
-	const value = consumeValue(reader, !!consumeBlockStartOptional(reader));
+	const value = consumeValue(reader, !!consumeBlockStartOptional(reader))
 
 	return {
 		type: "property",
@@ -28,5 +28,5 @@ export default (reader: ChiriReader): ChiriProperty | undefined => {
 		position,
 		property,
 		value,
-	};
-};
+	}
+}

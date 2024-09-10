@@ -1,74 +1,74 @@
-import { ChiriExpressionOperand } from "../ChiriAST";
-import ChiriCompiler from "../write/ChiriCompiler";
-import resolveLiteralValue from "./resolveLiteralValue";
+import type { ChiriExpressionOperand } from "../ChiriAST"
+import type ChiriCompiler from "../write/ChiriCompiler"
+import resolveLiteralValue from "./resolveLiteralValue"
 
 const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpressionOperand): undefined | number | boolean | string => {
 	if (!expression)
-		return undefined;
+		return undefined
 
 	switch (expression.type) {
 		case "literal":
-			return resolveLiteralValue(compiler, expression);
+			return resolveLiteralValue(compiler, expression)
 
 		case "get":
-			return compiler.getVariable(expression.name.value);
+			return compiler.getVariable(expression.name.value)
 
 		case "expression":
 			switch (expression.subType) {
 				case "unary": {
 					/** @type {any} */
-					const operand: any = resolveExpression(compiler, expression.operand);
+					const operand: any = resolveExpression(compiler, expression.operand)
 					switch (expression.operator) {
 						case "!":
-							return !operand;
+							return !operand
 						case "+":
-							return +operand;
+							return +operand
 						case "-":
-							return -operand;
+							return -operand
 						case "~":
-							return ~operand;
+							return ~operand
 						default:
-							throw compiler.error(`Unable to resolve unary operator "${expression.operator}"`);
+							throw compiler.error(`Unable to resolve unary operator "${expression.operator}"`)
 					}
 				}
 				case "binary": {
 					/** @type {any} */
-					const operandA: any = resolveExpression(compiler, expression.operandA);
+					const operandA: any = resolveExpression(compiler, expression.operandA)
 					/** @type {any} */
-					const operandB: any = resolveExpression(compiler, expression.operandB);
+					const operandB: any = resolveExpression(compiler, expression.operandB)
 					switch (expression.operator) {
 						case "+":
-							return operandA + operandB;
+							return operandA + operandB
 						case "-":
-							return operandA - operandB;
+							return operandA - operandB
 						case "*":
-							return operandA * operandB;
+							return operandA * operandB
 						case "/":
-							return operandA / operandB;
+							return operandA / operandB
 						case "%":
-							return operandA % operandB;
+							return operandA % operandB
 						case "**":
-							return operandA ** operandB;
+							return operandA ** operandB
 						case "==":
-							return operandA === operandB;
+							return operandA === operandB
 						case "!=":
-							return operandA !== operandB;
+							return operandA !== operandB
 						case "||":
-							return operandA || operandB;
+							return operandA || operandB
 						case "&&":
-							return operandA && operandB;
+							return operandA && operandB
 						case "|":
-							return operandA | operandB;
+							return operandA | operandB
 						case "&":
-							return operandA & operandB;
+							return operandA & operandB
 						case "^":
-							return operandA ^ operandB;
+							return operandA ^ operandB
 						default:
-							throw compiler.error(`Unable to resolve binary operator "${expression.operator}"`);
+							throw compiler.error(`Unable to resolve binary operator "${expression.operator}"`)
 					}
 				}
 			}
 	}
-};
+}
 
-export default resolveExpression;
+export default resolveExpression

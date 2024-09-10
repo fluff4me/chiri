@@ -1,3 +1,3 @@
-import ChiriReader from "../../ChiriReader";
+import type ChiriReader from "../../ChiriReader"
 
-export default (reader: ChiriReader) => reader.consumeOptional("#once") && reader.setOnce();
+export default (reader: ChiriReader) => reader.consumeOptional("#once") && reader.setOnce()

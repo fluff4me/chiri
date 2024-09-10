@@ -1,20 +1,20 @@
 
 
-import ChiriReader from "../ChiriReader";
-import consumeNewLineOptional from "../consume/consumeNewLineOptional";
-import consumeWhiteSpaceOptional from "../consume/consumeWhiteSpaceOptional";
+import type ChiriReader from "../ChiriReader"
+import consumeNewLineOptional from "../consume/consumeNewLineOptional"
+import consumeWhiteSpaceOptional from "../consume/consumeWhiteSpaceOptional"
 
 export default (reader: ChiriReader) => {
-	const s = reader.i;
-	const savedPosition = reader.savePosition();
+	const s = reader.i
+	const savedPosition = reader.savePosition()
 	if (!consumeWhiteSpaceOptional(reader))
-		return;
+		return
 
-	const e = reader.i;
+	const e = reader.i
 	if (consumeNewLineOptional(reader)) {
-		reader.i = e;
-		throw reader.error(s, "Extraneous whitespace before newline");
+		reader.i = e
+		throw reader.error(s, "Extraneous whitespace before newline")
 	}
 
-	reader.restorePosition(savedPosition);
-};
+	reader.restorePosition(savedPosition)
+}

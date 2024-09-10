@@ -1,26 +1,26 @@
-import { ChiriExpressionOperand } from "../ChiriAST";
-import ChiriCompiler from "../write/ChiriCompiler";
-import resolveExpression from "./resolveExpression";
-import resolveLiteralValue from "./resolveLiteralValue";
+import type { ChiriExpressionOperand } from "../ChiriAST"
+import type ChiriCompiler from "../write/ChiriCompiler"
+import resolveExpression from "./resolveExpression"
+import resolveLiteralValue from "./resolveLiteralValue"
 
 const stringifyExpression = (compiler: ChiriCompiler, expression?: ChiriExpressionOperand | string | number | boolean): string => {
 	if (expression === undefined)
-		return "";
+		return ""
 
-	const resolved = typeof expression === "object" ? resolveExpression(compiler, expression) : expression;
+	const resolved = typeof expression === "object" ? resolveExpression(compiler, expression) : expression
 	switch (typeof resolved) {
 		case "number":
 		case "boolean":
-			return `${resolved}`;
+			return `${resolved}`
 		case "undefined":
-			return "";
+			return ""
 		case "string":
-			return resolved;
+			return resolved
 		default:
-			throw compiler.error(`Expression resolved to unstringifiable type "${typeof resolved}"`);
+			throw compiler.error(`Expression resolved to unstringifiable type "${typeof resolved}"`)
 	}
-};
+}
 
-resolveLiteralValue.stringifyExpression = stringifyExpression;
+resolveLiteralValue.stringifyExpression = stringifyExpression
 
-export default stringifyExpression;
+export default stringifyExpression

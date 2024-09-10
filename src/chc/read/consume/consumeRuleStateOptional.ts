@@ -1,17 +1,17 @@
-import { ChiriRule } from "../../ChiriAST";
-import { STATES } from "../../util/componentStates";
-import ChiriReader from "../ChiriReader";
-import consumeBody from "./consumeBody";
+import type { ChiriRule } from "../../ChiriAST"
+import { STATES } from "../../util/componentStates"
+import type ChiriReader from "../ChiriReader"
+import consumeBody from "./consumeBody"
 
 export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
-	const prefix = reader.consumeOptional(":");
+	const prefix = reader.consumeOptional(":")
 	if (!prefix)
-		return undefined;
+		return undefined
 
-	const position = reader.getPosition();
-	const state = reader.consume(...STATES);
+	const position = reader.getPosition()
+	const state = reader.consume(...STATES)
 
-	reader.consume(":");
+	reader.consume(":")
 
 	return {
 		type: "rule",
@@ -24,4 +24,4 @@ export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 		},
 		...await consumeBody(reader, "rule"),
 	}
-};
+}

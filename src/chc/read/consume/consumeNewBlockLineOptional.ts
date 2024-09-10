@@ -1,9 +1,9 @@
 
 
-import ChiriReader from "../ChiriReader";
-import consumeCommentOptional from "./consumeCommentOptional";
-import consumeOptionalIndent from "./consumeIndentOptional";
-import consumeOptionalNewLine from "./consumeNewLineOptional";
+import type ChiriReader from "../ChiriReader"
+import consumeCommentOptional from "./consumeCommentOptional"
+import consumeOptionalIndent from "./consumeIndentOptional"
+import consumeOptionalNewLine from "./consumeNewLineOptional"
 
 /**
  * Loop:
@@ -18,39 +18,39 @@ import consumeOptionalNewLine from "./consumeNewLineOptional";
  * @returns Lines consumed
  */
 export default (reader: ChiriReader, ignoreExtraIndentation = false) => {
-	let consumed = 0;
+	let consumed = 0
 	while (true) {
-		let iPreConsumeLine = reader.i;
+		const iPreConsumeLine = reader.i
 		if (!consumeOptionalNewLine(reader))
 			// no more newlines! return the number of newlines that we consumed
-			return consumed;
+			return consumed
 
-		let iPreConsumeIndent = reader.i;
-		let encounteredIndent;
+		const iPreConsumeIndent = reader.i
+		let encounteredIndent
 		while (true) {
-			encounteredIndent = consumeOptionalIndent(reader, reader.indent);
+			encounteredIndent = consumeOptionalIndent(reader, reader.indent)
 			if (encounteredIndent !== reader.indent) {
 				if (reader.consumeOptional("\r") || reader.consumeOptional("\n"))
-					continue;
+					continue
 
-				reader.i = iPreConsumeLine;
-				return consumed;
+				reader.i = iPreConsumeLine
+				return consumed
 			}
-			break;
+			break
 		}
 
 		if (!ignoreExtraIndentation) {
-			const iBeforeExtraIndentation = reader.i;
+			const iBeforeExtraIndentation = reader.i
 			if (consumeOptionalIndent(reader))
-				throw reader.error(iBeforeExtraIndentation, "Too much indentation");
+				throw reader.error(iBeforeExtraIndentation, "Too much indentation")
 		}
 
-		const e = reader.i;
+		const e = reader.i
 		if (encounteredIndent && !consumeCommentOptional(reader) && consumeOptionalNewLine(reader)) {
-			reader.i = e;
-			throw reader.error(iPreConsumeIndent, "Unexpected indentation on empty line");
+			reader.i = e
+			throw reader.error(iPreConsumeIndent, "Unexpected indentation on empty line")
 		}
 
-		consumed++;
+		consumed++
 	}
-};
+}

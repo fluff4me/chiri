@@ -1,9 +1,9 @@
 
 
-import { ChiriTypeDefinition } from "../ChiriTypeManager";
-import consumeOptionalString from "../consume/consumeStringOptional";
+import type { ChiriTypeDefinition } from "../ChiriTypeManager"
+import consumeOptionalString from "../consume/consumeStringOptional"
 
 export default {
 	stringable: true,
 	consumeOptionalConstructor: consumeOptionalString,
-} as ChiriTypeDefinition;
+} as ChiriTypeDefinition
