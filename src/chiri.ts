@@ -42,7 +42,7 @@ async function compileAll (files: string[], watch = false) {
 		compilationPromise = undefined
 		if (watch) {
 			console.log(ansi.label + "watch", ansi.path + relToCwd(file), ansi.reset)
-			chokidar.watch(file, { ignoreInitial: true })
+			chokidar.watch([file, `${file}.chiri`], { ignoreInitial: true })
 				// eslint-disable-next-line @typescript-eslint/no-misused-promises
 				.on("all", async (event, filename) => {
 					if (queuedTryCompile)
@@ -110,7 +110,7 @@ async function compile (filename: string) {
 	await compiler.writeFiles()
 
 	const elapsed = performance.now() - start
-	console.log(ansi.label + "chiri", ansi.path + relToCwd(filename), ansi.label + "=>", ansi.path + relToCwd(outFile), ansi.label + formatElapsed(elapsed))
+	console.log(ansi.label + "chiri", ansi.path + relToCwd(reader.filename), ansi.label + "=>", ansi.path + relToCwd(outFile), ansi.label + formatElapsed(elapsed))
 }
 
 function formatElapsed (elapsed: number) {
