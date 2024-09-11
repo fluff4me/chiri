@@ -2,8 +2,8 @@
 
 #function border-shorthand:
 	#string of
-	#string[] affects ??= [of]
-	#shorthand #{of}:
+	#list!string affects ??= [of]
+	#shorthand of:
 		#var subproperties = ["width", "style", "color"]
 		#each affects as var affected:
 			#each subproperties as var subproperty:

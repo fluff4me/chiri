@@ -3,9 +3,10 @@
 import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
-import { LIB_ROOT } from "../../constants"
+import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriCompilerVariable, ChiriContext, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
 import relToCwd from "../util/relToCwd"
+import type { ChiriType } from "./ChiriType"
 import type { ChiriTypeDefinition } from "./ChiriTypeManager"
 import ChiriTypeManager from "./ChiriTypeManager"
 import consumeBlockEnd from "./consume/consumeBlockEnd"
@@ -18,7 +19,7 @@ import consumePropertyOptional from "./consume/consumePropertyOptional"
 import consumeRuleMainOptional from "./consume/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/consumeRuleStateOptional"
 
-interface ChiriPositionState {
+export interface ChiriPositionState {
 	lastLineNumber: number
 	lastLineNumberPosition: number
 	i: number
@@ -111,7 +112,8 @@ export default class ChiriReader {
 				statement.type === "mixin" && statement.name.value === name)
 	}
 
-	getType (name: string) {
+	getType (name: string | ChiriType) {
+		name = typeof name === "string" ? name : name.name.value
 		const type = this.types.types[name]
 		if (!type)
 			throw this.error(`There is no type by name '${name}'`)
@@ -291,8 +293,13 @@ export default class ChiriReader {
 			+ ansi.label + "  " + `${lineNumber + 1}`.padStart(5) + " " + ansi.reset + line + "\n"
 			+ (err ? ansi.err : ansi.filepos) + `        ${" ".repeat(columnNumber)}${"^".repeat((start ?? this.i) - this.i || 1)}`
 			+ ansi.reset
-			+ (!err?.stack ? ""
-				: `\n${err.stack.slice(err.stack.indexOf("\n", start === undefined ? 0 : err.stack.indexOf("\n") + 1) + 1)}`))
+			+ (!err?.stack || (process.env.CHIRI_ENV !== "dev" && !(+process.env.CHIRI_STACK_LENGTH! || 0)) ? ""
+				: `\n${err.stack
+					.slice(err.stack.indexOf("\n", start === undefined ? 0 : err.stack.indexOf("\n") + 1) + 1)
+					.split("\n")
+					.slice(0, +process.env.CHIRI_STACK_LENGTH! || 3)
+					.map(path => path.replace(PACKAGE_ROOT + "\\", "").replaceAll("\\", "/"))
+					.join("\n")}`))
 	}
 
 	formatFilename () {

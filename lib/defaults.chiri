@@ -1,5 +1,5 @@
 #once
 
 #import: default/variables
-; #import: shorthands
+#import: shorthands
 #import: default/mixins

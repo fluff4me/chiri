@@ -2,6 +2,7 @@
 
 import type { ChiriText } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import consumeExpression from "./consumeExpression"
 import consumeWord from "./consumeWord"
 
@@ -57,7 +58,7 @@ export default (reader: ChiriReader): ChiriText => {
 
 	return {
 		type: "text",
-		valueType: "string",
+		valueType: ChiriType.of("string"),
 		content,
 		position: reader.getPosition(e),
 	}

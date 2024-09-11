@@ -1,6 +1,7 @@
 import type { ChiriRule } from "../../ChiriAST"
 import { STATES } from "../../util/componentStates"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import consumeBody from "./consumeBody"
 
 export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
@@ -18,7 +19,7 @@ export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 		className: undefined,
 		state: {
 			type: "text",
-			valueType: "string",
+			valueType: ChiriType.of("string"),
 			content: [{ type: "text-raw", text: state, position }],
 			position,
 		},

@@ -2,8 +2,10 @@
 
 import ansi from "../../ansi"
 import type ChiriReader from "./ChiriReader"
+import type { ChiriType } from "./ChiriType"
 import typeDec from "./type/typeDec"
 import typeInt from "./type/typeInt"
+import typeList from "./type/typeList"
 import typeString from "./type/typeString"
 import typeUint from "./type/typeUint"
 
@@ -21,6 +23,7 @@ const types: Record<string, ChiriTypeDefinition> = {
 	uint: typeUint,
 	int: typeInt,
 	dec: typeDec,
+	list: typeList,
 }
 
 const numericTypes = ["uint", "int", "dec"] as const
@@ -135,17 +138,18 @@ export default class ChiriTypeManager {
 		return man
 	}
 
-	isAssignable (type: string, toType: string) {
-		if (toType === "*")
+	isAssignable (type: ChiriType, toType: ChiriType): boolean {
+		if (toType.name.value === "*")
 			return true
 
-		if (type === "*")
+		if (type.name.value === "*")
 			// this should never happen
 			throw new Error("Tried to assign value of unknown type")
 
-		if (isNumeric(type) && isNumeric(toType))
-			return minNumericPrecision(type, toType) === toType
+		if (isNumeric(type.name.value) && isNumeric(toType.name.value))
+			return minNumericPrecision(type.name.value, toType.name.value) === toType.name.value
 
-		return type === toType
+		return type.name.value === toType.name.value
+			&& type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i]))
 	}
 }

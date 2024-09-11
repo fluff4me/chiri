@@ -2,11 +2,13 @@
 
 import type { ChiriExpressionOperand, ChiriUnaryExpression } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import type { Operator } from "../ChiriTypeManager"
 import consumeDecimalOptional from "./consumeDecimalOptional"
 import consumeIntegerOptional from "./consumeIntegerOptional"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import consumeStringOptional from "./consumeStringOptional"
+import consumeTypeConstructorOptional from "./consumeTypeConstructorOptional"
 import consumeUnsignedIntegerOptional from "./consumeUnsignedIntegerOptional"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
@@ -14,18 +16,16 @@ import consumeWordOptional from "./consumeWordOptional"
 
 const empy = {} as never
 
-export default (reader: ChiriReader, expectedType?: string): ChiriExpressionOperand => {
+export default (reader: ChiriReader, expectedType?: ChiriType): ChiriExpressionOperand => {
 	const e = reader.i
 	const operand = consumeExpression(reader)
 
-	const typeName = getOperandTypeName(operand)
-	if (expectedType && expectedType !== "*" && typeName !== expectedType)
-		throw reader.error(e, `Expected '${expectedType}', got '${typeName}'`)
+	const valueType = operand.valueType
+	if (expectedType && !reader.types.isAssignable(valueType, expectedType))
+		throw reader.error(e, `Expected '${ChiriType.stringify(expectedType)}', got '${ChiriType.stringify(valueType)}'`)
 
 	return operand
 }
-
-const getOperandTypeName = (operand: ChiriExpressionOperand) => operand.type === "literal" /*&& operand.subType !== "other"*/ ? operand.subType : operand.valueType
 
 const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	if (reader.consumeOptional("(")) {
@@ -36,7 +36,6 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 		return expr
 	}
 
-	// TODO automatically try to optionally consume whatever types can go in this context
 	const numeric = consumeUnsignedIntegerOptional(reader) ?? consumeIntegerOptional(reader) ?? consumeDecimalOptional(reader)
 	if (numeric)
 		return numeric
@@ -47,7 +46,7 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 
 	let e = reader.i
 	if (reader.consumeOptional("_"))
-		return { type: "literal", subType: "undefined", position: reader.getPosition(e) }
+		return { type: "literal", subType: "undefined", valueType: ChiriType.of("undefined"), position: reader.getPosition(e) }
 
 	e = reader.i
 	const word = consumeWordOptional(reader)
@@ -62,6 +61,9 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 
 		throw reader.error(e, `No variable '${word.value}'`)
 	}
+
+	const constructedType = consumeTypeConstructorOptional(reader)
+	if (constructedType) return constructedType
 
 	throw reader.error("Unknown expression operand type")
 }
@@ -83,7 +85,7 @@ const consumeExpression = (reader: ChiriReader): ChiriExpressionOperand => {
 		if (!consumeWhiteSpaceOptional(reader) || consumeNewBlockLineOptional(reader))
 			return operandA
 
-		const operandATypeName = getOperandTypeName(operandA)
+		const operandATypeName = operandA.valueType.name.value
 		const operatorsForType = binaryOperators[operandATypeName] ?? empy
 		const operator = consumeOperatorOptional(reader, operatorsForType)
 		if (!operator) {
@@ -96,7 +98,7 @@ const consumeExpression = (reader: ChiriReader): ChiriExpressionOperand => {
 		const resultTypesByOperandB = operatorsForType[operator] ?? empy
 
 		const operandB = consumeUnaryExpression(reader)
-		const operandBTypeName = getOperandTypeName(operandB)
+		const operandBTypeName = operandB.valueType.name.value
 		const resultType = resultTypesByOperandB[operandBTypeName]
 		if (!resultType)
 			throw reader.error(`Undefined operation ${operandATypeName}${operator}${operandBTypeName}`)
@@ -107,7 +109,7 @@ const consumeExpression = (reader: ChiriReader): ChiriExpressionOperand => {
 			operandA,
 			operandB,
 			operator,
-			valueType: resultType,
+			valueType: ChiriType.of(resultType),
 		}
 	}
 }
@@ -123,7 +125,7 @@ const consumeUnaryExpression = (reader: ChiriReader): ChiriUnaryExpression | Chi
 
 	const resultsByType = unaryOperators[operator] ?? empy
 
-	const typeName = getOperandTypeName(operand)
+	const typeName = operand.valueType.name.value
 	const returnType = resultsByType[typeName]
 	if (!returnType)
 		throw reader.error(e, `Undefined operation ${operator}${typeName}`)
@@ -133,6 +135,6 @@ const consumeUnaryExpression = (reader: ChiriReader): ChiriUnaryExpression | Chi
 		subType: "unary",
 		operand,
 		operator,
-		valueType: returnType,
+		valueType: ChiriType.of(returnType),
 	}
 }

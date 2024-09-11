@@ -1,5 +1,6 @@
 import type { ChiriLiteralNumeric } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 
 export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	const i = reader.i
@@ -16,6 +17,7 @@ export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	return {
 		type: "literal",
 		subType: "uint",
+		valueType: ChiriType.of("uint"),
 		value: intStr,
 		position: reader.getPosition(i),
 	}

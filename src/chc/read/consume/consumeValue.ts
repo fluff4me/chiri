@@ -2,6 +2,7 @@
 
 import type { ChiriValueText } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import consumeExpression from "./consumeExpression"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import consumeWordInterpolated from "./consumeWordInterpolated"
@@ -65,7 +66,7 @@ export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 
 	return {
 		type: "text",
-		valueType: "string",
+		valueType: ChiriType.of("string"),
 		content,
 		position: start,
 	}

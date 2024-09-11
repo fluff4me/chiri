@@ -61,22 +61,25 @@ async function write (stream: AWriteStream, data: any, indent: string) {
 
 	const entries = Object.entries(data as object)
 	await stream.awrite("{")
+	let hasWrittenKeyVal = false
 	if (entries.length) {
 		indent += "\t"
-		await stream.awrite(`\n${indent}`)
 		for (let i = 0; i < entries.length; i++) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			const [key, value] = entries[i]
 			if (value === undefined)
 				continue
 
+			await stream.awrite(`${hasWrittenKeyVal ? "," : ""}\n${indent}`)
+			hasWrittenKeyVal = true
+
 			await stream.awrite(`${JSON.stringify(key)}: `)
 			await write(stream, value, indent)
-			if (i !== entries.length - 1)
-				await stream.awrite(`,\n${indent}`)
 		}
+
 		indent = indent.slice(0, -1)
-		await stream.awrite(`\n${indent}`)
+		if (hasWrittenKeyVal)
+			await stream.awrite(`\n${indent}`)
 	}
 	await stream.awrite("}")
 }

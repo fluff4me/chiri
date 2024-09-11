@@ -1,8 +1,5 @@
-export interface ChiriType {
-	type: "type"
-	name: ChiriWord
-	generics: ChiriType[]
-}
+import type { ChiriType } from "./read/ChiriType"
+import type { ChiriLiteralList } from "./read/type/typeList"
 
 export interface ChiriBinaryExpression {
 	type: "expression"
@@ -10,7 +7,7 @@ export interface ChiriBinaryExpression {
 	operandA: ChiriExpressionOperand
 	operandB: ChiriExpressionOperand
 	operator: string
-	valueType: string
+	valueType: ChiriType
 	wrapped?: true
 }
 
@@ -19,12 +16,13 @@ export interface ChiriUnaryExpression {
 	subType: "unary"
 	operand: ChiriExpressionOperand
 	operator: string
-	valueType: string
+	valueType: ChiriType
 }
 
 export interface ChiriLiteralString {
 	type: "literal"
 	subType: "string"
+	valueType: ChiriType
 	segments: (string | ChiriExpressionOperand)[]
 }
 
@@ -32,12 +30,14 @@ export interface ChiriLiteralNumeric {
 	type: "literal"
 	subType: "uint" | "int" | "dec"
 	value: string
+	valueType: ChiriType
 	position: ChiriPosition
 }
 
-export interface ChiriLiteralBoolean {
+export interface ChiriLiteralBool {
 	type: "literal"
-	subType: "boolean"
+	subType: "bool"
+	valueType: ChiriType
 	value: boolean
 	position: ChiriPosition
 }
@@ -45,30 +45,24 @@ export interface ChiriLiteralBoolean {
 export interface ChiriLiteralUndefined {
 	type: "literal"
 	subType: "undefined"
+	valueType: ChiriType
 	position: ChiriPosition
 	value?: undefined
 }
 
-export interface ChiriLiteralArray {
-	type: "literal"
-	subType: "array"
-	valueType: string
-	value: ChiriExpressionOperand[]
-}
-
-export type ChiriLiteralValue = ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBoolean | ChiriLiteralUndefined | ChiriLiteralArray
+export type ChiriLiteralValue = ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBool | ChiriLiteralUndefined | ChiriLiteralList
 
 export interface ChiriVariableReference {
 	type: "get"
 	name: ChiriWord
-	valueType: string
+	valueType: ChiriType
 }
 
 export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText
 
 export interface ChiriCompilerVariable {
 	type: "variable"
-	valueType: string
+	valueType: ChiriType
 	name: ChiriWord
 	expression?: ChiriExpressionOperand
 	position: ChiriPosition
@@ -103,14 +97,14 @@ export interface ChiriTextRaw {
 
 export interface ChiriText {
 	type: "text"
-	valueType: "string"
+	valueType: ChiriType
 	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[]
 	position: ChiriPosition
 }
 
 export interface ChiriValueText {
 	type: "text"
-	valueType: "string"
+	valueType: ChiriType
 	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand | string)[]
 	position: ChiriPosition
 }

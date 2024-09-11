@@ -1,6 +1,8 @@
+import { INTERNAL_POSITION } from "../../../constants"
 import type { ChiriLiteralString } from "../../ChiriAST"
 import assertNotWhiteSpaceAndNewLine from "../assert/assertNotWhiteSpaceAndNewLine"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
 import consumeIndentOptional from "./consumeIndentOptional"
@@ -75,16 +77,16 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				if (!variable)
 					throw reader.error(e, `Variable '${word.value}' has not been declared`)
 
-				const type = variable.valueType
-				if (!type || !reader.getType(type).stringable)
-					throw reader.error(e, `Type '${type}' is not stringable`)
+				const valueType = variable.valueType
+				if (!valueType || !reader.getType(valueType).stringable)
+					throw reader.error(e, `Type '${ChiriType.stringify(valueType)}' is not stringable`)
 
 				appendSegment(pendingNewlines)
 				pendingNewlines = ""
 
 				segments.push({
 					type: "get",
-					valueType: type,
+					valueType,
 					name: word,
 				}, "")
 				break
@@ -114,6 +116,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 	return {
 		type: "literal",
 		subType: "string",
+		valueType: { type: "type", name: { type: "word", value: "string", position: INTERNAL_POSITION }, generics: [] },
 		segments,
 	}
 }

@@ -1,4 +1,5 @@
 import type { ChiriAST, ChiriMixin, ChiriStatement, ChiriText } from "../ChiriAST"
+import { ChiriType } from "../read/ChiriType"
 import resolveExpression from "../util/resolveExpression"
 import CSSWriter from "./CSSWriter"
 import DTSWriter from "./DTSWriter"
@@ -90,7 +91,7 @@ export default class ChiriCompiler {
 
 					const selector: ChiriText = !className.length ? containingSelector : {
 						type: "text",
-						valueType: "string",
+						valueType: ChiriType.of("string"),
 						content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
 						position: (statement.className?.position ?? statement.state?.position)!,
 					}

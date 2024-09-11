@@ -1,7 +1,8 @@
 
 
-import type { ChiriCompilerVariable, ChiriExpressionOperand, ChiriType } from "../../ChiriAST"
+import type { ChiriCompilerVariable, ChiriExpressionOperand } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriType } from "../ChiriType"
 import consumeExpression from "./consumeExpression"
 import { consumeTypeOptional } from "./consumeType"
 import consumeWhiteSpace from "./consumeWhiteSpace"
@@ -16,14 +17,14 @@ export default (reader: ChiriReader): ChiriCompilerVariable | undefined => {
 	reader.consume("#")
 
 	const varWord = consumeWordOptional(reader, "var")
-	const type: ChiriType | undefined = !varWord ? consumeTypeOptional(reader)
+	const valueType: ChiriType | undefined = !varWord ? consumeTypeOptional(reader)
 		: {
 			type: "type",
 			name: { ...varWord, value: "*" },
 			generics: [],
 		}
 
-	if (!type) {
+	if (!valueType) {
 		reader.restorePosition(save)
 		return undefined
 	}
@@ -34,7 +35,7 @@ export default (reader: ChiriReader): ChiriCompilerVariable | undefined => {
 
 	const postType = reader.i
 
-	if (type)
+	if (valueType)
 		consumeWhiteSpaceOptional(reader)
 
 	const assignment = reader.consumeOptional("??=", "=") as "??=" | "=" | undefined
@@ -42,14 +43,14 @@ export default (reader: ChiriReader): ChiriCompilerVariable | undefined => {
 	let expression: ChiriExpressionOperand | undefined
 	if (assignment) {
 		consumeWhiteSpaceOptional(reader)
-		expression = consumeExpression(reader, type.name.value)
+		expression = consumeExpression(reader, valueType)
 	} else {
 		reader.i = postType
 	}
 
 	return {
 		type: "variable",
-		valueType: type?.name.value ?? "*",
+		valueType,
 		name,
 		expression,
 		position,

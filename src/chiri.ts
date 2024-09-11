@@ -4,6 +4,7 @@
 import chokidar from "chokidar"
 import dotenv from "dotenv"
 import path from "path"
+import sourceMapSupport from "source-map-support"
 import ansi from "./ansi"
 import type ChiriReaderType from "./chc/read/ChiriReader"
 import prefixError from "./chc/util/prefixError.js"
@@ -13,6 +14,9 @@ import type ChiriCompilerType from "./chc/write/ChiriCompiler"
 import { CHC_ROOT, LIB_ROOT } from "./constants"
 
 dotenv.config()
+
+if (process.env.CHIRI_ENV === "dev")
+	sourceMapSupport.install()
 
 const args: Record<string, string | true> = {}
 const allArgs: string[] = []

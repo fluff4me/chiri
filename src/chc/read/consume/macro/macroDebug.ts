@@ -1,5 +1,6 @@
 import type { ChiriFunctionUse, ChiriValueText } from "../../../ChiriAST"
 import type ChiriReader from "../../ChiriReader"
+import { ChiriType } from "../../ChiriType"
 import consumeBlockStartOptional from "../consumeBlockStartOptional"
 import consumeNewBlockLineOptional from "../consumeNewBlockLineOptional"
 import consumeValue from "../consumeValue"
@@ -23,7 +24,7 @@ export default (reader: ChiriReader): ChiriFunctionUse | undefined => {
 	return {
 		type: "function-use",
 		name: { type: "word", value: "debug", position: { file: "internal", line: 0, column: 0 } },
-		variables: { content: { type: "literal", subType: "array", valueType: "*", value: toDebug } },
+		variables: { content: { type: "literal", subType: "list", valueType: ChiriType.of("*"), value: toDebug } },
 		content: [],
 	}
 }

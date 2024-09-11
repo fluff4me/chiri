@@ -8,7 +8,7 @@ function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralV
 		case "int":
 		case "uint":
 			return +expression.value
-		case "boolean":
+		case "bool":
 			return expression.value
 		case "undefined":
 			return undefined

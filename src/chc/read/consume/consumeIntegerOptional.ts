@@ -2,6 +2,7 @@
 
 import type { ChiriLiteralNumeric } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import consumeUnsignedIntegerOptional from "./consumeUnsignedIntegerOptional"
 
 export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
@@ -15,6 +16,7 @@ export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	return !numeric ? undefined : {
 		type: "literal",
 		subType: "int",
+		valueType: ChiriType.of("int"),
 		value: negative + numeric.value,
 		position,
 	}

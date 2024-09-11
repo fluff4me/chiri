@@ -2,6 +2,7 @@ import type { ChiriExpressionOperand, ChiriFunctionBase } from "../../ChiriAST"
 import getFunctionParameters from "../../util/getFunctionParameters"
 import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
+import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
 import consumeExpression from "./consumeExpression"
@@ -25,7 +26,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 		if (!parameter) {
 			const expected = parameters
 				.filter(param => !assignments[param.name.value])
-				.map(param => `${param.expression ? "[" : ""}${param.valueType} ${param.name.value}${param.expression ? "]?" : ""}`)
+				.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
 				.join(", ")
 			if (!expected)
 				throw reader.error(e, `Unexpected parameter for ${fnTypeSymbol}${fn.name.value}`)
@@ -33,17 +34,32 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 		}
 
 		if (assignments[word.value])
-			throw reader.error(`Already assigned  #${word.value} for ${fnTypeSymbol}${fn.name.value}`)
+			throw reader.error(`Already assigned ${word.value} for ${fnTypeSymbol}${fn.name.value}`)
 
 		const expectedType = parameter.valueType
 
 		if (!reader.consumeOptional("=")) {
-			if (!reader.types.isAssignable("bool", expectedType))
-				throw reader.error(e, `Unable to set #${word.value} to true, expected ${expectedType}`)
+			const variableInScope = reader.getVariable(word.value)
+			if (variableInScope) {
+				if (!reader.types.isAssignable(variableInScope.valueType, expectedType))
+					throw reader.error(e, `Unable to set ${word.value} to variable of same name, expected ${ChiriType.stringify(expectedType)}, but variable is ${ChiriType.stringify(variableInScope.valueType)}`)
+
+				assignments[word.value] = {
+					type: "get",
+					name: word,
+					valueType: variableInScope.valueType,
+				}
+				return
+			}
+
+			const valueType = ChiriType.of("bool")
+			if (!reader.types.isAssignable(valueType, expectedType))
+				throw reader.error(e, `Unable to set ${word.value} to true, expected ${ChiriType.stringify(expectedType)}`)
 
 			assignments[word.value] = {
 				type: "literal",
-				subType: "boolean",
+				subType: "bool",
+				valueType,
 				value: true,
 				position: word.position,
 			}
@@ -62,7 +78,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 	if (missing.length)
 		throw reader.error(start, `Missing parameters for ${fnTypeSymbol}${fn.name.value}: ${parameters
 			.filter(param => !assignments[param.name.value])
-			.map(param => `${param.expression ? "[" : ""}${param.valueType} ${param.name.value}${param.expression ? "]?" : ""}`)
+			.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
 			.join(", ")}`)
 
 	if (multiline)
