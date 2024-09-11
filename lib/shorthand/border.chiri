@@ -3,12 +3,13 @@
 #function border-shorthand:
 	#string of
 	#list!string affects ??= [of]
+	#body!shorthand body
 	#shorthand of:
+		#{body}
 		#var subproperties = ["width", "style", "color"]
 		#each affects as var affected:
 			#each subproperties as var subproperty:
 				#{affected}-#{subproperty}
-				#content
 
 #border-shorthand
 	of="border"

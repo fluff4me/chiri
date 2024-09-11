@@ -1,30 +1,13 @@
-import type { ChiriFunctionUse, ChiriValueText } from "../../../ChiriAST"
-import type ChiriReader from "../../ChiriReader"
+import type { ChiriFunctionUse } from "../../../ChiriAST"
 import { ChiriType } from "../../ChiriType"
-import consumeBlockStartOptional from "../consumeBlockStartOptional"
-import consumeNewBlockLineOptional from "../consumeNewBlockLineOptional"
 import consumeValue from "../consumeValue"
-import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
+import MacroFunction from "./MacroFunctionInternal"
 
-export default (reader: ChiriReader): ChiriFunctionUse | undefined => {
-	if (!reader.consumeOptional("#debug"))
-		return undefined
-
-	reader.consume(":")
-
-	const toDebug: ChiriValueText[] = []
-	const multiline = consumeBlockStartOptional(reader)
-	if (!multiline) {
-		consumeWhiteSpaceOptional(reader)
-		toDebug.push(consumeValue(reader, false))
-	} else
-		while (consumeNewBlockLineOptional(reader))
-			toDebug.push(consumeValue(reader, false))
-
-	return {
+export default MacroFunction("debug")
+	.body(reader => consumeValue(reader, false))
+	.consume(({ reader, assignments, body }): ChiriFunctionUse => ({
 		type: "function-use",
 		name: { type: "word", value: "debug", position: { file: "internal", line: 0, column: 0 } },
-		variables: { content: { type: "literal", subType: "list", valueType: ChiriType.of("*"), value: toDebug } },
+		variables: { content: { type: "literal", subType: "list", valueType: ChiriType.of("*"), value: body } },
 		content: [],
-	}
-}
+	}))

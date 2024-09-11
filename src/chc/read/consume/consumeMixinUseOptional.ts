@@ -1,4 +1,5 @@
 import type { ChiriMixinUse } from "../../ChiriAST"
+import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
 import consumeFunctionParameters from "./consumeFunctionParameters"
 import consumeWordOptional from "./consumeWordOptional"
@@ -18,7 +19,7 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 
 	const assignments = consumeFunctionParameters(reader, start, mixin)
 
-	// if ()
+	assertNewLine(reader)
 
 	mixin.used = true
 	return {

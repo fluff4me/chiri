@@ -20,6 +20,9 @@ export default async (reader: ChiriReader, context: ChiriContext, initialiser?: 
 	const sub = reader.sub(multiline, context)
 	initialiser?.(sub)
 	const ast = await sub.read()
+	if (sub.errored)
+		throw reader.subError()
+
 	const content = ast.statements
 	reader.update(sub)
 	return {

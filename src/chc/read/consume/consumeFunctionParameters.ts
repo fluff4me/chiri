@@ -1,6 +1,5 @@
 import type { ChiriExpressionOperand, ChiriFunctionBase } from "../../ChiriAST"
 import getFunctionParameters from "../../util/getFunctionParameters"
-import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
@@ -17,6 +16,9 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 
 	const parameters = getFunctionParameters(fn)
 		.sort((a, b) => +!!a.expression - +!!b.expression)
+
+	if (!parameters.length)
+		return {}
 
 	const assignments: Record<string, ChiriExpressionOperand> = {}
 	function consumeParameterAssignment () {
@@ -83,8 +85,6 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 
 	if (multiline)
 		consumeBlockEnd(reader)
-	else
-		assertNewLine(reader)
 
 	return assignments
 }

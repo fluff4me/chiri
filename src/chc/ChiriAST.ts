@@ -1,4 +1,5 @@
 import type { ChiriType } from "./read/ChiriType"
+import type { ChiriShorthand } from "./read/consume/macro/macroShorthand"
 import type { ChiriLiteralList } from "./read/type/typeList"
 
 export interface ChiriBinaryExpression {
@@ -188,7 +189,7 @@ export interface ChiriBody {
 	content: ChiriStatement[]
 }
 
-export type ChiriStatement = ChiriCompilerVariable | ChiriProperty | ChiriMixin | ChiriFunction | ChiriDocumentation | ChiriRule | ChiriMixinUse | ChiriFunctionUse | ChiriRoot
+export type ChiriStatement = ChiriCompilerVariable | ChiriProperty | ChiriMixin | ChiriFunction | ChiriDocumentation | ChiriRule | ChiriMixinUse | ChiriFunctionUse | ChiriRoot | ChiriShorthand
 
 export interface ChiriAST {
 	source: Record<string, string>

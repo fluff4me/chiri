@@ -2,21 +2,25 @@ import type ChiriReader from "../ChiriReader"
 import consumeCompilerVariable from "./consumeCompilerVariableOptional"
 import consumeWordOptional from "./consumeWordOptional"
 import macroDebug from "./macro/macroDebug"
-import macroFunction from "./macro/macroFunction"
+import macroEach from "./macro/macroEach"
+import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
 import macroImport from "./macro/macroImport"
 import macroOnce from "./macro/macroOnce"
+import macroShorthand from "./macro/macroShorthand"
 
 export default async (reader: ChiriReader) => {
 	if (reader.input[reader.i] !== "#" || reader.input[reader.i + 1] === "{")
 		return undefined
 
-	if (macroOnce(reader))
+	if (await macroOnce.consumeOptional(reader))
 		return undefined
 
 	const result = undefined
-		?? macroImport(reader)
-		?? macroDebug(reader)
-		?? await macroFunction(reader)
+		?? await macroImport.consumeOptional(reader)
+		?? await macroDebug.consumeOptional(reader)
+		?? await macroFunctionDeclaration.consumeOptional(reader)
+		?? await macroShorthand.consumeOptional(reader)
+		?? await macroEach.consumeOptional(reader)
 		?? consumeCompilerVariable(reader)
 
 	if (!result) {

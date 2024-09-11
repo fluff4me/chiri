@@ -58,6 +58,10 @@ export default class ChiriReader {
 	public readonly dirname: string
 	public readonly cwd: string
 
+	public get errored () {
+		return this.#errored
+	}
+
 	constructor (
 		public readonly filename: string,
 		public readonly input: string,
@@ -85,6 +89,11 @@ export default class ChiriReader {
 		reader.types = this.types.clone()
 		reader.#isSubReader = true
 		return reader
+	}
+
+	addOuterStatement (statement: ChiriStatement) {
+		this.#outerStatements.push(statement)
+		return this
 	}
 
 	/**
@@ -257,7 +266,8 @@ export default class ChiriReader {
 
 		} catch (err) {
 			this.#errored = true
-			this.logLine(this.#errorStart, err as Error)
+			if (!this.#subError)
+				this.logLine(this.#errorStart, err as Error)
 		}
 
 		if (this.#rootStatements.length) {
@@ -384,6 +394,12 @@ export default class ChiriReader {
 			message = errorPositionOrMessage
 
 		return new Error(message ?? "Compilation failed for an unknown reason")
+	}
+
+	#subError = false
+	subError () {
+		this.#subError = true
+		throw new Error("if this is logged something is very wrong")
 	}
 
 	getLineStart (at = this.i) {

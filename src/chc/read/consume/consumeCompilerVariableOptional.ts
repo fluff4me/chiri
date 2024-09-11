@@ -10,14 +10,14 @@ import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import consumeWord from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
 
-export default (reader: ChiriReader): ChiriCompilerVariable | undefined => {
+export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | undefined => {
 	const save = reader.savePosition()
 	const position = reader.getPosition()
-	const e = reader.i
-	reader.consume("#")
+	if (prefix)
+		reader.consume("#")
 
 	const varWord = consumeWordOptional(reader, "var")
-	const valueType: ChiriType | undefined = !varWord ? consumeTypeOptional(reader)
+	let valueType: ChiriType | undefined = !varWord ? consumeTypeOptional(reader)
 		: {
 			type: "type",
 			name: { ...varWord, value: "*" },
@@ -44,6 +44,9 @@ export default (reader: ChiriReader): ChiriCompilerVariable | undefined => {
 	if (assignment) {
 		consumeWhiteSpaceOptional(reader)
 		expression = consumeExpression(reader, valueType)
+		if (valueType.name.value === "*")
+			valueType = expression.valueType
+
 	} else {
 		reader.i = postType
 	}

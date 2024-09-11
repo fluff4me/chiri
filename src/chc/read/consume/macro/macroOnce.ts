@@ -1,3 +1,7 @@
-import type ChiriReader from "../../ChiriReader"
+import MacroFunction from "./MacroFunctionInternal"
 
-export default (reader: ChiriReader) => reader.consumeOptional("#once") && reader.setOnce()
+export default MacroFunction("once")
+	.consume(({ reader }) => {
+		reader.setOnce()
+		return true
+	})

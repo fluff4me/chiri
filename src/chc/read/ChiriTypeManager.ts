@@ -2,7 +2,7 @@
 
 import ansi from "../../ansi"
 import type ChiriReader from "./ChiriReader"
-import type { ChiriType } from "./ChiriType"
+import { ChiriType } from "./ChiriType"
 import typeDec from "./type/typeDec"
 import typeInt from "./type/typeInt"
 import typeList from "./type/typeList"
@@ -144,7 +144,7 @@ export default class ChiriTypeManager {
 
 		if (type.name.value === "*")
 			// this should never happen
-			throw new Error("Tried to assign value of unknown type")
+			throw new Error(`* is not a statically known type and therefore cannot be assigned to ${ChiriType.stringify(toType)}`)
 
 		if (isNumeric(type.name.value) && isNumeric(toType.name.value))
 			return minNumericPrecision(type.name.value, toType.name.value) === toType.name.value
