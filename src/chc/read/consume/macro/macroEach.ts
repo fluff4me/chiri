@@ -4,7 +4,7 @@ import consumeBody from "../consumeBody"
 import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWord from "../consumeWord"
-import MacroFunction from "./MacroFunctionInternal"
+import MacroFunction from "./MacroFunction"
 
 export interface ChiriEach {
 	type: "each"
@@ -21,7 +21,7 @@ export default MacroFunction("each")
 		const iterable = consumeWord(reader)
 		const iterableVariable = reader.getVariable(iterable.value)
 		if (!iterableVariable)
-			throw reader.error("Expected list or record")
+			throw reader.error(e, `No variable "${iterable.value}" exists`)
 
 		if (!reader.types.isAssignable(iterableVariable.valueType, ChiriType.of("list", "*")))
 			throw reader.error(e, `Expected list or record, was ${ChiriType.stringify(iterableVariable?.valueType)}`)

@@ -3,6 +3,7 @@
 import ansi from "../../ansi"
 import type ChiriReader from "./ChiriReader"
 import { ChiriType } from "./ChiriType"
+import typeBody from "./type/typeBody"
 import typeDec from "./type/typeDec"
 import typeInt from "./type/typeInt"
 import typeList from "./type/typeList"
@@ -14,7 +15,7 @@ type Consumer<RESULT> = (reader: ChiriReader) => RESULT | undefined
 export interface ChiriTypeDefinition {
 	consumeOptionalConstructor: Consumer<object>
 	consumeType?: Consumer<string>
-	hasGenerics?: number | true
+	generics?: number | true | string[][]
 	stringable?: true
 }
 
@@ -24,6 +25,7 @@ const types: Record<string, ChiriTypeDefinition> = {
 	int: typeInt,
 	dec: typeDec,
 	list: typeList,
+	body: typeBody,
 }
 
 const numericTypes = ["uint", "int", "dec"] as const

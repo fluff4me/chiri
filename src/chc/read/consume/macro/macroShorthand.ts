@@ -1,18 +1,23 @@
-import type { ChiriExpressionOperand, ChiriStatement, ChiriText } from "../../../ChiriAST"
+import type { ChiriExpressionOperand, ChiriImport, ChiriText } from "../../../ChiriAST"
 import { ChiriType } from "../../ChiriType"
-import MacroFunction from "./MacroFunctionInternal"
+import bodyMacros from "../body/bodyMacros"
+import bodyShorthand from "../body/bodyShorthand"
+import type { MacroResult } from "../consumeMacroUseOptional"
+import MacroFunction from "./MacroFunction"
 
 export interface ChiriShorthand {
 	type: "shorthand"
 	property: ChiriText | ChiriExpressionOperand
-	body: ChiriStatement[]
+	body: MacroResultShorthand[]
 }
+
+export type MacroResultShorthand = Exclude<MacroResult, ChiriImport> | ChiriText
 
 export default MacroFunction("shorthand")
 	.parameter("of", ChiriType.of("string"))
-	.body()
+	.body(async reader => bodyShorthand(reader) ?? await bodyMacros(reader, "shorthand"))
 	.consume(({ reader, assignments, body }): ChiriShorthand => ({
 		type: "shorthand",
 		property: assignments.of,
-		body,
+		body: body as MacroResultShorthand[],
 	}))

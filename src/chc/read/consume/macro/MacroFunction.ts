@@ -2,6 +2,8 @@ import { INTERNAL_POSITION } from "../../../../constants"
 import type { ChiriCompilerVariable, ChiriExpressionOperand, ChiriFunctionBase, ChiriStatement, ChiriWord } from "../../../ChiriAST"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriType } from "../../ChiriType"
+import type { BodyType } from "../body/BodyTypes"
+import BodyTypes from "../body/BodyTypes"
 import type { ChiriFunctionBodyConsumer } from "../consumeFunctionBodyOptional"
 import consumeFunctionBodyOptional from "../consumeFunctionBodyOptional"
 import consumeFunctionParameters from "../consumeFunctionParameters"
@@ -10,13 +12,13 @@ import consumeWordOptional from "../consumeWordOptional"
 
 export interface ChiriFunctionInternal<T> extends ChiriFunctionBase {
 	type: "function:internal"
-	consumeOptional (reader: ChiriReader): Promise<T | undefined>
+	consumeOptional (reader: ChiriReader, bodyType: BodyType): Promise<T | undefined>
 }
 
 export interface ChiriFunctionInternalConsumerInfo<NAMED extends boolean = false, BODY = null, EXTRA = never> {
 	reader: ChiriReader
 	assignments: Record<string, ChiriExpressionOperand>
-	body: BODY extends null ? [] : BODY[]
+	body: (BODY extends null ? never : BODY)[]
 	name: NAMED extends true ? ChiriWord : undefined
 	extra: EXTRA
 }
@@ -24,11 +26,12 @@ export interface ChiriFunctionInternalConsumerInfo<NAMED extends boolean = false
 export type ChiriFunctionInternalParametersConsumer<T> = (reader: ChiriReader) => T
 
 export interface ChiriFunctionInternalFactory<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+	usability (...types: BodyType[]): this
 	consumeParameters<T> (consumer: ChiriFunctionInternalParametersConsumer<T>): ChiriFunctionInternalFactory<NAMED, BODY, T>
 	named (): ChiriFunctionInternalFactory<true, BODY>
 	parameter (name: string, type: ChiriType): this
 	body (): ChiriFunctionInternalFactory<NAMED, ChiriStatement>
-	body<T> (consumer: (reader: ChiriReader) => T | undefined): ChiriFunctionInternalFactory<NAMED, T>
+	body<T> (consumer: (reader: ChiriReader) => T | undefined | Promise<T | undefined>): ChiriFunctionInternalFactory<NAMED, T>
 	consume<T> (consumer: (info: ChiriFunctionInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriFunctionInternal<T>
 }
 
@@ -37,7 +40,12 @@ export default function (type: string): ChiriFunctionInternalFactory {
 	let parametersConsumer: ChiriFunctionInternalParametersConsumer<any> | undefined
 	let bodyConsumer: ChiriFunctionBodyConsumer<any> | undefined | null = null
 	let named = false
+	let usability = BodyTypes.slice()
 	return {
+		usability (...types) {
+			usability = types
+			return this
+		},
 		named () {
 			named = true
 			return this as ChiriFunctionInternalFactory<boolean, any> as ChiriFunctionInternalFactory<true, any>
@@ -64,7 +72,10 @@ export default function (type: string): ChiriFunctionInternalFactory {
 				type: "function:internal",
 				name: { type: "word", value: type, position: INTERNAL_POSITION },
 				content: parameters,
-				async consumeOptional (reader) {
+				async consumeOptional (reader, bodyType) {
+					if (!usability.includes(bodyType))
+						return undefined
+
 					const savedPosition = reader.savePosition()
 					const start = reader.i
 					if (!reader.consumeOptional(`#${type}`))

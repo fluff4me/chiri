@@ -1,7 +1,7 @@
 
 
 import type { ChiriFunction } from "../../../ChiriAST"
-import MacroFunction from "./MacroFunctionInternal"
+import MacroFunction from "./MacroFunction"
 
 export default MacroFunction("function")
 	.named()

@@ -2,7 +2,7 @@
 
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPositionState } from "../ChiriReader"
-import type { ChiriType } from "../ChiriType"
+import { ChiriType } from "../ChiriType"
 import consumeTypeNameOptional from "./consumeTypeNameOptional"
 
 export const consumeType = (reader: ChiriReader) => {
@@ -29,18 +29,24 @@ export const consumeTypeOptional = (reader: ChiriReader): ChiriType | undefined 
 		return type
 
 	const definition = reader.getType(typeName.value)
-	if (definition.hasGenerics)
-		type.generics = consumeGenerics(reader, definition.hasGenerics === true ? undefined : definition.hasGenerics)
+	if (definition.generics)
+		type.generics = consumeGenerics(reader, definition.generics === true ? undefined : definition.generics)
 
 	return type
 }
 
-const consumeGenerics = (reader: ChiriReader, quantity?: number) => {
-	const generics = []
-	if (quantity) {
-		for (let g = 0; g < quantity; g++) {
+const consumeGenerics = (reader: ChiriReader, generics?: number | string[][]) => {
+	const result: ChiriType[] = []
+	if (typeof generics === "number") {
+		for (let g = 0; g < generics; g++) {
 			reader.consume("!")
-			generics.push(consumeType(reader))
+			result.push(consumeType(reader))
+		}
+
+	} else if (generics) {
+		for (const generic of generics) {
+			reader.consume("!")
+			result.push(ChiriType.of(reader.consume(...generic)))
 		}
 
 	} else {
@@ -56,9 +62,9 @@ const consumeGenerics = (reader: ChiriReader, quantity?: number) => {
 				break
 			}
 
-			generics.push(type)
+			result.push(type)
 		}
 	}
 
-	return generics
+	return result
 }

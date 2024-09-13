@@ -177,7 +177,7 @@ export default class ChiriReader {
 				////////////////////////////////////
 				//#region Macro
 
-				const macro = await consumeMacroOptional(this)
+				const macro = await consumeMacroOptional(this, "generic")
 				if (macro?.type === "variable") {
 					// if (macro.type === "variable")
 					// 	this.#variables[macro.name.value] = this.#statements.length;
@@ -217,13 +217,13 @@ export default class ChiriReader {
 					continue
 				}
 
-				if (macro?.type === "function-use" || macro?.type === "function") {
+				if (macro && (macro.type === "function-use" || macro.type === "function" || macro.type === "shorthand")) {
 					this.#statements.push(macro)
 					continue
 				}
 
 				if (macro)
-					throw this.error(e, "Not supported this macro result type yet")
+					throw this.error(e, `Macro result type "${macro.type}" is not supported yet`)
 
 				//#endregion
 				////////////////////////////////////

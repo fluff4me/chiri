@@ -15,7 +15,7 @@ export interface ChiriLiteralList {
 
 export default {
 	stringable: true,
-	hasGenerics: 1,
+	generics: 1,
 	consumeOptionalConstructor: (reader): ChiriLiteralList | undefined => {
 		if (!reader.consumeOptional("["))
 			return undefined

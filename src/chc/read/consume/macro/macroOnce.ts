@@ -1,4 +1,4 @@
-import MacroFunction from "./MacroFunctionInternal"
+import MacroFunction from "./MacroFunction"
 
 export default MacroFunction("once")
 	.consume(({ reader }) => {

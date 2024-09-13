@@ -23,21 +23,21 @@ export default async function <T> (reader: ChiriReader, consumer?: ChiriFunction
 		consumeWhiteSpaceOptional(reader)
 
 		const e = reader.i
-		const consumed = consumer(reader)
+		const consumed = await consumer(reader)
 		if (!consumed)
 			throw reader.error(e, "Expected content")
 
 		result.push(consumed)
 
 	} else
-		while (consumeNewBlockLineOptional(reader)) {
+		do {
 			const e = reader.i
-			const consumed = consumer(reader)
+			const consumed = await consumer(reader)
 			if (!consumed)
 				throw reader.error(e, "Expected content")
 
 			result.push(consumed)
-		}
+		} while (consumeNewBlockLineOptional(reader))
 
 	return result
 }
