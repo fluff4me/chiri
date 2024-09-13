@@ -14,7 +14,7 @@ export default (reader: ChiriReader): ChiriText | undefined => {
 	const content: ChiriText["content"] = []
 
 	let textStart = reader.getPosition()
-	let text = reader.input[reader.i]
+	let text = ""
 	for (; reader.i < reader.input.length; reader.i++) {
 		if (reader.isWordChar()) {
 			text += reader.input[reader.i]
