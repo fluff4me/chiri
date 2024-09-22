@@ -312,13 +312,13 @@ export default class ChiriReader {
 			.replace(/ /g, ansi.whitespace + "\u00B7" + ansi.reset)
 			.replace(/\t/g, ansi.whitespace + "\u2192" + ansi.reset)
 
-		const lineNumber = this.getLineNumber()
+		const lineNumber = this.getLineNumber(undefined, true)
 		const columnNumber = this.getColumnNumber()
 
 		const err = typeof errOrMessage === "string" ? undefined : errOrMessage
 		const message = typeof errOrMessage === "string" ? errOrMessage : undefined
 
-		const filename = this.formatFilePos(lineNumber, columnNumber)
+		const filename = this.formatFilePosAtFromScratch(start ?? this.i)
 		console[err ? "error" : "info"](filename
 			+ ansi.label + (errOrMessage ? " - " : "")
 			+ ansi.reset + (!err ? message ?? "" : ansi.err + err.message) + "\n"
@@ -478,7 +478,7 @@ export default class ChiriReader {
 
 	#lastLineNumber = 0
 	#lastLineNumberPosition = 0
-	getLineNumber (at = this.i) {
+	getLineNumber (at = this.i, allowRecalc = false) {
 		const lastLineNumberPosition = this.#lastLineNumberPosition
 		const recalc = at < lastLineNumberPosition
 
@@ -491,7 +491,7 @@ export default class ChiriReader {
 		this.#lastLineNumber = newlines
 		this.#lastLineNumberPosition = at
 
-		if (recalc) {
+		if (recalc && !allowRecalc) {
 			const lastPos = this.formatFilePosAtFromScratch(lastLineNumberPosition)
 			const newPos = this.formatFilePosAtFromScratch(at)
 			console.warn(`${ansi.err}Forced to recalculate line number! ${ansi.label}Was: ${lastPos} ${ansi.label}Now: ${newPos}${ansi.reset}\n${Errors.stack(3)}`)

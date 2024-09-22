@@ -1,4 +1,4 @@
-#export once in="root
+#export once
 
 %font-small: font-size: $font-small
 %font-large: font-size: $font-large 

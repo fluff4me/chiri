@@ -61,6 +61,7 @@ export default function (type: string): ChiriFunctionInternalFactory {
 				valueType: type,
 				assignment: "??=",
 				position: INTERNAL_POSITION,
+				expression: value,
 			})
 			return this
 		},
