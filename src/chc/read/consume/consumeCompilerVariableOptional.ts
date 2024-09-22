@@ -29,6 +29,9 @@ export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | und
 		return undefined
 	}
 
+	if (valueType.name.value === "body" && reader.getVariables().find(variable => variable.valueType.name.value === "body"))
+		throw reader.error(save.i, "A function cannot declare multiple body parameters")
+
 	consumeWhiteSpace(reader)
 
 	const name = consumeWord(reader)
@@ -38,7 +41,7 @@ export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | und
 	if (valueType)
 		consumeWhiteSpaceOptional(reader)
 
-	const assignment = reader.consumeOptional("??=", "=") as "??=" | "=" | undefined
+	let assignment = reader.consumeOptional("??=", "=") as "??=" | "=" | undefined
 
 	let expression: ChiriExpressionOperand | undefined
 	if (assignment) {
@@ -49,6 +52,9 @@ export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | und
 
 	} else {
 		reader.i = postType
+
+		if (!assignment && reader.consumeOptional("?"))
+			assignment = "??="
 	}
 
 	return {

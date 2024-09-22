@@ -3,7 +3,6 @@ import type { ChiriCompilerVariable, ChiriExpressionOperand, ChiriFunctionBase, 
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriType } from "../../ChiriType"
 import type { ContextStatement } from "../body/BodyRegistry"
-import BodyRegistry from "../body/BodyRegistry"
 import type { ChiriContext } from "../body/Contexts"
 import Contexts from "../body/Contexts"
 import consumeBodyOptional from "../consumeBodyOptional"
@@ -95,7 +94,7 @@ export default function (type: string): ChiriFunctionInternalFactory {
 
 					const extra = parametersConsumer?.(reader) as never
 					const assignments = parametersConsumer ? {} : consumeFunctionParameters(reader, start, this)
-					const body = bodyContext ? await consumeBodyOptional<any>(reader, BodyRegistry[bodyContext]!) : []
+					const body = bodyContext ? await consumeBodyOptional(reader, bodyContext) : []
 					const result = await consumer({
 						reader,
 						assignments,

@@ -4,7 +4,7 @@ import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
 import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
-import type { ChiriAST, ChiriCompilerVariable, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
+import type { ChiriAST, ChiriCompilerVariable, ChiriFunction, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
 import type { ArrayOr, PromiseOr } from "../util/Type"
@@ -126,12 +126,25 @@ export default class ChiriReader {
 		this.#errored = reader.#errored
 	}
 
+	getVariables () {
+		return [...this.#outerStatements, ...this.#statements]
+			.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable")
+	}
+
 	getVariable (name: string) {
 		return undefined
 			?? this.#statements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
+	}
+
+	getFunction (name: string) {
+		return undefined
+			?? this.#statements.findLast((statement): statement is ChiriFunction =>
+				statement.type === "function" && statement.name.value === name)
+			?? this.#outerStatements.findLast((statement): statement is ChiriFunction =>
+				statement.type === "function" && statement.name.value === name)
 	}
 
 	getMixin (name: string) {
@@ -329,7 +342,7 @@ export default class ChiriReader {
 		const err = typeof errOrMessage === "string" ? undefined : errOrMessage
 		const message = typeof errOrMessage === "string" ? errOrMessage : undefined
 
-		const filename = this.formatFilePosAtFromScratch(start ?? this.i)
+		const filename = this.formatFilePosAtFromScratch(this.i)
 		console[err ? "error" : "info"](filename
 			+ ansi.label + (errOrMessage ? " - " : "")
 			+ ansi.reset + (!err ? message ?? "" : ansi.err + err.message) + "\n"

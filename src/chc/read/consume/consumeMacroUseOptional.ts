@@ -2,6 +2,7 @@ import type { ChiriCompilerVariable, ChiriFunction, ChiriFunctionUse, ChiriImpor
 import type ChiriReader from "../ChiriReader"
 import type { ChiriContext } from "./body/Contexts"
 import consumeCompilerVariable from "./consumeCompilerVariableOptional"
+import consumeFunctionUseOptional from "./consumeFunctionUseOptional"
 import consumeWordOptional from "./consumeWordOptional"
 import macroDebug from "./macro/macroDebug"
 import type { ChiriEach } from "./macro/macroEach"
@@ -33,6 +34,7 @@ export default async (reader: ChiriReader, context: ChiriContext): Promise<Macro
 		?? await macroFunctionDeclaration.consumeOptional(reader, context)
 		?? await macroShorthand.consumeOptional(reader, context)
 		?? await macroEach.consumeOptional(reader, context)
+		?? await consumeFunctionUseOptional(reader, context)
 		?? consumeCompilerVariable(reader)
 
 	if (!result) {

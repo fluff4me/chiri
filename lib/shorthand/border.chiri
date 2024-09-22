@@ -1,7 +1,7 @@
 #function border-shorthand:
 	#string of
 	#list!string affects ??= [of]
-	#body!shorthand body
+	#body!shorthand body?
 	#shorthand of:
 		#{body}
 		#var subproperties = ["width", "style", "color"]

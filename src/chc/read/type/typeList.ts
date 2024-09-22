@@ -28,8 +28,8 @@ export default {
 			while (reader.consumeOptional(", "))
 
 		} else
+			do expressions.push(consumeExpression(reader))
 			while (consumeNewBlockLineOptional(reader))
-				expressions.push(consumeExpression(reader))
 
 		const stringifiedTypes = expressions.map(expr => ChiriType.stringify(expr.valueType))
 		if (new Set(stringifiedTypes).size > 1)
@@ -43,7 +43,7 @@ export default {
 		return {
 			type: "literal",
 			subType: "list",
-			valueType: ChiriType.of("list", expressions[0].valueType),
+			valueType: ChiriType.of("list", expressions[0]?.valueType ?? "*"),
 			value: expressions,
 		}
 	},

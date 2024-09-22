@@ -16,6 +16,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 
 	const parameters = getFunctionParameters(fn)
 		.sort((a, b) => +!!a.expression - +!!b.expression)
+		.filter(parameter => parameter.valueType.name.value !== "body")
 
 	if (!parameters.length)
 		return {}
@@ -72,9 +73,12 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 	}
 
 	const multiline = consumeBlockStartOptional(reader)
+	if (!multiline) consumeWhiteSpaceOptional(reader)
+
 	const consumeParameterSeparatorOptional = multiline ? consumeNewBlockLineOptional : consumeWhiteSpaceOptional
+
+	do consumeParameterAssignment()
 	while (consumeParameterSeparatorOptional(reader))
-		consumeParameterAssignment()
 
 	const missing = parameters.filter(parameter => !parameter.expression && !assignments[parameter.name.value])
 	if (missing.length)
