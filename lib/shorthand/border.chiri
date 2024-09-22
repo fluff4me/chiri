@@ -1,5 +1,3 @@
-#export once in="root
-
 #function border-shorthand:
 	#string of
 	#list!string affects ??= [of]

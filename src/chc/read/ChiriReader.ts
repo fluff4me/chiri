@@ -7,7 +7,6 @@ import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriCompilerVariable, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
-import relToCwd from "../util/relToCwd"
 import type { ArrayOr, PromiseOr } from "../util/Type"
 import { ChiriType } from "./ChiriType"
 import type { ChiriTypeDefinition } from "./ChiriTypeManager"
@@ -34,16 +33,21 @@ export type ChiriBodyConsumer<T> = (reader: ChiriReader) => PromiseOr<ArrayOr<T 
 
 export default class ChiriReader {
 
-	static async load (filename: string, cwd?: string, once?: Set<string>, stack?: string[], source?: Record<string, string>) {
+	static async load (filename: string, reader?: ChiriReader) {
 		filename = path.resolve(filename)
 		if (!filename.endsWith(".chiri"))
 			filename += ".chiri"
 
-		if (once?.has(filename))
-			return undefined
+		if (reader?.used.has(filename) && !reader.reusable.has(filename))
+			throw reader.error("This source file is not exported as reusable")
+
 
 		const ch = await fsp.readFile(filename, "utf8")
-		return new ChiriReader(filename, ch, cwd, undefined, stack, source)
+		const result = new ChiriReader(filename, ch, reader?.cwd, undefined, reader?.stack.slice(), reader?.source)
+		result.used = reader?.used ?? result.used
+		result.reusable = reader?.reusable ?? result.reusable
+		result.used.add(filename)
+		return result
 	}
 
 	types = new ChiriTypeManager()
@@ -59,7 +63,9 @@ export default class ChiriReader {
 	#multiline = true
 	#isSubReader = false
 	#errored = false
-	once: Set<string> = new Set()
+	used: Set<string> = new Set()
+	reusable: Set<string> = new Set()
+	importName?: string
 
 	public readonly basename: string
 	public readonly dirname: string
@@ -85,8 +91,8 @@ export default class ChiriReader {
 		this.consumeBodyDefault = this.consumeBodyDefault.bind(this)
 	}
 
-	setOnce () {
-		this.once.add(this.filename)
+	setReusable () {
+		this.reusable.add(this.filename)
 		return true
 	}
 
@@ -100,6 +106,8 @@ export default class ChiriReader {
 		reader.#lastLineNumberPosition = this.#lastLineNumberPosition
 		reader.#outerStatements = [...this.#outerStatements, ...this.#statements]
 		reader.types = this.types.clone()
+		reader.used = this.used
+		reader.reusable = this.reusable
 		reader.#isSubReader = true
 		return reader
 	}
@@ -234,26 +242,29 @@ export default class ChiriReader {
 		if (macro?.type === "import") {
 			const statements: ChiriStatement[] = []
 			for (const imp of macro.paths) {
+				const raw = (imp.module ? `${imp.module}:` : "") + imp.path
 				const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? LIB_ROOT : require.resolve(imp.module)
 				const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path)
 				if (this.stack.includes(filename))
-					throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`)
+					throw this.error(`Cannot recursively import file '${raw}'`)
 
 				let sub
 				try {
-					sub = await ChiriReader.load(filename, this.cwd, this.once, this.stack.slice(), this.source)
+					sub = await ChiriReader.load(filename, this)
+					sub.importName = raw
 
 				} catch (e) {
 					const err = e as Error
 					this.#errorStart = this.i
 					this.i = imp.i
 					const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error")
-					throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`)
+					throw this.error(`Cannot import file '${raw}': ${message}`)
 				}
 
 				if (sub) {
-					sub.once = this.once
 					const ast = await sub.read()
+					if (this.reusable.has(this.filename) && !this.reusable.has(sub.filename))
+						throw this.error(imp.i, `${this.importName} is exported as reusable, it can only import other files exported as reusable`)
 
 					this.#errored ||= sub.#errored
 					statements.push(...ast.statements)
