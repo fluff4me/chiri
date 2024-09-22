@@ -1,4 +1,4 @@
-#once
+#export once in="root
 
 $font-small: 16px
 $font-large: 32px

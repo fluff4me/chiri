@@ -1,4 +1,4 @@
-#once
+#export once in="root
 
 #import: default/variables
 #import: shorthands

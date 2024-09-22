@@ -1,14 +1,14 @@
 import type { ChiriCompilerVariable, ChiriFunction, ChiriFunctionUse, ChiriImport } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
-import type { BodyType } from "./body/BodyTypes"
+import type { ChiriContext } from "./body/Contexts"
 import consumeCompilerVariable from "./consumeCompilerVariableOptional"
 import consumeWordOptional from "./consumeWordOptional"
 import macroDebug from "./macro/macroDebug"
 import type { ChiriEach } from "./macro/macroEach"
 import macroEach from "./macro/macroEach"
+import macroExport from "./macro/macroExport"
 import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
 import macroImport from "./macro/macroImport"
-import macroOnce from "./macro/macroOnce"
 import type { ChiriShorthand } from "./macro/macroShorthand"
 import macroShorthand from "./macro/macroShorthand"
 
@@ -20,19 +20,19 @@ export type MacroResult =
 	| ChiriImport
 	| ChiriEach
 
-export default async (reader: ChiriReader, bodyType: BodyType): Promise<MacroResult | undefined> => {
+export default async (reader: ChiriReader, context: ChiriContext): Promise<MacroResult | undefined> => {
 	if (reader.input[reader.i] !== "#" || reader.input[reader.i + 1] === "{")
 		return undefined
 
-	if (await macroOnce.consumeOptional(reader, bodyType))
+	if (await macroExport.consumeOptional(reader, context))
 		return undefined
 
 	const result = undefined
-		?? await macroImport.consumeOptional(reader, bodyType)
-		?? await macroDebug.consumeOptional(reader, bodyType)
-		?? await macroFunctionDeclaration.consumeOptional(reader, bodyType)
-		?? await macroShorthand.consumeOptional(reader, bodyType)
-		?? await macroEach.consumeOptional(reader, bodyType)
+		?? await macroImport.consumeOptional(reader, context)
+		?? await macroDebug.consumeOptional(reader, context)
+		?? await macroFunctionDeclaration.consumeOptional(reader, context)
+		?? await macroShorthand.consumeOptional(reader, context)
+		?? await macroEach.consumeOptional(reader, context)
 		?? consumeCompilerVariable(reader)
 
 	if (!result) {

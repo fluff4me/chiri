@@ -173,8 +173,6 @@ export interface ChiriRule {
 	content: ChiriStatement[]
 }
 
-export type ChiriContext = "mixin" | "rule" | "function"
-
 export interface ChiriPath {
 	module?: string
 	path: string
@@ -186,8 +184,8 @@ export interface ChiriImport {
 	paths: ChiriPath[]
 }
 
-export interface ChiriBody {
-	content: ChiriStatement[]
+export interface ChiriBody<STATEMENT = ChiriStatement> {
+	content: STATEMENT[]
 }
 
 export type ChiriStatement =
@@ -203,9 +201,9 @@ export type ChiriStatement =
 	| ChiriShorthand
 	| ChiriEach
 
-export interface ChiriAST {
+export interface ChiriAST<STATEMENT = ChiriStatement> {
 	source: Record<string, string>
-	statements: ChiriStatement[]
+	statements: STATEMENT[]
 }
 
 

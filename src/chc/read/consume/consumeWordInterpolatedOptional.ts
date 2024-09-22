@@ -13,7 +13,8 @@ export default (reader: ChiriReader): ChiriText | undefined => {
 
 	const content: ChiriText["content"] = []
 
-	let textStart = reader.getPosition()
+	const start = reader.getPosition()
+	let textStart = start
 	let text = ""
 	for (; reader.i < reader.input.length; reader.i++) {
 		if (reader.isWordChar()) {
@@ -50,6 +51,6 @@ export default (reader: ChiriReader): ChiriText | undefined => {
 		type: "text",
 		valueType: ChiriType.of("string"),
 		content,
-		position: reader.getPosition(e),
+		position: start,
 	}
 }

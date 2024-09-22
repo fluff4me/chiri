@@ -4,20 +4,25 @@ import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
 import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
-import type { ChiriAST, ChiriCompilerVariable, ChiriContext, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
+import type { ChiriAST, ChiriCompilerVariable, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
+import Arrays from "../util/Arrays"
+import Errors from "../util/Errors"
 import relToCwd from "../util/relToCwd"
-import type { ChiriType } from "./ChiriType"
+import type { ArrayOr, PromiseOr } from "../util/Type"
+import { ChiriType } from "./ChiriType"
 import type { ChiriTypeDefinition } from "./ChiriTypeManager"
 import ChiriTypeManager from "./ChiriTypeManager"
+import type { ChiriContext } from "./consume/body/Contexts"
 import consumeBlockEnd from "./consume/consumeBlockEnd"
 import consumeDocumentationOptional from "./consume/consumeDocumentationOptional"
-import consumeMacroOptional from "./consume/consumeMacroUseOptional"
+import { default as consumeMacroOptional, default as consumeMacroUseOptional } from "./consume/consumeMacroUseOptional"
 import consumeMixinOptional from "./consume/consumeMixinOptional"
 import consumeMixinUseOptional from "./consume/consumeMixinUseOptional"
 import consumeNewBlockLineOptional from "./consume/consumeNewBlockLineOptional"
 import consumePropertyOptional from "./consume/consumePropertyOptional"
 import consumeRuleMainOptional from "./consume/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/consumeRuleStateOptional"
+import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
 
 export interface ChiriPositionState {
 	lastLineNumber: number
@@ -25,9 +30,11 @@ export interface ChiriPositionState {
 	i: number
 }
 
+export type ChiriBodyConsumer<T> = (reader: ChiriReader) => PromiseOr<ArrayOr<T | undefined>>
+
 export default class ChiriReader {
 
-	static async load (filename: string, cwd?: string, once?: Set<string>) {
+	static async load (filename: string, cwd?: string, once?: Set<string>, stack?: string[], source?: Record<string, string>) {
 		filename = path.resolve(filename)
 		if (!filename.endsWith(".chiri"))
 			filename += ".chiri"
@@ -36,7 +43,7 @@ export default class ChiriReader {
 			return undefined
 
 		const ch = await fsp.readFile(filename, "utf8")
-		return new ChiriReader(filename, ch, cwd)
+		return new ChiriReader(filename, ch, cwd, undefined, stack, source)
 	}
 
 	types = new ChiriTypeManager()
@@ -66,11 +73,16 @@ export default class ChiriReader {
 		public readonly filename: string,
 		public readonly input: string,
 		cwd?: string,
-		public readonly context?: ChiriContext,
+		public readonly context: ChiriContext = "root",
+		public readonly stack: string[] = [],
+		public readonly source: Record<string, string> = {},
 	) {
 		this.basename = path.join(path.dirname(filename), path.basename(filename, path.extname(filename)))
 		this.dirname = path.dirname(filename)
 		this.cwd = cwd ?? this.dirname
+		this.stack.push(filename)
+		this.source[filename] = this.input
+		this.consumeBodyDefault = this.consumeBodyDefault.bind(this)
 	}
 
 	setOnce () {
@@ -79,7 +91,8 @@ export default class ChiriReader {
 	}
 
 	sub (multiline: boolean, context: ChiriContext) {
-		const reader = new ChiriReader(this.filename, this.input, undefined, context)
+		// this.logLine(undefined, `sub for ${context}`)
+		const reader = new ChiriReader(this.filename, this.input, undefined, context, this.stack.slice(), this.source)
 		reader.i = this.i
 		reader.indent = this.indent
 		reader.#multiline = multiline
@@ -107,17 +120,17 @@ export default class ChiriReader {
 
 	getVariable (name: string) {
 		return undefined
-			?? this.#outerStatements.findLast((statement): statement is ChiriCompilerVariable =>
-				statement.type === "variable" && statement.name.value === name)
 			?? this.#statements.findLast((statement): statement is ChiriCompilerVariable =>
+				statement.type === "variable" && statement.name.value === name)
+			?? this.#outerStatements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
 	}
 
 	getMixin (name: string) {
 		return undefined
-			?? this.#outerStatements.findLast((statement): statement is ChiriMixin =>
-				statement.type === "mixin" && statement.name.value === name)
 			?? this.#statements.findLast((statement): statement is ChiriMixin =>
+				statement.type === "mixin" && statement.name.value === name)
+			?? this.#outerStatements.findLast((statement): statement is ChiriMixin =>
 				statement.type === "mixin" && statement.name.value === name)
 	}
 
@@ -141,127 +154,48 @@ export default class ChiriReader {
 		return this.types.binaryOperators
 	}
 
-	async read (): Promise<ChiriAST> {
-		const source: Record<string, string> = {
-			[this.filename]: this.input,
-		}
+	hasStatements () {
+		return !!this.#statements.length
+	}
 
-		let ignoreNewLineRequirement = this.#isSubReader
+	setExport () {
+
+	}
+
+	async read (): Promise<ChiriAST>
+	async read<STATEMENT = ChiriStatement> (consumer: ChiriBodyConsumer<STATEMENT>): Promise<ChiriAST<STATEMENT>>
+	async read (configuredConsumer: ChiriBodyConsumer<object> = this.consumeBodyDefault): Promise<ChiriAST<object>> {
+		const consumer = async () => undefined
+			?? await configuredConsumer(this)
+			?? await consumeMacroUseOptional(this, this.context)
+
 		try {
-			while (true) {
-				if (this.#errored)
-					break
+			if (!this.#multiline) {
+				consumeWhiteSpaceOptional(this)
 
-				let e = this.i
-				if (this.#multiline)
-					while (consumeNewBlockLineOptional(this));
+				const e = this.i
+				const consumed = await consumer()
+				if (!consumed)
+					throw this.error(e, `Expected ${this.context} content`)
 
-				if (this.i >= this.input.length)
-					break
+				this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish) as ChiriStatement[])
 
-				if (this.i && this.i === e && this.#multiline && !ignoreNewLineRequirement) {
-					if (consumeBlockEnd(this))
-						break
+			} else {
+				do {
+					// if (this.#errored)
+					// 	break
 
-					throw this.error("Expected newline")
-				}
+					// this.logLine(undefined, this.stack.join(" -> "))
+					const e = this.i
+					const consumed = await consumer()
+					if (!consumed)
+						throw this.error(e, `Expected ${this.context} content`)
 
-				ignoreNewLineRequirement = false
+					this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish) as ChiriStatement[])
+				} while (consumeNewBlockLineOptional(this))
 
-				const documentation = consumeDocumentationOptional(this)
-				if (documentation)
-					this.#statements.push(documentation)
-
-				e = this.i
-
-				////////////////////////////////////
-				//#region Macro
-
-				const macro = await consumeMacroOptional(this, "generic")
-				if (macro?.type === "variable") {
-					// if (macro.type === "variable")
-					// 	this.#variables[macro.name.value] = this.#statements.length;
-					this.#statements.push(macro)
-					continue
-				}
-
-				if (macro?.type === "import") {
-					for (const imp of macro.paths) {
-						const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? LIB_ROOT : require.resolve(imp.module)
-						const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path)
-						if (source[filename])
-							throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`)
-
-						let sub
-						try {
-							sub = await ChiriReader.load(filename, this.cwd, this.once)
-
-						} catch (e) {
-							const err = e as Error
-							this.#errorStart = this.i
-							this.i = imp.i
-							const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error")
-							throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`)
-						}
-
-						if (sub) {
-							sub.once = this.once
-							const ast = await sub.read()
-
-							this.#errored ||= sub.#errored
-							Object.assign(source, ast.source)
-							this.#statements.push(...ast.statements)
-						}
-					}
-
-					continue
-				}
-
-				if (macro && (macro.type === "function-use" || macro.type === "function" || macro.type === "shorthand")) {
-					this.#statements.push(macro)
-					continue
-				}
-
-				if (macro)
-					throw this.error(e, `Macro result type "${macro.type}" is not supported yet`)
-
-				//#endregion
-				////////////////////////////////////
-
-				const mixin = await consumeMixinOptional(this)
-				if (mixin) {
-					// this.#variables[mixin.name.value] = this.#statements.length;
-					this.#statements.push(mixin)
-					continue
-				}
-
-				const mixinUse = consumeMixinUseOptional(this)
-				if (mixinUse) {
-					this.#statements.push(mixinUse)
-					continue
-				}
-
-				const property = consumePropertyOptional(this)
-				if (property) {
-					const statementsContainer = this.#isSubReader ? this.#statements : this.#rootStatements
-					statementsContainer.push(property)
-					continue
-				}
-
-				const rule = (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
-				if (rule) {
-					this.#statements.push(rule)
-					continue
-				}
-
-				if (this.#errored)
-					break
-
-				if (!this.#multiline)
-					break
-
-				if (this.i === e)
-					throw this.error("Failed to continue parsing")
+				if (this.i < this.input.length)
+					consumeBlockEnd(this)
 			}
 
 		} catch (err) {
@@ -278,9 +212,97 @@ export default class ChiriReader {
 		}
 
 		return {
-			source,
+			source: this.source,
 			statements: this.#statements,
 		}
+	}
+
+	async consumeBodyDefault (): Promise<ChiriStatement | ChiriStatement[]> {
+		const documentation = consumeDocumentationOptional(this)
+		if (documentation)
+			return documentation
+
+		const e = this.i
+
+		////////////////////////////////////
+		//#region Macro
+
+		const macro = await consumeMacroOptional(this, this.#isSubReader ? "generic" : "root")
+		if (macro?.type === "variable")
+			return macro
+
+		if (macro?.type === "import") {
+			const statements: ChiriStatement[] = []
+			for (const imp of macro.paths) {
+				const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? LIB_ROOT : require.resolve(imp.module)
+				const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path)
+				if (this.stack.includes(filename))
+					throw this.error(`Cannot recursively import file '${relToCwd(filename, this.cwd)}'`)
+
+				let sub
+				try {
+					sub = await ChiriReader.load(filename, this.cwd, this.once, this.stack.slice(), this.source)
+
+				} catch (e) {
+					const err = e as Error
+					this.#errorStart = this.i
+					this.i = imp.i
+					const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error")
+					throw this.error(`Cannot import file '${relToCwd(filename, this.cwd)}': ${message}`)
+				}
+
+				if (sub) {
+					sub.once = this.once
+					const ast = await sub.read()
+
+					this.#errored ||= sub.#errored
+					statements.push(...ast.statements)
+				}
+			}
+
+			return statements
+		}
+
+		if (macro && (macro.type === "function-use" || macro.type === "function" || macro.type === "shorthand")) {
+			return macro
+		}
+
+		if (macro)
+			throw this.error(e, `Macro result type "${macro.type}" is not supported yet`)
+
+		//#endregion
+		////////////////////////////////////
+
+		const mixin = await consumeMixinOptional(this)
+		if (mixin)
+			return mixin
+
+		const mixinUse = consumeMixinUseOptional(this)
+		if (mixinUse)
+			return mixinUse
+
+		const property = consumePropertyOptional(this)
+		if (property) {
+			if (!this.#isSubReader) {
+				this.#rootStatements.push(property)
+				return []
+			}
+
+			return property
+		}
+
+		const rule = (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
+		if (rule)
+			return rule
+
+		return []
+	}
+
+	logState () {
+		console.log(Object.entries({
+			variables: [...this.#outerStatements, ...this.#statements].filter(statement => statement.type === "variable")
+				.map(statement => `${ansi.path + statement.name.value}: ${ansi.ok + ChiriType.stringify(statement.valueType)}`).join(ansi.label + ", "),
+		}).map(([k, v]) => `${ansi.label + k}: ${v}` + ansi.reset).join("\n"))
 	}
 
 	logLine (start?: number, errOrMessage?: Error | string) {
@@ -322,6 +344,22 @@ export default class ChiriReader {
 
 	formatFilePosAt (at = this.i) {
 		return this.formatFilePos(this.getLineNumber(at), this.getColumnNumber(at))
+	}
+
+	formatFilePosAtFromScratch (at: number) {
+		let newlines = 0
+		let columns = 0
+		for (let j = 0; j < at; j++) {
+			if (this.input[j] === "\n") {
+				newlines++
+				columns = 0
+				continue
+			}
+
+			columns++
+		}
+
+		return this.formatFilePos(newlines, columns)
 	}
 
 	consume (...strings: string[]) {
@@ -444,8 +482,6 @@ export default class ChiriReader {
 		const lastLineNumberPosition = this.#lastLineNumberPosition
 		const recalc = at < lastLineNumberPosition
 
-		const lastPos = !recalc ? "" : this.formatFilePosAt(lastLineNumberPosition)
-
 		let newlines = recalc ? 0 : this.#lastLineNumber
 		let j = recalc ? 0 : lastLineNumberPosition
 		for (; j < at; j++)
@@ -456,9 +492,9 @@ export default class ChiriReader {
 		this.#lastLineNumberPosition = at
 
 		if (recalc) {
-			const newPos = this.formatFilePos()
-			const stack = new Error().stack
-			console.warn(`${ansi.err}Forced to recalculate line number! ${ansi.label}Was: ${lastPos} ${ansi.label}Now: ${newPos}${ansi.reset}\n${stack?.slice(stack.indexOf("\n", stack.indexOf("\n") + 1) + 1)}`)
+			const lastPos = this.formatFilePosAtFromScratch(lastLineNumberPosition)
+			const newPos = this.formatFilePosAtFromScratch(at)
+			console.warn(`${ansi.err}Forced to recalculate line number! ${ansi.label}Was: ${lastPos} ${ansi.label}Now: ${newPos}${ansi.reset}\n${Errors.stack(3)}`)
 		}
 
 		return newlines

@@ -15,6 +15,8 @@ import { CHC_ROOT, LIB_ROOT } from "./constants"
 
 dotenv.config()
 
+Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH! || 4)
+
 if (process.env.CHIRI_ENV === "dev")
 	sourceMapSupport.install()
 

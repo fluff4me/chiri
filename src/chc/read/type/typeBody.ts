@@ -1,8 +1,8 @@
 import type { ChiriTypeDefinition } from "../ChiriTypeManager"
-import BodyTypes from "../consume/body/BodyTypes"
-import consumeFunctionBodyOptional from "../consume/consumeFunctionBodyOptional"
+import Contexts from "../consume/body/Contexts"
+import consumeFunctionBodyOptional from "../consume/consumeBodyOptional"
 
 export default {
 	consumeOptionalConstructor: consumeFunctionBodyOptional,
-	generics: [BodyTypes],
+	generics: [Contexts],
 } as ChiriTypeDefinition

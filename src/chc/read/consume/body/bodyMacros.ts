@@ -1,5 +1,5 @@
 import consumeMacroUseOptional from "../consumeMacroUseOptional"
 import BodyFunction from "./BodyFunction"
-import type { BodyType } from "./BodyTypes"
+import type { ChiriContext } from "./Contexts"
 
-export default BodyFunction((reader, type: BodyType) => consumeMacroUseOptional(reader, type))
+export default BodyFunction("inherit", (reader, type: ChiriContext) => consumeMacroUseOptional(reader, type))

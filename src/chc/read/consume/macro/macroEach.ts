@@ -45,7 +45,7 @@ export default MacroFunction("each")
 	})
 	.consume(async ({ reader, extra: { iterable, variable } }): Promise<ChiriEach> => {
 		reader.consume(":")
-		const body = await consumeBody(reader, "function", sub => sub.addOuterStatement(variable))
+		const body = await consumeBody(reader, "inherit", sub => sub.addOuterStatement(variable))
 		return {
 			type: "each",
 			iterable,

@@ -5,7 +5,7 @@ import MacroFunction from "./MacroFunction"
 
 export default MacroFunction("function")
 	.named()
-	.body()
+	.body("inherit")
 	.consume(({ reader, assignments, body, name }): ChiriFunction | undefined => ({
 		type: "function",
 		name,
