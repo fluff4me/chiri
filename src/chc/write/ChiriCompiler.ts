@@ -1,5 +1,7 @@
-import type { ChiriAST, ChiriMixin, ChiriStatement, ChiriText } from "../ChiriAST"
+import type { ChiriAST, ChiriStatement } from "../read/ChiriReader"
 import { ChiriType } from "../read/ChiriType"
+import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
+import type { ChiriWordInterpolated } from "../read/consume/consumeWordInterpolatedOptional"
 import resolveExpression from "../util/resolveExpression"
 import CSSWriter from "./CSSWriter"
 import DTSWriter from "./DTSWriter"
@@ -13,7 +15,7 @@ interface Scope {
 export default class ChiriCompiler {
 
 	#scopes: Scope[] = [{ variables: {}, mixins: {} }]
-	#selectorStack: ChiriText[] = []
+	#selectorStack: ChiriWordInterpolated[] = []
 
 	public readonly es: ESWriter
 	public readonly dts: DTSWriter
@@ -89,7 +91,7 @@ export default class ChiriCompiler {
 
 					const containingSelector = this.#selectorStack[this.#selectorStack.length - 1]
 
-					const selector: ChiriText = !className.length ? containingSelector : {
+					const selector: ChiriWordInterpolated = !className.length ? containingSelector : {
 						type: "text",
 						valueType: ChiriType.of("string"),
 						content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],

@@ -4,7 +4,6 @@ import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
 import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
-import type { ChiriAST, ChiriCompilerVariable, ChiriFunction, ChiriMixin, ChiriPosition, ChiriStatement } from "../ChiriAST"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
 import type { ArrayOr, PromiseOr } from "../util/Type"
@@ -13,15 +12,51 @@ import type { ChiriTypeDefinition } from "./ChiriTypeManager"
 import ChiriTypeManager from "./ChiriTypeManager"
 import type { ChiriContext } from "./consume/body/Contexts"
 import consumeBlockEnd from "./consume/consumeBlockEnd"
-import consumeDocumentationOptional from "./consume/consumeDocumentationOptional"
+import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional"
+import consumeDocumentationOptional, { type ChiriDocumentation } from "./consume/consumeDocumentationOptional"
+import type { ChiriFunctionUse } from "./consume/consumeFunctionUseOptional"
 import { default as consumeMacroOptional, default as consumeMacroUseOptional } from "./consume/consumeMacroUseOptional"
+import type { ChiriMixin } from "./consume/consumeMixinOptional"
 import consumeMixinOptional from "./consume/consumeMixinOptional"
-import consumeMixinUseOptional from "./consume/consumeMixinUseOptional"
+import consumeMixinUseOptional, { type ChiriMixinUse } from "./consume/consumeMixinUseOptional"
 import consumeNewBlockLineOptional from "./consume/consumeNewBlockLineOptional"
-import consumePropertyOptional from "./consume/consumePropertyOptional"
-import consumeRuleMainOptional from "./consume/consumeRuleMainOptional"
-import consumeRuleStateOptional from "./consume/consumeRuleStateOptional"
+import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePropertyOptional"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
+import type { ChiriEach } from "./consume/macro/macroEach"
+import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
+import type { ChiriShorthand } from "./consume/macro/macroShorthand"
+import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
+import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
+import type { ChiriRule } from "./consume/rule/Rule"
+
+export interface ChiriPosition {
+	file: string
+	line: number
+	column: number
+}
+
+export interface ChiriRoot {
+	type: "root"
+	content: ChiriStatement[]
+}
+
+export type ChiriStatement =
+	| ChiriCompilerVariable
+	| ChiriProperty
+	| ChiriMixin
+	| ChiriFunction
+	| ChiriDocumentation
+	| ChiriRule
+	| ChiriMixinUse
+	| ChiriFunctionUse
+	| ChiriRoot
+	| ChiriShorthand
+	| ChiriEach
+
+export interface ChiriAST<STATEMENT = ChiriStatement> {
+	source: Record<string, string>
+	statements: STATEMENT[]
+}
 
 export interface ChiriPositionState {
 	lastLineNumber: number

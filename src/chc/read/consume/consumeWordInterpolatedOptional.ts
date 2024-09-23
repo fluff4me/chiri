@@ -1,17 +1,21 @@
 
 
-import type { ChiriText } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
-import consumeExpression from "./consumeExpression"
+import consumeExpression, { type ChiriExpressionOperand } from "./consumeExpression"
+import type { ChiriInterpolationVariable, ChiriTextRaw, ChiriValueText } from "./consumeValueText"
 
-export default (reader: ChiriReader): ChiriText | undefined => {
+export interface ChiriWordInterpolated extends ChiriValueText {
+	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[]
+}
+
+export default (reader: ChiriReader): ChiriWordInterpolated | undefined => {
 	const e = reader.i
 
 	if (!reader.isLetter() && !reader.peek("#{"))
 		return undefined
 
-	const content: ChiriText["content"] = []
+	const content: ChiriWordInterpolated["content"] = []
 
 	const start = reader.getPosition()
 	let textStart = start

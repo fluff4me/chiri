@@ -1,18 +1,46 @@
 
 
-import type { ChiriExpressionOperand, ChiriUnaryExpression } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
 import type { Operator } from "../ChiriTypeManager"
-import consumeDecimalOptional from "./consumeDecimalOptional"
-import consumeIntegerOptional from "./consumeIntegerOptional"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import consumeStringOptional from "./consumeStringOptional"
+import type { ChiriLiteralValue } from "./consumeTypeConstructorOptional"
 import consumeTypeConstructorOptional from "./consumeTypeConstructorOptional"
-import consumeUnsignedIntegerOptional from "./consumeUnsignedIntegerOptional"
+import type { ChiriValueText } from "./consumeValueText"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
+import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
+import consumeDecimalOptional from "./numeric/consumeDecimalOptional"
+import consumeIntegerOptional from "./numeric/consumeIntegerOptional"
+import consumeUnsignedIntegerOptional from "./numeric/consumeUnsignedIntegerOptional"
+
+export interface ChiriBinaryExpression {
+	type: "expression"
+	subType: "binary"
+	operandA: ChiriExpressionOperand
+	operandB: ChiriExpressionOperand
+	operator: string
+	valueType: ChiriType
+	wrapped?: true
+}
+
+export interface ChiriUnaryExpression {
+	type: "expression"
+	subType: "unary"
+	operand: ChiriExpressionOperand
+	operator: string
+	valueType: ChiriType
+}
+
+export interface ChiriVariableReference {
+	type: "get"
+	name: ChiriWord
+	valueType: ChiriType
+}
+
+export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText
 
 const empy = {} as never
 

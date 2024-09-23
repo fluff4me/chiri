@@ -1,5 +1,10 @@
-import type { ChiriPath } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+
+export interface ChiriPath {
+	module?: string
+	path: string
+	i: number
+}
 
 const isValidPathCharacter = {
 	...{}

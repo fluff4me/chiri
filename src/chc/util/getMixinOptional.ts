@@ -1,4 +1,5 @@
-import type { ChiriMixin, ChiriStatement } from "../ChiriAST"
+import type { ChiriStatement } from "../read/ChiriReader"
+import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 
 export default (name: string, ...blocks: ChiriStatement[][]): ChiriMixin | undefined => {
 	for (let i = blocks.length - 1; i--; i >= 0) {

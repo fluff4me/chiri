@@ -1,4 +1,5 @@
-import type { ChiriCompilerVariable, ChiriFunctionBase } from "../ChiriAST"
+import type { ChiriCompilerVariable } from "../read/consume/consumeCompilerVariableOptional"
+import type { ChiriFunctionBase } from "../read/consume/macro/MacroFunction"
 
 export default (fn: ChiriFunctionBase): ChiriCompilerVariable[] =>
 	fn.content.filter((statement): statement is ChiriCompilerVariable =>

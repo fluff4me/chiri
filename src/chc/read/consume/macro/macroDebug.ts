@@ -1,5 +1,5 @@
-import type { ChiriFunctionUse } from "../../../ChiriAST"
 import { ChiriType } from "../../ChiriType"
+import type { ChiriFunctionUse } from "../consumeFunctionUseOptional"
 import MacroFunction from "./MacroFunction"
 
 export default MacroFunction("debug")

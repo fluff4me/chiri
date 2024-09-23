@@ -1,11 +1,36 @@
-
-
-import type { ChiriValueText } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
-import consumeExpression from "./consumeExpression"
+import consumeExpression, { type ChiriExpressionOperand } from "./consumeExpression"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
+import type { ChiriWord } from "./consumeWord"
 import consumeWordInterpolated from "./consumeWordInterpolated"
+import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
+
+export interface ChiriInterpolationVariable {
+	type: "interpolation-variable"
+	name: ChiriWord
+	position: ChiriPosition
+}
+
+export interface ChiriInterpolationProperty {
+	type: "interpolation-property"
+	name: ChiriWordInterpolated
+	position: ChiriPosition
+}
+
+export interface ChiriTextRaw {
+	type: "text-raw"
+	text: string
+	position: ChiriPosition
+}
+
+export interface ChiriValueText {
+	type: "text"
+	valueType: ChiriType
+	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand | string)[]
+	position: ChiriPosition
+}
 
 export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 	const e = reader.i

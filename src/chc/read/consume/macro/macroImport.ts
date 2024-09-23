@@ -1,5 +1,10 @@
-import type { ChiriImport } from "../../../ChiriAST"
+import type { ChiriPath } from "../consumePathOptional"
 import MacroFunction from "./MacroFunction"
+
+export interface ChiriImport {
+	type: "import"
+	paths: ChiriPath[]
+}
 
 export default MacroFunction("import")
 	.body("paths")

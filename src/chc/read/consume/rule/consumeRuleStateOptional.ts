@@ -1,8 +1,8 @@
-import type { ChiriRule } from "../../ChiriAST"
-import { STATES } from "../../util/componentStates"
-import type ChiriReader from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
-import consumeBody from "./consumeBody"
+import { STATES } from "../../../util/componentStates"
+import type ChiriReader from "../../ChiriReader"
+import { ChiriType } from "../../ChiriType"
+import consumeBody from "../consumeBody"
+import type { ChiriRule } from "./Rule"
 
 export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 	const prefix = reader.consumeOptional(":")

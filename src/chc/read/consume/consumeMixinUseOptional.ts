@@ -1,8 +1,15 @@
-import type { ChiriMixinUse } from "../../ChiriAST"
 import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriExpressionOperand } from "./consumeExpression"
 import consumeFunctionParameters from "./consumeFunctionParameters"
+import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
+
+export interface ChiriMixinUse {
+	type: "mixin-use"
+	name: ChiriWord
+	variables: Record<string, ChiriExpressionOperand>
+}
 
 export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	const start = reader.i

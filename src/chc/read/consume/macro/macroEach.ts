@@ -1,8 +1,10 @@
-import type { ChiriCompilerVariable, ChiriStatement, ChiriWord } from "../../../ChiriAST"
+import type { ChiriStatement } from "../../ChiriReader"
 import { ChiriType } from "../../ChiriType"
 import consumeBody from "../consumeBody"
+import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
 import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
 import consumeWhiteSpace from "../consumeWhiteSpace"
+import type { ChiriWord } from "../consumeWord"
 import consumeWord from "../consumeWord"
 import MacroFunction from "./MacroFunction"
 

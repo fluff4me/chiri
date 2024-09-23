@@ -1,4 +1,4 @@
-import type { ChiriValueText } from "../ChiriAST"
+import type { ChiriValueText } from "../read/consume/consumeValueText"
 import type ChiriCompiler from "../write/ChiriCompiler"
 import stringifyExpression from "./stringifyExpression"
 

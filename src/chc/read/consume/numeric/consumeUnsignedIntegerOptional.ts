@@ -1,6 +1,6 @@
-import type { ChiriLiteralNumeric } from "../../ChiriAST"
-import type ChiriReader from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
+import type ChiriReader from "../../ChiriReader"
+import { ChiriType } from "../../ChiriType"
+import type { ChiriLiteralNumeric } from "./Numeric"
 
 export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	const i = reader.i

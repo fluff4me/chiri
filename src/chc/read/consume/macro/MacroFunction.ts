@@ -1,14 +1,23 @@
 import { INTERNAL_POSITION } from "../../../../constants"
-import type { ChiriCompilerVariable, ChiriExpressionOperand, ChiriFunctionBase, ChiriWord } from "../../../ChiriAST"
 import type ChiriReader from "../../ChiriReader"
+import type { ChiriStatement } from "../../ChiriReader"
 import type { ChiriType } from "../../ChiriType"
 import type { ContextStatement } from "../body/BodyRegistry"
 import type { ChiriContext } from "../body/Contexts"
 import Contexts from "../body/Contexts"
 import consumeBodyOptional from "../consumeBodyOptional"
+import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
+import type { ChiriExpressionOperand } from "../consumeExpression"
 import consumeFunctionParameters from "../consumeFunctionParameters"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
+import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
+
+export interface ChiriFunctionBase {
+	type: string
+	name: ChiriWord
+	content: ChiriStatement[]
+}
 
 export interface ChiriFunctionInternal<T> extends ChiriFunctionBase {
 	type: "function:internal"

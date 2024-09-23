@@ -1,4 +1,4 @@
-import type { ChiriExpressionOperand } from "../ChiriAST"
+import type { ChiriExpressionOperand } from "../read/consume/consumeExpression"
 import type ChiriCompiler from "../write/ChiriCompiler"
 import resolveExpression from "./resolveExpression"
 import resolveLiteralValue from "./resolveLiteralValue"

@@ -1,7 +1,7 @@
 
 
 import type { ChiriTypeDefinition } from "../ChiriTypeManager"
-import consumeIntegerOptional from "../consume/consumeUnsignedIntegerOptional"
+import consumeIntegerOptional from "../consume/numeric/consumeUnsignedIntegerOptional"
 
 export default {
 	stringable: true,

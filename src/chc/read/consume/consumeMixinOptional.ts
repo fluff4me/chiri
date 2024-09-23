@@ -1,9 +1,16 @@
 
 
-import type { ChiriMixin } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriStatement } from "../ChiriReader"
 import consumeBody from "./consumeBody"
-import consumeWord from "./consumeWord"
+import consumeWord, { type ChiriWord } from "./consumeWord"
+
+export interface ChiriMixin {
+	type: "mixin"
+	name: ChiriWord
+	content: ChiriStatement[]
+	used: boolean
+}
 
 export default async (reader: ChiriReader): Promise<ChiriMixin | undefined> => {
 	const savedPosition = reader.savePosition()

@@ -1,13 +1,14 @@
-import type { ChiriExpressionOperand, ChiriFunctionBase } from "../../ChiriAST"
 import getFunctionParameters from "../../util/getFunctionParameters"
 import type ChiriReader from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
+import type { ChiriExpressionOperand } from "./consumeExpression"
 import consumeExpression from "./consumeExpression"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import consumeWordOptional from "./consumeWordOptional"
+import type { ChiriFunctionBase } from "./macro/MacroFunction"
 
 export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 	const fnTypeSymbol = fn.type === "mixin" ? "%"

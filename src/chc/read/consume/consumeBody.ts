@@ -1,5 +1,5 @@
-import type { ChiriBody, ChiriStatement } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriStatement } from "../ChiriReader"
 import assertNotWhiteSpaceAndNewLine from "../assert/assertNotWhiteSpaceAndNewLine"
 import type BodyFunction from "./body/BodyFunction"
 import type { ContextStatement } from "./body/BodyRegistry"
@@ -7,6 +7,10 @@ import BodyRegistry from "./body/BodyRegistry"
 import type { ChiriContext } from "./body/Contexts"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
+
+export interface ChiriBody<STATEMENT = ChiriStatement> {
+	content: STATEMENT[]
+}
 
 async function consumeBody<CONTEXT extends ChiriContext> (reader: ChiriReader, context: CONTEXT, initialiser?: (sub: ChiriReader) => any): Promise<ChiriBody<ContextStatement<CONTEXT>>>
 async function consumeBody (reader: ChiriReader, context: ChiriContext, initialiser?: (sub: ChiriReader) => any): Promise<ChiriBody<ContextStatement<ChiriContext>>> {

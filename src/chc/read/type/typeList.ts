@@ -1,7 +1,7 @@
-import type { ChiriExpressionOperand } from "../../ChiriAST"
 import { ChiriType } from "../ChiriType"
 import type { ChiriTypeDefinition } from "../ChiriTypeManager"
 import consumeBlockStartOptional from "../consume/consumeBlockStartOptional"
+import type { ChiriExpressionOperand } from "../consume/consumeExpression"
 import consumeExpression from "../consume/consumeExpression"
 import consumeNewBlockLineOptional from "../consume/consumeNewBlockLineOptional"
 import consumeWhiteSpaceOptional from "../consume/consumeWhiteSpaceOptional"

@@ -1,5 +1,11 @@
-import type { ChiriWord } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
+
+export interface ChiriWord {
+	type: "word"
+	value: string
+	position: ChiriPosition
+}
 
 export default (reader: ChiriReader, expectedWord?: string): ChiriWord => {
 	const e = reader.i

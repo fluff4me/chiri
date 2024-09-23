@@ -1,4 +1,5 @@
-import type { ChiriCompilerVariable, ChiriStatement } from "../ChiriAST"
+import type { ChiriStatement } from "../read/ChiriReader"
+import type { ChiriCompilerVariable } from "../read/consume/consumeCompilerVariableOptional"
 
 export default (name: string, ...blocks: ChiriStatement[][]): ChiriCompilerVariable | undefined => {
 	let valuelessMatch

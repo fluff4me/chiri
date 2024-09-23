@@ -1,7 +1,7 @@
 
 
-import type { ChiriWord } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriWord } from "./consumeWord"
 import consumeWord from "./consumeWord"
 
 export default (reader: ChiriReader, expectedWord?: string): ChiriWord | undefined => {

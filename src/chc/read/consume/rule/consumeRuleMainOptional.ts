@@ -1,7 +1,7 @@
-import type { ChiriRule } from "../../ChiriAST"
-import type ChiriReader from "../ChiriReader"
-import consumeBody from "./consumeBody"
-import consumeWordInterpolated from "./consumeWordInterpolated"
+import type ChiriReader from "../../ChiriReader"
+import consumeBody from "../consumeBody"
+import consumeWordInterpolated from "../consumeWordInterpolated"
+import type { ChiriRule } from "./Rule"
 
 export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 	if (reader.context === "mixin")

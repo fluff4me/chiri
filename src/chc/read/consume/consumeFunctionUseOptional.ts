@@ -1,10 +1,19 @@
-import type { ChiriFunctionUse } from "../../ChiriAST"
 import getFunctionParameters from "../../util/getFunctionParameters"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriStatement } from "../ChiriReader"
 import type { ChiriContext } from "./body/Contexts"
 import consumeBodyOptional from "./consumeBodyOptional"
+import type { ChiriExpressionOperand } from "./consumeExpression"
 import consumeFunctionParameters from "./consumeFunctionParameters"
+import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
+
+export interface ChiriFunctionUse {
+	type: "function-use"
+	name: ChiriWord
+	variables: Record<string, ChiriExpressionOperand>
+	content: ChiriStatement[]
+}
 
 export default async (reader: ChiriReader, context: ChiriContext): Promise<ChiriFunctionUse | undefined> => {
 	const position = reader.savePosition()

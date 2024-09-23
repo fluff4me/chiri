@@ -1,4 +1,6 @@
-import type { ChiriLiteralBool, ChiriLiteralNumeric, ChiriLiteralString, ChiriLiteralUndefined, ChiriLiteralValue } from "../../ChiriAST"
+import type { ChiriLiteralString } from "../consume/consumeStringOptional"
+import type { ChiriLiteralBool, ChiriLiteralUndefined, ChiriLiteralValue } from "../consume/consumeTypeConstructorOptional"
+import type { ChiriLiteralNumeric } from "../consume/numeric/Numeric"
 import type { ChiriLiteralList } from "../type/typeList"
 
 export default function (value: unknown, subType?: "string"): value is ChiriLiteralString

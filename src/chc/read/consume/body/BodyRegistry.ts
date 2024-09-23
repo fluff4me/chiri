@@ -1,4 +1,4 @@
-import type { ChiriStatement } from "../../../ChiriAST"
+import type { ChiriStatement } from "../../ChiriReader"
 import type BodyFunction from "./BodyFunction"
 import bodyPaths from "./bodyPaths"
 import bodyShorthand from "./bodyShorthand"

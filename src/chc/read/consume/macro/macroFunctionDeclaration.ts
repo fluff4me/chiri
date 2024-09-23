@@ -1,7 +1,11 @@
 
 
-import type { ChiriFunction } from "../../../ChiriAST"
+import type { ChiriFunctionBase } from "./MacroFunction"
 import MacroFunction from "./MacroFunction"
+
+export interface ChiriFunction extends ChiriFunctionBase {
+	type: "function"
+}
 
 export default MacroFunction("function")
 	.named()

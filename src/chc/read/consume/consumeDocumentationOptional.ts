@@ -1,8 +1,12 @@
 
 
-import type { ChiriDocumentation } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
+
+export interface ChiriDocumentation {
+	type: "documentation"
+	content: string
+}
 
 export default (reader: ChiriReader): ChiriDocumentation | undefined => {
 	if (!reader.consumeOptional(";; "))

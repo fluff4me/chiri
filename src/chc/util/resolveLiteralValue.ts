@@ -1,4 +1,5 @@
-import type { ChiriExpressionOperand, ChiriLiteralValue } from "../ChiriAST"
+import type { ChiriExpressionOperand } from "../read/consume/consumeExpression"
+import type { ChiriLiteralValue } from "../read/consume/consumeTypeConstructorOptional"
 import type ChiriCompiler from "../write/ChiriCompiler"
 
 function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralValue) {

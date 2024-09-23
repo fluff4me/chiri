@@ -1,7 +1,9 @@
 import fsp from "fs/promises"
 import { SourceMapGenerator } from "source-map"
 import ansi from "../../ansi"
-import type { ChiriAST, ChiriPosition, ChiriValueText, ChiriWord, ChiriWriteConfig } from "../ChiriAST"
+import type { ChiriAST, ChiriPosition } from "../read/ChiriReader"
+import type { ChiriValueText } from "../read/consume/consumeValueText"
+import type { ChiriWord } from "../read/consume/consumeWord"
 import stringifyText from "../util/stringifyText"
 import type ChiriCompiler from "./ChiriCompiler"
 
@@ -138,3 +140,7 @@ export default class Writer {
 		return at - this.getLineStart(at)
 	}
 }
+export interface ChiriWriteConfig {
+	extension: `.${string}`
+}
+

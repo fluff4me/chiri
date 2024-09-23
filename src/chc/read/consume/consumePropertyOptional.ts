@@ -1,9 +1,19 @@
-import type { ChiriProperty } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
-import consumeValue from "./consumeValue"
+import type { ChiriValueText } from "./consumeValueText"
+import consumeValue from "./consumeValueText"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWordInterpolated from "./consumeWordInterpolated"
+import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
+
+export interface ChiriProperty {
+	type: "property"
+	isCustomProperty?: true
+	property: ChiriWordInterpolated
+	value: ChiriValueText
+	position: ChiriPosition
+}
 
 export default (reader: ChiriReader): ChiriProperty | undefined => {
 	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")

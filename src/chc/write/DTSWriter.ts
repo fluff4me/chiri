@@ -1,4 +1,5 @@
-import type { ChiriAST, ChiriWriteConfig } from "../ChiriAST"
+import type { ChiriAST } from "../read/ChiriReader"
+import type { ChiriWriteConfig } from "./Writer"
 import Writer from "./Writer"
 
 export default class DTSWriter extends Writer {

@@ -1,14 +1,24 @@
 
 
-import type { ChiriCompilerVariable, ChiriExpressionOperand } from "../../ChiriAST"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriType } from "../ChiriType"
+import type { ChiriExpressionOperand } from "./consumeExpression"
 import consumeExpression from "./consumeExpression"
 import { consumeTypeOptional } from "./consumeType"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
-import consumeWord from "./consumeWord"
+import consumeWord, { type ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
+
+export interface ChiriCompilerVariable {
+	type: "variable"
+	valueType: ChiriType
+	name: ChiriWord
+	expression?: ChiriExpressionOperand
+	position: ChiriPosition
+	assignment?: "=" | "??="
+}
 
 export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | undefined => {
 	const save = reader.savePosition()
