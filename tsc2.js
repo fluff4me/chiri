@@ -41,7 +41,7 @@ function getElapsedString (start, time = Date.now() - start) {
 ////////////////////////////////////
 
 (async () => {
-	const tsc = exec(`npx tsc --project src/tsconfig.json ${process.argv.slice(2).map(a => a.includes(" ") ? `"${a}"` : a).join(" ")}`);
+	const tsc = exec(`npx tspc --project src/tsconfig.json ${process.argv.slice(2).map(a => a.includes(" ") ? `"${a}"` : a).join(" ")}`);
 
 	let lastStart = -1;
 

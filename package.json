@@ -14,7 +14,7 @@
 		"chokidar": "3.6.0"
 	},
 	"devDependencies": {
-		"typescript": "5.5.4",
+		"typescript": "5.6.2",
 		"@types/node": "20.11.30",
 		"dotenv": "16.4.5",
 		"concurrently": "9.0.0",
@@ -24,6 +24,8 @@
 		"@typescript-eslint/parser": "6.9.0",
 		"eslint-plugin-only-warn": "1.0.3",
 		"source-map-support": "0.5.21",
-		"@types/source-map-support": "0.5.10"
+		"@types/source-map-support": "0.5.10",
+		"typescript-girlboss": "0.0.4",
+		"typescript-ignore-leftmost-nullish-literal-errors": "0.0.1"
 	}
 }
