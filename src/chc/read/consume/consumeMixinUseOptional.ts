@@ -1,17 +1,19 @@
 import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriExpressionOperand } from "./consumeExpression"
-import consumeFunctionParameters from "./consumeFunctionParameters"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
 
 export interface ChiriMixinUse {
 	type: "mixin-use"
 	name: ChiriWord
-	variables: Record<string, ChiriExpressionOperand>
+	assignments: Record<string, ChiriExpressionOperand>
+	position: ChiriPosition
 }
 
 export default (reader: ChiriReader): ChiriMixinUse | undefined => {
+	const position = reader.getPosition()
 	const start = reader.i
 	if (!reader.consumeOptional("%"))
 		return undefined
@@ -24,7 +26,7 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	if (!mixin)
 		throw reader.error(start, `No declaration for %${word.value}`)
 
-	const assignments = consumeFunctionParameters(reader, start, mixin)
+	// const assignments = consumeFunctionParameters(reader, start, mixin)
 
 	assertNewLine(reader)
 
@@ -32,6 +34,7 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	return {
 		type: "mixin-use",
 		name: word,
-		variables: assignments,
+		assignments: {},
+		position,
 	}
 }

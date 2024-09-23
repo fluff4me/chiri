@@ -1,7 +1,7 @@
 
 
 import type ChiriReader from "../ChiriReader"
-import type { ChiriStatement } from "../ChiriReader"
+import type { ChiriPosition, ChiriStatement } from "../ChiriReader"
 import consumeBody from "./consumeBody"
 import consumeWord, { type ChiriWord } from "./consumeWord"
 
@@ -10,17 +10,19 @@ export interface ChiriMixin {
 	name: ChiriWord
 	content: ChiriStatement[]
 	used: boolean
+	position: ChiriPosition
 }
 
 export default async (reader: ChiriReader): Promise<ChiriMixin | undefined> => {
-	const savedPosition = reader.savePosition()
+	const position = reader.getPosition()
+	const restore = reader.savePosition()
 	if (!reader.consumeOptional("%"))
 		return undefined
 
 	const name = consumeWord(reader)
 
 	if (!reader.consumeOptional(":")) {
-		reader.restorePosition(savedPosition)
+		reader.restorePosition(restore)
 		return undefined
 	}
 
@@ -29,5 +31,6 @@ export default async (reader: ChiriReader): Promise<ChiriMixin | undefined> => {
 		name,
 		used: false,
 		...await consumeBody(reader, "mixin"),
+		position,
 	}
 }

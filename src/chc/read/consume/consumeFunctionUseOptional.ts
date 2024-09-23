@@ -1,6 +1,6 @@
 import getFunctionParameters from "../../util/getFunctionParameters"
 import type ChiriReader from "../ChiriReader"
-import type { ChiriStatement } from "../ChiriReader"
+import type { ChiriPosition, ChiriStatement } from "../ChiriReader"
 import type { ChiriContext } from "./body/Contexts"
 import consumeBodyOptional from "./consumeBodyOptional"
 import type { ChiriExpressionOperand } from "./consumeExpression"
@@ -11,23 +11,25 @@ import consumeWordOptional from "./consumeWordOptional"
 export interface ChiriFunctionUse {
 	type: "function-use"
 	name: ChiriWord
-	variables: Record<string, ChiriExpressionOperand>
+	assignments: Record<string, ChiriExpressionOperand>
 	content: ChiriStatement[]
+	position: ChiriPosition
 }
 
 export default async (reader: ChiriReader, context: ChiriContext): Promise<ChiriFunctionUse | undefined> => {
-	const position = reader.savePosition()
+	const position = reader.getPosition()
+	const restore = reader.savePosition()
 	if (!reader.consumeOptional("#"))
 		return undefined
 
 	const word = consumeWordOptional(reader)
 	const fn = word?.value && reader.getFunction(word.value)
 	if (!fn) {
-		reader.restorePosition(position)
+		reader.restorePosition(restore)
 		return undefined
 	}
 
-	const assignments = consumeFunctionParameters(reader, position.i, fn)
+	const assignments = consumeFunctionParameters(reader, restore.i, fn)
 
 	const bodyParameter = getFunctionParameters(fn)
 		.sort((a, b) => +!!a.expression - +!!b.expression)
@@ -38,7 +40,8 @@ export default async (reader: ChiriReader, context: ChiriContext): Promise<Chiri
 	return {
 		type: "function-use",
 		name: word,
-		variables: assignments,
+		assignments,
 		content: body ?? [],
+		position,
 	}
 }

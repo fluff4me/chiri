@@ -111,7 +111,7 @@ async function compile (filename: string) {
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 	const ChiriCompilerClass = rerequire<typeof ChiriCompilerType>("./chc/write/ChiriCompiler.js")
-	const compiler = new ChiriCompilerClass(ast, outFile)
+	const compiler = ChiriCompilerClass(ast, outFile)
 	compiler.compile()
 	await compiler.writeFiles()
 

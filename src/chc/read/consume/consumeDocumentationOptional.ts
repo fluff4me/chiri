@@ -1,14 +1,17 @@
 
 
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 
 export interface ChiriDocumentation {
 	type: "documentation"
 	content: string
+	position: ChiriPosition
 }
 
 export default (reader: ChiriReader): ChiriDocumentation | undefined => {
+	const position = reader.getPosition()
 	if (!reader.consumeOptional(";; "))
 		return undefined
 
@@ -25,13 +28,17 @@ export default (reader: ChiriReader): ChiriDocumentation | undefined => {
 				documentation += reader.input[reader.i]
 		}
 
+		const beforeConsumeNewline = reader.savePosition()
 		if (!consumeNewBlockLineOptional(reader))
 			throw reader.error("Expected additional documentation or documented declaration")
 
-		if (!reader.consumeOptional(";; "))
+		if (!reader.consumeOptional(";; ")) {
+			reader.restorePosition(beforeConsumeNewline)
 			return {
 				type: "documentation",
 				content: documentation.slice(0, -1),
+				position,
 			}
+		}
 	}
 }

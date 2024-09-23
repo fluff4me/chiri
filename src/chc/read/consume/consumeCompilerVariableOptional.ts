@@ -53,6 +53,9 @@ export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | und
 
 	let assignment = reader.consumeOptional("??=", "=") as "??=" | "=" | undefined
 
+	if (assignment === "??=" && reader.context === "mixin")
+		throw reader.error(save.i, "Mixins cannot accept parameters")
+
 	let expression: ChiriExpressionOperand | undefined
 	if (assignment) {
 		consumeWhiteSpaceOptional(reader)
@@ -65,6 +68,9 @@ export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | und
 
 		if (!assignment && reader.consumeOptional("?"))
 			assignment = "??="
+
+		else if (reader.context === "mixin")
+			throw reader.error(save.i, "Mixins cannot accept parameters")
 	}
 
 	return {

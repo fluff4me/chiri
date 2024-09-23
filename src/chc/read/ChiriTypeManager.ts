@@ -34,7 +34,7 @@ const isNumeric = (type: string) => numericTypes.includes(type as NumericType)
 
 type TypeName = keyof typeof types
 
-const binaryNumericOperators = ["+", "-", "*", "/", "%", "**", "==", "!="] as const
+const binaryNumericOperators = ["**", "+", "-", "*", "/", "%", "==", "!="] as const
 const unaryNumericOperators = ["+", "-"] as const
 const binaryBitwiseOperators = ["&", "|", "^"] as const
 const unaryBitwiseOperators = ["~"] as const

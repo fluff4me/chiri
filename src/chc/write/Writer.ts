@@ -2,12 +2,25 @@ import fsp from "fs/promises"
 import { SourceMapGenerator } from "source-map"
 import ansi from "../../ansi"
 import type { ChiriAST, ChiriPosition } from "../read/ChiriReader"
+import type { ChiriDocumentation } from "../read/consume/consumeDocumentationOptional"
 import type { ChiriValueText } from "../read/consume/consumeValueText"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import stringifyText from "../util/stringifyText"
 import type ChiriCompiler from "./ChiriCompiler"
 
 export default class Writer {
+
+	public static writeBlocks (writers: Writer[], inside: () => any) {
+		writeBlocksRecursive()
+
+		function writeBlocksRecursive () {
+			const writer = writers.pop()
+			if (!writer)
+				return inside()
+
+			writer.writeBlock(writeBlocksRecursive)
+		}
+	}
 
 	#indent = 0
 
@@ -24,14 +37,15 @@ export default class Writer {
 			this.map.setSourceContent(filename, source)
 	}
 
-	indent () {
-		this.#indent++
+	indent (amount = 1) {
+		this.#indent += amount
 	}
 
-	unindent () {
-		this.#indent--
-		if (this.output[this.output.length - 1] === "\t")
-			this.output = this.output.slice(0, -1)
+	unindent (amount = 1) {
+		this.#indent -= amount
+		for (let i = 0; i < amount; i++)
+			if (this.output[this.output.length - 1] === "\t")
+				this.output = this.output.slice(0, -1)
 	}
 
 	writeFile () {
@@ -43,6 +57,18 @@ export default class Writer {
 	}
 
 	writeLine (text: string) {
+		this.output += text
+		this.writeNewLine()
+	}
+
+	writeLineStartBlock (text: string) {
+		this.output += text
+		this.indent()
+		this.writeNewLine()
+	}
+
+	writeLineEndBlock (text: string) {
+		this.unindent()
 		this.output += text
 		this.writeNewLine()
 	}
@@ -85,6 +111,17 @@ export default class Writer {
 		this.unindent()
 		this.writeLine("}")
 	}
+
+	writeDocumentation (documentation: ChiriDocumentation) {
+		this.writeLine("/**")
+		const lines = documentation.content.split("\n")
+		for (const line of lines)
+			this.writeLine(` * ${line}`)
+		this.writeLine(" */")
+	}
+
+	onCompileStart (compiler: ChiriCompiler) { }
+	onCompileEnd (compiler: ChiriCompiler) { }
 
 	addMapping (sourcePosition: ChiriPosition, tokenName?: string | undefined) {
 		this.map.addMapping({

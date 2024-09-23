@@ -1,4 +1,4 @@
-import type { ChiriStatement } from "../../ChiriReader"
+import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import { ChiriType } from "../../ChiriType"
 import consumeBody from "../consumeBody"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
@@ -13,6 +13,7 @@ export interface ChiriEach {
 	iterable: ChiriWord
 	variable: ChiriCompilerVariable
 	content: ChiriStatement[]
+	position: ChiriPosition
 }
 
 export default MacroFunction("each")
@@ -45,7 +46,7 @@ export default MacroFunction("each")
 			variable,
 		}
 	})
-	.consume(async ({ reader, extra: { iterable, variable } }): Promise<ChiriEach> => {
+	.consume(async ({ reader, extra: { iterable, variable }, position }): Promise<ChiriEach> => {
 		reader.consume(":")
 		const body = await consumeBody(reader, "inherit", sub => sub.addOuterStatement(variable))
 		return {
@@ -53,5 +54,6 @@ export default MacroFunction("each")
 			iterable,
 			variable,
 			...body,
+			position,
 		}
 	})

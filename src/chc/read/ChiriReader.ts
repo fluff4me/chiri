@@ -3,7 +3,7 @@
 import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
-import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
+import { INTERNAL_POSITION, LIB_ROOT, PACKAGE_ROOT } from "../../constants"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
 import type { ArrayOr, PromiseOr } from "../util/Type"
@@ -21,7 +21,9 @@ import consumeMixinOptional from "./consume/consumeMixinOptional"
 import consumeMixinUseOptional, { type ChiriMixinUse } from "./consume/consumeMixinUseOptional"
 import consumeNewBlockLineOptional from "./consume/consumeNewBlockLineOptional"
 import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePropertyOptional"
+import type { ChiriValueText } from "./consume/consumeValueText"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
+import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
 import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
@@ -38,20 +40,32 @@ export interface ChiriPosition {
 export interface ChiriRoot {
 	type: "root"
 	content: ChiriStatement[]
+	position: ChiriPosition
 }
 
 export type ChiriStatement =
-	| ChiriCompilerVariable
-	| ChiriProperty
-	| ChiriMixin
-	| ChiriFunction
+	// all
 	| ChiriDocumentation
-	| ChiriRule
-	| ChiriMixinUse
+	// macro
+	| ChiriCompilerVariable
+	| ChiriFunction
 	| ChiriFunctionUse
-	| ChiriRoot
-	| ChiriShorthand
 	| ChiriEach
+	// root
+	| ChiriRoot
+	| ChiriRule
+	| ChiriMixin
+	| ChiriShorthand
+	// mixin
+	| ChiriProperty
+	// rule
+	| ChiriMixinUse
+	// shorthand
+	| ChiriWordInterpolated
+	// debug
+	| ChiriValueText
+
+type VerifyChiriStatement = ChiriStatement["position"]
 
 export interface ChiriAST<STATEMENT = ChiriStatement> {
 	source: Record<string, string>
@@ -264,6 +278,7 @@ export default class ChiriReader {
 			this.#statements.unshift({
 				type: "root",
 				content: this.#rootStatements,
+				position: INTERNAL_POSITION,
 			})
 		}
 

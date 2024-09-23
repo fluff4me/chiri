@@ -24,5 +24,6 @@ export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 			position,
 		},
 		...await consumeBody(reader, "rule"),
+		position,
 	}
 }

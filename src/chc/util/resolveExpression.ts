@@ -27,7 +27,7 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 						case "~":
 							return ~operand
 						default:
-							throw compiler.error(`Unable to resolve unary operator "${expression.operator}"`)
+							throw compiler.error(undefined, `Unable to resolve unary operator "${expression.operator}"`)
 					}
 				}
 				case "binary": {
@@ -61,7 +61,7 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 						case "^":
 							return operandA ^ operandB
 						default:
-							throw compiler.error(`Unable to resolve binary operator "${expression.operator}"`)
+							throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`)
 					}
 				}
 			}

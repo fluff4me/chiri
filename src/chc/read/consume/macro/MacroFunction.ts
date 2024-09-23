@@ -1,6 +1,6 @@
 import { INTERNAL_POSITION } from "../../../../constants"
 import type ChiriReader from "../../ChiriReader"
-import type { ChiriStatement } from "../../ChiriReader"
+import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import type { ChiriType } from "../../ChiriType"
 import type { ContextStatement } from "../body/BodyRegistry"
 import type { ChiriContext } from "../body/Contexts"
@@ -17,6 +17,7 @@ export interface ChiriFunctionBase {
 	type: string
 	name: ChiriWord
 	content: ChiriStatement[]
+	position: ChiriPosition
 }
 
 export interface ChiriFunctionInternal<T> extends ChiriFunctionBase {
@@ -30,6 +31,7 @@ export interface ChiriFunctionInternalConsumerInfo<NAMED extends boolean = false
 	body: (BODY extends null ? never : BODY)[]
 	name: NAMED extends true ? ChiriWord : undefined
 	extra: EXTRA
+	position: ChiriPosition
 }
 
 export type ChiriFunctionInternalParametersConsumer<T> = (reader: ChiriReader) => T
@@ -81,8 +83,10 @@ export default function (type: string): ChiriFunctionInternalFactory {
 			return {
 				type: "function:internal",
 				name: { type: "word", value: type, position: INTERNAL_POSITION },
+				position: INTERNAL_POSITION,
 				content: parameters,
 				async consumeOptional (reader, context) {
+					const position = reader.getPosition()
 					const savedPosition = reader.savePosition()
 					const start = reader.i
 					if (!reader.consumeOptional(`#${type}`))
@@ -110,6 +114,7 @@ export default function (type: string): ChiriFunctionInternalFactory {
 						body: body as [],
 						name: name as undefined,
 						extra,
+						position,
 					})
 
 					if (!result)

@@ -7,6 +7,7 @@ export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 	if (reader.context === "mixin")
 		return undefined
 
+	const position = reader.getPosition()
 	const prefix = reader.consumeOptional(reader.context === "rule" ? "&-" : ".")
 	if (!prefix)
 		return undefined
@@ -19,5 +20,6 @@ export default async (reader: ChiriReader): Promise<ChiriRule | undefined> => {
 		className,
 		state: undefined,
 		...await consumeBody(reader, "rule"),
+		position,
 	}
 }

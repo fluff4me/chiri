@@ -10,8 +10,9 @@ export interface ChiriFunction extends ChiriFunctionBase {
 export default MacroFunction("function")
 	.named()
 	.body("inherit")
-	.consume(({ reader, assignments, body, name }): ChiriFunction | undefined => ({
+	.consume(({ reader, assignments, body, name, position }): ChiriFunction | undefined => ({
 		type: "function",
 		name,
 		content: body,
+		position,
 	}))
