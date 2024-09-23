@@ -48,8 +48,7 @@ function getElapsedString (start, time = Date.now() - start) {
 	await /** @type {Promise<void>} */(new Promise((resolve) => {
 		tsc.stdout?.on("data", data => {
 			data = data
-				.replace(/\[\x1b\[90m\d{1,2}:\d{2}:\d{2}[ \xa0\u202f][AP]M\x1b\[0m\][ \xa0\u202f]/gi, "") // remove time
-				.replace(/(\x1b\[96m)(.*?\x1b\[0m:\x1b\[93m)/g, `$1${process.cwd()}/$2`); // longer file paths
+				.replace(/\[\x1b\[90m\d{1,2}:\d{2}:\d{2}[ \xa0\u202f][AP]M\x1b\[0m\][ \xa0\u202f]/gi, ""); // remove time
 
 			const lines = data.split("\n");
 			for (let line of lines) {
