@@ -35,5 +35,7 @@ export default class ESWriter extends Writer {
 	override onCompileEnd (compiler: ChiriCompiler): void {
 		this.writeLineEndBlock("};")
 		this.writeLineEndBlock(UMD_SUFFIX)
+
+		this.output += `\n//# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())}`
 	}
 }

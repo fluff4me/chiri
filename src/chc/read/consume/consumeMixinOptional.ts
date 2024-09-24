@@ -9,7 +9,6 @@ export interface ChiriMixin {
 	type: "mixin"
 	name: ChiriWord
 	content: ChiriStatement[]
-	used: boolean
 	position: ChiriPosition
 }
 
@@ -29,7 +28,6 @@ export default async (reader: ChiriReader): Promise<ChiriMixin | undefined> => {
 	return {
 		type: "mixin",
 		name,
-		used: false,
 		...await consumeBody(reader, "mixin"),
 		position,
 	}

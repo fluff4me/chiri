@@ -1,6 +1,7 @@
 import { INTERNAL_POSITION } from "../../../constants"
 import assertNotWhiteSpaceAndNewLine from "../assert/assertNotWhiteSpaceAndNewLine"
 import type ChiriReader from "../ChiriReader"
+import type { ChiriPosition } from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
@@ -14,10 +15,11 @@ export interface ChiriLiteralString {
 	subType: "string"
 	valueType: ChiriType
 	segments: (string | ChiriExpressionOperand)[]
+	position: ChiriPosition
 }
 
 export default (reader: ChiriReader): ChiriLiteralString | undefined => {
-	const s = reader.i
+	const position = reader.getPosition()
 	if (!reader.consumeOptional('"'))
 		return undefined
 
@@ -125,5 +127,6 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 		subType: "string",
 		valueType: { type: "type", name: { type: "word", value: "string", position: INTERNAL_POSITION }, generics: [] },
 		segments,
+		position,
 	}
 }

@@ -21,7 +21,14 @@ export interface ChiriLiteralUndefined {
 	value?: undefined
 }
 
-export type ChiriLiteralValue = ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBool | ChiriLiteralUndefined | ChiriLiteralList
+export type ChiriLiteralValue =
+	| ChiriLiteralString
+	| ChiriLiteralNumeric
+	| ChiriLiteralBool
+	| ChiriLiteralUndefined
+	| ChiriLiteralList
+
+type VerifyChiriStatement = ChiriLiteralValue["position"]
 
 export default (reader: ChiriReader, type?: ChiriType): ChiriLiteralValue | undefined => {
 	if (type !== undefined)

@@ -9,4 +9,6 @@ export const STATE_MAP = {
 	":focus-any": ":focus-within",
 }
 
-export const STATES = Object.keys(STATE_MAP)
+export type ComponentState = keyof typeof STATE_MAP
+
+export const STATES = Object.keys(STATE_MAP) as ComponentState[]

@@ -33,15 +33,14 @@ export interface ChiriValueText {
 }
 
 export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
-	const e = reader.i
 	const start = reader.getPosition()
 
 	const content: ChiriValueText["content"] = []
 
 	let textStart = start
 	let text = ""
-	for (; reader.i < reader.input.length; reader.i++) {
-		if (reader.input[reader.i] === "\n") {
+	for (; reader.i < reader.input.length;) {
+		if (reader.peek("\r\n", "\n")) {
 			if (!multiline || !consumeNewBlockLineOptional(reader))
 				break
 
@@ -49,12 +48,9 @@ export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 			continue
 		}
 
-		if (reader.input[reader.i] === "\r")
-			continue
-
 		const varType = reader.consumeOptional("#{", "$")
 		if (!varType) {
-			text += reader.input[reader.i]
+			text += reader.input[reader.i++]
 			continue
 		}
 
@@ -67,6 +63,7 @@ export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 		}
 
 		if (varType === "$") {
+			const wrapped = reader.consumeOptional("{")
 			const property = consumeWordInterpolated(reader)
 			content.push({
 				type: "interpolation-property",
@@ -74,8 +71,12 @@ export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 				position: property.position,
 			})
 
+			if (wrapped)
+				reader.consume("}")
+
 		} else {
 			content.push(consumeExpression(reader))
+			reader.consume("}")
 		}
 
 		text = ""

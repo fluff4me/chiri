@@ -6,6 +6,7 @@ import ansi from "../../ansi"
 import { INTERNAL_POSITION, LIB_ROOT, PACKAGE_ROOT } from "../../constants"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
+import Strings from "../util/Strings"
 import type { ArrayOr, PromiseOr } from "../util/Type"
 import { ChiriType } from "./ChiriType"
 import type { ChiriTypeDefinition } from "./ChiriTypeManager"
@@ -29,7 +30,7 @@ import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
-import type { ChiriRule } from "./consume/rule/Rule"
+import type { ChiriComponent } from "./consume/rule/Rule"
 
 export interface ChiriPosition {
 	file: string
@@ -53,7 +54,7 @@ export type ChiriStatement =
 	| ChiriEach
 	// root
 	| ChiriRoot
-	| ChiriRule
+	| ChiriComponent
 	| ChiriMixin
 	| ChiriShorthand
 	// mixin
@@ -172,7 +173,7 @@ export default class ChiriReader {
 	update (reader: ChiriReader) {
 		this.i = reader.i
 		this.indent = reader.indent
-		this.#errored = reader.#errored
+		this.#errored ||= reader.#errored
 	}
 
 	getVariables () {
@@ -224,8 +225,8 @@ export default class ChiriReader {
 		return this.types.binaryOperators
 	}
 
-	hasStatements () {
-		return !!this.#statements.length
+	getStatements (): readonly ChiriStatement[] {
+		return this.#statements
 	}
 
 	setExport () {
@@ -265,8 +266,12 @@ export default class ChiriReader {
 				} while (consumeNewBlockLineOptional(this))
 
 				if (this.i < this.input.length)
-					consumeBlockEnd(this)
+					if (!consumeBlockEnd(this))
+						throw this.error("Expected block end")
 			}
+
+			if (!this.#isSubReader && this.i < this.input.length)
+				throw this.error("Failed to continue parsing input file")
 
 		} catch (err) {
 			this.#errored = true
@@ -282,6 +287,7 @@ export default class ChiriReader {
 			})
 		}
 
+		// this.logLine(undefined, `read end (${this.context})`)
 		return {
 			source: this.source,
 			statements: this.#statements,
@@ -326,11 +332,13 @@ export default class ChiriReader {
 
 				if (sub) {
 					const ast = await sub.read()
+					// sub.logLine(undefined, `imp end (${sub.context})`)
 					if (this.reusable.has(this.filename) && !this.reusable.has(sub.filename))
 						throw this.error(imp.i, `${this.importName} is exported as reusable, it can only import other files exported as reusable`)
 
-					this.#errored ||= sub.#errored
 					statements.push(...ast.statements)
+					if (sub.errored)
+						this.subError()
 				}
 			}
 
@@ -352,8 +360,12 @@ export default class ChiriReader {
 			return mixin
 
 		const mixinUse = consumeMixinUseOptional(this)
-		if (mixinUse)
+		if (mixinUse) {
+			if (this.context === "root")
+				throw this.error("Cannot use mixins in root context")
+
 			return mixinUse
+		}
 
 		const property = consumePropertyOptional(this)
 		if (property) {
@@ -365,7 +377,7 @@ export default class ChiriReader {
 			return property
 		}
 
-		const rule = (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
+		const rule = this.context === "state" ? undefined : (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
 		if (rule)
 			return rule
 
@@ -380,11 +392,7 @@ export default class ChiriReader {
 	}
 
 	logLine (start?: number, errOrMessage?: Error | string) {
-		const line = this.getCurrentLine(undefined, true)
-			.replace(/\r/g, ansi.whitespace + "\u240D" + ansi.reset)
-			.replace(/\n/g, ansi.whitespace + "\u240A" + ansi.reset)
-			.replace(/ /g, ansi.whitespace + "\u00B7" + ansi.reset)
-			.replace(/\t/g, ansi.whitespace + "\u2192" + ansi.reset)
+		const line = Strings.symbolise(this.getCurrentLine(undefined, true))
 
 		const lineNumber = this.getLineNumber(undefined, true)
 		const columnNumber = this.getColumnNumber()

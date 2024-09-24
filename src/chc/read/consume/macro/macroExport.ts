@@ -7,7 +7,7 @@ export default MacroFunction("export")
 	.parameter("reusable", ChiriType.of("bool"), LITERAL_FALSE)
 	.parameter("in", ChiriType.of("string"), LITERAL_STRING_ROOT)
 	.consume(({ reader, assignments }) => {
-		if (reader.hasStatements())
+		if (reader.getStatements().length)
 			throw reader.error("#export must be the first statement in a file")
 
 		if (assignments.reusable) {

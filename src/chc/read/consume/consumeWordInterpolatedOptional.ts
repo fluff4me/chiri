@@ -20,9 +20,9 @@ export default (reader: ChiriReader): ChiriWordInterpolated | undefined => {
 	const start = reader.getPosition()
 	let textStart = start
 	let text = ""
-	for (; reader.i < reader.input.length; reader.i++) {
+	for (; reader.i < reader.input.length;) {
 		if (reader.isWordChar()) {
-			text += reader.input[reader.i]
+			text += reader.input[reader.i++]
 			continue
 		}
 

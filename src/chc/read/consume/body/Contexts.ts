@@ -7,7 +7,8 @@ const Contexts = [
 	"paths" as const,
 	"text" as const,
 	"mixin" as const,
-	"rule" as const,
+	"component" as const,
+	"state" as const,
 ]
 
 export default Contexts

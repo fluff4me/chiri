@@ -1,6 +1,8 @@
-import type { ChiriExpressionOperand } from "../read/consume/consumeExpression"
 import type { ChiriLiteralValue } from "../read/consume/consumeTypeConstructorOptional"
 import type ChiriCompiler from "../write/ChiriCompiler"
+import type { default as resolveExpressionType } from "./resolveExpression"
+import resolveExpression from "./resolveExpression"
+import type { default as stringifyExpressionType } from "./stringifyExpression"
 
 function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralValue) {
 	const subType = expression.subType
@@ -17,13 +19,19 @@ function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralV
 			return expression.segments
 				.map(segment => typeof segment === "string" ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
 				.join("")
-		default:
-			throw new Error(`Unable to resolve literal value type ${subType}`)
+		case "list":
+			return expression.value
+				.map(value => resolveExpression(compiler, value))
+		default: {
+			const e2 = expression as ChiriLiteralValue
+			throw compiler.error(e2.position, `Unable to resolve literal value type ${e2.subType}`)
+		}
 	}
 }
 
 namespace resolveLiteralValue {
-	export let stringifyExpression: (compiler: ChiriCompiler, expression?: ChiriExpressionOperand | string | number | boolean) => string | undefined
+	export let stringifyExpression: typeof stringifyExpressionType
+	export let resolveExpression: typeof resolveExpressionType
 }
 
 export default resolveLiteralValue

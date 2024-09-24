@@ -12,4 +12,4 @@ export const INTERNAL_POSITION: ChiriPosition = { file: "internal", line: 0, col
 
 export const LITERAL_TRUE: ChiriLiteralBool = { type: "literal", subType: "bool", value: true, valueType: ChiriType.of("bool"), position: INTERNAL_POSITION }
 export const LITERAL_FALSE: ChiriLiteralBool = { type: "literal", subType: "bool", value: false, valueType: ChiriType.of("bool"), position: INTERNAL_POSITION }
-export const LITERAL_STRING_ROOT: ChiriLiteralString = { type: "literal", subType: "string", segments: ["root"], valueType: ChiriType.of("string") }
+export const LITERAL_STRING_ROOT: ChiriLiteralString = { type: "literal", subType: "string", segments: ["root"], valueType: ChiriType.of("string"), position: INTERNAL_POSITION }

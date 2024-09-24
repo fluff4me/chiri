@@ -99,6 +99,8 @@ async function compile (filename: string) {
 	}
 
 	const ast = await reader.read()
+	if (reader.errored)
+		return
 
 	if (process.env.CHIRI_AST) {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

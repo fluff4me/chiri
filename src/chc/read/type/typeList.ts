@@ -1,5 +1,7 @@
+import type { ChiriPosition } from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
 import type { ChiriTypeDefinition } from "../ChiriTypeManager"
+import consumeBlockEnd from "../consume/consumeBlockEnd"
 import consumeBlockStartOptional from "../consume/consumeBlockStartOptional"
 import type { ChiriExpressionOperand } from "../consume/consumeExpression"
 import consumeExpression from "../consume/consumeExpression"
@@ -11,12 +13,14 @@ export interface ChiriLiteralList {
 	subType: "list"
 	valueType: ChiriType
 	value: ChiriExpressionOperand[]
+	position: ChiriPosition
 }
 
 export default {
 	stringable: true,
 	generics: 1,
 	consumeOptionalConstructor: (reader): ChiriLiteralList | undefined => {
+		const position = reader.getPosition()
 		if (!reader.consumeOptional("["))
 			return undefined
 
@@ -27,9 +31,12 @@ export default {
 			do expressions.push(consumeExpression(reader))
 			while (reader.consumeOptional(", "))
 
-		} else
+		} else {
 			do expressions.push(consumeExpression(reader))
 			while (consumeNewBlockLineOptional(reader))
+
+			consumeBlockEnd(reader)
+		}
 
 		const stringifiedTypes = expressions.map(expr => ChiriType.stringify(expr.valueType))
 		if (new Set(stringifiedTypes).size > 1)
@@ -45,6 +52,7 @@ export default {
 			subType: "list",
 			valueType: ChiriType.of("list", expressions[0]?.valueType ?? "*"),
 			value: expressions,
+			position,
 		}
 	},
 } as ChiriTypeDefinition

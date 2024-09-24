@@ -26,11 +26,13 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	if (!mixin)
 		throw reader.error(start, `No declaration for %${word.value}`)
 
+	if (reader.getStatements().some(statement => statement.type === "mixin-use" && statement.name.value === word.value))
+		throw reader.error(start, `%${word.value} is already included in this context`)
+
 	// const assignments = consumeFunctionParameters(reader, start, mixin)
 
 	assertNewLine(reader)
 
-	mixin.used = true
 	return {
 		type: "mixin-use",
 		name: word,

@@ -7,12 +7,13 @@ export interface ChiriWord {
 	position: ChiriPosition
 }
 
-export default (reader: ChiriReader, expectedWord?: string): ChiriWord => {
+export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord => {
 	const e = reader.i
-	if (expectedWord) {
+	if (expectedWords.length) {
+		const value = reader.consume(...expectedWords)
 		return {
 			type: "word",
-			value: reader.consume(expectedWord),
+			value,
 			position: reader.getPosition(e),
 		}
 	}

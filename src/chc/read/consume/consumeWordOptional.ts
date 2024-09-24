@@ -4,10 +4,10 @@ import type ChiriReader from "../ChiriReader"
 import type { ChiriWord } from "./consumeWord"
 import consumeWord from "./consumeWord"
 
-export default (reader: ChiriReader, expectedWord?: string): ChiriWord | undefined => {
-	if (expectedWord) {
+export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord | undefined => {
+	if (expectedWords.length) {
 		const e = reader.i
-		const word = reader.consumeOptional(expectedWord)
+		const word = reader.consumeOptional(...expectedWords)
 		return !word ? undefined : {
 			type: "word",
 			value: word,
@@ -15,5 +15,5 @@ export default (reader: ChiriReader, expectedWord?: string): ChiriWord | undefin
 		}
 	}
 
-	return !expectedWord && !reader.isLetter() ? undefined : consumeWord(reader, expectedWord)
+	return !expectedWords.length && !reader.isLetter() ? undefined : consumeWord(reader, ...expectedWords)
 }

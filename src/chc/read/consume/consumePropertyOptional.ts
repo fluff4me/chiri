@@ -2,7 +2,7 @@ import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
 import type { ChiriValueText } from "./consumeValueText"
-import consumeValue from "./consumeValueText"
+import consumeValueText from "./consumeValueText"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWordInterpolated from "./consumeWordInterpolated"
 import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
@@ -16,6 +16,7 @@ export interface ChiriProperty {
 }
 
 export default (reader: ChiriReader): ChiriProperty | undefined => {
+	const e = reader.i
 	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
 		return undefined
 
@@ -30,7 +31,7 @@ export default (reader: ChiriReader): ChiriProperty | undefined => {
 	reader.consume(":")
 	consumeWhiteSpace(reader)
 
-	const value = consumeValue(reader, !!consumeBlockStartOptional(reader))
+	const value = consumeValueText(reader, !!consumeBlockStartOptional(reader))
 
 	return {
 		type: "property",

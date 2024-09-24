@@ -21,7 +21,7 @@ const stringifyText = (compiler: ChiriCompiler, text: ChiriValueText): string =>
 				result += `var(--${stringifyText(compiler, value.name)})`
 				continue
 			case "interpolation-variable":
-				result += stringifyExpression(compiler, compiler.getVariable(value.name.value))
+				result += stringifyExpression(compiler, compiler.getVariable(value.name.value, value.name.position))
 				continue
 			default:
 				result += stringifyExpression(compiler, value)
