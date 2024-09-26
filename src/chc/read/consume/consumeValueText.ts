@@ -75,7 +75,7 @@ export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 				reader.consume("}")
 
 		} else {
-			content.push(consumeExpression(reader))
+			content.push(consumeExpression.inline(reader))
 			reader.consume("}")
 		}
 

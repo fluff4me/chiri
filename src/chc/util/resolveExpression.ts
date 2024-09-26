@@ -1,10 +1,10 @@
-import type { ChiriExpressionOperand } from "../read/consume/expression/consumeExpression"
+import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression"
 import type ChiriCompiler from "../write/ChiriCompiler"
 import resolveLiteralValue from "./resolveLiteralValue"
 
 export type Literal = undefined | number | boolean | string
 export type Value = Literal | Value[]
-const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpressionOperand): Value => {
+const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpressionResult): Value => {
 	if (!expression)
 		return undefined
 
@@ -69,6 +69,8 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 				}
 			}
 	}
+
+	throw compiler.error(expression.position, `Cannot compile expression result type "${expression.type}" yet`)
 }
 
 resolveLiteralValue.resolveExpression = resolveExpression

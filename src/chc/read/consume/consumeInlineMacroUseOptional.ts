@@ -5,7 +5,7 @@ import { consumeAssignmentOptional } from "./macro/macroSet"
 export type MacroResultInline =
 	| ChiriAssignment
 
-export default (reader: ChiriReader): MacroResultInline | undefined => {
+export default async (reader: ChiriReader): Promise<MacroResultInline | undefined> => {
 	return undefined
-		?? consumeAssignmentOptional(reader)
+		?? await consumeAssignmentOptional(reader, true)
 }

@@ -7,14 +7,14 @@ import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWord from "../consumeWord"
-import type { ChiriExpressionOperand } from "../expression/consumeExpression"
+import type { ChiriExpressionResult } from "../expression/consumeExpression"
 import consumeExpression, { consumeOperatorOptional } from "../expression/consumeExpression"
 import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriAssignment {
 	type: "assignment"
 	name: ChiriWord
-	expression?: ChiriExpressionOperand
+	expression?: ChiriExpressionResult
 	position: ChiriPosition
 	assignment?: "=" | "??="
 }
@@ -23,11 +23,11 @@ const empy = {} as never
 
 interface SetData {
 	name: ChiriWord
-	expression: ChiriExpressionOperand
+	expression: ChiriExpressionResult
 	assignment: "=" | "??="
 }
 
-const consumeAssignmentData = (reader: ChiriReader, skipInitialWhitespace = false): SetData => {
+const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace = false, inline = false): Promise<SetData> => {
 	if (!skipInitialWhitespace)
 		consumeWhiteSpace(reader)
 
@@ -51,7 +51,8 @@ const consumeAssignmentData = (reader: ChiriReader, skipInitialWhitespace = fals
 
 	consumeWhiteSpaceOptional(reader)
 
-	const expr = operator === "++" || operator === "--" ? undefined : consumeExpression(reader, type)
+	const expr = operator === "++" || operator === "--" ? undefined
+		: inline ? consumeExpression.inline(reader, type) : await consumeExpression(reader, type)
 
 	if (operator === "++")
 		operator = "+"
@@ -73,7 +74,7 @@ const consumeAssignmentData = (reader: ChiriReader, skipInitialWhitespace = fals
 	}
 }
 
-export const consumeAssignmentOptional = (reader: ChiriReader): ChiriAssignment | undefined => {
+export const consumeAssignmentOptional = async (reader: ChiriReader, inline = false): Promise<ChiriAssignment | undefined> => {
 	const position = reader.getPosition()
 	if (!reader.consumeOptional("set"))
 		return undefined
@@ -81,7 +82,7 @@ export const consumeAssignmentOptional = (reader: ChiriReader): ChiriAssignment 
 	if (!consumeWhiteSpaceOptional(reader))
 		return undefined
 
-	const data = consumeAssignmentData(reader, true)
+	const data = await consumeAssignmentData(reader, true, inline)
 	return {
 		type: "assignment",
 		...data,

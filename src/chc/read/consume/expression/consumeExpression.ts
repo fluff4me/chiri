@@ -15,12 +15,14 @@ import consumeWordOptional from "../consumeWordOptional"
 import consumeDecimalOptional from "../numeric/consumeDecimalOptional"
 import consumeIntegerOptional from "../numeric/consumeIntegerOptional"
 import consumeUnsignedIntegerOptional from "../numeric/consumeUnsignedIntegerOptional"
+import type { ChiriExpressionMatch } from "./expressionMatch"
+import expressionMatch from "./expressionMatch"
 
 export interface ChiriBinaryExpression {
 	type: "expression"
 	subType: "binary"
 	operandA: ChiriExpressionOperand
-	operandB: ChiriExpressionOperand
+	operandB: ChiriExpressionResult
 	operator: string
 	valueType: ChiriType
 	wrapped?: true
@@ -40,13 +42,40 @@ export interface ChiriVariableReference {
 	valueType: ChiriType
 }
 
-export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText
+export type ChiriExpressionOperand =
+	| ChiriBinaryExpression
+	| ChiriUnaryExpression
+	| ChiriLiteralValue
+	| ChiriVariableReference
+	| ChiriValueText
+
+export type ChiriExpressionResult =
+	| ChiriExpressionOperand
+	| ChiriExpressionMatch
+
+type VerifyExpressionResult = ChiriExpressionResult["valueType"]
+
+export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand
 
 const empy = {} as never
 
-export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpressionOperand => {
+async function consumeExpression (reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult> {
+	return undefined
+		?? await expressionMatch.consumeOptional(reader, consumeExpressionValidated, ...expectedTypes)
+		?? consumeExpressionValidated(reader, ...expectedTypes)
+}
+
+namespace consumeExpression {
+	export function inline (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpressionOperand {
+		return consumeExpressionValidated(reader, ...expectedTypes)
+	}
+}
+
+export default consumeExpression
+
+const consumeExpressionValidated = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => {
 	const e = reader.i
-	const operand = consumeExpression(reader)
+	const operand = consumeExpressionInternal(reader)
 
 	const valueType = operand.valueType
 	if (expectedTypes.length && !expectedTypes.every(expectedType => reader.types.isAssignable(valueType, expectedType)))
@@ -57,7 +86,7 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpres
 
 const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	if (reader.consumeOptional("(")) {
-		const expr = consumeExpression(reader)
+		const expr = consumeExpressionInternal(reader)
 		reader.consume(")")
 		if (expr.type === "expression" && expr.subType === "binary")
 			expr.wrapped = true
@@ -103,7 +132,7 @@ export const consumeOperatorOptional = (reader: ChiriReader, operators: Record<O
 	return undefined
 }
 
-const consumeExpression = (reader: ChiriReader): ChiriExpressionOperand => {
+const consumeExpressionInternal = (reader: ChiriReader): ChiriExpressionOperand => {
 	const e = reader.i
 	let operandA = consumeUnaryExpression(reader)
 

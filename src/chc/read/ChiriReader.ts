@@ -230,7 +230,7 @@ export default class ChiriReader {
 
 	with (...scopeStatements: ChiriStatement[]) {
 		return {
-			do: <T> (callback: () => T): T => {
+			do: async <T> (callback: () => PromiseOr<T>): Promise<T> => {
 				this.#statements.push(...scopeStatements)
 				try {
 					return callback()

@@ -19,25 +19,25 @@ export interface ChiriFor {
 }
 
 export default MacroConstruct("for")
-	.consumeParameters(reader => {
+	.consumeParameters(async reader => {
 		consumeWhiteSpace(reader)
 
-		const variable = consumeCompilerVariableOptional(reader, false)
+		const variable = await consumeCompilerVariableOptional(reader, false)
 		if (!variable)
 			throw reader.error("Expected variable declaration")
 
 		reader.consume(",")
 		consumeWhiteSpaceOptional(reader)
 
-		const [condition, update] = reader
+		const [condition, update] = await reader
 			.with(variable)
-			.do(() => {
-				const condition = consumeExpression(reader)
+			.do(async () => {
+				const condition = consumeExpression.inline(reader)
 
 				reader.consume(",")
 				consumeWhiteSpaceOptional(reader)
 
-				const update = consumeInlineMacroUseOptional(reader)
+				const update = await consumeInlineMacroUseOptional(reader)
 				return [condition, update]
 			})
 

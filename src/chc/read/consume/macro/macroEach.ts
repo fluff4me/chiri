@@ -17,7 +17,7 @@ export interface ChiriEach {
 }
 
 export default MacroConstruct("each")
-	.consumeParameters(reader => {
+	.consumeParameters(async reader => {
 		consumeWhiteSpace(reader)
 
 		let e = reader.i
@@ -31,7 +31,7 @@ export default MacroConstruct("each")
 		consumeWhiteSpace(reader)
 
 		e = reader.i
-		const variable = consumeCompilerVariableOptional(reader, false)
+		const variable = await consumeCompilerVariableOptional(reader, false)
 		if (!variable)
 			throw reader.error("Expected variable declaration")
 

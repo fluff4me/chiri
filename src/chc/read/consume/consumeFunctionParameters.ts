@@ -70,7 +70,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 			return
 		}
 
-		assignments[word.value] = consumeExpression(reader, expectedType)
+		assignments[word.value] = consumeExpression.inline(reader, expectedType)
 	}
 
 	const multiline = consumeBlockStartOptional(reader)

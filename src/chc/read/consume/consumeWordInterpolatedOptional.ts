@@ -37,7 +37,7 @@ export default (reader: ChiriReader): ChiriWordInterpolated | undefined => {
 			})
 
 		reader.consume("#{")
-		content.push(consumeExpression(reader))
+		content.push(consumeExpression.inline(reader))
 		reader.consume("}")
 
 		text = ""

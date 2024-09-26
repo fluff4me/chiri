@@ -28,11 +28,11 @@ export default {
 		const multiline = consumeBlockStartOptional(reader)
 		if (!multiline) {
 			consumeWhiteSpaceOptional(reader)
-			do expressions.push(consumeExpression(reader))
+			do expressions.push(consumeExpression.inline(reader))
 			while (reader.consumeOptional(", "))
 
 		} else {
-			do expressions.push(consumeExpression(reader))
+			do expressions.push(consumeExpression.inline(reader))
 			while (consumeNewBlockLineOptional(reader))
 
 			consumeBlockEnd(reader)

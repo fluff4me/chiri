@@ -8,19 +8,19 @@ import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import consumeWord, { type ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
-import type { ChiriExpressionOperand } from "./expression/consumeExpression"
+import type { ChiriExpressionResult } from "./expression/consumeExpression"
 import consumeExpression from "./expression/consumeExpression"
 
 export interface ChiriCompilerVariable {
 	type: "variable"
 	valueType: ChiriType
 	name: ChiriWord
-	expression?: ChiriExpressionOperand
+	expression?: ChiriExpressionResult
 	position: ChiriPosition
 	assignment?: "=" | "??="
 }
 
-export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | undefined => {
+export default async (reader: ChiriReader, prefix = true): Promise<ChiriCompilerVariable | undefined> => {
 	const save = reader.savePosition()
 	const position = reader.getPosition()
 	if (prefix)
@@ -56,10 +56,10 @@ export default (reader: ChiriReader, prefix = true): ChiriCompilerVariable | und
 	if (assignment === "??=" && reader.context.type === "mixin")
 		throw reader.error(save.i, "Mixins cannot accept parameters")
 
-	let expression: ChiriExpressionOperand | undefined
+	let expression: ChiriExpressionResult | undefined
 	if (assignment) {
 		consumeWhiteSpaceOptional(reader)
-		expression = consumeExpression(reader, valueType)
+		expression = await consumeExpression(reader, valueType)
 		if (valueType.name.value === "*")
 			valueType = expression.valueType
 
