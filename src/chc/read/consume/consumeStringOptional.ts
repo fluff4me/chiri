@@ -85,7 +85,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				const variable = reader.getVariable(word.value)
 				const valueType = variable.valueType
 				if (!valueType || !reader.getType(valueType).stringable)
-					throw reader.error(e, `Type '${ChiriType.stringify(valueType)}' is not stringable`)
+					throw reader.error(e, `Type "${ChiriType.stringify(valueType)}" is not stringable`)
 
 				appendSegment(pendingNewlines)
 				pendingNewlines = ""

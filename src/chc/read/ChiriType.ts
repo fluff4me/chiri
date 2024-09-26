@@ -5,6 +5,11 @@ export interface ChiriType {
 	type: "type"
 	name: ChiriWord
 	generics: ChiriType[]
+	isGeneric?: true
+}
+
+export interface ChiriTypeGeneric extends ChiriType {
+	isGeneric: true
 }
 
 export namespace ChiriType {

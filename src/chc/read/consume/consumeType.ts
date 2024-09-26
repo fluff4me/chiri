@@ -1,21 +1,26 @@
 
 
 import type ChiriReader from "../ChiriReader"
-import type { ChiriPositionState } from "../ChiriReader"
+import type { ChiriTypeGeneric } from "../ChiriType"
 import { ChiriType } from "../ChiriType"
 import consumeTypeNameOptional from "./consumeTypeNameOptional"
+import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 
-export const consumeType = (reader: ChiriReader) => {
+export function consumeType (reader: ChiriReader): ChiriType
+export function consumeType (reader: ChiriReader, genericDeclaration: true): ChiriTypeGeneric
+export function consumeType (reader: ChiriReader, genericDeclaration?: true) {
 	const e = reader.i
-	const type = consumeTypeOptional(reader)
+	const type = consumeTypeOptional(reader, genericDeclaration!)
 	if (!type)
 		throw reader.error(e, "Expected type")
 	return type
 }
 
-export const consumeTypeOptional = (reader: ChiriReader): ChiriType | undefined => {
+export function consumeTypeOptional (reader: ChiriReader): ChiriType | undefined
+export function consumeTypeOptional (reader: ChiriReader, genericDeclaration: true): ChiriTypeGeneric | undefined
+export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: true): ChiriType | undefined {
 	const e = reader.i
-	const typeName = consumeTypeNameOptional(reader)
+	const typeName = consumeTypeNameOptional(reader, genericDeclaration)
 	if (!typeName)
 		return undefined
 
@@ -28,14 +33,19 @@ export const consumeTypeOptional = (reader: ChiriReader): ChiriType | undefined 
 	if (typeName.value === "*")
 		return type
 
-	const definition = reader.getType(typeName.value)
-	if (definition.generics)
+	const definition = reader.getTypeOptional(typeName.value)
+	if (definition?.generics)
 		type.generics = consumeGenerics(reader, definition.generics === true ? undefined : definition.generics)
+	else if (genericDeclaration)
+		type.generics = consumeGenerics(reader, undefined, true)
+
+	if (genericDeclaration)
+		type.isGeneric = true
 
 	return type
 }
 
-const consumeGenerics = (reader: ChiriReader, generics?: number | string[][]) => {
+const consumeGenerics = (reader: ChiriReader, generics?: number | string[][], genericDeclaration = false) => {
 	const result: ChiriType[] = []
 	if (typeof generics === "number") {
 		for (let g = 0; g < generics; g++) {
@@ -46,24 +56,35 @@ const consumeGenerics = (reader: ChiriReader, generics?: number | string[][]) =>
 	} else if (generics) {
 		for (const generic of generics) {
 			reader.consume("!")
+			const parenthesised = reader.consumeOptional("(")
 			result.push(ChiriType.of(reader.consume(...generic)))
+			if (parenthesised) reader.consume(")")
 		}
 
 	} else {
-		let savedPosition: ChiriPositionState | undefined
 		while (true) {
-			savedPosition = reader.savePosition()
 			if (!reader.consumeOptional("!"))
 				break
 
-			const type = consumeTypeOptional(reader)
-			if (!type) {
-				if (savedPosition) reader.restorePosition(savedPosition)
-				break
+			const parenthesised = reader.consumeOptional("(")
+
+			while (genericDeclaration) {
+				if (result.length)
+					if (!consumeWhiteSpaceOptional(reader))
+						break
+
+				const type = consumeTypeOptional(reader)
+				if (!type)
+					break
+
+				result.push(type)
 			}
 
-			result.push(type)
+			if (parenthesised) reader.consume(")")
 		}
+
+		if (!result.length)
+			throw reader.error("Expected type generic")
 	}
 
 	return result

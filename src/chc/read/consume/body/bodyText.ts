@@ -1,4 +1,4 @@
 import consumeValue from "../consumeValueText"
-import BodyFunction from "./BodyFunction"
+import BodyConsumer from "./BodyConsumer"
 
-export default BodyFunction("text", reader => consumeValue(reader, false))
+export default BodyConsumer("text", reader => consumeValue(reader, false))

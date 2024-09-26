@@ -44,13 +44,13 @@ export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpressio
 
 const empy = {} as never
 
-export default (reader: ChiriReader, expectedType?: ChiriType): ChiriExpressionOperand => {
+export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpressionOperand => {
 	const e = reader.i
 	const operand = consumeExpression(reader)
 
 	const valueType = operand.valueType
-	if (expectedType && !reader.types.isAssignable(valueType, expectedType))
-		throw reader.error(e, `Expected '${ChiriType.stringify(expectedType)}', got '${ChiriType.stringify(valueType)}'`)
+	if (expectedTypes.length && !expectedTypes.every(expectedType => reader.types.isAssignable(valueType, expectedType)))
+		throw reader.error(e, `Expected ${expectedTypes.map(type => `"${ChiriType.stringify(type)}"`).join(" or ")}, got "${ChiriType.stringify(valueType)}"`)
 
 	return operand
 }
@@ -87,7 +87,7 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 				valueType: variable.valueType,
 			}
 
-		throw reader.error(e, `No variable '${word.value}'`)
+		throw reader.error(e, `No variable "${word.value}"`)
 	}
 
 	const constructedType = consumeTypeConstructorOptional(reader)

@@ -1,4 +1,4 @@
 import consumeWordInterpolatedOptional from "../consumeWordInterpolatedOptional"
-import BodyFunction from "./BodyFunction"
+import BodyConsumer from "./BodyConsumer"
 
-export default BodyFunction("property-name", reader => consumeWordInterpolatedOptional(reader))
+export default BodyConsumer("property-name", reader => consumeWordInterpolatedOptional(reader))

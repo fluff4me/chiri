@@ -1,7 +1,7 @@
 #function hex returns string:
 	#int num
 
-	#function hex-place:
+	#function hex-place returns string:
 		#int num
 		#return match num:
 			15: "f

@@ -2,6 +2,7 @@
 
 import ansi from "../../ansi"
 import type ChiriReader from "./ChiriReader"
+import type { ChiriTypeGeneric } from "./ChiriType"
 import { ChiriType } from "./ChiriType"
 import typeBody from "./type/typeBody"
 import typeDec from "./type/typeDec"
@@ -115,7 +116,7 @@ export default class ChiriTypeManager {
 		instancesOfThisOperator[type] = result
 	}
 
-	constructor () {
+	constructor (private readonly reader: ChiriReader) {
 		for (const operator of binaryNumericOperators)
 			for (const typeA of numericTypes)
 				for (const typeB of numericTypes) {
@@ -133,8 +134,8 @@ export default class ChiriTypeManager {
 			this.registerUnaryOperator(operator, "bool")
 	}
 
-	clone () {
-		const man = new ChiriTypeManager()
+	clone (reader: ChiriReader) {
+		const man = new ChiriTypeManager(reader)
 		man.types = { ...this.types }
 		man.unaryOperators = Object.fromEntries(Object.entries(this.unaryOperators)
 			.map(([key, record]) => [key, { ...record }]))
@@ -142,6 +143,51 @@ export default class ChiriTypeManager {
 			.map(([key, record]) => [key, Object.fromEntries(Object.entries(record)
 				.map(([key, record]) => [key, { ...record }]))]))
 		return man
+	}
+
+	with (...generics: ChiriTypeGeneric[]) {
+		return {
+			do: <T> (handler: () => T): T => {
+				this.registerGenerics(...generics)
+				const result = handler()
+				this.deregisterGenerics(...generics)
+				return result
+			},
+		}
+	}
+
+	registerGenerics (...generics: ChiriTypeGeneric[]) {
+		for (const type of generics) {
+			if (this.types[type.name.value])
+				throw this.reader.error(`Cannot redefine type "${type.name.value}"`)
+
+			const componentTypeDefinitions = type.generics.map(component => {
+				const typeDef = this.types[component.name.value]
+				if (!typeDef)
+					throw this.reader.error(`Type "${type.name.value}" depends on undefined type "${component.name.value}"`)
+
+				return typeDef
+			})
+
+			this.types[type.name.value] = {
+				stringable: componentTypeDefinitions.every(type => type.stringable) ? true : undefined,
+				consumeOptionalConstructor: reader => {
+					for (const type of componentTypeDefinitions) {
+						const result = type.consumeOptionalConstructor(reader)
+						if (result)
+							return result
+					}
+
+					return undefined
+				},
+			}
+		}
+	}
+
+	deregisterGenerics (...generics: ChiriTypeGeneric[]) {
+		for (const type of generics) {
+			delete this.types[type.name.value]
+		}
 	}
 
 	isAssignable (type: ChiriType, toType: ChiriType): boolean {

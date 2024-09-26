@@ -4,11 +4,11 @@ import consumeWordInterpolated from "../consumeWordInterpolated"
 import type { ChiriComponent } from "./Rule"
 
 export default async (reader: ChiriReader): Promise<ChiriComponent | undefined> => {
-	if (reader.context === "mixin")
+	if (reader.context.type === "mixin")
 		return undefined
 
 	const position = reader.getPosition()
-	const prefix = reader.consumeOptional(reader.context === "component" ? "&-" : ".")
+	const prefix = reader.consumeOptional(reader.context.type === "component" ? "&-" : ".")
 	if (!prefix)
 		return undefined
 

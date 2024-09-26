@@ -23,8 +23,8 @@ export default MacroFunction("export")
 
 		const context = contextAssignment?.segments[0] as string ?? "root"
 
-		if (reader.context !== context)
-			throw reader.error(`${reader.importName} is exported for use in ${context} context, but was imported into a ${reader.context} context`)
+		if (reader.context.type !== context)
+			throw reader.error(`${reader.importName} is exported for use in ${context} context, but was imported into a ${reader.context.type} context`)
 
 		return true
 	})

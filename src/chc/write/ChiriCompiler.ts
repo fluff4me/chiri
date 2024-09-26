@@ -631,7 +631,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				setMacro(statement)
 				return true
 
-			case "function-use": {
+			case "macro-use": {
 				switch (statement.name.value) {
 					case "debug": {
 						const lines = compileStatements(statement.content, undefined, compileText)

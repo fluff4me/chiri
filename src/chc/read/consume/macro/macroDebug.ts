@@ -1,10 +1,10 @@
-import type { ChiriFunctionUse } from "../consumeFunctionUseOptional"
+import type { ChiriMacroUse } from "../consumeMacroUseOptional"
 import MacroFunction from "./MacroFunction"
 
 export default MacroFunction("debug")
 	.body("text")
-	.consume(({ reader, assignments, body, position }): ChiriFunctionUse => ({
-		type: "function-use",
+	.consume(({ reader, assignments, body, position }): ChiriMacroUse => ({
+		type: "macro-use",
 		name: { type: "word", value: "debug", position: { file: "internal", line: 0, column: 0 } },
 		assignments: {},
 		content: body,

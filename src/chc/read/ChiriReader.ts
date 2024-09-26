@@ -11,11 +11,11 @@ import type { ArrayOr, PromiseOr } from "../util/Type"
 import { ChiriType } from "./ChiriType"
 import type { ChiriTypeDefinition } from "./ChiriTypeManager"
 import ChiriTypeManager from "./ChiriTypeManager"
-import type { ChiriContext } from "./consume/body/Contexts"
+import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./consume/body/Contexts"
 import consumeBlockEnd from "./consume/consumeBlockEnd"
 import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional"
 import consumeDocumentationOptional, { type ChiriDocumentation } from "./consume/consumeDocumentationOptional"
-import type { ChiriFunctionUse } from "./consume/consumeFunctionUseOptional"
+import type { ChiriMacroUse } from "./consume/consumeMacroUseOptional"
 import { default as consumeMacroOptional, default as consumeMacroUseOptional } from "./consume/consumeMacroUseOptional"
 import type { ChiriMixin } from "./consume/consumeMixinOptional"
 import consumeMixinOptional from "./consume/consumeMixinOptional"
@@ -29,7 +29,9 @@ import type { ChiriAlias } from "./consume/macro/macroAlias"
 import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFor } from "./consume/macro/macroFor"
+import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
+import type { ChiriReturn } from "./consume/macro/macroReturn"
 import type { ChiriAssignment } from "./consume/macro/macroSet"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
@@ -54,11 +56,13 @@ export type ChiriStatement =
 	// macro
 	| ChiriCompilerVariable
 	| ChiriMacro
-	| ChiriFunctionUse
+	| ChiriMacroUse
 	| ChiriEach
 	| ChiriDo
 	| ChiriAssignment
 	| ChiriFor
+	| ChiriFunction
+	| ChiriReturn
 	// root
 	| ChiriRoot
 	| ChiriComponent
@@ -108,7 +112,7 @@ export default class ChiriReader {
 		return result
 	}
 
-	types = new ChiriTypeManager()
+	types = new ChiriTypeManager(this)
 
 	#outerStatements: ChiriStatement[] = []
 	#statements: ChiriStatement[] = []
@@ -137,7 +141,7 @@ export default class ChiriReader {
 		public readonly filename: string,
 		public readonly input: string,
 		cwd?: string,
-		public readonly context: ChiriContext = "root",
+		public readonly context: ChiriContext = { type: "root" },
 		public readonly stack: string[] = [],
 		public readonly source: Record<string, string> = {},
 	) {
@@ -154,16 +158,19 @@ export default class ChiriReader {
 		return true
 	}
 
-	sub (multiline: boolean, context: ChiriContext) {
+	sub<CONTEXT extends ChiriContextType> (multiline: boolean, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>) {
 		// this.logLine(undefined, `sub for ${context}`)
-		const reader = new ChiriReader(this.filename, this.input, undefined, context, this.stack.slice(), this.source)
+		const contextData = { type: context, data: data[0] } as ChiriContext
+		const reader = new ChiriReader(this.filename, this.input, undefined, contextData, this.stack.slice(), this.source)
 		reader.i = this.i
 		reader.indent = this.indent
 		reader.#multiline = multiline
 		reader.#lastLineNumber = this.#lastLineNumber
 		reader.#lastLineNumberPosition = this.#lastLineNumberPosition
 		reader.#outerStatements = [...this.#outerStatements, ...this.#statements]
-		reader.types = this.types.clone()
+		reader.types = this.types.clone(reader)
+		if (reader.context.type === "function")
+			reader.types.registerGenerics(...reader.context.data.types)
 		reader.used = this.used
 		reader.reusable = this.reusable
 		reader.#isSubReader = true
@@ -238,7 +245,7 @@ export default class ChiriReader {
 		name = typeof name === "string" ? name : name.name.value
 		const type = this.types.types[name]
 		if (!type)
-			throw this.error(`There is no type by name '${name}'`)
+			throw this.error(`There is no type by name "${name}"`)
 		return type
 	}
 
@@ -267,7 +274,7 @@ export default class ChiriReader {
 	async read (configuredConsumer: ChiriBodyConsumer<object> = this.consumeBodyDefault): Promise<ChiriAST<object>> {
 		const consumer = async () => undefined
 			?? await configuredConsumer(this)
-			?? await consumeMacroUseOptional(this, this.context)
+			?? await consumeMacroUseOptional(this)
 
 		try {
 			if (!this.#multiline) {
@@ -276,7 +283,7 @@ export default class ChiriReader {
 				const e = this.i
 				const consumed = await consumer()
 				if (!consumed)
-					throw this.error(e, `Expected ${this.context} content`)
+					throw this.error(e, `Expected ${this.context.type} content`)
 
 				this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish) as ChiriStatement[])
 
@@ -289,7 +296,7 @@ export default class ChiriReader {
 					const e = this.i
 					const consumed = await consumer()
 					if (!consumed)
-						throw this.error(e, `Expected ${this.context} content`)
+						throw this.error(e, `Expected ${this.context.type} content`)
 
 					this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish) as ChiriStatement[])
 				} while (consumeNewBlockLineOptional(this))
@@ -344,7 +351,7 @@ export default class ChiriReader {
 				const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? LIB_ROOT : require.resolve(imp.module)
 				const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path)
 				if (this.stack.includes(filename))
-					throw this.error(`Cannot recursively import file '${raw}'`)
+					throw this.error(`Cannot recursively import file "${raw}"`)
 
 				let sub
 				try {
@@ -356,7 +363,7 @@ export default class ChiriReader {
 					this.#errorStart = this.i
 					this.i = imp.i
 					const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error")
-					throw this.error(`Cannot import file '${raw}': ${message}`)
+					throw this.error(`Cannot import file "${raw}": ${message}`)
 				}
 
 				if (sub) {
@@ -389,7 +396,7 @@ export default class ChiriReader {
 
 		const mixinUse = consumeMixinUseOptional(this)
 		if (mixinUse) {
-			if (this.context === "root")
+			if (this.context.type === "root")
 				throw this.error("Cannot use mixins in root context")
 
 			return mixinUse
@@ -405,7 +412,7 @@ export default class ChiriReader {
 			return property
 		}
 
-		const rule = this.context === "state" ? undefined : (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
+		const rule = this.context.type === "state" ? undefined : (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
 		if (rule)
 			return rule
 
@@ -489,7 +496,7 @@ export default class ChiriReader {
 			.replace(/\t/g, "\u2192"))
 		throw this.error("Expected "
 			+ (strings.length === 1 ? strings[0]
-				: "any of" + strings.map(string => `'${string}'`).join(", ")))
+				: "any of" + strings.map(string => `"${string}"`).join(", ")))
 	}
 
 	consumeOptional (...strings: string[]) {

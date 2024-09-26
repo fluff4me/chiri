@@ -3,19 +3,17 @@
 import type ChiriReader from "../ChiriReader"
 import consumeWordOptional from "./consumeWordOptional"
 
-export default (reader: ChiriReader) => {
-	const e = reader.i
-
-	const type = consumeWordOptional(reader, "[]") // internal array type
-		?? consumeWordOptional(reader, "{}") // internal object type
-		?? consumeWordOptional(reader)
-
+export default (reader: ChiriReader, genericDeclaration = false) => {
+	const type = consumeWordOptional(reader)
 	if (!type)
 		return undefined
 
-	if (!reader.getTypeOptional(type.value))
+	const typeExists = !!reader.getTypeOptional(type.value)
+	if (typeExists && genericDeclaration)
+		throw reader.error(`Cannot declare type "${type.value}", a type already exists with that name`)
+
+	if (!genericDeclaration && !typeExists)
 		return undefined
-	// throw reader.error(e, "There is no type '" + type.value + "'");
 
 	return type
 }

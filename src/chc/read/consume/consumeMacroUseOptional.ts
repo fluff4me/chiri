@@ -1,9 +1,14 @@
+import getFunctionParameters from "../../util/getFunctionParameters"
 import type ChiriReader from "../ChiriReader"
-import type { ChiriContext } from "./body/Contexts"
+import type { ChiriPosition, ChiriStatement } from "../ChiriReader"
+import type { ChiriContextSpreadable, ChiriContextType, ResolveContextDataTuple } from "./body/Contexts"
+import Contexts from "./body/Contexts"
+import consumeBodyOptional from "./consumeBodyOptional"
 import type { ChiriCompilerVariable } from "./consumeCompilerVariableOptional"
 import consumeCompilerVariable from "./consumeCompilerVariableOptional"
-import type { ChiriFunctionUse } from "./consumeFunctionUseOptional"
-import consumeFunctionUseOptional from "./consumeFunctionUseOptional"
+import type { ChiriExpressionOperand } from "./consumeExpression"
+import consumeFunctionParameters from "./consumeFunctionParameters"
+import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
 import type { ChiriAlias } from "./macro/macroAlias"
 import macroAlias from "./macro/macroAlias"
@@ -15,10 +20,12 @@ import macroEach from "./macro/macroEach"
 import macroExport from "./macro/macroExport"
 import type { ChiriFor } from "./macro/macroFor"
 import macroFor from "./macro/macroFor"
+import type { ChiriFunction } from "./macro/macroFunctionDeclaration"
+import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
 import type { ChiriImport } from "./macro/macroImport"
 import macroImport from "./macro/macroImport"
 import type { ChiriMacro } from "./macro/macroMacroDeclaration"
-import macroFunctionDeclaration from "./macro/macroMacroDeclaration"
+import macroMacroDeclaration from "./macro/macroMacroDeclaration"
 import type { ChiriAssignment } from "./macro/macroSet"
 import macroSet from "./macro/macroSet"
 import type { ChiriShorthand } from "./macro/macroShorthand"
@@ -27,7 +34,7 @@ import macroShorthand from "./macro/macroShorthand"
 export type MacroResult =
 	| ChiriCompilerVariable
 	| ChiriMacro
-	| ChiriFunctionUse
+	| ChiriMacroUse
 	| ChiriShorthand
 	| ChiriImport
 	| ChiriEach
@@ -35,25 +42,31 @@ export type MacroResult =
 	| ChiriDo
 	| ChiriAssignment
 	| ChiriFor
+	| ChiriFunction
 
-export default async (reader: ChiriReader, context: ChiriContext): Promise<MacroResult | undefined> => {
+export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
+export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
+export default async function (reader: ChiriReader, ...context: ChiriContextSpreadable): Promise<MacroResult | undefined>
+export default async function (reader: ChiriReader, ...args: any[]): Promise<MacroResult | undefined> {
 	if (reader.input[reader.i] !== "#" || reader.input[reader.i + 1] === "{")
 		return undefined
 
-	if (await macroExport.consumeOptional(reader, context))
+	const context = args as [ChiriContextType, ResolveContextDataTuple<ChiriContextType>[0]]
+	if (await macroExport.consumeOptional(reader, ...context))
 		return undefined
 
 	const result = undefined
-		?? await macroImport.consumeOptional(reader, context)
-		?? await macroDebug.consumeOptional(reader, context)
-		?? await macroFunctionDeclaration.consumeOptional(reader, context)
-		?? await macroShorthand.consumeOptional(reader, context)
-		?? await macroAlias.consumeOptional(reader, context)
-		?? await macroEach.consumeOptional(reader, context)
-		?? await macroDo.consumeOptional(reader, context)
-		?? await macroSet.consumeOptional(reader, context)
-		?? await macroFor.consumeOptional(reader, context)
-		?? await consumeFunctionUseOptional(reader, context)
+		?? await macroImport.consumeOptional(reader, ...context)
+		?? await macroDebug.consumeOptional(reader, ...context)
+		?? await macroMacroDeclaration.consumeOptional(reader, ...context)
+		?? await macroFunctionDeclaration.consumeOptional(reader, ...context)
+		?? await macroShorthand.consumeOptional(reader, ...context)
+		?? await macroAlias.consumeOptional(reader, ...context)
+		?? await macroEach.consumeOptional(reader, ...context)
+		?? await macroDo.consumeOptional(reader, ...context)
+		?? await macroSet.consumeOptional(reader, ...context)
+		?? await macroFor.consumeOptional(reader, ...context)
+		?? await consumeDeclaredUse(reader)
 		?? consumeCompilerVariable(reader)
 
 	if (!result) {
@@ -73,4 +86,47 @@ export default async (reader: ChiriReader, context: ChiriContext): Promise<Macro
 	}
 
 	return result
+}
+
+
+export interface ChiriMacroUse {
+	type: "macro-use"
+	name: ChiriWord
+	assignments: Record<string, ChiriExpressionOperand>
+	content: ChiriStatement[]
+	position: ChiriPosition
+}
+
+async function consumeDeclaredUse (reader: ChiriReader): Promise<ChiriMacroUse | undefined> {
+	const position = reader.getPosition()
+	const restore = reader.savePosition()
+	if (!reader.consumeOptional("#"))
+		return undefined
+
+	const word = consumeWordOptional(reader)
+	const fn = word?.value && reader.getMacroOptional(word.value)
+	if (!fn) {
+		reader.restorePosition(restore)
+		return undefined
+	}
+
+	const assignments = consumeFunctionParameters(reader, restore.i, fn)
+
+	const bodyParameter = getFunctionParameters(fn)
+		.sort((a, b) => +!!a.expression - +!!b.expression)
+		.find(parameter => parameter.valueType.name.value === "body")
+
+	const context = bodyParameter?.valueType.generics[0].name.value as ChiriContextType | undefined
+	if (context === "function" || (context && !Contexts.includes(context)))
+		throw reader.error(`Invalid body context "${context}"`)
+
+	const body = context && await consumeBodyOptional(reader, context)
+
+	return {
+		type: "macro-use",
+		name: word,
+		assignments,
+		content: body ?? [],
+		position,
+	}
 }

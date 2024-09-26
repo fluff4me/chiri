@@ -8,7 +8,7 @@ export default (reader: ChiriReader, type: ChiriType) => {
 	const e = reader.i
 	const result = consumeTypeConstructorOptional(reader, type)
 	if (result === undefined)
-		throw reader.error(e, `Expected '${type.name.value}' constructor`)
+		throw reader.error(e, `Expected "${type.name.value}" constructor`)
 
 	return result
 }

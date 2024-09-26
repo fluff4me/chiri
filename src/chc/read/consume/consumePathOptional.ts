@@ -42,7 +42,7 @@ const isValidPathCharacter = {
 }[process.platform]
 
 if (!isValidPathCharacter)
-	throw new Error(`Unsupported platform '${process.platform}'`)
+	throw new Error(`Unsupported platform "${process.platform}"`)
 
 const consumePathSegment = (reader: ChiriReader): string => {
 	let segment = ""
