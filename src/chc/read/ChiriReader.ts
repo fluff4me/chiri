@@ -29,7 +29,7 @@ import type { ChiriAlias } from "./consume/macro/macroAlias"
 import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFor } from "./consume/macro/macroFor"
-import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
+import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
 import type { ChiriAssignment } from "./consume/macro/macroSet"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
@@ -53,7 +53,7 @@ export type ChiriStatement =
 	| ChiriDocumentation
 	// macro
 	| ChiriCompilerVariable
-	| ChiriFunction
+	| ChiriMacro
 	| ChiriFunctionUse
 	| ChiriEach
 	| ChiriDo
@@ -205,12 +205,12 @@ export default class ChiriReader {
 		return variable
 	}
 
-	getFunctionOptional (name: string) {
+	getMacroOptional (name: string) {
 		return undefined
-			?? this.#statements.findLast((statement): statement is ChiriFunction =>
-				statement.type === "function" && statement.name.value === name)
-			?? this.#outerStatements.findLast((statement): statement is ChiriFunction =>
-				statement.type === "function" && statement.name.value === name)
+			?? this.#statements.findLast((statement): statement is ChiriMacro =>
+				statement.type === "macro" && statement.name.value === name)
+			?? this.#outerStatements.findLast((statement): statement is ChiriMacro =>
+				statement.type === "macro" && statement.name.value === name)
 	}
 
 	getMixinOptional (name: string) {

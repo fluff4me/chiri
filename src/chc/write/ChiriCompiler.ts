@@ -8,7 +8,7 @@ import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriWordInterpolated } from "../read/consume/consumeWordInterpolatedOptional"
-import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
+import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
 import Arrays from "../util/Arrays"
 import { STATE_MAP, type ComponentState } from "../util/componentStates"
 import type { Value } from "../util/resolveExpression"
@@ -26,7 +26,7 @@ import type Writer from "./Writer"
 
 interface Scope {
 	variables?: Record<string, Value>
-	functions?: Record<string, ChiriFunction>
+	macros?: Record<string, ChiriMacro>
 	mixins?: Record<string, PreRegisteredMixin>
 	shorthands?: Record<string, string[]>
 	aliases?: Record<string, string[]>
@@ -86,8 +86,8 @@ interface ChiriCompiler {
 	setMixin (mixin: PreRegisteredMixin): void
 	getShorthand (property: string): string[]
 	setShorthand (property: string, affects: string[], position: ChiriPosition): void
-	getFunction (name: string, position: ChiriPosition): ChiriFunction
-	setFunction (fn: ChiriFunction): void
+	getFunction (name: string, position: ChiriPosition): ChiriMacro
+	setFunction (fn: ChiriMacro): void
 }
 
 function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
@@ -114,7 +114,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		getVariable, setVariable,
 		getMixin, setMixin,
 		getShorthand, setShorthand,
-		getFunction, setFunction,
+		getFunction: getMacro, setFunction: setMacro,
 	}
 
 	return compiler
@@ -177,24 +177,24 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 
 	////////////////////////////////////
-	//#region Functions
+	//#region Macros
 
-	function getFunction (name: string, position: ChiriPosition): ChiriFunction {
+	function getMacro (name: string, position: ChiriPosition): ChiriMacro {
 		for (let i = scopes.length - 1; i >= 0; i--) {
-			const functions = scopes[i].functions
+			const functions = scopes[i].macros
 			if (functions && name in functions)
 				return functions[name]
 		}
 
-		throw error(position, `Function ${name} is not defined`)
+		throw error(position, `Macro ${name} is not defined`)
 	}
 
-	function setFunction (fn: ChiriFunction) {
-		scope().functions ??= {}
-		if (scope().functions![fn.name.value])
-			throw error(fn.position, `Function ${fn.name.value} has already been defined in this scope`)
+	function setMacro (fn: ChiriMacro) {
+		scope().macros ??= {}
+		if (scope().macros![fn.name.value])
+			throw error(fn.position, `Macro ${fn.name.value} has already been defined in this scope`)
 
-		scope().functions![fn.name.value] = fn
+		scope().macros![fn.name.value] = fn
 	}
 
 	//#endregion
@@ -627,8 +627,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 
-			case "function":
-				setFunction(statement)
+			case "macro":
+				setMacro(statement)
 				return true
 
 			case "function-use": {
@@ -640,7 +640,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					}
 				}
 
-				const fn = getFunction(statement.name.value, statement.position)
+				const fn = getMacro(statement.name.value, statement.position)
 				if (!fn)
 					return undefined
 

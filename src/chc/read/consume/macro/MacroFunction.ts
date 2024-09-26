@@ -14,19 +14,19 @@ import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
 
-export interface ChiriFunctionBase {
+export interface ChiriMacroBase {
 	type: string
 	name: ChiriWord
 	content: ChiriStatement[]
 	position: ChiriPosition
 }
 
-export interface ChiriFunctionInternal<T> extends ChiriFunctionBase {
-	type: "function:internal"
+export interface ChiriMacroInternal<T> extends ChiriMacroBase {
+	type: "macro:internal"
 	consumeOptional (reader: ChiriReader, bodyType: ChiriContext): Promise<T | undefined>
 }
 
-export interface ChiriFunctionInternalConsumerInfo<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+export interface ChiriMacroInternalConsumerInfo<NAMED extends boolean = false, BODY = null, EXTRA = never> {
 	reader: ChiriReader
 	assignments: Record<string, ChiriExpressionOperand>
 	body: (BODY extends null ? never : BODY)[]
@@ -35,20 +35,20 @@ export interface ChiriFunctionInternalConsumerInfo<NAMED extends boolean = false
 	position: ChiriPosition
 }
 
-export type ChiriFunctionInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>
+export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>
 
-export interface ChiriFunctionInternalFactory<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+export interface ChiriMacroInternalFactory<NAMED extends boolean = false, BODY = null, EXTRA = never> {
 	usability (...types: ChiriContext[]): this
-	consumeParameters<T> (consumer: ChiriFunctionInternalParametersConsumer<T>): ChiriFunctionInternalFactory<NAMED, BODY, T>
-	named (): ChiriFunctionInternalFactory<true, BODY>
+	consumeParameters<T> (consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>
+	named (): ChiriMacroInternalFactory<true, BODY>
 	parameter (name: string, type: ChiriType, value?: ChiriExpressionOperand): this
-	body<CONTEXT extends ChiriContext> (context: CONTEXT): ChiriFunctionInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
-	consume<T> (consumer: (info: ChiriFunctionInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriFunctionInternal<T>
+	body<CONTEXT extends ChiriContext> (context: CONTEXT): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
+	consume<T> (consumer: (info: ChiriMacroInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriMacroInternal<T>
 }
 
-export default function (type: string): ChiriFunctionInternalFactory {
+export default function (type: string): ChiriMacroInternalFactory {
 	const parameters: ChiriCompilerVariable[] = []
-	let parametersConsumer: ChiriFunctionInternalParametersConsumer<any> | undefined
+	let parametersConsumer: ChiriMacroInternalParametersConsumer<any> | undefined
 	let bodyContext: ChiriContext | undefined
 	let named = false
 	let usability = Contexts.slice()
@@ -59,7 +59,7 @@ export default function (type: string): ChiriFunctionInternalFactory {
 		},
 		named () {
 			named = true
-			return this as ChiriFunctionInternalFactory<boolean, any> as ChiriFunctionInternalFactory<true, any>
+			return this as ChiriMacroInternalFactory<boolean, any> as ChiriMacroInternalFactory<true, any>
 		},
 		consumeParameters (consumer) {
 			parametersConsumer = consumer
@@ -78,11 +78,11 @@ export default function (type: string): ChiriFunctionInternalFactory {
 		},
 		body<CONTEXT extends ChiriContext> (context: CONTEXT) {
 			bodyContext = context
-			return this as ChiriFunctionInternalFactory<boolean, ContextStatement<CONTEXT>>
+			return this as ChiriMacroInternalFactory<boolean, ContextStatement<CONTEXT>>
 		},
 		consume (consumer) {
 			return {
-				type: "function:internal",
+				type: "macro:internal",
 				name: { type: "word", value: type, position: INTERNAL_POSITION },
 				position: INTERNAL_POSITION,
 				content: parameters,

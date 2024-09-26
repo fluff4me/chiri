@@ -8,9 +8,9 @@ import consumeExpression from "./consumeExpression"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import consumeWordOptional from "./consumeWordOptional"
-import type { ChiriFunctionBase } from "./macro/MacroFunction"
+import type { ChiriMacroBase } from "./macro/MacroFunction"
 
-export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
+export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 	const fnTypeSymbol = fn.type === "mixin" ? "%"
 		: fn.type === "function" || fn.type === "function:internal" ? "#"
 			: "???"

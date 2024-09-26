@@ -15,10 +15,10 @@ import macroEach from "./macro/macroEach"
 import macroExport from "./macro/macroExport"
 import type { ChiriFor } from "./macro/macroFor"
 import macroFor from "./macro/macroFor"
-import type { ChiriFunction } from "./macro/macroFunctionDeclaration"
-import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
 import type { ChiriImport } from "./macro/macroImport"
 import macroImport from "./macro/macroImport"
+import type { ChiriMacro } from "./macro/macroMacroDeclaration"
+import macroFunctionDeclaration from "./macro/macroMacroDeclaration"
 import type { ChiriAssignment } from "./macro/macroSet"
 import macroSet from "./macro/macroSet"
 import type { ChiriShorthand } from "./macro/macroShorthand"
@@ -26,7 +26,7 @@ import macroShorthand from "./macro/macroShorthand"
 
 export type MacroResult =
 	| ChiriCompilerVariable
-	| ChiriFunction
+	| ChiriMacro
 	| ChiriFunctionUse
 	| ChiriShorthand
 	| ChiriImport
