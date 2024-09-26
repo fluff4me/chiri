@@ -1,0 +1,7 @@
+#function round returns int:
+	#dec value
+	#int truncated = value
+	#set value -= truncated
+	#return match value >= 0.5:
+		true: truncated + 1
+		false: truncated

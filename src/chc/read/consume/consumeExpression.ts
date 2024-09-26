@@ -79,7 +79,7 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	e = reader.i
 	const word = consumeWordOptional(reader)
 	if (word) {
-		const variable = reader.getVariable(word.value)
+		const variable = reader.getVariableOptional(word.value)
 		if (variable)
 			return {
 				type: "get",
@@ -96,7 +96,7 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	throw reader.error("Unknown expression operand type")
 }
 
-const consumeOperatorOptional = (reader: ChiriReader, operators: Record<Operator, Record<string, string>>): string | undefined => {
+export const consumeOperatorOptional = (reader: ChiriReader, operators: Record<Operator, Record<string, string>>): string | undefined => {
 	for (const o in operators)
 		if (reader.consumeOptional(o))
 			return o

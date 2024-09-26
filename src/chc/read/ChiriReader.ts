@@ -25,8 +25,12 @@ import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePr
 import type { ChiriValueText } from "./consume/consumeValueText"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
+import type { ChiriAlias } from "./consume/macro/macroAlias"
+import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
+import type { ChiriFor } from "./consume/macro/macroFor"
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
+import type { ChiriAssignment } from "./consume/macro/macroSet"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
@@ -52,11 +56,15 @@ export type ChiriStatement =
 	| ChiriFunction
 	| ChiriFunctionUse
 	| ChiriEach
+	| ChiriDo
+	| ChiriAssignment
+	| ChiriFor
 	// root
 	| ChiriRoot
 	| ChiriComponent
 	| ChiriMixin
 	| ChiriShorthand
+	| ChiriAlias
 	// mixin
 	| ChiriProperty
 	// rule
@@ -181,7 +189,7 @@ export default class ChiriReader {
 			.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable")
 	}
 
-	getVariable (name: string) {
+	getVariableOptional (name: string) {
 		return undefined
 			?? this.#statements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
@@ -189,7 +197,15 @@ export default class ChiriReader {
 				statement.type === "variable" && statement.name.value === name)
 	}
 
-	getFunction (name: string) {
+	getVariable (name: string, start = this.i) {
+		const variable = this.getVariableOptional(name)
+		if (!variable)
+			throw this.error(start, `No variable "${name}" exists`)
+
+		return variable
+	}
+
+	getFunctionOptional (name: string) {
 		return undefined
 			?? this.#statements.findLast((statement): statement is ChiriFunction =>
 				statement.type === "function" && statement.name.value === name)
@@ -197,12 +213,25 @@ export default class ChiriReader {
 				statement.type === "function" && statement.name.value === name)
 	}
 
-	getMixin (name: string) {
+	getMixinOptional (name: string) {
 		return undefined
 			?? this.#statements.findLast((statement): statement is ChiriMixin =>
 				statement.type === "mixin" && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriMixin =>
 				statement.type === "mixin" && statement.name.value === name)
+	}
+
+	with (...scopeStatements: ChiriStatement[]) {
+		return {
+			do: <T> (callback: () => T): T => {
+				this.#statements.push(...scopeStatements)
+				try {
+					return callback()
+				} finally {
+					this.#statements.splice(-scopeStatements.length, scopeStatements.length)
+				}
+			},
+		}
 	}
 
 	getType (name: string | ChiriType) {
@@ -345,12 +374,11 @@ export default class ChiriReader {
 			return statements
 		}
 
-		if (macro && (macro.type === "function-use" || macro.type === "function" || macro.type === "shorthand")) {
-			return macro
-		}
-
 		if (macro)
-			throw this.error(e, `Macro result type "${macro.type}" is not supported yet`)
+			return macro
+
+		// if (macro)
+		// 	throw this.error(e, `Macro result type "${(macro as MacroResult).type}" is not supported yet`)
 
 		//#endregion
 		////////////////////////////////////

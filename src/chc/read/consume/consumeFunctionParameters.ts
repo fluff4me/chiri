@@ -43,7 +43,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriFunctionBase) => {
 		const expectedType = parameter.valueType
 
 		if (!reader.consumeOptional("=")) {
-			const variableInScope = reader.getVariable(word.value)
+			const variableInScope = reader.getVariableOptional(word.value)
 			if (variableInScope) {
 				if (!reader.types.isAssignable(variableInScope.valueType, expectedType))
 					throw reader.error(e, `Unable to set ${word.value} to variable of same name, expected ${ChiriType.stringify(expectedType)}, but variable is ${ChiriType.stringify(variableInScope.valueType)}`)

@@ -6,3 +6,10 @@ $space-2: 4px
 $space-3: 8px
 $space-4: 16px
 $space-5: 32px
+
+#for var i = 0, i <= 5, set i++:
+	$dark-#{i}: ##{i}#{i}#{i}
+
+#for var i = 0, i <= 5, set i++:
+	#string hex = hex(15 - i)
+	$light-#{i}: ##{hex}#{hex}#{hex}

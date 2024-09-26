@@ -66,6 +66,9 @@ export default ChiriClasses;
 export as namespace ChiriClasses;
 ```
 
+## Generated Class Ordering
+If mixins are compiled into CSS classes, you might be wondering whether you have to constantly keep the declaration order of your mixins in mind so that components appear how you'd like them to appear. The answer is *no* — mixin classes are generated dynamically based on what the components need. If a previously generated class for a mixin is generated before a mixin you want to take higher precedence on a component, a new copy of the mixin class is generated.
+
 ## Selectors
 Selectors are more restrictive than in base CSS, as chiri stylesheets are intended to be used *exclusively* for components, and *anything* that needs custom styles *should* be a component.
 

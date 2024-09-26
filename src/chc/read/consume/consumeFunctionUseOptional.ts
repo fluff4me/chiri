@@ -23,7 +23,7 @@ export default async (reader: ChiriReader, context: ChiriContext): Promise<Chiri
 		return undefined
 
 	const word = consumeWordOptional(reader)
-	const fn = word?.value && reader.getFunction(word.value)
+	const fn = word?.value && reader.getFunctionOptional(word.value)
 	if (!fn) {
 		reader.restorePosition(restore)
 		return undefined

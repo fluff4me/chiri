@@ -13,7 +13,6 @@ import Arrays from "../util/Arrays"
 import { STATE_MAP, type ComponentState } from "../util/componentStates"
 import type { Value } from "../util/resolveExpression"
 import resolveExpression from "../util/resolveExpression"
-import stringifyExpression from "../util/stringifyExpression"
 import stringifyText from "../util/stringifyText"
 import Strings from "../util/Strings"
 import type { ArrayOr } from "../util/Type"
@@ -30,6 +29,7 @@ interface Scope {
 	functions?: Record<string, ChiriFunction>
 	mixins?: Record<string, PreRegisteredMixin>
 	shorthands?: Record<string, string[]>
+	aliases?: Record<string, string[]>
 }
 
 function Scope (data: Scope): Scope {
@@ -264,24 +264,32 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	//#region Shorthands
 
 	function getShorthand (property: string): string[] {
-		for (let i = scopes.length - 1; i >= 0; i--) {
-			const shorthands = scopes[i].shorthands
-			if (shorthands && property in shorthands)
-				return shorthands[property]
-		}
-
-		return [property]
+		return root().shorthands?.[property] ?? [property]
 	}
 
 	function setShorthand (property: string, affects: string[], position: ChiriPosition) {
-		for (let i = scopes.length - 1; i >= 0; i--) {
-			const shorthands = scopes[i].shorthands
-			if (shorthands && property in shorthands)
-				throw error(position, `#shorthand of="${property}" cannot be redefined`)
-		}
+		const shorthands = root().shorthands ??= {}
 
-		root().shorthands ??= {}
-		root().shorthands![property] = affects
+		// allow redefining specific things that are in core lib
+		// if (shorthands[property])
+		// 	throw error(position, `#shorthand ${property} cannot be redefined`)
+
+		shorthands[property] = affects
+	}
+
+	//#endregion
+	////////////////////////////////////
+
+	////////////////////////////////////
+	//#region Aliases
+
+	function getAlias (property: string): string[] {
+		return root().aliases?.[property] ?? [property]
+	}
+
+	function setAlias (property: string, properties: string[], position: ChiriPosition) {
+		const aliases = root().aliases ??= {}
+		aliases[property] = properties
 	}
 
 	//#endregion
@@ -359,11 +367,19 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 			case "shorthand": {
-				const property = stringifyExpression(compiler, statement.property)
+				const property = stringifyText(compiler, statement.property)
 				const affects = compileStatements(statement.body, undefined, compileShorthand)
 					.filter(affected => !!affected)
 
 				setShorthand(property, affects, statement.position)
+				return true
+			}
+			case "alias": {
+				const property = stringifyText(compiler, statement.property)
+				const properties = compileStatements(statement.body, undefined, compileShorthand)
+					.filter(affected => !!affected)
+
+				setAlias(property, properties, statement.position)
 				return true
 			}
 			case "root": {
@@ -569,11 +585,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function emitProperty (property: ResolvedProperty) {
 		if (property.isCustomProperty) css.write("--")
-		css.writeWord(property.property)
-		css.write(":")
-		css.writeSpaceOptional()
-		css.write(property.value)
-		css.writeLine(";")
+		const aliases = property.isCustomProperty ? [property.property.value] : getAlias(property.property.value)
+		for (const alias of aliases) {
+			css.writeWord({ type: "word", value: alias, position: property.property.position })
+			css.write(":")
+			css.writeSpaceOptional()
+			css.write(property.value)
+			css.writeLine(";")
+		}
 	}
 
 	function emitMixin (mixin: RegisteredMixin) {
@@ -645,6 +664,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 				return result
 			}
+
+			case "do":
+				return compileStatements(statement.content, undefined, contextConsumer)
 		}
 	}
 

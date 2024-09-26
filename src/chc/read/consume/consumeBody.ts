@@ -12,11 +12,11 @@ export interface ChiriBody<STATEMENT = ChiriStatement> {
 	content: STATEMENT[]
 }
 
-async function consumeBody<CONTEXT extends ChiriContext> (reader: ChiriReader, context: CONTEXT, initialiser?: (sub: ChiriReader) => any): Promise<ChiriBody<ContextStatement<CONTEXT>>>
-async function consumeBody (reader: ChiriReader, context: ChiriContext, initialiser?: (sub: ChiriReader) => any): Promise<ChiriBody<ContextStatement<ChiriContext>>> {
+async function consumeBody<CONTEXT extends ChiriContext> (reader: ChiriReader, context: CONTEXT, initialiser?: (sub: ChiriReader) => any, singleLineOnly?: true): Promise<ChiriBody<ContextStatement<CONTEXT>>>
+async function consumeBody (reader: ChiriReader, context: ChiriContext, initialiser?: (sub: ChiriReader) => any, singleLineOnly?: true): Promise<ChiriBody<ContextStatement<ChiriContext>>> {
 	assertNotWhiteSpaceAndNewLine(reader)
 
-	const multiline = consumeBlockStartOptional(reader)
+	const multiline = !singleLineOnly && consumeBlockStartOptional(reader)
 	const whitespace = multiline || consumeWhiteSpaceOptional(reader)
 	if (!whitespace)
 		return {

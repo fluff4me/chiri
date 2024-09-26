@@ -1,4 +1,5 @@
 import { INTERNAL_POSITION } from "../../../../constants"
+import type { PromiseOr } from "../../../util/Type"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import type { ChiriType } from "../../ChiriType"
@@ -34,14 +35,14 @@ export interface ChiriFunctionInternalConsumerInfo<NAMED extends boolean = false
 	position: ChiriPosition
 }
 
-export type ChiriFunctionInternalParametersConsumer<T> = (reader: ChiriReader) => T
+export type ChiriFunctionInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>
 
 export interface ChiriFunctionInternalFactory<NAMED extends boolean = false, BODY = null, EXTRA = never> {
 	usability (...types: ChiriContext[]): this
 	consumeParameters<T> (consumer: ChiriFunctionInternalParametersConsumer<T>): ChiriFunctionInternalFactory<NAMED, BODY, T>
 	named (): ChiriFunctionInternalFactory<true, BODY>
 	parameter (name: string, type: ChiriType, value?: ChiriExpressionOperand): this
-	body<CONTEXT extends ChiriContext> (context: CONTEXT): ChiriFunctionInternalFactory<NAMED, ContextStatement<CONTEXT>>
+	body<CONTEXT extends ChiriContext> (context: CONTEXT): ChiriFunctionInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
 	consume<T> (consumer: (info: ChiriFunctionInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriFunctionInternal<T>
 }
 
@@ -92,6 +93,7 @@ export default function (type: string): ChiriFunctionInternalFactory {
 					if (!reader.consumeOptional(`#${type}`))
 						return undefined
 
+					context = context === "inherit" ? reader.context : context
 					if (!usability.includes(context))
 						throw reader.error(`#${type} cannot be used in "${context}" context`)
 
@@ -105,7 +107,7 @@ export default function (type: string): ChiriFunctionInternalFactory {
 							throw reader.error("Expected declaration name")
 					}
 
-					const extra = parametersConsumer?.(reader) as never
+					const extra = await parametersConsumer?.(reader) as never
 					const assignments = parametersConsumer ? {} : consumeFunctionParameters(reader, start, this)
 					const body = bodyContext ? await consumeBodyOptional(reader, bodyContext) : []
 					const result = await consumer({

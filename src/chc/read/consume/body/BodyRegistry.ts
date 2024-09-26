@@ -1,7 +1,7 @@
 import type { ChiriStatement } from "../../ChiriReader"
 import type BodyFunction from "./BodyFunction"
 import bodyPaths from "./bodyPaths"
-import bodyShorthand from "./bodyShorthand"
+import bodyPropertyName from "./bodyPropertyName"
 import bodyText from "./bodyText"
 import type { ChiriContext } from "./Contexts"
 
@@ -13,7 +13,7 @@ const BodyRegistry = {
 	mixin: undefined,
 	component: undefined,
 	state: undefined,
-	shorthand: bodyShorthand,
+	"property-name": bodyPropertyName,
 	paths: bodyPaths,
 	text: bodyText,
 } satisfies Record<ChiriContext, BodyFunction<any, []> | undefined>

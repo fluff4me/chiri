@@ -23,9 +23,6 @@ export default MacroFunction("each")
 		let e = reader.i
 		const iterable = consumeWord(reader)
 		const iterableVariable = reader.getVariable(iterable.value)
-		if (!iterableVariable)
-			throw reader.error(e, `No variable "${iterable.value}" exists`)
-
 		if (!reader.types.isAssignable(iterableVariable.valueType, ChiriType.of("list", "*")))
 			throw reader.error(e, `Expected list or record, was ${ChiriType.stringify(iterableVariable?.valueType)}`)
 

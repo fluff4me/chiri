@@ -83,9 +83,6 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 
 				reader.i--
 				const variable = reader.getVariable(word.value)
-				if (!variable)
-					throw reader.error(e, `Variable '${word.value}' has not been declared`)
-
 				const valueType = variable.valueType
 				if (!valueType || !reader.getType(valueType).stringable)
 					throw reader.error(e, `Type '${ChiriType.stringify(valueType)}' is not stringable`)

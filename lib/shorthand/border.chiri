@@ -1,8 +1,8 @@
-#function border-shorthand:
+#macro border-shorthand:
 	#string of
 	#list!string affects ??= [of]
-	#body!shorthand body?
-	#shorthand of:
+	#body!property-name body?
+	#shorthand #{of}:
 		#{body}
 		#var subproperties = ["width", "style", "color"]
 		#each affects as var affected:

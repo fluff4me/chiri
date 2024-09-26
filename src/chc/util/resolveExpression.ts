@@ -45,7 +45,8 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 						case "/":
 							return operandA / operandB
 						case "%":
-							return operandA % operandB
+							// TODO maybe add an operator for normal %?
+							return ((operandA % operandB) + operandB) % operandB
 						case "**":
 							return operandA ** operandB
 						case "==":

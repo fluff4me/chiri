@@ -3,12 +3,12 @@ const Contexts = [
 	"root" as const,
 	"generic" as const,
 	"function" as const,
-	"shorthand" as const,
 	"paths" as const,
 	"text" as const,
 	"mixin" as const,
 	"component" as const,
 	"state" as const,
+	"property-name" as const,
 ]
 
 export default Contexts
