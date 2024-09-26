@@ -2,12 +2,12 @@ import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import consumeBody from "../consumeBody"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
 import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
-import type { ChiriExpressionOperand } from "../consumeExpression"
-import consumeExpression from "../consumeExpression"
 import consumeInlineMacroUseOptional from "../consumeInlineMacroUseOptional"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
-import MacroFunction from "./MacroFunction"
+import type { ChiriExpressionOperand } from "../expression/consumeExpression"
+import consumeExpression from "../expression/consumeExpression"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriFor {
 	type: "for"
@@ -18,7 +18,7 @@ export interface ChiriFor {
 	position: ChiriPosition
 }
 
-export default MacroFunction("for")
+export default MacroConstruct("for")
 	.consumeParameters(reader => {
 		consumeWhiteSpace(reader)
 

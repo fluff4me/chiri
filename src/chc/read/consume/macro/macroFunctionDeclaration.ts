@@ -3,8 +3,8 @@
 import type { ChiriType, ChiriTypeGeneric } from "../../ChiriType"
 import { consumeType, consumeTypeOptional } from "../consumeType"
 import consumeWhiteSpace from "../consumeWhiteSpace"
-import type { ChiriMacroBase } from "./MacroFunction"
-import MacroFunction from "./MacroFunction"
+import type { ChiriMacroBase } from "./MacroConstruct"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriFunction extends ChiriMacroBase {
 	type: "function"
@@ -12,7 +12,7 @@ export interface ChiriFunction extends ChiriMacroBase {
 	returnType: ChiriType
 }
 
-export default MacroFunction("function")
+export default MacroConstruct("function")
 	.named()
 	.consumeParameters(reader => {
 		consumeWhiteSpace(reader)

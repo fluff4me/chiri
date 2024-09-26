@@ -3,13 +3,13 @@ import { INTERNAL_POSITION } from "../../../../constants"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
 import { ChiriType } from "../../ChiriType"
-import type { ChiriExpressionOperand } from "../consumeExpression"
-import consumeExpression, { consumeOperatorOptional } from "../consumeExpression"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWord from "../consumeWord"
-import MacroFunction from "./MacroFunction"
+import type { ChiriExpressionOperand } from "../expression/consumeExpression"
+import consumeExpression, { consumeOperatorOptional } from "../expression/consumeExpression"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriAssignment {
 	type: "assignment"
@@ -89,7 +89,7 @@ export const consumeAssignmentOptional = (reader: ChiriReader): ChiriAssignment 
 	}
 }
 
-export default MacroFunction("set")
+export default MacroConstruct("set")
 	.consumeParameters(consumeAssignmentData)
 	.consume(({ extra, position }): ChiriAssignment => {
 		return {

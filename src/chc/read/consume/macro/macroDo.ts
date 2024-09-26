@@ -1,6 +1,6 @@
 import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import consumeBody from "../consumeBody"
-import MacroFunction from "./MacroFunction"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriDo {
 	type: "do"
@@ -8,7 +8,7 @@ export interface ChiriDo {
 	position: ChiriPosition
 }
 
-export default MacroFunction("do")
+export default MacroConstruct("do")
 	.consume(async ({ reader, position }): Promise<ChiriDo> => {
 		reader.consume(":")
 		const body = await consumeBody(reader, "inherit")

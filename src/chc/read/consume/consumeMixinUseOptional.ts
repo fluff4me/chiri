@@ -1,9 +1,9 @@
 import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
-import type { ChiriExpressionOperand } from "./consumeExpression"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
+import type { ChiriExpressionOperand } from "./expression/consumeExpression"
 
 export interface ChiriMixinUse {
 	type: "mixin-use"

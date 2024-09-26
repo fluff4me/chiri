@@ -1,7 +1,7 @@
 import type { ChiriMacroUse } from "../consumeMacroUseOptional"
-import MacroFunction from "./MacroFunction"
+import MacroConstruct from "./MacroConstruct"
 
-export default MacroFunction("debug")
+export default MacroConstruct("debug")
 	.body("text")
 	.consume(({ reader, assignments, body, position }): ChiriMacroUse => ({
 		type: "macro-use",

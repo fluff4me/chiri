@@ -1,4 +1,4 @@
-import type { ChiriExpressionOperand } from "../read/consume/consumeExpression"
+import type { ChiriExpressionOperand } from "../read/consume/expression/consumeExpression"
 import type ChiriCompiler from "../write/ChiriCompiler"
 import type { Value } from "./resolveExpression"
 import resolveExpression from "./resolveExpression"

@@ -1,9 +1,9 @@
 import { LITERAL_FALSE, LITERAL_STRING_ROOT } from "../../../../constants"
 import { ChiriType } from "../../ChiriType"
 import isLiteral from "../../guard/isLiteral"
-import MacroFunction from "./MacroFunction"
+import MacroConstruct from "./MacroConstruct"
 
-export default MacroFunction("export")
+export default MacroConstruct("export")
 	.parameter("reusable", ChiriType.of("bool"), LITERAL_FALSE)
 	.parameter("in", ChiriType.of("string"), LITERAL_STRING_ROOT)
 	.consume(({ reader, assignments }) => {

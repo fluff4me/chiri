@@ -2,8 +2,8 @@
 
 import type ChiriReader from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
-import consumeExpression, { type ChiriExpressionOperand } from "./consumeExpression"
 import type { ChiriInterpolationVariable, ChiriTextRaw, ChiriValueText } from "./consumeValueText"
+import consumeExpression, { type ChiriExpressionOperand } from "./expression/consumeExpression"
 
 export interface ChiriWordInterpolated extends ChiriValueText {
 	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[]

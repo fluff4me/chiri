@@ -1,8 +1,8 @@
 import type { ChiriPosition } from "../../ChiriReader"
-import type { ChiriExpressionOperand } from "../consumeExpression"
-import consumeExpression from "../consumeExpression"
 import consumeWhiteSpace from "../consumeWhiteSpace"
-import MacroFunction from "./MacroFunction"
+import type { ChiriExpressionOperand } from "../expression/consumeExpression"
+import consumeExpression from "../expression/consumeExpression"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriReturn {
 	type: "return"
@@ -10,7 +10,7 @@ export interface ChiriReturn {
 	position: ChiriPosition
 }
 
-export default MacroFunction("return")
+export default MacroConstruct("return")
 	.consume(({ reader, position }): ChiriReturn => {
 		consumeWhiteSpace(reader)
 		consumeExpression(reader)

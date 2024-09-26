@@ -3,13 +3,13 @@
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriType } from "../ChiriType"
-import type { ChiriExpressionOperand } from "./consumeExpression"
-import consumeExpression from "./consumeExpression"
 import { consumeTypeOptional } from "./consumeType"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import consumeWord, { type ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
+import type { ChiriExpressionOperand } from "./expression/consumeExpression"
+import consumeExpression from "./expression/consumeExpression"
 
 export interface ChiriCompilerVariable {
 	type: "variable"

@@ -2,7 +2,7 @@ import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWordInterpolated from "../consumeWordInterpolated"
 import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional"
-import MacroFunction from "./MacroFunction"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriShorthand {
 	type: "shorthand"
@@ -11,7 +11,7 @@ export interface ChiriShorthand {
 	position: ChiriPosition
 }
 
-export default MacroFunction("shorthand")
+export default MacroConstruct("shorthand")
 	.consumeParameters(reader => consumeWhiteSpace(reader) && consumeWordInterpolated(reader))
 	.body("property-name")
 	.consume(({ reader, body, position, extra }): ChiriShorthand => ({

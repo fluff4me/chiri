@@ -3,10 +3,10 @@ import { ChiriType } from "../ChiriType"
 import type { ChiriTypeDefinition } from "../ChiriTypeManager"
 import consumeBlockEnd from "../consume/consumeBlockEnd"
 import consumeBlockStartOptional from "../consume/consumeBlockStartOptional"
-import type { ChiriExpressionOperand } from "../consume/consumeExpression"
-import consumeExpression from "../consume/consumeExpression"
 import consumeNewBlockLineOptional from "../consume/consumeNewBlockLineOptional"
 import consumeWhiteSpaceOptional from "../consume/consumeWhiteSpaceOptional"
+import type { ChiriExpressionOperand } from "../consume/expression/consumeExpression"
+import consumeExpression from "../consume/expression/consumeExpression"
 
 export interface ChiriLiteralList {
 	type: "literal"

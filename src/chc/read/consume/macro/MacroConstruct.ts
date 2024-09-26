@@ -8,11 +8,11 @@ import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData
 import Contexts from "../body/Contexts"
 import consumeBodyOptional from "../consumeBodyOptional"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
-import type { ChiriExpressionOperand } from "../consumeExpression"
 import consumeFunctionParameters from "../consumeFunctionParameters"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
+import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 
 export interface ChiriMacroBase {
 	type: string

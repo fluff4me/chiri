@@ -6,7 +6,7 @@ import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import type { ChiriWord } from "../consumeWord"
 import consumeWord from "../consumeWord"
-import MacroFunction from "./MacroFunction"
+import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriEach {
 	type: "each"
@@ -16,7 +16,7 @@ export interface ChiriEach {
 	position: ChiriPosition
 }
 
-export default MacroFunction("each")
+export default MacroConstruct("each")
 	.consumeParameters(reader => {
 		consumeWhiteSpace(reader)
 

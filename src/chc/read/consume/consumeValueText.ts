@@ -1,11 +1,11 @@
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
-import consumeExpression, { type ChiriExpressionOperand } from "./consumeExpression"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordInterpolated from "./consumeWordInterpolated"
 import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
+import consumeExpression, { type ChiriExpressionOperand } from "./expression/consumeExpression"
 
 export interface ChiriInterpolationVariable {
 	type: "interpolation-variable"

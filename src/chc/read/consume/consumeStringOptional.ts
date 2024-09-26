@@ -5,10 +5,10 @@ import type { ChiriPosition } from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
-import type { ChiriExpressionOperand } from "./consumeExpression"
 import consumeIndentOptional from "./consumeIndentOptional"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import consumeWordOptional from "./consumeWordOptional"
+import type { ChiriExpressionOperand } from "./expression/consumeExpression"
 
 export interface ChiriLiteralString {
 	type: "literal"
