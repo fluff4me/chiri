@@ -22,6 +22,8 @@ import type { ChiriFor } from "./macro/macroFor"
 import macroFor from "./macro/macroFor"
 import type { ChiriFunction } from "./macro/macroFunctionDeclaration"
 import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
+import type { ChiriElse, ChiriIf } from "./macro/macroIf"
+import macroIf, { macroElse, macroIfElse } from "./macro/macroIf"
 import type { ChiriImport } from "./macro/macroImport"
 import macroImport from "./macro/macroImport"
 import type { ChiriMacro } from "./macro/macroMacroDeclaration"
@@ -30,6 +32,8 @@ import type { ChiriAssignment } from "./macro/macroSet"
 import macroSet from "./macro/macroSet"
 import type { ChiriShorthand } from "./macro/macroShorthand"
 import macroShorthand from "./macro/macroShorthand"
+import type { ChiriWhile } from "./macro/macroWhile"
+import macroWhile from "./macro/macroWhile"
 
 export type MacroResult =
 	| ChiriCompilerVariable
@@ -43,6 +47,9 @@ export type MacroResult =
 	| ChiriAssignment
 	| ChiriFor
 	| ChiriFunction
+	| ChiriWhile
+	| ChiriIf
+	| ChiriElse
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
 export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
@@ -66,6 +73,10 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroDo.consumeOptional(reader, ...context)
 		?? await macroSet.consumeOptional(reader, ...context)
 		?? await macroFor.consumeOptional(reader, ...context)
+		?? await macroWhile.consumeOptional(reader, ...context)
+		?? await macroIf.consumeOptional(reader, ...context)
+		?? await macroIfElse.consumeOptional(reader, ...context)
+		?? await macroElse.consumeOptional(reader, ...context)
 		?? await consumeDeclaredUse(reader)
 		?? await consumeCompilerVariable(reader)
 

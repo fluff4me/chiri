@@ -20,7 +20,7 @@
 	#while num > 0:
 		#int remainder = num % 16
 		#string place = #hex-place num=remainder
-		#set result = place + result
+		#set result = place . result
 		#set num /= 16
 
 	#if negative:

@@ -35,6 +35,7 @@ export interface ChiriMacroInternalConsumerInfo<NAMED extends boolean = false, B
 	name: NAMED extends true ? ChiriWord : undefined
 	extra: EXTRA
 	position: ChiriPosition
+	start: number
 }
 
 export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends boolean = false, EXTRA = never> =
@@ -125,6 +126,7 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 						name: name as undefined,
 						extra,
 						position,
+						start,
 					}
 
 					const [contextType, contextData] = bodyContext ?? []

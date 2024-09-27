@@ -42,8 +42,16 @@ const binaryBitwiseOperators = ["&", "|", "^"] as const
 const unaryBitwiseOperators = ["~"] as const
 const binaryBooleanOperators = ["||", "&&", "==", "!="] as const
 const unaryBooleanOperators = ["!"] as const
+const binaryStringOperators = [".", "x"] as const
 
-export type Operator = (typeof binaryNumericOperators)[number] | (typeof unaryNumericOperators)[number] | (typeof binaryBitwiseOperators)[number] | (typeof unaryBitwiseOperators)[number] | (typeof binaryBooleanOperators)[number] | (typeof unaryBooleanOperators)[number]
+export type Operator =
+	| (typeof binaryNumericOperators)[number]
+	| (typeof unaryNumericOperators)[number]
+	| (typeof binaryBitwiseOperators)[number]
+	| (typeof unaryBitwiseOperators)[number]
+	| (typeof binaryBooleanOperators)[number]
+	| (typeof unaryBooleanOperators)[number]
+	| (typeof binaryStringOperators)[number]
 
 const minNumericPrecision2 = (typeA: string, typeB: string): "uint" | "int" | "dec" => (typeA === "dec" || typeB === "dec") ? "dec"
 	: (typeA === "int" || typeB === "int") ? "int"
@@ -71,9 +79,13 @@ const operatorResults: Record<string, string | ((typeA: string, typeB?: string) 
 	"&": "int",
 	"|": "int",
 	"^": "int",
+	".": "string",
+	"x": "string",
 }
 
-const minNumericPrecisionOperators: Set<Operator> = new Set(["+", "-", "*", "%"])
+const operatorOperandBTypes: Record<string, string> = {
+	"x": "uint",
+}
 
 export default class ChiriTypeManager {
 
@@ -140,6 +152,9 @@ export default class ChiriTypeManager {
 
 		for (const operator of unaryBooleanOperators)
 			this.registerUnaryOperator(operator, "bool")
+
+		for (const operator of binaryStringOperators)
+			this.registerBinaryOperator("string", operator, operatorOperandBTypes[operator] ?? "string")
 	}
 
 	registerGenerics (...generics: ChiriTypeGeneric[]) {

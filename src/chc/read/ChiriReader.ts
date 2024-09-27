@@ -29,10 +29,12 @@ import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFor } from "./consume/macro/macroFor"
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
+import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf"
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
 import type { ChiriReturn } from "./consume/macro/macroReturn"
 import type { ChiriAssignment } from "./consume/macro/macroSet"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
+import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import type { ChiriComponent } from "./consume/rule/Rule"
@@ -63,6 +65,9 @@ export type ChiriStatement =
 	| ChiriFor
 	| ChiriFunction
 	| ChiriReturn
+	| ChiriWhile
+	| ChiriIf
+	| ChiriElse
 	// root
 	| ChiriRoot
 	| ChiriComponent
