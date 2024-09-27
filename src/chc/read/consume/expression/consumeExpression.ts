@@ -15,6 +15,8 @@ import consumeWordOptional from "../consumeWordOptional"
 import consumeDecimalOptional from "../numeric/consumeDecimalOptional"
 import consumeIntegerOptional from "../numeric/consumeIntegerOptional"
 import consumeUnsignedIntegerOptional from "../numeric/consumeUnsignedIntegerOptional"
+import type { ChiriFunctionCall } from "./consumeFunctionCallOptional"
+import consumeFunctionCallOptional from "./consumeFunctionCallOptional"
 import type { ChiriExpressionMatch } from "./expressionMatch"
 import expressionMatch from "./expressionMatch"
 
@@ -52,6 +54,7 @@ export type ChiriExpressionOperand =
 export type ChiriExpressionResult =
 	| ChiriExpressionOperand
 	| ChiriExpressionMatch
+	| ChiriFunctionCall
 
 type VerifyExpressionResult = ChiriExpressionResult["valueType"]
 
@@ -61,7 +64,8 @@ const empy = {} as never
 
 async function consumeExpression (reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult> {
 	return undefined
-		?? await expressionMatch.consumeOptional(reader, consumeExpressionValidated, ...expectedTypes)
+		?? await expressionMatch.consumeOptional(reader, consumeExpression, ...expectedTypes)
+		?? consumeFunctionCallOptional(reader, ...expectedTypes)
 		?? consumeExpressionValidated(reader, ...expectedTypes)
 }
 
@@ -78,7 +82,7 @@ const consumeExpressionValidated = (reader: ChiriReader, ...expectedTypes: Chiri
 	const operand = consumeExpressionInternal(reader)
 
 	const valueType = operand.valueType
-	if (expectedTypes.length && !expectedTypes.every(expectedType => reader.types.isAssignable(valueType, expectedType)))
+	if (expectedTypes.length && !expectedTypes.some(expectedType => reader.types.isAssignable(valueType, expectedType)))
 		throw reader.error(e, `Expected ${expectedTypes.map(type => `"${ChiriType.stringify(type)}"`).join(" or ")}, got "${ChiriType.stringify(valueType)}"`)
 
 	return operand
@@ -93,7 +97,7 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 		return expr
 	}
 
-	const numeric = consumeUnsignedIntegerOptional(reader) ?? consumeIntegerOptional(reader) ?? consumeDecimalOptional(reader)
+	const numeric = consumeDecimalOptional(reader) ?? consumeUnsignedIntegerOptional(reader) ?? consumeIntegerOptional(reader)
 	if (numeric)
 		return numeric
 
@@ -104,6 +108,9 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	let e = reader.i
 	if (reader.consumeOptional("_"))
 		return { type: "literal", subType: "undefined", valueType: ChiriType.of("undefined"), position: reader.getPosition(e) }
+
+	const constructedType = consumeTypeConstructorOptional(reader)
+	if (constructedType) return constructedType
 
 	e = reader.i
 	const word = consumeWordOptional(reader)
@@ -118,9 +125,6 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 
 		throw reader.error(e, `No variable "${word.value}"`)
 	}
-
-	const constructedType = consumeTypeConstructorOptional(reader)
-	if (constructedType) return constructedType
 
 	throw reader.error("Unknown expression operand type")
 }

@@ -19,7 +19,6 @@ export function consumeType (reader: ChiriReader, genericDeclaration?: true) {
 export function consumeTypeOptional (reader: ChiriReader): ChiriType | undefined
 export function consumeTypeOptional (reader: ChiriReader, genericDeclaration: true): ChiriTypeGeneric | undefined
 export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: true): ChiriType | undefined {
-	const e = reader.i
 	const typeName = consumeTypeNameOptional(reader, genericDeclaration)
 	if (!typeName)
 		return undefined
@@ -34,6 +33,9 @@ export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: t
 		return type
 
 	const definition = reader.getTypeOptional(typeName.value)
+	if (definition?.type.isGeneric)
+		return definition.type // use exact generic types as defined
+
 	if (definition?.generics)
 		type.generics = consumeGenerics(reader, definition.generics === true ? undefined : definition.generics)
 	else if (genericDeclaration)

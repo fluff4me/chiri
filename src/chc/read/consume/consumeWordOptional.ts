@@ -6,14 +6,20 @@ import consumeWord from "./consumeWord"
 
 export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord | undefined => {
 	if (expectedWords.length) {
+		const restore = reader.savePosition()
 		const e = reader.i
 		const word = reader.consumeOptional(...expectedWords)
-		return !word ? undefined : {
+		if (!word || reader.isWordChar() || reader.input[reader.i] === "#") {
+			reader.restorePosition(restore)
+			return undefined
+		}
+
+		return {
 			type: "word",
 			value: word,
 			position: reader.getPosition(e),
 		}
 	}
 
-	return !expectedWords.length && !reader.isLetter() ? undefined : consumeWord(reader, ...expectedWords)
+	return !reader.isLetter() ? undefined : consumeWord(reader)
 }

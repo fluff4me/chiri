@@ -9,7 +9,6 @@ import Errors from "../util/Errors"
 import Strings from "../util/Strings"
 import type { ArrayOr, PromiseOr } from "../util/Type"
 import { ChiriType } from "./ChiriType"
-import type { ChiriTypeDefinition } from "./ChiriTypeManager"
 import ChiriTypeManager from "./ChiriTypeManager"
 import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./consume/body/Contexts"
 import consumeBlockEnd from "./consume/consumeBlockEnd"
@@ -37,6 +36,7 @@ import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import type { ChiriComponent } from "./consume/rule/Rule"
+import type TypeDefinition from "./type/TypeDefinition"
 
 export interface ChiriPosition {
 	file: string
@@ -137,6 +137,10 @@ export default class ChiriReader {
 		return this.#errored
 	}
 
+	public get isSubReader () {
+		return this.#isSubReader
+	}
+
 	constructor (
 		public readonly filename: string,
 		public readonly input: string,
@@ -212,6 +216,22 @@ export default class ChiriReader {
 		return variable
 	}
 
+	getFunctionOptional (name: string) {
+		return undefined
+			?? this.#statements.findLast((statement): statement is ChiriFunction =>
+				statement.type === "function" && statement.name.value === name)
+			?? this.#outerStatements.findLast((statement): statement is ChiriFunction =>
+				statement.type === "function" && statement.name.value === name)
+	}
+
+	getFunction (name: string, start = this.i) {
+		const variable = this.getVariableOptional(name)
+		if (!variable)
+			throw this.error(start, `No variable "${name}" exists`)
+
+		return variable
+	}
+
 	getMacroOptional (name: string) {
 		return undefined
 			?? this.#statements.findLast((statement): statement is ChiriMacro =>
@@ -249,7 +269,7 @@ export default class ChiriReader {
 		return type
 	}
 
-	getTypeOptional (name: string): ChiriTypeDefinition | undefined {
+	getTypeOptional (name: string): TypeDefinition | undefined {
 		return this.types.types[name]
 	}
 
@@ -261,8 +281,8 @@ export default class ChiriReader {
 		return this.types.binaryOperators
 	}
 
-	getStatements (): readonly ChiriStatement[] {
-		return this.#statements
+	getStatements (onlyThisBlock?: true): readonly ChiriStatement[] {
+		return !onlyThisBlock ? [...this.#outerStatements, ...this.#statements] : this.#statements
 	}
 
 	setExport () {
@@ -345,7 +365,6 @@ export default class ChiriReader {
 			return macro
 
 		if (macro?.type === "import") {
-			const statements: ChiriStatement[] = []
 			for (const imp of macro.paths) {
 				const raw = (imp.module ? `${imp.module}:` : "") + imp.path
 				const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? LIB_ROOT : require.resolve(imp.module)
@@ -367,18 +386,19 @@ export default class ChiriReader {
 				}
 
 				if (sub) {
+					sub.#outerStatements = [...this.#outerStatements, ...this.#statements]
 					const ast = await sub.read()
 					// sub.logLine(undefined, `imp end (${sub.context})`)
 					if (this.reusable.has(this.filename) && !this.reusable.has(sub.filename))
 						throw this.error(imp.i, `${this.importName} is exported as reusable, it can only import other files exported as reusable`)
 
-					statements.push(...ast.statements)
+					this.#statements.push(...ast.statements)
 					if (sub.errored)
 						this.subError()
 				}
 			}
 
-			return statements
+			return []
 		}
 
 		if (macro)

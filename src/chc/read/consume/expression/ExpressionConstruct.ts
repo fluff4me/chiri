@@ -1,17 +1,19 @@
 import type { PromiseOr } from "../../../util/Type"
 import type ChiriReader from "../../ChiriReader"
+import type { ChiriPosition } from "../../ChiriReader"
 import type { ChiriType } from "../../ChiriType"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
-import type { ExpressionOperandConsumer } from "./consumeExpression"
+import type consumeExpression from "./consumeExpression"
 
 interface ExpressionConstruct<T> {
-	consumeOptional (reader: ChiriReader, consumeExpression: ExpressionOperandConsumer, ...expectedTypes: ChiriType[]): Promise<T | undefined>
+	consumeOptional (reader: ChiriReader, expressionConsumer: typeof consumeExpression, ...expectedTypes: ChiriType[]): Promise<T | undefined>
 }
 
 interface ExpressionConstructFactoryInfo {
 	reader: ChiriReader
-	consumeExpression: ExpressionOperandConsumer
+	consumeExpression: typeof consumeExpression
 	expectedTypes: ChiriType[]
+	position: ChiriPosition
 }
 
 interface ExpressionConstructFactory {
@@ -23,16 +25,17 @@ function ExpressionConstruct (name: string): ExpressionConstructFactory {
 		consume: consumer => {
 			return {
 				consumeOptional: async (reader, consumeExpression, ...expectedTypes) => {
-					const position = reader.savePosition()
+					const position = reader.getPosition()
+					const restore = reader.savePosition()
 					if (!reader.consumeOptional(name))
 						return undefined
 
 					if (!consumeWhiteSpaceOptional(reader))
 						return undefined
 
-					const result = await consumer({ reader, consumeExpression, expectedTypes })
+					const result = await consumer({ reader, consumeExpression, expectedTypes, position })
 					if (result === undefined)
-						reader.restorePosition(position)
+						reader.restorePosition(restore)
 
 					return result
 				},

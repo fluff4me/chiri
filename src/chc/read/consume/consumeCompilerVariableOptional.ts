@@ -40,7 +40,7 @@ export default async (reader: ChiriReader, prefix = true): Promise<ChiriCompiler
 	}
 
 	if (valueType.name.value === "body" && reader.getVariables().find(variable => variable.valueType.name.value === "body"))
-		throw reader.error(save.i, "A function cannot declare multiple body parameters")
+		throw reader.error(save.i, "A macro cannot declare multiple body parameters")
 
 	consumeWhiteSpace(reader)
 

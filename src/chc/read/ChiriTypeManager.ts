@@ -5,29 +5,30 @@ import type ChiriReader from "./ChiriReader"
 import type { ChiriTypeGeneric } from "./ChiriType"
 import { ChiriType } from "./ChiriType"
 import typeBody from "./type/typeBody"
+import typeBool from "./type/typeBool"
 import typeDec from "./type/typeDec"
+import type TypeDefinition from "./type/TypeDefinition"
 import typeInt from "./type/typeInt"
 import typeList from "./type/typeList"
 import typeString from "./type/typeString"
 import typeUint from "./type/typeUint"
 
-type Consumer<RESULT> = (reader: ChiriReader) => RESULT | undefined
+const typesList = [
+	typeString,
+	typeDec,
+	typeInt,
+	typeUint,
+	typeList,
+	typeBody,
+	typeBool,
+]
 
-export interface ChiriTypeDefinition {
-	consumeOptionalConstructor: Consumer<object>
-	consumeType?: Consumer<string>
-	generics?: number | true | string[][]
-	stringable?: true
-}
+type TypeRegistry =
+	{ [KEY in keyof typeof typesList as (typeof typesList)[KEY] extends TypeDefinition<infer TYPE> ? TYPE : never]: true } extends infer O ?
+	{ [KEY in keyof O]: TypeDefinition<KEY & string> }
+	: never
 
-const types: Record<string, ChiriTypeDefinition> = {
-	string: typeString,
-	uint: typeUint,
-	int: typeInt,
-	dec: typeDec,
-	list: typeList,
-	body: typeBody,
-}
+const types = Object.fromEntries(typesList.map(typedef => [typedef.type.name.value, typedef])) as TypeRegistry
 
 const numericTypes = ["uint", "int", "dec"] as const
 type NumericType = (typeof numericTypes)[number]
@@ -44,14 +45,15 @@ const unaryBooleanOperators = ["!"] as const
 
 export type Operator = (typeof binaryNumericOperators)[number] | (typeof unaryNumericOperators)[number] | (typeof binaryBitwiseOperators)[number] | (typeof unaryBitwiseOperators)[number] | (typeof binaryBooleanOperators)[number] | (typeof unaryBooleanOperators)[number]
 
-const minNumericPrecision = (typeA: TypeName, typeB: TypeName): "uint" | "int" | "dec" => (typeA === "dec" || typeB === "dec") ? "dec"
+const minNumericPrecision2 = (typeA: string, typeB: string): "uint" | "int" | "dec" => (typeA === "dec" || typeB === "dec") ? "dec"
 	: (typeA === "int" || typeB === "int") ? "int"
 		: "uint"
 
+const minNumericPrecision = (...types: string[]) => types.reduce(minNumericPrecision2, "uint")
 
-const operatorResults: Record<string, TypeName | ((typeA: TypeName, typeB?: TypeName) => TypeName)> = {
+const operatorResults: Record<string, string | ((typeA: string, typeB?: string) => string)> = {
 	"+": (a, b = a) => minNumericPrecision(a, b),
-	"-": (a, b = a) => minNumericPrecision("int", minNumericPrecision(a, b)),
+	"-": (a, b = a) => minNumericPrecision("int", a, b),
 	"*": (a, b = a) => minNumericPrecision(a, b),
 	"/": "dec",
 	"%": (a, b = a) => minNumericPrecision(a, b),
@@ -75,7 +77,7 @@ const minNumericPrecisionOperators: Set<Operator> = new Set(["+", "-", "*", "%"]
 
 export default class ChiriTypeManager {
 
-	types: Record<string, ChiriTypeDefinition> = { ...types }
+	types: Record<string, TypeDefinition> = { ...types }
 
 	binaryOperators: Record<string, Record<string, Record<string, string>>> = {}
 	unaryOperators: Record<string, Record<string, string>> = {}
@@ -83,12 +85,14 @@ export default class ChiriTypeManager {
 	registerBinaryOperator (typeA: string, operator: string, typeB: string = typeA, output?: string, reversible: boolean = false) {
 		const operatorsOfTypeA = this.binaryOperators[typeA] ??= {}
 		let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {}
-		if (instancesOfThisOperator[typeB])
-			console.warn(ansi.err + `Operation ${typeA}${operator}${typeB}=${instancesOfThisOperator[typeB]} replaced with ${typeA}${operator}${typeB}=${output}`)
 		let result = output ?? operatorResults[operator]
 		result = typeof result === "function" ? result(typeA, typeB) : result
 		if (!result)
 			throw new Error(`Unable to determine output type of operation ${typeA}${operator}${typeB}`)
+
+		if (instancesOfThisOperator[typeB] && instancesOfThisOperator[typeB] !== result)
+			console.warn(ansi.err + `Operation ${typeA}${operator}${typeB}=${instancesOfThisOperator[typeB]} replaced with ${typeA}${operator}${typeB}=${result}`)
+
 		instancesOfThisOperator[typeB] = result
 
 		if (!reversible)
@@ -96,23 +100,27 @@ export default class ChiriTypeManager {
 
 		const operatorsOfTypeB = this.binaryOperators[typeB] ??= {}
 		instancesOfThisOperator = operatorsOfTypeB[operator] ??= {}
-		if (instancesOfThisOperator[typeA])
-			console.warn(ansi.err + `Operation ${typeB}${operator}${typeA}=${instancesOfThisOperator[typeA]} replaced with ${typeB}${operator}${typeA}=${output}`)
 		result = output ?? operatorResults[operator]
 		result = typeof result === "function" ? result(typeB, typeA) : result
 		if (!result)
 			throw new Error(`Unable to determine output type of operation ${typeB}${operator}${typeA}`)
+
+		if (instancesOfThisOperator[typeA] && instancesOfThisOperator[typeA] !== result)
+			console.warn(ansi.err + `Operation ${typeB}${operator}${typeA}=${instancesOfThisOperator[typeA]} replaced with ${typeB}${operator}${typeA}=${result}`)
+
 		instancesOfThisOperator[typeA] = result
 	}
 
 	registerUnaryOperator (operator: string, type: string, output?: string) {
 		const instancesOfThisOperator = this.unaryOperators[operator] ??= {}
-		if (instancesOfThisOperator[type])
-			console.warn(ansi.err + `Operation ${operator}${type}=${instancesOfThisOperator[type]} replaced with ${operator}${type}=${output}`)
 		let result = output ?? operatorResults[operator]
 		result = typeof result === "function" ? result(type) : result
 		if (!result)
 			throw new Error(`Unable to determine output type of operation ${operator}${type}`)
+
+		if (instancesOfThisOperator[type] && instancesOfThisOperator[type] !== result)
+			console.warn(ansi.err + `Operation ${operator}${type}=${instancesOfThisOperator[type]} replaced with ${operator}${type}=${result}`)
+
 		instancesOfThisOperator[type] = result
 	}
 
@@ -134,28 +142,6 @@ export default class ChiriTypeManager {
 			this.registerUnaryOperator(operator, "bool")
 	}
 
-	clone (reader: ChiriReader) {
-		const man = new ChiriTypeManager(reader)
-		man.types = { ...this.types }
-		man.unaryOperators = Object.fromEntries(Object.entries(this.unaryOperators)
-			.map(([key, record]) => [key, { ...record }]))
-		man.binaryOperators = Object.fromEntries(Object.entries(this.binaryOperators)
-			.map(([key, record]) => [key, Object.fromEntries(Object.entries(record)
-				.map(([key, record]) => [key, { ...record }]))]))
-		return man
-	}
-
-	with (...generics: ChiriTypeGeneric[]) {
-		return {
-			do: <T> (handler: () => T): T => {
-				this.registerGenerics(...generics)
-				const result = handler()
-				this.deregisterGenerics(...generics)
-				return result
-			},
-		}
-	}
-
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
 		for (const type of generics) {
 			if (this.types[type.name.value])
@@ -170,10 +156,11 @@ export default class ChiriTypeManager {
 			})
 
 			this.types[type.name.value] = {
+				type,
 				stringable: componentTypeDefinitions.every(type => type.stringable) ? true : undefined,
 				consumeOptionalConstructor: reader => {
 					for (const type of componentTypeDefinitions) {
-						const result = type.consumeOptionalConstructor(reader)
+						const result = type.consumeOptionalConstructor?.(reader)
 						if (result)
 							return result
 					}
@@ -181,16 +168,97 @@ export default class ChiriTypeManager {
 					return undefined
 				},
 			}
+
+			// register common operators for `generic OPERATOR value`
+			for (const [typeA, operatorsOfTypeA] of Object.entries(this.binaryOperators)) {
+				if (!type.generics.some(generic => typeA === generic.name.value))
+					// skip, this isn't one of the component types
+					continue
+
+				for (const [operator, instancesOfOperator] of Object.entries(operatorsOfTypeA)) {
+					for (const typeB of Object.keys(instancesOfOperator)) {
+						const returnTypes = [...new Set(type.generics.map(generic => this.binaryOperators[generic.name.value]?.[operator]?.[typeB]))]
+						if (returnTypes.includes(undefined!))
+							// not common between all component types
+							continue
+
+						if (returnTypes.length > 1 && !returnTypes.every(isNumeric))
+							// return types are not common between all component types
+							continue
+
+						const returnType = returnTypes.length === 1 ? returnTypes[0] : minNumericPrecision(...returnTypes)
+
+						// this will register duplicates, but that's ok
+						this.registerBinaryOperator(type.name.value, operator, typeB, returnType)
+					}
+				}
+			}
+
+			// register common operators for `value OPERATOR generic`
+			for (const [typeA, operatorsOfTypeA] of Object.entries(this.binaryOperators)) {
+				for (const [operator, instancesOfOperator] of Object.entries(operatorsOfTypeA)) {
+					for (const typeB of Object.keys(instancesOfOperator)) {
+						if (!type.generics.some(generic => typeB === generic.name.value))
+							// skip, this isn't one of the component types
+							continue
+
+						const returnTypes = [...new Set(type.generics.map(generic => this.binaryOperators[generic.name.value]?.[operator]?.[typeB]))]
+						if (returnTypes.includes(undefined!))
+							// not common between all component types
+							continue
+
+						if (returnTypes.length > 1 && !returnTypes.every(isNumeric))
+							// return types are not common between all component types
+							continue
+
+						const returnType = returnTypes.length === 1 ? returnTypes[0] : minNumericPrecision(...returnTypes)
+
+						// this will register duplicates, but that's ok
+						this.registerBinaryOperator(typeA, operator, type.name.value, returnType)
+					}
+				}
+			}
+
+			// register common operators for `OPERATOR value`
+			for (const [operator, types] of Object.entries(this.unaryOperators)) {
+				const returnTypes = [...new Set(type.generics.map(generic => types[generic.name.value]))]
+				if (returnTypes.includes(undefined!))
+					// not common between all component types
+					continue
+
+				if (returnTypes.length > 1 && !returnTypes.every(isNumeric))
+					// return types are not common between all component types
+					continue
+
+				const returnType = returnTypes.length === 1 ? returnTypes[0] : minNumericPrecision(...returnTypes)
+
+				this.registerUnaryOperator(operator, type.name.value, returnType)
+			}
 		}
 	}
 
 	deregisterGenerics (...generics: ChiriTypeGeneric[]) {
 		for (const type of generics) {
 			delete this.types[type.name.value]
+			delete this.binaryOperators[type.name.value]
+			for (const unaryOperator of Object.values(this.unaryOperators))
+				delete unaryOperator[type.name.value]
+
+			for (const binaryOperators of Object.values(this.binaryOperators))
+				for (const binaryOperator of Object.values(binaryOperators))
+					delete binaryOperator[type.name.value]
 		}
 	}
 
-	isAssignable (type: ChiriType, toType: ChiriType): boolean {
+	isAssignable (type: ChiriType, ...toTypes: ChiriType[]): boolean {
+		if (toTypes.includes(type))
+			return true
+
+		toTypes = toTypes.flatMap(type => type.isGeneric ? type.generics : type)
+		if (toTypes.length > 1)
+			return toTypes.some(toType => this.isAssignable(type, toType))
+
+		const [toType] = toTypes
 		if (toType.name.value === "*")
 			return true
 
@@ -199,9 +267,71 @@ export default class ChiriTypeManager {
 			throw new Error(`* is not a statically known type and therefore cannot be assigned to ${ChiriType.stringify(toType)}`)
 
 		if (isNumeric(type.name.value) && isNumeric(toType.name.value))
-			return minNumericPrecision(type.name.value, toType.name.value) === toType.name.value
+			// explicitly allow putting any numbers in contexts that expect specific types
+			// they'll be clamped to what's valid(truncation for int, clamp to >= 0 for uint)
+			return true // minNumericPrecision(type.name.value, toType.name.value) === toType.name.value
 
 		return type.name.value === toType.name.value
 			&& type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i]))
+	}
+
+	dedupe (...types: ChiriType[]) {
+		const result: ChiriType[] = []
+		for (const type of types)
+			if (!result.some(test => test.name.value === type.name.value && test.generics.every((test, i) => test.name.value === type.generics[i].name.value)))
+				result.push(type)
+
+		return result
+	}
+
+	intersection (...types: ChiriType[]) {
+		types = this.dedupe(...types)
+		if (types.length === 1)
+			return types[0]
+
+		const generics = types
+			.filter(type => type.isGeneric)
+			.sort((a, b) => b.generics.length - a.generics.length)
+
+		const primaryType = generics[0]
+		if (!primaryType) {
+			if (types.every(type => isNumeric(type.name.value)))
+				return ChiriType.of(minNumericPrecision(...types.map(type => type.name.value)))
+
+			throw this.reader.error("Cannot form an intersection")
+		}
+
+		if (generics.length > 1)
+			for (let i = 1; i < generics.length; i++)
+				if (generics[i].generics.some(generic => !primaryType.generics.some(primaryTypeGeneric => primaryTypeGeneric.name.value === generic.name.value)))
+					throw this.reader.error(`Cannot form an intersection between types "${ChiriType.stringify(primaryType)}" and "${ChiriType.stringify(generics[i])}"`)
+
+		const unableToIntersect = types.find(type => !type.isGeneric && !primaryType.generics.some(generic => generic.name.value === type.name.value))
+		if (unableToIntersect)
+			throw this.reader.error(`Cannot form an intersection between types "${ChiriType.stringify(primaryType)}" and "${ChiriType.stringify(unableToIntersect)}"`)
+
+		return primaryType
+	}
+
+	with (...generics: ChiriTypeGeneric[]) {
+		return {
+			do: <T> (handler: () => T): T => {
+				this.registerGenerics(...generics)
+				const result = handler()
+				this.deregisterGenerics(...generics)
+				return result
+			},
+		}
+	}
+
+	clone (reader: ChiriReader) {
+		const man = new ChiriTypeManager(reader)
+		man.types = { ...this.types }
+		man.unaryOperators = Object.fromEntries(Object.entries(this.unaryOperators)
+			.map(([key, record]) => [key, { ...record }]))
+		man.binaryOperators = Object.fromEntries(Object.entries(this.binaryOperators)
+			.map(([key, record]) => [key, Object.fromEntries(Object.entries(record)
+				.map(([key, record]) => [key, { ...record }]))]))
+		return man
 	}
 }

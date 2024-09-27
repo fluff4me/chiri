@@ -13,13 +13,14 @@
 			else: "#{num}
 
 	#bool negative = num < 0
-	#set num = abs
+	#set num = #abs value=num
 
 	#string result = "
 
 	#while num > 0:
 		#int remainder = num % 16
-		#set result = "#{hex-place(remainder)}#{result}
+		#string place = #hex-place num=remainder
+		#set result = place + result
 		#set num /= 16
 
 	#if negative:

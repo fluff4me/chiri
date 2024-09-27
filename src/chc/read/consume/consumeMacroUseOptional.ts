@@ -67,7 +67,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroSet.consumeOptional(reader, ...context)
 		?? await macroFor.consumeOptional(reader, ...context)
 		?? await consumeDeclaredUse(reader)
-		?? consumeCompilerVariable(reader)
+		?? await consumeCompilerVariable(reader)
 
 	if (!result) {
 		const saved = reader.savePosition()

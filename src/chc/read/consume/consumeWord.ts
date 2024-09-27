@@ -1,9 +1,9 @@
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 
-export interface ChiriWord {
+export interface ChiriWord<WORD extends string = string> {
 	type: "word"
-	value: string
+	value: WORD
 	position: ChiriPosition
 }
 
@@ -27,6 +27,9 @@ export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord => {
 			word += reader.input[reader.i]
 		else
 			break
+
+	if (reader.input[reader.i] === "#")
+		throw reader.error(e, "This word cannot contain interpolations")
 
 	return {
 		type: "word",

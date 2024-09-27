@@ -1,9 +1,11 @@
 
 
-import type { ChiriTypeDefinition } from "../ChiriTypeManager"
+import { ChiriType } from "../ChiriType"
 import consumeDecimalOptional from "../consume/numeric/consumeDecimalOptional"
+import TypeDefinition from "./TypeDefinition"
 
-export default {
+export default TypeDefinition({
+	type: ChiriType.of("dec"),
 	stringable: true,
 	consumeOptionalConstructor: reader => consumeDecimalOptional(reader),
-} as ChiriTypeDefinition
+})

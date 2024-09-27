@@ -1,9 +1,9 @@
 import { INTERNAL_POSITION } from "../../constants"
 import type { ChiriWord } from "./consume/consumeWord"
 
-export interface ChiriType {
+export interface ChiriType<TYPE extends string = string> {
 	type: "type"
-	name: ChiriWord
+	name: ChiriWord<TYPE>
 	generics: ChiriType[]
 	isGeneric?: true
 }
@@ -13,7 +13,7 @@ export interface ChiriTypeGeneric extends ChiriType {
 }
 
 export namespace ChiriType {
-	export function of (name: string, ...generics: (string | ChiriType)[]): ChiriType {
+	export function of<TYPE extends string = string> (name: TYPE, ...generics: (string | ChiriType)[]): ChiriType<TYPE> {
 		return {
 			type: "type",
 			name: { type: "word", value: name, position: INTERNAL_POSITION },
@@ -22,6 +22,9 @@ export namespace ChiriType {
 	}
 
 	export function stringify (type: ChiriType, stack = false): string {
+		if (type.isGeneric)
+			return type.generics.map(type => stringify(type, true)).join(" ")
+
 		const stringified = `${type.name.value}${type.generics.map(generic => `!${stringify(generic, true)}`).join("")}`
 		return stack && type.generics.length ? `(${stringified})` : stringified
 	}

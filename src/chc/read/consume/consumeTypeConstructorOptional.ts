@@ -1,7 +1,7 @@
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriType } from "../ChiriType"
-import type { ChiriTypeDefinition } from "../ChiriTypeManager"
+import type TypeDefinition from "../type/TypeDefinition"
 import type { ChiriLiteralList } from "../type/typeList"
 import type { ChiriLiteralString } from "./consumeStringOptional"
 import type { ChiriLiteralNumeric } from "./numeric/Numeric"
@@ -47,7 +47,7 @@ export default (reader: ChiriReader, type?: ChiriType): ChiriLiteralValue | unde
 	// };
 }
 
-function consumeTypeConstructorOptional (reader: ChiriReader, typename: string, type: ChiriTypeDefinition) {
+function consumeTypeConstructorOptional (reader: ChiriReader, typename: string, type: TypeDefinition) {
 	const result = type.consumeOptionalConstructor?.(reader)
 	if (!result)
 		return undefined

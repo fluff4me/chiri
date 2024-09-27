@@ -1,12 +1,12 @@
 import type { ChiriPosition } from "../ChiriReader"
 import { ChiriType } from "../ChiriType"
-import type { ChiriTypeDefinition } from "../ChiriTypeManager"
 import consumeBlockEnd from "../consume/consumeBlockEnd"
 import consumeBlockStartOptional from "../consume/consumeBlockStartOptional"
 import consumeNewBlockLineOptional from "../consume/consumeNewBlockLineOptional"
 import consumeWhiteSpaceOptional from "../consume/consumeWhiteSpaceOptional"
 import type { ChiriExpressionOperand } from "../consume/expression/consumeExpression"
 import consumeExpression from "../consume/expression/consumeExpression"
+import TypeDefinition from "./TypeDefinition"
 
 export interface ChiriLiteralList {
 	type: "literal"
@@ -16,7 +16,8 @@ export interface ChiriLiteralList {
 	position: ChiriPosition
 }
 
-export default {
+export default TypeDefinition({
+	type: ChiriType.of("list"),
 	stringable: true,
 	generics: 1,
 	consumeOptionalConstructor: (reader): ChiriLiteralList | undefined => {
@@ -55,4 +56,4 @@ export default {
 			position,
 		}
 	},
-} as ChiriTypeDefinition
+})
