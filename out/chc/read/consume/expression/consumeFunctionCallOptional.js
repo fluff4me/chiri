@@ -54,7 +54,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         throw reader.error(`Missing required parameters for #function ${fn.name.value}: ${missingParameters}`);
                     break;
                 }
-                assignments[parameter.name.value] = consumeExpression_1.default.inline(reader, parameter.valueType);
+                const expectedType = [parameter.valueType];
+                if (parameter.assignment === "??=")
+                    expectedType.push(ChiriType_1.ChiriType.of("undefined"));
+                assignments[parameter.name.value] = consumeExpression_1.default.inline(reader, ...expectedType);
             }
             reader.consumeOptional(")");
         }
