@@ -71,7 +71,7 @@ If mixins are compiled into CSS classes, you might be wondering whether you have
 
 If a previously generated class for a mixin is generated before a mixin you want to take higher precedence on a component, a new copy of the mixin class is generated. This is handled smartly based on the contents of the mixins — if two mixins contain no intersecting properties, then no new mixin class needs to be generated.
 
-Many properties in CSS are shorthands for other properties, or can affect other properties — in these cases, you can tell chirilang about them via `#shorthand property-name:` — every property name specified in the body of the shorthand is considered affected by `property-name`, which means intersections can be detected. The [default lib](https://github.com/ChiriVulpes/chiri/tree/main/lib/shorthand/) has some shorthands already set up, but do not trust that they are anywhere *near* exhaustive.
+Many properties in CSS are shorthands for other properties, or can affect other properties — in these cases, you can tell chirilang about them via `#shorthand property-name:` — every property name specified in the body of the shorthand is considered affected by `property-name`, which means intersections can be detected. The [default lib](https://github.com/fluff4me/chiri/tree/main/lib/shorthand/) has some shorthands already set up, but do not trust that they are anywhere *near* exhaustive.
 
 ## Selectors
 Selectors are more restrictive than in base CSS, as chiri stylesheets are intended to be used *exclusively* for components, and *anything* that needs custom styles *should* be a component.
@@ -112,4 +112,4 @@ Pseudo-elements are possible, but they cannot be part of a selector.
 -->
 
 ## Other Stuff
-chiri supports many other language constructs — variables, macros, if/else, loops, functions, importing other files, etc. It also supports interpolation, allowing you to inject variable contents into strings or property names and values. At time of writing I don't have time to document all of this, but if you want examples, check out the [default lib](https://github.com/ChiriVulpes/chiri/tree/main/lib/).
+chiri supports many other language constructs — variables, macros, if/else, loops, functions, importing other files, etc. It also supports interpolation, allowing you to inject variable contents into strings or property names and values. At time of writing I don't have time to document all of this, but if you want examples, check out the [default lib](https://github.com/fluff4me/chiri/tree/main/lib/).

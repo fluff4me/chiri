@@ -1,6 +1,6 @@
 {
 	"name": "chiri",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"bin": {
 		"chiri": "out/chiri.js"
 	},
@@ -11,6 +11,8 @@
 		"watch": "node tsc2.js --watch",
 		"build": "node tsc2.js"
 	},
+	"repository": "github:fluff4me/chiri",
+	"license": "MIT",
 	"dependencies": {
 		"chokidar": "3.6.0",
 		"del-cli": "^5.1.0",
