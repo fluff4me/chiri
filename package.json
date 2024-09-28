@@ -8,7 +8,8 @@
 	"types": "out/chiri.d.ts",
 	"scripts": {
 		"play": "node tsc2.js && concurrently --prefix none \"node tsc2.js --watch\" \"chiri playground -w\"",
-		"watch": "node tsc2.js --watch"
+		"watch": "node tsc2.js --watch",
+		"build": "node tsc2.js"
 	},
 	"dependencies": {
 		"source-map": "0.7.4",
