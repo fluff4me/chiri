@@ -5,4 +5,4 @@ tsc2.js
 src/
 .vscode/
 out/tsconfig.tsbuildinfo
-out/*.js.map
+out/**/*.js.map
