@@ -220,7 +220,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             });
         }
         isAssignable(type, ...toTypes) {
-            if (toTypes.includes(type))
+            if (toTypes.includes(type) || !toTypes.length)
                 return true;
             toTypes = toTypes.flatMap(type => type.isGeneric ? type.generics : type);
             if (toTypes.length > 1)

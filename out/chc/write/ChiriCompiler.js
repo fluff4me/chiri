@@ -456,7 +456,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         ////////////////////////////////////
         //#region Context: Macros
-        function compileMacros(statement, contextConsumer) {
+        function compileMacros(statement, contextConsumer, end) {
             switch (statement.type) {
                 case "variable": {
                     const result = types.coerce((0, resolveExpression_1.default)(compiler, statement.expression), statement.valueType, statement.expression?.valueType);
@@ -493,7 +493,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     if (!fn)
                         return undefined;
                     const assignments = resolveAssignments(statement.assignments);
-                    const result = compileStatements(fn.content, assignments, contextConsumer);
+                    const bodyParameter = fn.content.find((statement) => statement.type === "variable" && statement.valueType.name.value === "body");
+                    if (bodyParameter) {
+                        assignments.variables ??= {};
+                        const bodyType = bodyParameter.valueType.generics[0].name.value;
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                        assignments.variables[bodyParameter.name.value] = {
+                            type: bodyParameter.valueType,
+                            value: Object.assign(compileStatements(statement.content, undefined, getContextConsumer(bodyType)), { isBody: true }),
+                        };
+                    }
+                    const result = compileStatements(fn.content, assignments, contextConsumer, end);
                     return result;
                 }
                 case "each": {
@@ -502,7 +512,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         throw error(statement.iterable.position, "Variable is not iterable");
                     const result = [];
                     for (const value of list) {
-                        result.push(...compileStatements(statement.content, Scope.variables({ [statement.variable.name.value]: { type: statement.variable.valueType, value } }), contextConsumer));
+                        result.push(...compileStatements(statement.content, Scope.variables({ [statement.variable.name.value]: { type: statement.variable.valueType, value } }), contextConsumer, end));
                     }
                     return result;
                 }
@@ -514,7 +524,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         const statements = statement.content.slice();
                         if (statement.update)
                             statements.push(statement.update);
-                        result.push(...compileStatements(statements, undefined, contextConsumer));
+                        result.push(...compileStatements(statements, undefined, contextConsumer, end));
                     }
                     scopes.pop();
                     return result;
@@ -524,7 +534,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const result = [];
                     while ((0, resolveExpression_1.default)(compiler, statement.condition)) {
                         const statements = statement.content.slice();
-                        result.push(...compileStatements(statements, undefined, contextConsumer));
+                        result.push(...compileStatements(statements, undefined, contextConsumer, end));
                     }
                     scopes.pop();
                     return result;
@@ -537,15 +547,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     ifState = !!(0, resolveExpression_1.default)(compiler, statement.condition);
                     if (!ifState)
                         return [];
-                    return compileStatements(statement.content, undefined, contextConsumer);
+                    return compileStatements(statement.content, undefined, contextConsumer, end);
                 }
                 case "else": {
                     if (ifState)
                         return [];
-                    return compileStatements(statement.content, undefined, contextConsumer);
+                    return compileStatements(statement.content, undefined, contextConsumer, end);
                 }
                 case "do":
-                    return compileStatements(statement.content, undefined, contextConsumer);
+                    return compileStatements(statement.content, undefined, contextConsumer, end);
+                case "include":
+                    return getVariable(statement.name.value, statement.name.position) ?? [];
+            }
+        }
+        function getContextConsumer(context) {
+            switch (context) {
+                case "text":
+                case "property-name":
+                    return compileText;
+                case "component":
+                    return compileComponentContent;
             }
         }
         //#endregion
@@ -584,15 +605,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         ////////////////////////////////////
         //#region Internals
-        function compileStatements(statements, using, contextCompiler) {
+        function compileStatements(statements, using, contextCompiler, end) {
             scopes.push(using ?? {});
             // console.log(inspect(scopes, undefined, 3, true))
             // logLine(undefined, error(statements[0].position, ""))
             let ended = false;
-            const end = () => ended = true;
+            const upperEnd = end;
+            end = () => {
+                ended = true;
+                upperEnd?.();
+            };
             const results = [];
             for (const statement of statements) {
-                const macroResult = compileMacros(statement, contextCompiler);
+                const macroResult = compileMacros(statement, contextCompiler, end);
                 if (macroResult) {
                     if (macroResult === true)
                         continue;
@@ -602,6 +627,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         results.push(macroResult);
                     continue;
                 }
+                if (ended)
+                    break;
                 const result = contextCompiler(statement, end);
                 if (result !== undefined) {
                     if (Array.isArray(result))

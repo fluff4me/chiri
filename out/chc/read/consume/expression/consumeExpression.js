@@ -29,7 +29,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     async function consumeExpression(reader, ...expectedTypes) {
         return undefined
             ?? await expressionMatch_1.default.consumeOptional(reader, consumeExpression, ...expectedTypes)
-            ?? (0, consumeFunctionCallOptional_1.default)(reader, ...expectedTypes)
             ?? consumeExpressionValidated(reader, ...expectedTypes);
     }
     (function (consumeExpression) {
@@ -67,10 +66,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const constructedType = (0, consumeTypeConstructorOptional_1.default)(reader);
         if (constructedType)
             return constructedType;
+        const fnCall = (0, consumeFunctionCallOptional_1.default)(reader);
+        if (fnCall)
+            return fnCall;
         e = reader.i;
         const word = (0, consumeWordOptional_1.default)(reader);
         if (word) {
             const variable = reader.getVariableOptional(word.value);
+            if (variable?.valueType.name.value === "body")
+                throw reader.error(e, "Cannot use a variable of type \"body\" in an expression");
             if (variable)
                 return {
                     type: "get",

@@ -1,5 +1,6 @@
 import type ChiriReader from "../ChiriReader";
 export interface ChiriPath {
+    type: "path";
     module?: string;
     path: string;
     i: number;

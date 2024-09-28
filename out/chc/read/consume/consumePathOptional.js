@@ -96,6 +96,7 @@
             return undefined;
         }
         return {
+            type: "path",
             module: moduleName,
             path,
             i: s,

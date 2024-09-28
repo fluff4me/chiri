@@ -17,6 +17,7 @@ import type { ChiriEach } from "./consume/macro/macroEach";
 import type { ChiriFor } from "./consume/macro/macroFor";
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration";
 import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf";
+import type { ChiriInclude } from "./consume/macro/macroInclude";
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration";
 import type { ChiriReturn } from "./consume/macro/macroReturn";
 import type { ChiriAssignment } from "./consume/macro/macroSet";
@@ -28,7 +29,7 @@ export interface ChiriPosition {
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];
@@ -66,7 +67,7 @@ export default class ChiriReader {
      * Update this reader to the position of the subreader
      */
     update(reader: ChiriReader): void;
-    getVariables(): ChiriCompilerVariable[];
+    getVariables(onlyThisBlock?: true): ChiriCompilerVariable[];
     getVariableOptional(name: string): ChiriCompilerVariable | undefined;
     getVariable(name: string, start?: number): ChiriCompilerVariable;
     getFunctionOptional(name: string): ChiriFunction | undefined;

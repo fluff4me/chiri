@@ -49,6 +49,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!reader.consumeOptional("=")) {
                 const variableInScope = reader.getVariableOptional(word.value);
                 if (variableInScope) {
+                    if (variableInScope?.valueType.name.value === "body")
+                        throw reader.error(e, "Cannot use a variable of type \"body\" in an expression");
                     if (!reader.types.isAssignable(variableInScope.valueType, expectedType))
                         throw reader.error(e, `Unable to set ${word.value} to variable of same name, expected ${ChiriType_1.ChiriType.stringify(expectedType)}, but variable is ${ChiriType_1.ChiriType.stringify(variableInScope.valueType)}`);
                     assignments[word.value] = {
@@ -90,4 +92,4 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return assignments;
     };
 });
-//# sourceMappingURL=consumeFunctionParameters.js.map
+//# sourceMappingURL=consumeMacroParameters.js.map

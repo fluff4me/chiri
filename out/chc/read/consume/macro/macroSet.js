@@ -47,8 +47,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeAssignmentData = async (reader, skipInitialWhitespace = false, inline = false) => {
         if (!skipInitialWhitespace)
             (0, consumeWhiteSpace_1.default)(reader);
+        const e = reader.i;
         const varName = (0, consumeWord_1.default)(reader);
         const variable = reader.getVariable(varName.value);
+        if (variable.valueType.name.value === "body")
+            throw reader.error(e, "Cannot reassign a variable of type \"body\"");
         (0, consumeWhiteSpaceOptional_1.default)(reader);
         const binaryOperators = reader.getBinaryOperators();
         const type = variable.valueType;

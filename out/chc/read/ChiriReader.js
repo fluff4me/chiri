@@ -119,8 +119,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.indent = reader.indent;
             this.#errored ||= reader.#errored;
         }
-        getVariables() {
-            return [...this.#outerStatements, ...this.#statements]
+        getVariables(onlyThisBlock) {
+            return (onlyThisBlock ? this.#statements : [...this.#outerStatements, ...this.#statements])
                 .filter((statement) => statement.type === "variable");
         }
         getVariableOptional(name) {

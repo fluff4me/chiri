@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../../constants", "../body/Contexts", "../consumeBodyOptional", "../consumeFunctionParameters", "../consumeWhiteSpaceOptional", "../consumeWordOptional"], factory);
+        define(["require", "exports", "../../../../constants", "../body/Contexts", "../consumeBodyOptional", "../consumeMacroParameters", "../consumeWhiteSpaceOptional", "../consumeWordOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,7 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const constants_1 = require("../../../../constants");
     const Contexts_1 = __importDefault(require("../body/Contexts"));
     const consumeBodyOptional_1 = __importDefault(require("../consumeBodyOptional"));
-    const consumeFunctionParameters_1 = __importDefault(require("../consumeFunctionParameters"));
+    const consumeMacroParameters_1 = __importDefault(require("../consumeMacroParameters"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     function default_1(macroName) {
@@ -78,7 +78,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 throw reader.error("Expected declaration name");
                         }
                         const extra = await parametersConsumer?.(reader);
-                        const assignments = parametersConsumer ? {} : (0, consumeFunctionParameters_1.default)(reader, start, macro);
+                        const assignments = parametersConsumer ? {} : (0, consumeMacroParameters_1.default)(reader, start, macro);
                         const info = {
                             reader,
                             assignments,

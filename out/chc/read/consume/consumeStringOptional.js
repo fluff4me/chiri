@@ -75,6 +75,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     pendingNewlines = "";
                     segments.push(consumeExpression_1.default.inline(reader));
                     reader.consume("}");
+                    reader.i--;
                     break;
                 }
                 case "\r":

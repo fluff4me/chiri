@@ -1,6 +1,9 @@
 #function hex returns string:
 	#int num
 
+	#if num == 0:
+		#return "0
+
 	#function hex-place returns string:
 		#int num
 		#return match num:
@@ -14,13 +17,13 @@
 
 	#bool negative = num < 0
 
-	#set num = #abs value=num
+	#set num = abs(num)
 
 	#string result = "
 
 	#while num > 0:
 		#int remainder = num % 16
-		#string place = #hex-place num=remainder
+		#string place = hex-place(remainder)
 		#set result = place . result
 		#set num /= 16
 

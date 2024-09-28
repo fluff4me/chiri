@@ -34,8 +34,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             reader.restorePosition(save);
             return undefined;
         }
-        if (valueType.name.value === "body" && reader.getVariables().find(variable => variable.valueType.name.value === "body"))
-            throw reader.error(save.i, "A macro cannot declare multiple body parameters");
+        if (valueType.name.value === "body" && reader.getVariables(true).find(variable => variable.valueType.name.value === "body"))
+            throw reader.error(save.i, "A macro cannot accept multiple body parameters");
+        if (valueType.name.value === "body" && reader.context.type === "function")
+            throw reader.error(save.i, "A function cannot accept a body parameter");
         (0, consumeWhiteSpace_1.default)(reader);
         const name = (0, consumeWord_1.default)(reader);
         const postType = reader.i;
@@ -58,6 +60,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             else if (reader.context.type === "mixin")
                 throw reader.error(save.i, "Mixins cannot accept parameters");
         }
+        if (assignment !== "??=" && reader.getVariables(true).findLast(variable => variable.assignment === "??="))
+            throw reader.error(save.i, "Required parameters cannot be declared after optional parameters");
         return {
             type: "variable",
             valueType,

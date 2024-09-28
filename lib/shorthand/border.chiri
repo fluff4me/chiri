@@ -3,7 +3,7 @@
 	#list!string affects ??= [of]
 	#body!property-name body?
 	#shorthand #{of}:
-		#{body}
+		#include body
 		#var subproperties = ["width", "style", "color"]
 		#each affects as var affected:
 			#each subproperties as var subproperty:

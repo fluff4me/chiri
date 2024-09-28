@@ -27,8 +27,8 @@ export interface ChiriVariableReference {
     name: ChiriWord;
     valueType: ChiriType;
 }
-export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText;
-export type ChiriExpressionResult = ChiriExpressionOperand | ChiriExpressionMatch | ChiriFunctionCall;
+export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText | ChiriFunctionCall;
+export type ChiriExpressionResult = ChiriExpressionOperand | ChiriExpressionMatch;
 export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand;
 declare function consumeExpression(reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult>;
 declare namespace consumeExpression {
