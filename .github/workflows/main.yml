@@ -25,10 +25,11 @@ jobs:
       
       - name: Clean
         run: |
-          find . -type f -not -path '*/\.git/*'
           npm install del-cli
           cat .npmignore | xargs -I {} npx del-cli '{}'
-          find . -type f -not -path '*/\.git/*'
+          rm -rf node_modules
+          rm -rf .git
+          rm -f .gitignore
       
       - name: Deploy
         uses: s0/git-publish-subdir-action@v2.5.1
