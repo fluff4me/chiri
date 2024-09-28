@@ -4,7 +4,6 @@
 import chokidar from "chokidar"
 import dotenv from "dotenv"
 import path from "path"
-import sourceMapSupport from "source-map-support"
 import ansi from "./ansi"
 import args, { allArgs } from "./args"
 import type ChiriReaderType from "./chc/read/ChiriReader"
@@ -20,7 +19,8 @@ if (process.cwd() === PACKAGE_ROOT)
 Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH! || 4)
 
 if (process.env.CHIRI_ENV === "dev")
-	sourceMapSupport.install()
+	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+	(require("source-map-support") as typeof import("source-map-support")).install()
 
 if (args.v) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
