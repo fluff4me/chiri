@@ -32,6 +32,7 @@ import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFor } from "./consume/macro/macroFor"
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
 import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf"
+import type { ChiriInclude } from "./consume/macro/macroInclude"
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
 import type { ChiriReturn } from "./consume/macro/macroReturn"
 import type { ChiriAssignment } from "./consume/macro/macroSet"
@@ -63,6 +64,7 @@ export type ChiriStatement =
 	| ChiriWhile
 	| ChiriIf
 	| ChiriElse
+	| ChiriInclude
 	// root
 	| ChiriComponent
 	| ChiriMixin
@@ -193,8 +195,8 @@ export default class ChiriReader {
 		this.#errored ||= reader.#errored
 	}
 
-	getVariables () {
-		return [...this.#outerStatements, ...this.#statements]
+	getVariables (onlyThisBlock?: true) {
+		return (onlyThisBlock ? this.#statements : [...this.#outerStatements, ...this.#statements])
 			.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable")
 	}
 

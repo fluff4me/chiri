@@ -2,6 +2,7 @@ import path from "path"
 import ansi from "../../ansi"
 import { PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriPosition, ChiriStatement } from "../read/ChiriReader"
+import type { ChiriCompilerVariable } from "../read/consume/consumeCompilerVariableOptional"
 import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
@@ -12,6 +13,7 @@ import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclarati
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
 import { ChiriType } from "../type/ChiriType"
 import ChiriTypeManager from "../type/ChiriTypeManager"
+import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
 import typeString from "../type/typeString"
 import Arrays from "../util/Arrays"
 import { STATE_MAP, type ComponentState } from "../util/componentStates"
@@ -655,7 +657,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Context: Macros
 
-	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined) {
+	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined, end: () => void) {
 		switch (statement.type) {
 			case "variable": {
 				const result = types.coerce(resolveExpression(compiler, statement.expression), statement.valueType, statement.expression?.valueType)
@@ -701,7 +703,19 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					return undefined
 
 				const assignments = resolveAssignments(statement.assignments)
-				const result = compileStatements(fn.content, assignments, contextConsumer)
+
+				const bodyParameter = fn.content.find((statement): statement is ChiriCompilerVariable => statement.type === "variable" && statement.valueType.name.value === "body")
+				if (bodyParameter) {
+					assignments.variables ??= {}
+					const bodyType = bodyParameter.valueType.generics[0].name.value as BodyVariableContext
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					assignments.variables[bodyParameter.name.value] = {
+						type: bodyParameter.valueType,
+						value: Object.assign(compileStatements(statement.content, undefined, getContextConsumer(bodyType)), { isBody: true }) as any[],
+					}
+				}
+
+				const result = compileStatements(fn.content, assignments, contextConsumer, end)
 				return result
 			}
 
@@ -714,7 +728,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				for (const value of list) {
 					result.push(...compileStatements(statement.content,
 						Scope.variables({ [statement.variable.name.value]: { type: statement.variable.valueType, value } }),
-						contextConsumer))
+						contextConsumer, end))
 				}
 
 				return result
@@ -730,7 +744,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					if (statement.update)
 						statements.push(statement.update)
 
-					result.push(...compileStatements(statements, undefined, contextConsumer))
+					result.push(...compileStatements(statements, undefined, contextConsumer, end))
 				}
 
 				scopes.pop()
@@ -743,7 +757,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				const result: T[] = []
 				while (resolveExpression(compiler, statement.condition)) {
 					const statements = statement.content.slice()
-					result.push(...compileStatements(statements, undefined, contextConsumer))
+					result.push(...compileStatements(statements, undefined, contextConsumer, end))
 				}
 
 				scopes.pop()
@@ -760,18 +774,31 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				if (!ifState)
 					return []
 
-				return compileStatements(statement.content, undefined, contextConsumer)
+				return compileStatements(statement.content, undefined, contextConsumer, end)
 			}
 
 			case "else": {
 				if (ifState)
 					return []
 
-				return compileStatements(statement.content, undefined, contextConsumer)
+				return compileStatements(statement.content, undefined, contextConsumer, end)
 			}
 
 			case "do":
-				return compileStatements(statement.content, undefined, contextConsumer)
+				return compileStatements(statement.content, undefined, contextConsumer, end)
+
+			case "include":
+				return getVariable(statement.name.value, statement.name.position) as any as T[] ?? []
+		}
+	}
+
+	function getContextConsumer (context: (typeof BodyVariableContexts)[number]): (statement: ChiriStatement) => ReturnType<typeof compileText> | ReturnType<typeof compileComponentContent> {
+		switch (context) {
+			case "text":
+			case "property-name":
+				return compileText
+			case "component":
+				return compileComponentContent
 		}
 	}
 
@@ -825,16 +852,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Internals
 
-	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined): T[] {
+	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined, end?: () => void): T[] {
 		scopes.push(using ?? {})
 		// console.log(inspect(scopes, undefined, 3, true))
 		// logLine(undefined, error(statements[0].position, ""))
 
 		let ended = false
-		const end = () => ended = true
+		const upperEnd = end
+		end = () => {
+			ended = true
+			upperEnd?.()
+		}
+
 		const results: T[] = []
 		for (const statement of statements) {
-			const macroResult = compileMacros(statement, contextCompiler)
+			const macroResult = compileMacros(statement, contextCompiler, end)
 			if (macroResult) {
 				if (macroResult === true)
 					continue
@@ -846,6 +878,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 				continue
 			}
+
+			if (ended)
+				break
 
 			const result = contextCompiler(statement, end)
 			if (result !== undefined) {

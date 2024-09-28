@@ -31,9 +31,12 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 	if (!skipInitialWhitespace)
 		consumeWhiteSpace(reader)
 
+	const e = reader.i
 	const varName = consumeWord(reader)
 
 	const variable = reader.getVariable(varName.value)
+	if (variable.valueType.name.value === "body")
+		throw reader.error(e, "Cannot reassign a variable of type \"body\"")
 
 	consumeWhiteSpaceOptional(reader)
 

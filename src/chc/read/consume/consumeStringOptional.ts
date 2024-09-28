@@ -83,6 +83,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				pendingNewlines = ""
 				segments.push(consumeExpression.inline(reader))
 				reader.consume("}")
+				reader.i--
 				break
 			}
 			case "\r":

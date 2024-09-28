@@ -8,8 +8,9 @@ $space-4: 16px
 $space-5: 32px
 
 #for var i = 0, i <= 5, set i++:
-	$dark-#{i}: ##{i}#{i}#{i}
+	#string hex = hex(i)
+	$dark-#{i}: ##{hex x 3}
 
 #for var i = 0, i <= 5, set i++:
-	#string hex = #hex num=15 - i
-	$light-#{i}: ##{hex}#{hex}#{hex}
+	#string hex = hex(15 - i)
+	$light-#{i}: ##{hex x 3}

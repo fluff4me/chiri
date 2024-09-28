@@ -50,11 +50,11 @@ export type ChiriExpressionOperand =
 	| ChiriLiteralValue
 	| ChiriVariableReference
 	| ChiriValueText
+	| ChiriFunctionCall
 
 export type ChiriExpressionResult =
 	| ChiriExpressionOperand
 	| ChiriExpressionMatch
-	| ChiriFunctionCall
 
 type VerifyExpressionResult = ChiriExpressionResult["valueType"]
 
@@ -65,7 +65,6 @@ const empy = {} as never
 async function consumeExpression (reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult> {
 	return undefined
 		?? await expressionMatch.consumeOptional(reader, consumeExpression, ...expectedTypes)
-		?? consumeFunctionCallOptional(reader, ...expectedTypes)
 		?? consumeExpressionValidated(reader, ...expectedTypes)
 }
 
@@ -112,10 +111,17 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	const constructedType = consumeTypeConstructorOptional(reader)
 	if (constructedType) return constructedType
 
+	const fnCall = consumeFunctionCallOptional(reader)
+	if (fnCall)
+		return fnCall
+
 	e = reader.i
 	const word = consumeWordOptional(reader)
 	if (word) {
 		const variable = reader.getVariableOptional(word.value)
+		if (variable?.valueType.name.value === "body")
+			throw reader.error(e, "Cannot use a variable of type \"body\" in an expression")
+
 		if (variable)
 			return {
 				type: "get",

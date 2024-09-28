@@ -6,7 +6,7 @@ import Contexts from "./body/Contexts"
 import consumeBodyOptional from "./consumeBodyOptional"
 import type { ChiriCompilerVariable } from "./consumeCompilerVariableOptional"
 import consumeCompilerVariable from "./consumeCompilerVariableOptional"
-import consumeFunctionParameters from "./consumeFunctionParameters"
+import consumeMacroParameters from "./consumeMacroParameters"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
 import type { ChiriExpressionOperand } from "./expression/consumeExpression"
@@ -26,6 +26,8 @@ import type { ChiriElse, ChiriIf } from "./macro/macroIf"
 import macroIf, { macroElse, macroIfElse } from "./macro/macroIf"
 import type { ChiriImport } from "./macro/macroImport"
 import macroImport from "./macro/macroImport"
+import type { ChiriInclude } from "./macro/macroInclude"
+import macroInclude from "./macro/macroInclude"
 import type { ChiriMacro } from "./macro/macroMacroDeclaration"
 import macroMacroDeclaration from "./macro/macroMacroDeclaration"
 import type { ChiriAssignment } from "./macro/macroSet"
@@ -50,6 +52,7 @@ export type MacroResult =
 	| ChiriWhile
 	| ChiriIf
 	| ChiriElse
+	| ChiriInclude
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
 export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
@@ -77,6 +80,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroIf.consumeOptional(reader, ...context)
 		?? await macroIfElse.consumeOptional(reader, ...context)
 		?? await macroElse.consumeOptional(reader, ...context)
+		?? await macroInclude.consumeOptional(reader, ...context)
 		?? await consumeDeclaredUse(reader)
 		?? await consumeCompilerVariable(reader)
 
@@ -121,7 +125,7 @@ async function consumeDeclaredUse (reader: ChiriReader): Promise<ChiriMacroUse |
 		return undefined
 	}
 
-	const assignments = consumeFunctionParameters(reader, restore.i, fn)
+	const assignments = consumeMacroParameters(reader, restore.i, fn)
 
 	const bodyParameter = getFunctionParameters(fn)
 		.sort((a, b) => +!!a.expression - +!!b.expression)

@@ -278,7 +278,7 @@ export default class ChiriTypeManager {
 	}
 
 	isAssignable (type: ChiriType, ...toTypes: ChiriType[]): boolean {
-		if (toTypes.includes(type))
+		if (toTypes.includes(type) || !toTypes.length)
 			return true
 
 		toTypes = toTypes.flatMap(type => type.isGeneric ? type.generics : type)

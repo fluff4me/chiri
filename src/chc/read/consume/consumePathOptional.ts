@@ -1,6 +1,7 @@
 import type ChiriReader from "../ChiriReader"
 
 export interface ChiriPath {
+	type: "path"
 	module?: string
 	path: string
 	i: number
@@ -102,6 +103,7 @@ export default (reader: ChiriReader): ChiriPath | undefined => {
 	}
 
 	return {
+		type: "path",
 		module: moduleName,
 		path,
 		i: s,

@@ -8,7 +8,7 @@ import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData
 import Contexts from "../body/Contexts"
 import consumeBodyOptional from "../consumeBodyOptional"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
-import consumeFunctionParameters from "../consumeFunctionParameters"
+import consumeMacroParameters from "../consumeMacroParameters"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
@@ -118,7 +118,7 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 					}
 
 					const extra = await parametersConsumer?.(reader) as never
-					const assignments = parametersConsumer ? {} : consumeFunctionParameters(reader, start, macro)
+					const assignments = parametersConsumer ? {} : consumeMacroParameters(reader, start, macro)
 
 					const info: ChiriMacroInternalBodyContextSupplierInfo<false, never> & Partial<ChiriMacroInternalConsumerInfo<false, any, never>> = {
 						reader,

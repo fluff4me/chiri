@@ -39,8 +39,11 @@ export default async (reader: ChiriReader, prefix = true): Promise<ChiriCompiler
 		return undefined
 	}
 
-	if (valueType.name.value === "body" && reader.getVariables().find(variable => variable.valueType.name.value === "body"))
-		throw reader.error(save.i, "A macro cannot declare multiple body parameters")
+	if (valueType.name.value === "body" && reader.getVariables(true).find(variable => variable.valueType.name.value === "body"))
+		throw reader.error(save.i, "A macro cannot accept multiple body parameters")
+
+	if (valueType.name.value === "body" && reader.context.type === "function")
+		throw reader.error(save.i, "A function cannot accept a body parameter")
 
 	consumeWhiteSpace(reader)
 
@@ -52,7 +55,6 @@ export default async (reader: ChiriReader, prefix = true): Promise<ChiriCompiler
 		consumeWhiteSpaceOptional(reader)
 
 	let assignment = reader.consumeOptional("??=", "=") as "??=" | "=" | undefined
-
 	if (assignment === "??=" && reader.context.type === "mixin")
 		throw reader.error(save.i, "Mixins cannot accept parameters")
 
@@ -72,6 +74,9 @@ export default async (reader: ChiriReader, prefix = true): Promise<ChiriCompiler
 		else if (reader.context.type === "mixin")
 			throw reader.error(save.i, "Mixins cannot accept parameters")
 	}
+
+	if (assignment !== "??=" && reader.getVariables(true).findLast(variable => variable.assignment === "??="))
+		throw reader.error(save.i, "Required parameters cannot be declared after optional parameters")
 
 	return {
 		type: "variable",
