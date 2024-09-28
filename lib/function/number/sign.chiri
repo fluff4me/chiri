@@ -1,0 +1,6 @@
+#function sign returns int:
+	#dec value
+	#return match true:
+		value > 0: 1
+		value < 0: -1
+		else: 0

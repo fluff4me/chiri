@@ -1,0 +1,6 @@
+#function floor returns int:
+	#dec value
+	#int truncated = value
+	#return match value == truncated:
+		true: value
+		false: value - 1

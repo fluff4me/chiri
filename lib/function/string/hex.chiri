@@ -1,0 +1,30 @@
+#function hex returns string:
+	#int num
+
+	#function hex-place returns string:
+		#int num
+		#return match num:
+			15: "f
+			14: "e
+			13: "d
+			12: "c
+			11: "b
+			10: "a
+			else: "#{num}
+
+	#bool negative = num < 0
+
+	#set num = #abs value=num
+
+	#string result = "
+
+	#while num > 0:
+		#int remainder = num % 16
+		#string place = #hex-place num=remainder
+		#set result = place . result
+		#set num /= 16
+
+	#if negative:
+		#set result = "-#{result}
+
+	#return result

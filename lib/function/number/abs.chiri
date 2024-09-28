@@ -1,0 +1,5 @@
+#function abs with number!(dec int uint) returns number:
+	#number value
+	#return match value < 0:
+		true: value * -1
+		false: value

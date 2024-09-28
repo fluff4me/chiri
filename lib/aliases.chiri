@@ -1,0 +1,19 @@
+#alias colour: color
+#alias background-colour: background-color
+
+#do:
+	#list!string properties = [
+		"border"
+		"border-left"
+		"border-right"
+		"border-top"
+		"border-bottom"
+		"border-block"
+		"border-block-start"
+		"border-block-end"
+		"border-inline"
+		"border-inline-start"
+		"border-inline-end"
+
+	#each properties as var property:
+		#alias #{property}-colour: #{property}-color
