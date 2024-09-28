@@ -46,7 +46,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const prefixError_js_1 = __importDefault(require("./chc/util/prefixError.js"));
     const relToCwd_js_1 = __importDefault(require("./chc/util/relToCwd.js"));
     const constants_1 = require("./constants");
-    dotenv_1.default.config();
+    if (process.cwd() === constants_1.PACKAGE_ROOT)
+        dotenv_1.default.config();
     Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH || 4);
     if (process.env.CHIRI_ENV === "dev")
         source_map_support_1.default.install();

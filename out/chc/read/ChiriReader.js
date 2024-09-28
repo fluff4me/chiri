@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/Arrays", "../util/Errors", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRuleStateOptional"], factory);
+        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRuleStateOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -20,6 +20,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const Arrays_1 = __importDefault(require("../util/Arrays"));
     const Errors_1 = __importDefault(require("../util/Errors"));
+    const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const Strings_1 = __importDefault(require("../util/Strings"));
     const consumeBlockEnd_1 = __importDefault(require("./consume/consumeBlockEnd"));
     const consumeDocumentationOptional_1 = __importDefault(require("./consume/consumeDocumentationOptional"));
@@ -148,11 +149,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined
                 ?? this.#statements.findLast((statement) => statement.type === "macro" && statement.name.value === name)
                 ?? this.#outerStatements.findLast((statement) => statement.type === "macro" && statement.name.value === name);
-        }
-        getMixinOptional(name) {
-            return undefined
-                ?? this.#statements.findLast((statement) => statement.type === "mixin" && statement.name.value === name)
-                ?? this.#outerStatements.findLast((statement) => statement.type === "mixin" && statement.name.value === name);
         }
         with(...scopeStatements) {
             return {
@@ -326,7 +322,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         .join("\n")}`));
         }
         formatFilename() {
-            return ansi_1.default.path + path_1.default.relative(process.cwd(), this.filename).replaceAll("\\", "/");
+            return ansi_1.default.path + (0, relToCwd_1.default)(this.filename);
         }
         formatFilePos(lineNumber = this.getLineNumber(), columnNumber = this.getColumnNumber()) {
             return this.formatFilename() + ansi_1.default.filepos + `:${lineNumber + 1}:${columnNumber + 1}` + ansi_1.default.reset;

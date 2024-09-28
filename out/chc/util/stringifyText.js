@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const stringifyExpression_1 = __importDefault(require("./stringifyExpression"));
     const stringifyText = (compiler, text) => {
+        if (text.type === "word")
+            return text.value;
         let result = "";
         for (const value of text.content) {
             if (typeof value === "string") {

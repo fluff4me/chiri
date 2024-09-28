@@ -22,9 +22,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const word = (0, consumeWordOptional_1.default)(reader);
         if (!word)
             return undefined;
-        const mixin = reader.getMixinOptional(word.value);
-        if (!mixin)
-            throw reader.error(start, `No declaration for %${word.value}`);
         if (reader.getStatements().some(statement => statement.type === "mixin-use" && statement.name.value === word.value))
             throw reader.error(start, `%${word.value} is already included in this context`);
         // const assignments = consumeFunctionParameters(reader, start, mixin)

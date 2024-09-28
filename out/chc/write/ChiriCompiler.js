@@ -164,7 +164,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 for (let i = scopes.length - 1; i >= 0; i--) {
                     const mixins = scopes[i].mixins;
                     if (mixins && mixin.name.value in mixins)
-                        throw error(mixin.position, `%${mixin.name.value} cannot be redefined`);
+                        if (mixin.name.value in usedMixins)
+                            throw error(mixin.position, `%${mixin.name.value} cannot be redefined after being used`);
                 }
             return root().mixins[mixin.name.value] = mixin;
         }
@@ -267,6 +268,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const properties = compileStatements(statement.content, undefined, compileMixinContent);
                     setMixin({
                         ...statement,
+                        name: resolveWord(statement.name),
                         content: properties,
                         affects: properties.flatMap(getPropertyAffects),
                     });
@@ -343,8 +345,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const properties = results.filter(result => result.type === "property");
             const mixins = results.filter(result => result.type === "word");
             const states = results.filter(result => result.type === "state");
-            if (!mixins.length && !states.length && !properties.length)
-                return [];
             let propertyGroup;
             let groupIndex = 1;
             for (const result of [...results, { type: "word" }]) {
@@ -376,7 +376,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             for (const state of states) {
                 for (const name of state.mixins) {
                     const mixin = getMixin(name.value, name.position);
-                    const stateMixinName = { type: "word", value: `${name.value}_${state.state.value}`, position: mixin.name.position };
+                    const stateName = state.state.value.startsWith(":") ? `${state.state.value.slice(1)}-any` : state.state.value;
+                    const stateMixinName = { type: "word", value: `${name.value}_${stateName}`, position: mixin.name.position };
                     if (!getMixin(stateMixinName.value, mixin.name.position, true))
                         setMixin({
                             ...mixin,
@@ -630,7 +631,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return getShorthand(property.property.value);
         }
         function debugStatementString(statement) {
-            const name = "name" in statement ? ` "${statement.name.value}"` : "";
+            const name = "name" in statement ? ` "${(0, stringifyText_1.default)(compiler, statement.name)}"` : "";
             return statement.type + name;
         }
         function resolveAssignments(assignments) {

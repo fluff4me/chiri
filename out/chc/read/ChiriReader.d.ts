@@ -72,7 +72,6 @@ export default class ChiriReader {
     getFunctionOptional(name: string): ChiriFunction | undefined;
     getFunction(name: string, start?: number): ChiriCompilerVariable;
     getMacroOptional(name: string): ChiriMacro | undefined;
-    getMixinOptional(name: string): ChiriMixin | undefined;
     with(...scopeStatements: ChiriStatement[]): {
         do: <T>(callback: () => PromiseOr<T>) => Promise<T>;
     };
