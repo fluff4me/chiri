@@ -24,7 +24,9 @@ jobs:
         run: npm run build
       
       - name: Clean
-        run: cat .npmignore | xargs -I {} rm -rf {}
+        run: |
+          npm install del-cli
+          cat .npmignore | xargs -I {} npx del-cli {}
       
       - name: Deploy
         uses: s0/git-publish-subdir-action@v2.5.1
