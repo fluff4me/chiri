@@ -34,10 +34,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         if (parameters.length) {
             reader.consume("(");
-            for (const parameter of parameters) {
-                if (parameter !== parameters[0]) {
-                    reader.consume(",");
+            for (let i = 0; i < parameters.length; i++) {
+                const parameter = parameters[i];
+                if (i > 0) {
+                    if (!reader.consumeOptional(",") && parameter.assignment !== "??=") {
+                        const missingParameters = parameters.slice(i)
+                            .map(param => `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
+                            .join(", ");
+                        throw reader.error(`Missing parameters for #function ${fn.name.value}: ${missingParameters}`);
+                    }
                     (0, consumeWhiteSpaceOptional_1.default)(reader);
+                }
+                if (reader.peek(")")) {
+                    const missingParameters = parameters.slice(i)
+                        .filter(param => !param.assignment)
+                        .map(param => `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
+                        .join(", ");
+                    if (missingParameters)
+                        throw reader.error(`Missing required parameters for #function ${fn.name.value}: ${missingParameters}`);
+                    break;
                 }
                 assignments[parameter.name.value] = consumeExpression_1.default.inline(reader, parameter.valueType);
             }

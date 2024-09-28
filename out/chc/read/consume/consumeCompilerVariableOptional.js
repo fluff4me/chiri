@@ -60,7 +60,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             else if (reader.context.type === "mixin")
                 throw reader.error(save.i, "Mixins cannot accept parameters");
         }
-        if (assignment !== "??=" && reader.getVariables(true).findLast(variable => variable.assignment === "??="))
+        if (!assignment && reader.getVariables(true).findLast(variable => variable.assignment === "??="))
             throw reader.error(save.i, "Required parameters cannot be declared after optional parameters");
         return {
             type: "variable",
