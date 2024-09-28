@@ -6,3 +6,4 @@ src/
 .vscode/
 out/tsconfig.tsbuildinfo
 out/**/*.js.map
+.github/

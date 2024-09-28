@@ -28,7 +28,6 @@ jobs:
           npm install del-cli
           cat .npmignore | xargs -I {} npx del-cli '{}'
           rm -rf node_modules
-          rm -rf .git
           rm -f .gitignore
       
       - name: Deploy
