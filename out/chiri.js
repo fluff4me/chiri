@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "chokidar", "dotenv", "path", "source-map-support", "./ansi", "./args", "./chc/util/prefixError.js", "./chc/util/relToCwd.js", "./constants"], factory);
+        define(["require", "exports", "chokidar", "dotenv", "path", "./ansi", "./args", "./chc/util/prefixError.js", "./chc/util/relToCwd.js", "./constants"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -40,7 +40,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const chokidar_1 = __importDefault(require("chokidar"));
     const dotenv_1 = __importDefault(require("dotenv"));
     const path_1 = __importDefault(require("path"));
-    const source_map_support_1 = __importDefault(require("source-map-support"));
     const ansi_1 = __importDefault(require("./ansi"));
     const args_1 = __importStar(require("./args"));
     const prefixError_js_1 = __importDefault(require("./chc/util/prefixError.js"));
@@ -50,7 +49,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         dotenv_1.default.config();
     Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH || 4);
     if (process.env.CHIRI_ENV === "dev")
-        source_map_support_1.default.install();
+        // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+        require("source-map-support").install();
     if (args_1.default.v) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         console.log(require(path_1.default.join(constants_1.PACKAGE_ROOT, "package.json")).version);
