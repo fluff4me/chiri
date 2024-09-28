@@ -29,6 +29,7 @@ jobs:
           cat .npmignore | xargs -I {} npx del-cli '{}'
           rm -rf node_modules
           rm -f .gitignore
+          find . -type f -not -path '*/\.git/*'
       
       - name: Deploy
         uses: s0/git-publish-subdir-action@v2.5.1
