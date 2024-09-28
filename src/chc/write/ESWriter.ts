@@ -1,3 +1,5 @@
+import path from "path"
+import args from "../../args"
 import type { ChiriAST } from "../read/ChiriReader"
 import type ChiriCompiler from "./ChiriCompiler"
 import type { ChiriWriteConfig } from "./Writer"
@@ -25,6 +27,10 @@ export default class ESWriter extends Writer {
 
 	constructor (ast: ChiriAST, dest: string, config?: ChiriWriteConfig) {
 		super(ast, dest, { extension: ".js", ...config })
+	}
+
+	override createDestPath (outFile: string): string {
+		return typeof args["out-es"] === "string" ? path.resolve(args["out-es"], outFile) : super.createDestPath(outFile)
 	}
 
 	override onCompileStart (compiler: ChiriCompiler): void {

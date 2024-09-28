@@ -1,10 +1,13 @@
 import fsp from "fs/promises"
+import path from "path"
 import { SourceMapGenerator } from "source-map"
 import ansi from "../../ansi"
+import args from "../../args"
 import type { ChiriAST, ChiriPosition } from "../read/ChiriReader"
 import type { ChiriDocumentation } from "../read/consume/consumeDocumentationOptional"
 import type { ChiriValueText } from "../read/consume/consumeValueText"
 import type { ChiriWord } from "../read/consume/consumeWord"
+import relToCwd from "../util/relToCwd"
 import stringifyText from "../util/stringifyText"
 import type ChiriCompiler from "./ChiriCompiler"
 
@@ -49,11 +52,17 @@ export default class Writer {
 	}
 
 	constructor (ast: ChiriAST, dest: string, public readonly config: ChiriWriteConfig) {
-		this.dest = dest + config.extension
+		this.dest = this.createDestPath(relToCwd(dest)) + config.extension
 
 		this.map = new SourceMapGenerator({ file: this.dest })
 		for (const [filename, source] of Object.entries(ast.source))
 			this.map.setSourceContent(filename, source)
+	}
+
+	createDestPath (outFile: string): string {
+		if (typeof args.out === "string")
+			outFile = path.join(args.out, outFile)
+		return path.resolve(outFile)
 	}
 
 	indent (amount = 1) {
@@ -67,7 +76,7 @@ export default class Writer {
 				this.currentWrite.output = this.currentWrite.output.slice(0, -1)
 	}
 
-	writeFile () {
+	async writeFile () {
 		this.output = ""
 		for (const queued of this.queue) {
 			if (queued.mapping) {
@@ -82,6 +91,7 @@ export default class Writer {
 			this.output += queued.output
 		}
 
+		await fsp.mkdir(path.dirname(this.dest), { recursive: true })
 		return fsp.writeFile(this.dest, this.output)
 	}
 

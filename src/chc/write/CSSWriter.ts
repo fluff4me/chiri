@@ -1,3 +1,5 @@
+import path from "path"
+import args from "../../args"
 import type { ChiriAST } from "../read/ChiriReader"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
@@ -23,6 +25,10 @@ export default class CSSWriter extends Writer {
 
 	constructor (ast: ChiriAST, dest: string, config?: ChiriWriteConfig) {
 		super(ast, dest, { extension: ".css", ...config })
+	}
+
+	override createDestPath (outFile: string): string {
+		return typeof args["out-css"] === "string" ? path.resolve(args["out-css"], outFile) : super.createDestPath(outFile)
 	}
 
 	writingTo (writingTo: "default" | "root", dowhile: () => any) {

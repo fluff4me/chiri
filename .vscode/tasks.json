@@ -6,10 +6,7 @@
 			"type": "npm",
 			"script": "play",
 			"isBackground": true,
-			"group": {
-				"kind": "build",
-				"isDefault": true,
-			}
+			"group": "build"
 		},
 	],
 }

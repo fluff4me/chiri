@@ -6,12 +6,13 @@ import dotenv from "dotenv"
 import path from "path"
 import sourceMapSupport from "source-map-support"
 import ansi from "./ansi"
+import args, { allArgs } from "./args"
 import type ChiriReaderType from "./chc/read/ChiriReader"
 import prefixError from "./chc/util/prefixError.js"
 import relToCwd from "./chc/util/relToCwd.js"
 import type streamJsonType from "./chc/util/streamJson"
 import type ChiriCompilerType from "./chc/write/ChiriCompiler"
-import { CHC_ROOT, LIB_ROOT } from "./constants"
+import { CHC_ROOT, LIB_ROOT, PACKAGE_ROOT } from "./constants"
 
 dotenv.config()
 
@@ -20,22 +21,10 @@ Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK
 if (process.env.CHIRI_ENV === "dev")
 	sourceMapSupport.install()
 
-const args: Record<string, string | true> = {}
-const allArgs: string[] = []
-
-for (let i = 2; i < process.argv.length; i++) {
-	const arg = process.argv[i]
-	if (arg[0] === "-" && (arg[2] || arg[1] !== "-")) {
-		if (arg[1] === "-") {
-			args[arg.slice(2)] = process.argv[++i]
-			continue
-		}
-
-		args[arg.slice(1)] = true
-		continue
-	}
-
-	allArgs.push(arg)
+if (args.v) {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+	console.log(require(path.join(PACKAGE_ROOT, "package.json")).version)
+	process.exit()
 }
 
 let compilationPromise: Promise<any> | undefined = undefined
@@ -109,16 +98,14 @@ async function compile (filename: string) {
 			.catch(e => { throw prefixError(e, "Failed to write AST JSON file") })
 	}
 
-	const outFile = reader.basename
-
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 	const ChiriCompilerClass = rerequire<typeof ChiriCompilerType>("./chc/write/ChiriCompiler.js")
-	const compiler = ChiriCompilerClass(ast, outFile)
+	const compiler = ChiriCompilerClass(ast, reader.basename)
 	compiler.compile()
 	await compiler.writeFiles()
 
 	const elapsed = performance.now() - start
-	console.log(ansi.label + "chiri", ansi.path + relToCwd(reader.filename), ansi.label + "=>", ansi.path + relToCwd(outFile), ansi.label + formatElapsed(elapsed))
+	console.log(ansi.label + "chiri", ansi.path + relToCwd(reader.filename), ansi.label + formatElapsed(elapsed))
 }
 
 function formatElapsed (elapsed: number) {
