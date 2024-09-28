@@ -39,10 +39,29 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 
 	if (parameters.length) {
 		reader.consume("(")
-		for (const parameter of parameters) {
-			if (parameter !== parameters[0]) {
-				reader.consume(",")
+		for (let i = 0; i < parameters.length; i++) {
+			const parameter = parameters[i]
+			if (i > 0) {
+				if (!reader.consumeOptional(",") && parameter.assignment !== "??=") {
+					const missingParameters = parameters.slice(i)
+						.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
+						.join(", ")
+					throw reader.error(`Missing parameters for #function ${fn.name.value}: ${missingParameters}`)
+				}
+
 				consumeWhiteSpaceOptional(reader)
+			}
+
+			if (reader.peek(")")) {
+				const missingParameters = parameters.slice(i)
+					.filter(param => !param.assignment)
+					.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
+					.join(", ")
+
+				if (missingParameters)
+					throw reader.error(`Missing required parameters for #function ${fn.name.value}: ${missingParameters}`)
+
+				break
 			}
 
 			assignments[parameter.name.value] = consumeExpression.inline(reader, parameter.valueType)
