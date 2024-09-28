@@ -25,10 +25,10 @@ jobs:
       
       - name: Clean
         run: |
-          git diff --name-only
+          git status
           npm install del-cli
-          cat .npmignore | xargs -I {} npx del-cli {}
-          git diff --name-only
+          cat .npmignore | xargs -I {} npx del-cli '{}'
+          git status
       
       - name: Deploy
         uses: s0/git-publish-subdir-action@v2.5.1
