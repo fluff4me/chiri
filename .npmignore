@@ -7,3 +7,4 @@ src/
 out/tsconfig.tsbuildinfo
 out/**/*.js.map
 .github/
+.gitattributes
