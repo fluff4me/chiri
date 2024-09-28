@@ -660,19 +660,25 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined, end: () => void) {
 		switch (statement.type) {
 			case "variable": {
-				const result = types.coerce(resolveExpression(compiler, statement.expression), statement.valueType, statement.expression?.valueType)
 				if (!statement.assignment)
 					return true
 
 				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position, true) !== undefined)
 					return true
 
+				if (!statement.expression && statement.assignment === "??=") {
+					scope().variables ??= {}
+					scope().variables![statement.name.value] = { type: statement.valueType, value: undefined }
+					return true
+				}
+
+				const result = types.coerce(resolveExpression(compiler, statement.expression), statement.valueType, statement.expression?.valueType)
 				setVariable(statement.name.value, result, statement.valueType)
 				return true
 			}
 
 			case "assignment": {
-				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position) === undefined)
+				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position) !== undefined)
 					// already assigned
 					return true
 

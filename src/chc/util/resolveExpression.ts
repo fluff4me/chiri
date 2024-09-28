@@ -90,6 +90,8 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 							return `${operandA}${operandB}`
 						case "x":
 							return `${operandA}`.repeat(+operandB || 1)
+						case "??":
+							return operandA ?? operandB
 						default:
 							throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`)
 					}

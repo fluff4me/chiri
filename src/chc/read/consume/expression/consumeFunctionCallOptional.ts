@@ -64,7 +64,11 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 				break
 			}
 
-			assignments[parameter.name.value] = consumeExpression.inline(reader, parameter.valueType)
+			const expectedType = [parameter.valueType]
+			if (parameter.assignment === "??=")
+				expectedType.push(ChiriType.of("undefined"))
+
+			assignments[parameter.name.value] = consumeExpression.inline(reader, ...expectedType)
 		}
 
 		reader.consumeOptional(")")
