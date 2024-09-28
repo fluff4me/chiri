@@ -9,6 +9,7 @@ import ChiriTypeManager from "../type/ChiriTypeManager"
 import type TypeDefinition from "../type/TypeDefinition"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
+import relToCwd from "../util/relToCwd"
 import Strings from "../util/Strings"
 import type { ArrayOr, PromiseOr } from "../util/Type"
 import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./consume/body/Contexts"
@@ -237,14 +238,6 @@ export default class ChiriReader {
 				statement.type === "macro" && statement.name.value === name)
 	}
 
-	getMixinOptional (name: string) {
-		return undefined
-			?? this.#statements.findLast((statement): statement is ChiriMixin =>
-				statement.type === "mixin" && statement.name.value === name)
-			?? this.#outerStatements.findLast((statement): statement is ChiriMixin =>
-				statement.type === "mixin" && statement.name.value === name)
-	}
-
 	with (...scopeStatements: ChiriStatement[]) {
 		return {
 			do: async <T> (callback: () => PromiseOr<T>): Promise<T> => {
@@ -459,7 +452,7 @@ export default class ChiriReader {
 	}
 
 	formatFilename () {
-		return ansi.path + path.relative(process.cwd(), this.filename).replaceAll("\\", "/")
+		return ansi.path + relToCwd(this.filename)
 	}
 
 	formatFilePos (lineNumber = this.getLineNumber(), columnNumber = this.getColumnNumber()) {

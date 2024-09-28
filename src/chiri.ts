@@ -14,7 +14,8 @@ import type streamJsonType from "./chc/util/streamJson"
 import type ChiriCompilerType from "./chc/write/ChiriCompiler"
 import { CHC_ROOT, LIB_ROOT, PACKAGE_ROOT } from "./constants"
 
-dotenv.config()
+if (process.cwd() === PACKAGE_ROOT)
+	dotenv.config()
 
 Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH! || 4)
 

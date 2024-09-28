@@ -3,11 +3,12 @@
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition, ChiriStatement } from "../ChiriReader"
 import consumeBody from "./consumeBody"
-import consumeWord, { type ChiriWord } from "./consumeWord"
+import consumeWordInterpolated from "./consumeWordInterpolated"
+import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
 
 export interface ChiriMixin {
 	type: "mixin"
-	name: ChiriWord
+	name: ChiriWordInterpolated
 	content: ChiriStatement[]
 	position: ChiriPosition
 }
@@ -18,7 +19,7 @@ export default async (reader: ChiriReader): Promise<ChiriMixin | undefined> => {
 	if (!reader.consumeOptional("%"))
 		return undefined
 
-	const name = consumeWord(reader)
+	const name = consumeWordInterpolated(reader)
 
 	if (!reader.consumeOptional(":")) {
 		reader.restorePosition(restore)

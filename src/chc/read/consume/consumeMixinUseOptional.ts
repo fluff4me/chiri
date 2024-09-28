@@ -22,10 +22,6 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	if (!word)
 		return undefined
 
-	const mixin = reader.getMixinOptional(word.value)
-	if (!mixin)
-		throw reader.error(start, `No declaration for %${word.value}`)
-
 	if (reader.getStatements().some(statement => statement.type === "mixin-use" && statement.name.value === word.value))
 		throw reader.error(start, `%${word.value} is already included in this context`)
 

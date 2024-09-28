@@ -5,21 +5,73 @@
 %border-1: border: 1px solid
 %border-2: border: 2px solid
 
-%border-radius-1: border-radius: $space-1
-%border-radius-2: border-radius: $space-2
-%border-radius-3: border-radius: $space-3
-%border-radius-4: border-radius: $space-4
-%border-radius-5: border-radius: $space-5
+#for var i = 1, i <= 5, set i++:
+	%border-radius-#{i}: border-radius: $space-#{i}
+	%gap-#{i}: gap: $space-#{i}
+	%padding-#{i}: padding: $space-#{i}
 
-%color-dark-0: colour: $dark-0
-%colour-dark-0: colour: $dark-0
-%color-dark-1: colour: $dark-1
-%colour-dark-1: colour: $dark-1
-%color-dark-2: colour: $dark-2
-%colour-dark-2: colour: $dark-2
-%color-dark-3: colour: $dark-3
-%colour-dark-3: colour: $dark-3
-%color-dark-4: colour: $dark-4
-%colour-dark-4: colour: $dark-4
-%color-dark-5: colour: $dark-5
-%colour-dark-5: colour: $dark-5
+	#for var j = 1, j <= 5, set j++:
+		%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
+
+#for var i = 0, i <= 5, set i++:
+	%color-dark-#{i}: colour: $dark-#{i}
+	%colour-dark-#{i}: colour: $dark-#{i}
+	%color-light-#{i}: colour: $light-#{i}
+	%colour-light-#{i}: colour: $light-#{i}
+	%background-dark-#{i}: background: $dark-#{i}
+	%background-light-#{i}: background: $light-#{i}
+
+%block: display: block
+%grid: display: grid
+%flex: display: flex
+%inline-block: display: inline-block
+%inline-grid: display: inline-grid
+%inline-flex: display: inline-flex
+
+%flex-column: flex-direction: column
+%flex-row: flex-direction: row
+
+#do:
+	#var cursor-values=[
+		"auto
+		"default
+		"none
+		"context-menu
+		"help
+		"pointer
+		"progress
+		"wait
+		"cell
+		"crosshair
+		"text
+		"vertical-text
+		"alias
+		"copy
+		"move
+		"no-drop
+		"not-allowed
+		"grab
+		"grabbing
+		"all-scroll
+		"col-resize
+		"row-resize
+		"n-resize
+		"e-resize
+		"s-resize
+		"w-resize
+		"ne-resize
+		"nw-resize
+		"se-resize
+		"sw-resize
+		"ew-resize
+		"ns-resize
+		"nesw-resize
+		"nwse-resize
+		"zoom-in
+		"zoom-out
+
+	#each cursor-values as var type:
+		%cursor-#{type}: cursor: #{type}
+
+%no-select: user-select: none
+%user-select-none: user-select: none

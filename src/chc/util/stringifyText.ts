@@ -1,8 +1,12 @@
 import type { ChiriValueText } from "../read/consume/consumeValueText"
+import type { ChiriWord } from "../read/consume/consumeWord"
 import type ChiriCompiler from "../write/ChiriCompiler"
 import stringifyExpression from "./stringifyExpression"
 
-const stringifyText = (compiler: ChiriCompiler, text: ChiriValueText): string => {
+const stringifyText = (compiler: ChiriCompiler, text: ChiriValueText | ChiriWord): string => {
+	if (text.type === "word")
+		return text.value
+
 	let result = ""
 	for (const value of text.content) {
 		if (typeof value === "string") {
