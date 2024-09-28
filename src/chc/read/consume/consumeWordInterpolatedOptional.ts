@@ -1,7 +1,7 @@
 
 
+import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
 import type { ChiriInterpolationVariable, ChiriTextRaw, ChiriValueText } from "./consumeValueText"
 import consumeExpression, { type ChiriExpressionOperand } from "./expression/consumeExpression"
 

@@ -36,6 +36,6 @@ export default class ESWriter extends Writer {
 		this.writeLineEndBlock("};")
 		this.writeLineEndBlock(UMD_SUFFIX)
 
-		this.output += `\n//# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())}`
+		this.write(`\n//# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())}`)
 	}
 }

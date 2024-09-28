@@ -1,5 +1,5 @@
 import { LITERAL_FALSE, LITERAL_STRING_ROOT } from "../../../../constants"
-import { ChiriType } from "../../ChiriType"
+import { ChiriType } from "../../../type/ChiriType"
 import isLiteral from "../../guard/isLiteral"
 import MacroConstruct from "./MacroConstruct"
 

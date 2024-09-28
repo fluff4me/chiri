@@ -1,14 +1,14 @@
 import { INTERNAL_POSITION } from "../../../constants"
+import type { ChiriType } from "../../type/ChiriType"
 import assertNotWhiteSpaceAndNewLine from "../assert/assertNotWhiteSpaceAndNewLine"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
 import consumeIndentOptional from "./consumeIndentOptional"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
-import consumeWordOptional from "./consumeWordOptional"
 import type { ChiriExpressionOperand } from "./expression/consumeExpression"
+import consumeExpression from "./expression/consumeExpression"
 
 export interface ChiriLiteralString {
 	type: "literal"
@@ -70,31 +70,19 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				appendSegment(pendingNewlines + `\\${char}`)
 				pendingNewlines = ""
 				break
-			case "*": {
-				const e = reader.i
-				reader.i++
-				const word = consumeWordOptional(reader)
-				if (!word) {
-					reader.i--
-					appendSegment(pendingNewlines + "*")
+			case "#": {
+				if (reader.input[reader.i + 1] !== "{") {
+					appendSegment(pendingNewlines + `${char}`)
 					pendingNewlines = ""
 					break
 				}
 
-				reader.i--
-				const variable = reader.getVariable(word.value)
-				const valueType = variable.valueType
-				if (!valueType || !reader.getType(valueType).stringable)
-					throw reader.error(e, `Type "${ChiriType.stringify(valueType)}" is not stringable`)
+				reader.i += 2
 
 				appendSegment(pendingNewlines)
 				pendingNewlines = ""
-
-				segments.push({
-					type: "get",
-					valueType,
-					name: word,
-				}, "")
+				segments.push(consumeExpression.inline(reader))
+				reader.consume("}")
 				break
 			}
 			case "\r":

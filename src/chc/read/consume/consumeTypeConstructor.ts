@@ -1,7 +1,7 @@
 
 
+import type { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
-import type { ChiriType } from "../ChiriType"
 import consumeTypeConstructorOptional from "./consumeTypeConstructorOptional"
 
 export default (reader: ChiriReader, type: ChiriType) => {

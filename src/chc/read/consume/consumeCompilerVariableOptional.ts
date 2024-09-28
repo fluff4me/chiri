@@ -1,8 +1,8 @@
 
 
+import type { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
-import type { ChiriType } from "../ChiriType"
 import { consumeTypeOptional } from "./consumeType"
 import consumeWhiteSpace from "./consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"

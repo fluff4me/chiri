@@ -3,13 +3,14 @@
 import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
-import { INTERNAL_POSITION, LIB_ROOT, PACKAGE_ROOT } from "../../constants"
+import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
+import { ChiriType } from "../type/ChiriType"
+import ChiriTypeManager from "../type/ChiriTypeManager"
+import type TypeDefinition from "../type/TypeDefinition"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
 import Strings from "../util/Strings"
 import type { ArrayOr, PromiseOr } from "../util/Type"
-import { ChiriType } from "./ChiriType"
-import ChiriTypeManager from "./ChiriTypeManager"
 import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./consume/body/Contexts"
 import consumeBlockEnd from "./consume/consumeBlockEnd"
 import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional"
@@ -38,18 +39,11 @@ import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import type { ChiriComponent } from "./consume/rule/Rule"
-import type TypeDefinition from "./type/TypeDefinition"
 
 export interface ChiriPosition {
 	file: string
 	line: number
 	column: number
-}
-
-export interface ChiriRoot {
-	type: "root"
-	content: ChiriStatement[]
-	position: ChiriPosition
 }
 
 export type ChiriStatement =
@@ -69,7 +63,6 @@ export type ChiriStatement =
 	| ChiriIf
 	| ChiriElse
 	// root
-	| ChiriRoot
 	| ChiriComponent
 	| ChiriMixin
 	| ChiriShorthand
@@ -121,7 +114,6 @@ export default class ChiriReader {
 
 	#outerStatements: ChiriStatement[] = []
 	#statements: ChiriStatement[] = []
-	#rootStatements: ChiriStatement[] = []
 
 	#errorStart?: number
 
@@ -340,14 +332,6 @@ export default class ChiriReader {
 				this.logLine(this.#errorStart, err as Error)
 		}
 
-		if (this.#rootStatements.length) {
-			this.#statements.unshift({
-				type: "root",
-				content: this.#rootStatements,
-				position: INTERNAL_POSITION,
-			})
-		}
-
 		// this.logLine(undefined, `read end (${this.context})`)
 		return {
 			source: this.source,
@@ -429,10 +413,8 @@ export default class ChiriReader {
 
 		const property = consumePropertyOptional(this)
 		if (property) {
-			if (!this.#isSubReader) {
-				this.#rootStatements.push(property)
-				return []
-			}
+			if (!property.isCustomProperty && this.context.type === "root")
+				throw this.error("Properties cannot be used in this context")
 
 			return property
 		}

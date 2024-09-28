@@ -18,7 +18,7 @@ const stringifyExpression = (compiler: ChiriCompiler, expression?: ChiriExpressi
 		case "string":
 			return resolved
 		case "object":
-			return resolved.join(" ")
+			return resolved.map(v => stringifyExpression(compiler, v)).join(" ")
 		default:
 			throw compiler.error(undefined, `Expression resolved to unstringifiable type "${typeof resolved}"`)
 	}

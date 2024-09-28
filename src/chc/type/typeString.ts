@@ -1,7 +1,7 @@
 
 
-import { ChiriType } from "../ChiriType"
-import consumeOptionalString from "../consume/consumeStringOptional"
+import consumeOptionalString from "../read/consume/consumeStringOptional"
+import { ChiriType } from "./ChiriType"
 import TypeDefinition from "./TypeDefinition"
 
 export default TypeDefinition({
@@ -9,3 +9,4 @@ export default TypeDefinition({
 	stringable: true,
 	consumeOptionalConstructor: consumeOptionalString,
 })
+

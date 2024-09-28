@@ -1,5 +1,5 @@
+import { ChiriType } from "../../../type/ChiriType"
 import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
-import { ChiriType } from "../../ChiriType"
 import consumeBody from "../consumeBody"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
 import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"

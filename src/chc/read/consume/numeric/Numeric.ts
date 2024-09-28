@@ -1,5 +1,5 @@
+import type { ChiriType } from "../../../type/ChiriType"
 import type { ChiriPosition } from "../../ChiriReader"
-import type { ChiriType } from "../../ChiriType"
 
 export interface ChiriLiteralNumeric {
 	type: "literal"

@@ -15,6 +15,21 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 		case "get":
 			return compiler.getVariable(expression.name.value, expression.name.position)
 
+		case "function-call":
+			return compiler.callFunction(expression)
+
+		case "match": {
+			const value = resolveExpression(compiler, expression.value)
+			for (const matchCase of expression.cases)
+				if (resolveExpression(compiler, matchCase.condition) === value)
+					return resolveExpression(compiler, matchCase.expression)
+
+			if (!expression.elseCase)
+				throw compiler.error(expression.position, "No cases of match expression matched, add an else case")
+
+			return resolveExpression(compiler, expression.elseCase.expression)
+		}
+
 		case "expression":
 			switch (expression.subType) {
 				case "unary": {
@@ -63,6 +78,18 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 							return operandA & operandB
 						case "^":
 							return operandA ^ operandB
+						case "<=":
+							return operandA <= operandB
+						case ">=":
+							return operandA >= operandB
+						case "<":
+							return operandA < operandB
+						case ">":
+							return operandA > operandB
+						case ".":
+							return `${operandA}${operandB}`
+						case "x":
+							return `${operandA}`.repeat(+operandB || 1)
 						default:
 							throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`)
 					}

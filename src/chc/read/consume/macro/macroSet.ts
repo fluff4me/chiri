@@ -1,8 +1,8 @@
 
 import { INTERNAL_POSITION } from "../../../../constants"
+import { ChiriType } from "../../../type/ChiriType"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
-import { ChiriType } from "../../ChiriType"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
@@ -16,7 +16,7 @@ export interface ChiriAssignment {
 	name: ChiriWord
 	expression?: ChiriExpressionResult
 	position: ChiriPosition
-	assignment?: "=" | "??="
+	assignment: "=" | "??="
 }
 
 const empy = {} as never
@@ -69,7 +69,7 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 				operator,
 				operandA: { type: "get", name: varName, valueType: variable.valueType },
 				operandB: expr ? expr : { type: "literal", subType: "int", valueType: ChiriType.of("int"), value: "1", position: INTERNAL_POSITION },
-				valueType: variable.valueType,
+				valueType: ChiriType.of(reader.types.binaryOperators[variable.valueType.name.value]?.[operator]?.[expr?.valueType.name.value ?? "int"] ?? "*"),
 			},
 	}
 }

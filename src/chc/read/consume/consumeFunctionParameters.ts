@@ -1,6 +1,6 @@
+import { ChiriType } from "../../type/ChiriType"
 import getFunctionParameters from "../../util/getFunctionParameters"
 import type ChiriReader from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"

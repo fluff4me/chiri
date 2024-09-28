@@ -1,8 +1,8 @@
 
 
-import { ChiriType } from "../ChiriType"
-import type { ChiriLiteralBool } from "../consume/consumeTypeConstructorOptional"
-import consumeWordOptional from "../consume/consumeWordOptional"
+import type { ChiriLiteralBool } from "../read/consume/consumeTypeConstructorOptional"
+import consumeWordOptional from "../read/consume/consumeWordOptional"
+import { ChiriType } from "./ChiriType"
 import TypeDefinition from "./TypeDefinition"
 
 export default TypeDefinition({
@@ -18,4 +18,5 @@ export default TypeDefinition({
 			position: bool.position,
 		}
 	},
+	coerce: value => !!value,
 })

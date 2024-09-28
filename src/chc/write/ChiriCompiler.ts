@@ -2,20 +2,26 @@ import path from "path"
 import ansi from "../../ansi"
 import { PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriPosition, ChiriStatement } from "../read/ChiriReader"
-import { ChiriType } from "../read/ChiriType"
 import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriWordInterpolated } from "../read/consume/consumeWordInterpolatedOptional"
 import type { ChiriExpressionOperand } from "../read/consume/expression/consumeExpression"
+import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional"
+import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
+import { ChiriType } from "../type/ChiriType"
+import ChiriTypeManager from "../type/ChiriTypeManager"
+import typeString from "../type/typeString"
 import Arrays from "../util/Arrays"
 import { STATE_MAP, type ComponentState } from "../util/componentStates"
 import type { Value } from "../util/resolveExpression"
 import resolveExpression from "../util/resolveExpression"
+import stringifyExpression from "../util/stringifyExpression"
 import stringifyText from "../util/stringifyText"
 import Strings from "../util/Strings"
 import type { ArrayOr } from "../util/Type"
+import type { ResolvedProperty } from "./CSSWriter"
 import CSSWriter from "./CSSWriter"
 import DTSWriter from "./DTSWriter"
 import ESWriter from "./ESWriter"
@@ -24,9 +30,15 @@ import type Writer from "./Writer"
 ////////////////////////////////////
 //#region Scope
 
+interface Variable {
+	type: ChiriType
+	value: Value
+}
+
 interface Scope {
-	variables?: Record<string, Value>
+	variables?: Record<string, Variable>
 	macros?: Record<string, ChiriMacro>
+	functions?: Record<string, ChiriFunction>
 	mixins?: Record<string, PreRegisteredMixin>
 	shorthands?: Record<string, string[]>
 	aliases?: Record<string, string[]>
@@ -59,17 +71,13 @@ interface RegisteredMixin extends PreRegisteredMixin {
 	index: number
 }
 
-interface ResolvedProperty extends Omit<ChiriProperty, "property" | "value"> {
-	property: ChiriWord
-	value: string
-}
-
 interface ErrorPositioned extends Error {
 	position?: ChiriPosition
 }
 
 interface ChiriCompiler {
-	ast: ChiriAST
+	readonly ast: ChiriAST
+	readonly types: ChiriTypeManager
 	readonly css: CSSWriter
 	readonly es: ESWriter
 	readonly dts: DTSWriter
@@ -77,17 +85,24 @@ interface ChiriCompiler {
 
 	compile (): void
 	writeFiles (): Promise<void>
+	error (message?: string): ErrorPositioned
 	error (position?: ChiriPosition, message?: string): ErrorPositioned
 	logLine (position?: ChiriPosition, message?: string | ErrorPositioned): void
 
 	getVariable (name: string, position: ChiriPosition): Value
-	setVariable (name: string, value: Value): void
+	setVariable (name: string, value: Value, type: ChiriType): void
 	getMixin (name: string, position: ChiriPosition): PreRegisteredMixin
 	setMixin (mixin: PreRegisteredMixin): void
 	getShorthand (property: string): string[]
 	setShorthand (property: string, affects: string[], position: ChiriPosition): void
-	getFunction (name: string, position: ChiriPosition): ChiriMacro
-	setFunction (fn: ChiriMacro): void
+	getAlias (property: string): string[]
+	setAlias (property: string, aliases: string[], position: ChiriPosition): void
+	getMacro (name: string, position: ChiriPosition): ChiriMacro
+	setMacro (fn: ChiriMacro): void
+	getFunction (name: string, position: ChiriPosition): ChiriFunction
+	setFunction (fn: ChiriFunction): void
+
+	callFunction (fn: ChiriFunctionCall): Value
 }
 
 function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
@@ -95,6 +110,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	const selectorStack: ChiriWordInterpolated[] = []
 	const usedMixins: Record<string, RegisteredMixin> = {}
 	let usedMixinIndex = 0
+	let ifState = true
 
 	const css = new CSSWriter(ast, dest)
 	const es = new ESWriter(ast, dest)
@@ -102,6 +118,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	const writers = [css, es, dts]
 
 	const compiler: ChiriCompiler = {
+		types: undefined!,
 		ast,
 		css, es, dts,
 		writers,
@@ -114,12 +131,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		getVariable, setVariable,
 		getMixin, setMixin,
 		getShorthand, setShorthand,
-		getFunction: getMacro, setFunction: setMacro,
+		getAlias, setAlias,
+		getMacro, setMacro,
+		getFunction, setFunction,
+
+		callFunction,
 	}
+
+	const types = new ChiriTypeManager(compiler)
+	Object.assign(compiler, { types })
 
 	return compiler
 
 	function compile () {
+		typeString.coerce = value => stringifyExpression(compiler, value)
+
 		try {
 			for (const writer of writers)
 				writer.onCompileStart(compiler)
@@ -152,25 +178,28 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		for (let i = scopes.length - 1; i >= 0; i--) {
 			const variables = scopes[i].variables
 			if (variables && name in variables)
-				return variables[name]
+				return variables[name].value
 		}
 
 		if (!optional)
 			throw error(position, `Variable ${name} is not defined`)
 	}
 
-	function setVariable (name: string, value: Value) {
+	function setVariable (name: string, value: Value, type: ChiriType) {
 		for (let i = scopes.length - 1; i >= 0; i--) {
 			const variables = scopes[i].variables
 			if (variables && name in variables) {
-				variables[name] = value
-				logLine(undefined, `Reassign variable ${name}`)
+				value = variables[name].type.name.value === type.name.value ? value : types.coerce(value, variables[name].type)
+				variables[name].value = value
 				return
 			}
 		}
 
 		scope().variables ??= {}
-		scope().variables![name] = value
+		scope().variables![name] = {
+			type,
+			value,
+		}
 	}
 
 	//#endregion
@@ -181,9 +210,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function getMacro (name: string, position: ChiriPosition): ChiriMacro {
 		for (let i = scopes.length - 1; i >= 0; i--) {
-			const functions = scopes[i].macros
-			if (functions && name in functions)
-				return functions[name]
+			const macros = scopes[i].macros
+			if (macros && name in macros)
+				return macros[name]
 		}
 
 		throw error(position, `Macro ${name} is not defined`)
@@ -195,6 +224,30 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			throw error(fn.position, `Macro ${fn.name.value} has already been defined in this scope`)
 
 		scope().macros![fn.name.value] = fn
+	}
+
+	//#endregion
+	////////////////////////////////////
+
+	////////////////////////////////////
+	//#region Functions
+
+	function getFunction (name: string, position: ChiriPosition): ChiriFunction {
+		for (let i = scopes.length - 1; i >= 0; i--) {
+			const functions = scopes[i].functions
+			if (functions && name in functions)
+				return functions[name]
+		}
+
+		throw error(position, `Function ${name} is not defined`)
+	}
+
+	function setFunction (fn: ChiriFunction) {
+		scope().functions ??= {}
+		if (scope().functions![fn.name.value])
+			throw error(fn.position, `Function ${fn.name.value} has already been defined in this scope`)
+
+		scope().functions![fn.name.value] = fn
 	}
 
 	//#endregion
@@ -301,7 +354,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Public Utils
 
-	function error (position?: ChiriPosition, message?: string): ErrorPositioned {
+	function error (message?: string): ErrorPositioned
+	function error (position?: ChiriPosition, message?: string): ErrorPositioned
+	function error (position?: ChiriPosition | string, message?: string): ErrorPositioned {
+		message = typeof position === "string" ? position : message
+		position = typeof position === "string" ? undefined : position
 		return Object.assign(new Error(message ?? "Compilation failed for an unknown reason"), { position })
 	}
 
@@ -382,20 +439,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				setAlias(property, properties, statement.position)
 				return true
 			}
-			case "root": {
-				css.indent()
-				css.write(":root")
-				css.writeSpaceOptional()
-				css.writeLine("{")
-
-				const properties = compileStatements(statement.content, undefined, compileMixinContent)
-				for (const property of properties)
-					emitProperty(property)
-
-				css.unindent()
-				css.writeLine("}")
-				return true
-			}
 			case "component": {
 				let components = compileComponent(statement)
 				if (components === undefined)
@@ -425,6 +468,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					dts.writeLine(": string[],")
 				}
 
+				return true
+			}
+
+			case "property": {
+				css.writingTo("root", () => {
+					css.emitProperty(compiler, {
+						...statement,
+						property: resolveWord(statement.property),
+						value: stringifyText(compiler, statement.value),
+					})
+				})
 				return true
 			}
 		}
@@ -583,18 +637,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		}
 	}
 
-	function emitProperty (property: ResolvedProperty) {
-		if (property.isCustomProperty) css.write("--")
-		const aliases = property.isCustomProperty ? [property.property.value] : getAlias(property.property.value)
-		for (const alias of aliases) {
-			css.writeWord({ type: "word", value: alias, position: property.property.position })
-			css.write(":")
-			css.writeSpaceOptional()
-			css.write(property.value)
-			css.writeLine(";")
-		}
-	}
-
 	function emitMixin (mixin: RegisteredMixin) {
 		css.write(".")
 		css.writeWord(mixin.name)
@@ -603,7 +645,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		css.writeSpaceOptional()
 		css.writeLineStartBlock("{")
 		for (const property of mixin.content)
-			emitProperty(property)
+			css.emitProperty(compiler, property)
 		css.writeLineEndBlock("}")
 	}
 
@@ -613,22 +655,36 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Context: Macros
 
-	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement) => ArrayOr<T> | undefined) {
+	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined) {
 		switch (statement.type) {
 			case "variable": {
-				const result = resolveExpression(compiler, statement.expression)
+				const result = types.coerce(resolveExpression(compiler, statement.expression), statement.valueType, statement.expression?.valueType)
 				if (!statement.assignment)
 					return true
 
 				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position, true) !== undefined)
 					return true
 
-				setVariable(statement.name.value, result)
+				setVariable(statement.name.value, result, statement.valueType)
+				return true
+			}
+
+			case "assignment": {
+				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position) === undefined)
+					// already assigned
+					return true
+
+				const value = resolveExpression(compiler, statement.expression)
+				setVariable(statement.name.value, value, statement.expression?.valueType ?? ChiriType.of("undefined"))
 				return true
 			}
 
 			case "macro":
 				setMacro(statement)
+				return true
+
+			case "function":
+				setFunction(statement)
 				return true
 
 			case "macro-use": {
@@ -656,13 +712,62 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 				const result: T[] = []
 				for (const value of list) {
-					statement.variable.name.value
 					result.push(...compileStatements(statement.content,
-						Scope.variables({ [statement.variable.name.value]: value }),
+						Scope.variables({ [statement.variable.name.value]: { type: statement.variable.valueType, value } }),
 						contextConsumer))
 				}
 
 				return result
+			}
+
+			case "for": {
+				scopes.push({})
+				setVariable(statement.variable.name.value, resolveExpression(compiler, statement.variable.expression), statement.variable.valueType)
+
+				const result: T[] = []
+				while (resolveExpression(compiler, statement.condition)) {
+					const statements = statement.content.slice()
+					if (statement.update)
+						statements.push(statement.update)
+
+					result.push(...compileStatements(statements, undefined, contextConsumer))
+				}
+
+				scopes.pop()
+				return result
+			}
+
+			case "while": {
+				scopes.push({})
+
+				const result: T[] = []
+				while (resolveExpression(compiler, statement.condition)) {
+					const statements = statement.content.slice()
+					result.push(...compileStatements(statements, undefined, contextConsumer))
+				}
+
+				scopes.pop()
+				return result
+			}
+
+			case "elseif":
+				if (ifState)
+					return []
+
+			// eslint-disable-next-line no-fallthrough
+			case "if": {
+				ifState = !!resolveExpression(compiler, statement.condition)
+				if (!ifState)
+					return []
+
+				return compileStatements(statement.content, undefined, contextConsumer)
+			}
+
+			case "else": {
+				if (ifState)
+					return []
+
+				return compileStatements(statement.content, undefined, contextConsumer)
 			}
 
 			case "do":
@@ -699,17 +804,34 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	//#endregion
 	////////////////////////////////////
 
+	////////////////////////////////////
+	//#region Context: Function
+
+	function compileFunction (statement: ChiriStatement, end: () => void) {
+		switch (statement.type) {
+			case "return": {
+				end()
+				return { type: "result" as const, value: resolveExpression(compiler, statement.expression) }
+			}
+		}
+	}
+
+	//#endregion
+	////////////////////////////////////
+
 	//#endregion
 	////////////////////////////////////
 
 	////////////////////////////////////
 	//#region Internals
 
-	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement) => ArrayOr<T> | undefined): T[] {
+	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined): T[] {
 		scopes.push(using ?? {})
 		// console.log(inspect(scopes, undefined, 3, true))
 		// logLine(undefined, error(statements[0].position, ""))
 
+		let ended = false
+		const end = () => ended = true
 		const results: T[] = []
 		for (const statement of statements) {
 			const macroResult = compileMacros(statement, contextCompiler)
@@ -725,20 +847,37 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				continue
 			}
 
-			const result = contextCompiler(statement)
+			const result = contextCompiler(statement, end)
+			if (result !== undefined) {
+				if (Array.isArray(result))
+					results.push(...result)
+				else
+					results.push(result)
+			}
+
+			if (ended)
+				break
+
 			if (result === undefined)
 				throw error((statement as { position?: ChiriPosition }).position, `Failed to compile ${debugStatementString(statement)}`)
-
-			if (Array.isArray(result))
-				results.push(...result)
-			else
-				results.push(result)
 		}
 
 		if (scopes.length > 1) // don't remove the root scope once it's set up
 			scopes.pop()
 
 		return results
+	}
+
+	function callFunction (call: ChiriFunctionCall) {
+		const fn = getFunction(call.name.value, call.position)
+		const result = compileStatements(fn.content, resolveAssignments(call.assignments), compileFunction)
+		if (result.length > 1)
+			throw error(call.position, "Internal Error: Function call returned multiple values")
+
+		if (result.length === 0)
+			throw error(call.position, "Internal Error: Function call did not return a value")
+
+		return result[0]?.value
 	}
 
 	function getPropertyAffects (property: ResolvedProperty): string[] {
@@ -751,13 +890,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function resolveAssignments (assignments: Record<string, ChiriExpressionOperand>): Partial<Scope> {
-		// console.log("\n\n\n")
-		// console.log(assignments)
-		const result = Scope.variables(Object.fromEntries(Object.entries(assignments)
-			.map(([name, expr]) => [name, resolveExpression(compiler, expr)])))
-		// console.log(result)
-		// console.log("\n\n\n")
-		return result
+		return Scope.variables(Object.fromEntries(Object.entries(assignments)
+			.map(([name, expr]) =>
+				[name, { type: expr.valueType, value: resolveExpression(compiler, expr) }])))
 	}
 
 	function resolveWord (word: ChiriWordInterpolated): ChiriWord {

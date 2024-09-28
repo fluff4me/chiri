@@ -1,6 +1,6 @@
 
 
-import type { ChiriType, ChiriTypeGeneric } from "../../ChiriType"
+import type { ChiriType, ChiriTypeGeneric } from "../../../type/ChiriType"
 import { consumeType, consumeTypeOptional } from "../consumeType"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import type { ChiriMacroBase } from "./MacroConstruct"

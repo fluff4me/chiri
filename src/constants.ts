@@ -1,8 +1,8 @@
 import path from "path"
 import type { ChiriPosition } from "./chc/read/ChiriReader"
-import { ChiriType } from "./chc/read/ChiriType"
 import type { ChiriLiteralString } from "./chc/read/consume/consumeStringOptional"
 import type { ChiriLiteralBool } from "./chc/read/consume/consumeTypeConstructorOptional"
+import { ChiriType } from "./chc/type/ChiriType"
 
 export const PACKAGE_ROOT = path.dirname(__dirname)
 export const LIB_ROOT = path.join(PACKAGE_ROOT, "lib")

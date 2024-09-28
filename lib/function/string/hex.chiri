@@ -13,6 +13,7 @@
 			else: "#{num}
 
 	#bool negative = num < 0
+
 	#set num = #abs value=num
 
 	#string result = "

@@ -1,7 +1,7 @@
 
 
+import { ChiriType } from "../../../type/ChiriType"
 import type ChiriReader from "../../ChiriReader"
-import { ChiriType } from "../../ChiriType"
 import consumeUnsignedIntegerOptional from "./consumeUnsignedIntegerOptional"
 import type { ChiriLiteralNumeric } from "./Numeric"
 

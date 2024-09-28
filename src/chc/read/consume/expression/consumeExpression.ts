@@ -1,8 +1,8 @@
 
 
+import { ChiriType } from "../../../type/ChiriType"
+import type { Operator } from "../../../type/ChiriTypeManager"
 import type ChiriReader from "../../ChiriReader"
-import { ChiriType } from "../../ChiriType"
-import type { Operator } from "../../ChiriTypeManager"
 import consumeNewBlockLineOptional from "../consumeNewBlockLineOptional"
 import consumeStringOptional from "../consumeStringOptional"
 import type { ChiriLiteralValue } from "../consumeTypeConstructorOptional"

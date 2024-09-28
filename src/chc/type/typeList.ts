@@ -1,11 +1,11 @@
-import type { ChiriPosition } from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
-import consumeBlockEnd from "../consume/consumeBlockEnd"
-import consumeBlockStartOptional from "../consume/consumeBlockStartOptional"
-import consumeNewBlockLineOptional from "../consume/consumeNewBlockLineOptional"
-import consumeWhiteSpaceOptional from "../consume/consumeWhiteSpaceOptional"
-import type { ChiriExpressionOperand } from "../consume/expression/consumeExpression"
-import consumeExpression from "../consume/expression/consumeExpression"
+import type { ChiriPosition } from "../read/ChiriReader"
+import consumeBlockEnd from "../read/consume/consumeBlockEnd"
+import consumeBlockStartOptional from "../read/consume/consumeBlockStartOptional"
+import consumeNewBlockLineOptional from "../read/consume/consumeNewBlockLineOptional"
+import consumeWhiteSpaceOptional from "../read/consume/consumeWhiteSpaceOptional"
+import type { ChiriExpressionOperand } from "../read/consume/expression/consumeExpression"
+import consumeExpression from "../read/consume/expression/consumeExpression"
+import { ChiriType } from "./ChiriType"
 import TypeDefinition from "./TypeDefinition"
 
 export interface ChiriLiteralList {
@@ -56,4 +56,5 @@ export default TypeDefinition({
 			position,
 		}
 	},
+	coerce: value => Array.isArray(value) ? value : [value],
 })

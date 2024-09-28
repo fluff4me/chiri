@@ -1,5 +1,5 @@
 import { INTERNAL_POSITION } from "../../constants"
-import type { ChiriWord } from "./consume/consumeWord"
+import type { ChiriWord } from "../read/consume/consumeWord"
 
 export interface ChiriType<TYPE extends string = string> {
 	type: "type"

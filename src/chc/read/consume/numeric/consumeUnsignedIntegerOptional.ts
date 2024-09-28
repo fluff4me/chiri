@@ -1,5 +1,5 @@
+import { ChiriType } from "../../../type/ChiriType"
 import type ChiriReader from "../../ChiriReader"
-import { ChiriType } from "../../ChiriType"
 import type { ChiriLiteralNumeric } from "./Numeric"
 
 export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {

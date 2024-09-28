@@ -1,4 +1,4 @@
-import type { ChiriTypeGeneric } from "../../ChiriType"
+import type { ChiriTypeGeneric } from "../../../type/ChiriType"
 
 const Contexts = [
 	"inherit" as const,

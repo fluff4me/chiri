@@ -1,6 +1,6 @@
+import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
-import { ChiriType } from "../ChiriType"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordInterpolated from "./consumeWordInterpolated"

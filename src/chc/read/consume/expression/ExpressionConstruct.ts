@@ -1,7 +1,7 @@
+import type { ChiriType } from "../../../type/ChiriType"
 import type { PromiseOr } from "../../../util/Type"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
-import type { ChiriType } from "../../ChiriType"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type consumeExpression from "./consumeExpression"
 

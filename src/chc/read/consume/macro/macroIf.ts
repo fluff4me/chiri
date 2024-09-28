@@ -1,6 +1,6 @@
+import { ChiriType } from "../../../type/ChiriType"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
-import { ChiriType } from "../../ChiriType"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 import consumeExpression from "../expression/consumeExpression"

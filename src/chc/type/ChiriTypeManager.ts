@@ -1,17 +1,19 @@
 
 
 import ansi from "../../ansi"
-import type ChiriReader from "./ChiriReader"
+import type ChiriReader from "../read/ChiriReader"
+import type { Value } from "../util/resolveExpression"
+import type ChiriCompiler from "../write/ChiriCompiler"
 import type { ChiriTypeGeneric } from "./ChiriType"
 import { ChiriType } from "./ChiriType"
-import typeBody from "./type/typeBody"
-import typeBool from "./type/typeBool"
-import typeDec from "./type/typeDec"
-import type TypeDefinition from "./type/TypeDefinition"
-import typeInt from "./type/typeInt"
-import typeList from "./type/typeList"
-import typeString from "./type/typeString"
-import typeUint from "./type/typeUint"
+import typeBody from "./typeBody"
+import typeBool from "./typeBool"
+import typeDec from "./typeDec"
+import type TypeDefinition from "./TypeDefinition"
+import typeInt from "./typeInt"
+import typeList from "./typeList"
+import typeString from "./typeString"
+import typeUint from "./typeUint"
 
 const typesList = [
 	typeString,
@@ -136,7 +138,7 @@ export default class ChiriTypeManager {
 		instancesOfThisOperator[type] = result
 	}
 
-	constructor (private readonly reader: ChiriReader) {
+	constructor (private readonly host: ChiriReader | ChiriCompiler) {
 		for (const operator of binaryNumericOperators)
 			for (const typeA of numericTypes)
 				for (const typeB of numericTypes) {
@@ -160,12 +162,12 @@ export default class ChiriTypeManager {
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
 		for (const type of generics) {
 			if (this.types[type.name.value])
-				throw this.reader.error(`Cannot redefine type "${type.name.value}"`)
+				throw this.host.error(`Cannot redefine type "${type.name.value}"`)
 
 			const componentTypeDefinitions = type.generics.map(component => {
 				const typeDef = this.types[component.name.value]
 				if (!typeDef)
-					throw this.reader.error(`Type "${type.name.value}" depends on undefined type "${component.name.value}"`)
+					throw this.host.error(`Type "${type.name.value}" depends on undefined type "${component.name.value}"`)
 
 				return typeDef
 			})
@@ -265,6 +267,16 @@ export default class ChiriTypeManager {
 		}
 	}
 
+	coerce (value: Value, type: ChiriType, fromType?: ChiriType) {
+		const definition = this.types[type.name.value]
+		if (!definition?.coerce)
+			return value
+
+		return definition.coerce(value, () => {
+			throw this.host.error(`Unable to coerce ${fromType ? `"${ChiriType.stringify(fromType)}"` : typeof value} to "${ChiriType.stringify(type)}"`)
+		})
+	}
+
 	isAssignable (type: ChiriType, ...toTypes: ChiriType[]): boolean {
 		if (toTypes.includes(type))
 			return true
@@ -313,17 +325,17 @@ export default class ChiriTypeManager {
 			if (types.every(type => isNumeric(type.name.value)))
 				return ChiriType.of(minNumericPrecision(...types.map(type => type.name.value)))
 
-			throw this.reader.error("Cannot form an intersection")
+			throw this.host.error("Cannot form an intersection")
 		}
 
 		if (generics.length > 1)
 			for (let i = 1; i < generics.length; i++)
 				if (generics[i].generics.some(generic => !primaryType.generics.some(primaryTypeGeneric => primaryTypeGeneric.name.value === generic.name.value)))
-					throw this.reader.error(`Cannot form an intersection between types "${ChiriType.stringify(primaryType)}" and "${ChiriType.stringify(generics[i])}"`)
+					throw this.host.error(`Cannot form an intersection between types "${ChiriType.stringify(primaryType)}" and "${ChiriType.stringify(generics[i])}"`)
 
 		const unableToIntersect = types.find(type => !type.isGeneric && !primaryType.generics.some(generic => generic.name.value === type.name.value))
 		if (unableToIntersect)
-			throw this.reader.error(`Cannot form an intersection between types "${ChiriType.stringify(primaryType)}" and "${ChiriType.stringify(unableToIntersect)}"`)
+			throw this.host.error(`Cannot form an intersection between types "${ChiriType.stringify(primaryType)}" and "${ChiriType.stringify(unableToIntersect)}"`)
 
 		return primaryType
 	}

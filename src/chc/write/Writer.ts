@@ -8,6 +8,14 @@ import type { ChiriWord } from "../read/consume/consumeWord"
 import stringifyText from "../util/stringifyText"
 import type ChiriCompiler from "./ChiriCompiler"
 
+export interface QueuedWrite {
+	output: string
+	mapping?: {
+		sourcePosition: ChiriPosition
+		tokenName?: string | undefined
+	}
+}
+
 export default class Writer {
 
 	public static writeBlocks (writers: Writer[], inside: () => any) {
@@ -25,12 +33,23 @@ export default class Writer {
 	#indent = 0
 
 	public readonly dest: string
-	public output: string
+	private output = ""
+	protected outputQueue: QueuedWrite[] = [{
+		output: "",
+	}]
+
 	public readonly map: SourceMapGenerator
+
+	protected get queue () {
+		return this.outputQueue
+	}
+
+	protected get currentWrite () {
+		return this.queue.at(-1)!
+	}
 
 	constructor (ast: ChiriAST, dest: string, public readonly config: ChiriWriteConfig) {
 		this.dest = dest + config.extension
-		this.output = ""
 
 		this.map = new SourceMapGenerator({ file: this.dest })
 		for (const [filename, source] of Object.entries(ast.source))
@@ -44,47 +63,59 @@ export default class Writer {
 	unindent (amount = 1) {
 		this.#indent -= amount
 		for (let i = 0; i < amount; i++)
-			if (this.output[this.output.length - 1] === "\t")
-				this.output = this.output.slice(0, -1)
+			if (this.currentWrite.output.at(-1) === "\t")
+				this.currentWrite.output = this.currentWrite.output.slice(0, -1)
 	}
 
 	writeFile () {
+		this.output = ""
+		for (const queued of this.queue) {
+			if (queued.mapping) {
+				this.map.addMapping({
+					generated: this.getPosition(),
+					source: queued.mapping.sourcePosition.file,
+					original: queued.mapping.sourcePosition,
+					name: queued.mapping.tokenName,
+				})
+			}
+
+			this.output += queued.output
+		}
+
 		return fsp.writeFile(this.dest, this.output)
 	}
 
 	write (text: string) {
-		this.output += text
+		this.currentWrite.output += text
 	}
 
 	writeLine (text: string) {
-		this.output += text
+		this.currentWrite.output += text
 		this.writeNewLine()
 	}
 
 	writeLineStartBlock (text: string) {
-		this.output += text
+		this.currentWrite.output += text
 		this.indent()
 		this.writeNewLine()
 	}
 
 	writeLineEndBlock (text: string) {
 		this.unindent()
-		this.output += text
+		this.currentWrite.output += text
 		this.writeNewLine()
 	}
 
 	writeTextInterpolated (compiler: ChiriCompiler, source: ChiriValueText) {
-		this.addMapping(source.position)
-		this.output += stringifyText(compiler, source)
+		this.addMapping(stringifyText(compiler, source), source.position)
 	}
 
 	writeWord (source: ChiriWord) {
-		this.addMapping(source.position, source.value)
-		this.output += source.value
+		this.addMapping(source.value, source.position, source.value)
 	}
 
 	writeNewLine () {
-		this.output += "\n" + "\t".repeat(this.#indent)
+		this.currentWrite.output += "\n" + "\t".repeat(this.#indent)
 	}
 
 	writeNewLineOptional () {
@@ -92,17 +123,18 @@ export default class Writer {
 	}
 
 	writeSpaceOptional () {
-		this.output += " "
+		this.currentWrite.output += " "
 	}
 
 	writeBlock (inside: () => any) {
-		const startIndex = this.output.length
+		const startIndex = this.currentWrite.output.length
 		this.indent()
 		this.writeLine("{")
-		const insideStartIndex = this.output.length
+		const currentWrite = this.currentWrite
+		const insideStartIndex = this.currentWrite.output.length
 		inside()
-		if (this.output.length === insideStartIndex) {
-			this.output = this.output.slice(0, startIndex)
+		if (currentWrite === this.currentWrite && this.currentWrite.output.length === insideStartIndex) {
+			this.currentWrite.output = this.currentWrite.output.slice(0, startIndex)
 			this.write("{}")
 			this.#indent--
 			return
@@ -123,13 +155,15 @@ export default class Writer {
 	onCompileStart (compiler: ChiriCompiler) { }
 	onCompileEnd (compiler: ChiriCompiler) { }
 
-	addMapping (sourcePosition: ChiriPosition, tokenName?: string | undefined) {
-		this.map.addMapping({
-			generated: this.getPosition(),
-			source: sourcePosition.file,
-			original: sourcePosition,
-			name: tokenName,
+	private addMapping (output: string, sourcePosition: ChiriPosition, tokenName?: string | undefined) {
+		this.queue.push({
+			output,
+			mapping: {
+				sourcePosition,
+				tokenName,
+			},
 		})
+		this.queue.push({ output: "" })
 	}
 
 	getLineStart (at = this.output.length) {
