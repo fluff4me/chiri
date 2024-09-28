@@ -1,0 +1,6 @@
+.env
+playground.*
+playground.*.*
+tsc2.js
+src/
+.vscode/
