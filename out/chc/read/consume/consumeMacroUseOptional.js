@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const macroFor_1 = __importDefault(require("./macro/macroFor"));
     const macroFunctionDeclaration_1 = __importDefault(require("./macro/macroFunctionDeclaration"));
     const macroIf_1 = __importStar(require("./macro/macroIf"));
-    const macroImport_1 = __importDefault(require("./macro/macroImport"));
+    const macroImport_1 = __importStar(require("./macro/macroImport"));
     const macroInclude_1 = __importDefault(require("./macro/macroInclude"));
     const macroMacroDeclaration_1 = __importDefault(require("./macro/macroMacroDeclaration"));
     const macroSet_1 = __importDefault(require("./macro/macroSet"));
@@ -63,6 +63,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (await macroExport_1.default.consumeOptional(reader, ...context))
             return undefined;
         const result = undefined
+            ?? await macroImport_1.macroImportCSS.consumeOptional(reader, ...context)
             ?? await macroImport_1.default.consumeOptional(reader, ...context)
             ?? await macroDebug_1.default.consumeOptional(reader, ...context)
             ?? await macroMacroDeclaration_1.default.consumeOptional(reader, ...context)

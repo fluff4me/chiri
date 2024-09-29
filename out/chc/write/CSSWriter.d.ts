@@ -11,10 +11,11 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
 export default class CSSWriter extends Writer {
     private writingToType;
     private rootQueue;
+    private importsQueue;
     protected get queue(): QueuedWrite[];
     constructor(ast: ChiriAST, dest: string, config?: ChiriWriteConfig);
     createDestPath(outFile: string): string;
-    writingTo(writingTo: "default" | "root", dowhile: () => any): void;
+    writingTo(writingTo: "default" | "root" | "imports", dowhile: () => any): void;
     emitProperty(compiler: ChiriCompiler, property: ResolvedProperty): void;
     onCompileEnd(compiler: ChiriCompiler): void;
 }

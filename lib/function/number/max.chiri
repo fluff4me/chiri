@@ -1,4 +1,4 @@
-#function min with number!(dec int uint) returns number:
+#function max with number!(dec int uint) returns number:
 	#number a
 	#number b
 	#return match a > b:

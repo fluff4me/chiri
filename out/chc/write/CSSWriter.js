@@ -20,8 +20,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         rootQueue = [{
                 output: "",
             }];
+        importsQueue = [{
+                output: "",
+            }];
         get queue() {
-            return this.writingToType === "root" ? this.rootQueue : super.queue;
+            switch (this.writingToType) {
+                case "root": return this.rootQueue;
+                case "imports": return this.importsQueue;
+                default: return super.queue;
+            }
         }
         constructor(ast, dest, config) {
             super(ast, dest, { extension: ".css", ...config });
@@ -57,7 +64,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             lastRootProperty.output = lastRootProperty.output.slice(0, -1);
             this.rootQueue.push({ output: "}\n\n" });
             this.outputQueue.unshift(...this.rootQueue);
-            if (this.writingToType === "root")
+            // imports above :root
+            this.importsQueue.push({ output: "\n" });
+            this.outputQueue.unshift(...this.importsQueue);
+            if (this.writingToType !== "default")
                 this.writingToType = "default";
             this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`);
         }

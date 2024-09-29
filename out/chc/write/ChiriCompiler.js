@@ -100,15 +100,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!optional)
                 throw error(position, `Variable ${name} is not defined`);
         }
-        function setVariable(name, value, type) {
-            for (let i = scopes.length - 1; i >= 0; i--) {
-                const variables = scopes[i].variables;
-                if (variables && name in variables) {
-                    value = variables[name].type.name.value === type.name.value ? value : types.coerce(value, variables[name].type);
-                    variables[name].value = value;
-                    return;
+        function setVariable(name, value, type, defineNew) {
+            if (!defineNew)
+                for (let i = scopes.length - 1; i >= 0; i--) {
+                    const variables = scopes[i].variables;
+                    if (variables && name in variables) {
+                        value = variables[name].type.name.value === type.name.value ? value : types.coerce(value, variables[name].type);
+                        variables[name].value = value;
+                        return;
+                    }
                 }
-            }
             scope().variables ??= {};
             scope().variables[name] = {
                 type,
@@ -324,6 +325,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     });
                     return true;
                 }
+                case "import-css": {
+                    css.writingTo("imports", () => {
+                        for (const imp of statement.imports) {
+                            css.writeLine(`@import ${(0, stringifyText_1.default)(compiler, imp)};`);
+                        }
+                    });
+                    return true;
+                }
             }
         }
         function compileComponent(statement) {
@@ -469,7 +478,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         return true;
                     }
                     const result = types.coerce((0, resolveExpression_1.default)(compiler, statement.expression), statement.valueType, statement.expression?.valueType);
-                    setVariable(statement.name.value, result, statement.valueType);
+                    setVariable(statement.name.value, result, statement.valueType, true);
                     return true;
                 }
                 case "assignment": {
@@ -523,7 +532,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 case "for": {
                     scopes.push({});
-                    setVariable(statement.variable.name.value, (0, resolveExpression_1.default)(compiler, statement.variable.expression), statement.variable.valueType);
+                    setVariable(statement.variable.name.value, (0, resolveExpression_1.default)(compiler, statement.variable.expression), statement.variable.valueType, true);
                     const result = [];
                     while ((0, resolveExpression_1.default)(compiler, statement.condition)) {
                         const statements = statement.content.slice();
