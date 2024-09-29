@@ -24,8 +24,8 @@ import type { ChiriFunction } from "./macro/macroFunctionDeclaration"
 import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
 import type { ChiriElse, ChiriIf } from "./macro/macroIf"
 import macroIf, { macroElse, macroIfElse } from "./macro/macroIf"
-import type { ChiriImport } from "./macro/macroImport"
-import macroImport from "./macro/macroImport"
+import type { ChiriCSSImport, ChiriImport } from "./macro/macroImport"
+import macroImport, { macroImportCSS } from "./macro/macroImport"
 import type { ChiriInclude } from "./macro/macroInclude"
 import macroInclude from "./macro/macroInclude"
 import type { ChiriMacro } from "./macro/macroMacroDeclaration"
@@ -53,6 +53,7 @@ export type MacroResult =
 	| ChiriIf
 	| ChiriElse
 	| ChiriInclude
+	| ChiriCSSImport
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
 export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
@@ -66,6 +67,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		return undefined
 
 	const result = undefined
+		?? await macroImportCSS.consumeOptional(reader, ...context)
 		?? await macroImport.consumeOptional(reader, ...context)
 		?? await macroDebug.consumeOptional(reader, ...context)
 		?? await macroMacroDeclaration.consumeOptional(reader, ...context)

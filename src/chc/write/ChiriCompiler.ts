@@ -485,6 +485,15 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				})
 				return true
 			}
+
+			case "import-css": {
+				css.writingTo("imports", () => {
+					for (const imp of statement.imports) {
+						css.writeLine(`@import ${stringifyText(compiler, imp)};`)
+					}
+				})
+				return true
+			}
 		}
 	}
 

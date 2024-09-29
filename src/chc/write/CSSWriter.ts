@@ -14,13 +14,20 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
 
 export default class CSSWriter extends Writer {
 
-	private writingToType: "default" | "root" = "default"
+	private writingToType: "default" | "root" | "imports" = "default"
 	private rootQueue: QueuedWrite[] = [{
+		output: "",
+	}]
+	private importsQueue: QueuedWrite[] = [{
 		output: "",
 	}]
 
 	protected override get queue () {
-		return this.writingToType === "root" ? this.rootQueue : super.queue
+		switch (this.writingToType) {
+			case "root": return this.rootQueue
+			case "imports": return this.importsQueue
+			default: return super.queue
+		}
 	}
 
 	constructor (ast: ChiriAST, dest: string, config?: ChiriWriteConfig) {
@@ -31,7 +38,7 @@ export default class CSSWriter extends Writer {
 		return typeof args["out-css"] === "string" ? path.resolve(args["out-css"], outFile) : super.createDestPath(outFile)
 	}
 
-	writingTo (writingTo: "default" | "root", dowhile: () => any) {
+	writingTo (writingTo: "default" | "root" | "imports", dowhile: () => any) {
 		if (this.writingToType === writingTo)
 			return
 
@@ -54,6 +61,7 @@ export default class CSSWriter extends Writer {
 	}
 
 	override onCompileEnd (compiler: ChiriCompiler): void {
+
 		for (const rootWrite of this.rootQueue)
 			rootWrite.output = rootWrite.output.replaceAll("\n", "\n\t")
 
@@ -64,7 +72,11 @@ export default class CSSWriter extends Writer {
 
 		this.outputQueue.unshift(...this.rootQueue)
 
-		if (this.writingToType === "root")
+		// imports above :root
+		this.importsQueue.push({ output: "\n" })
+		this.outputQueue.unshift(...this.importsQueue)
+
+		if (this.writingToType !== "default")
 			this.writingToType = "default"
 
 		this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`)
