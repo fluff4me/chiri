@@ -35,8 +35,8 @@ export default MacroConstruct("each")
 		if (!variable)
 			throw reader.error("Expected variable declaration")
 
-		if (!reader.types.isAssignable(iterableVariable.valueType, variable.valueType))
-			throw reader.error(e, `Iterable type "${ChiriType.stringify(iterableVariable.valueType)}" is not assignable to "${ChiriType.stringify(variable.valueType)}"`)
+		if (!reader.types.isAssignable(iterableVariable.valueType.generics[0], variable.valueType))
+			throw reader.error(e, `Iterable of type "${ChiriType.stringify(iterableVariable.valueType.generics[0])}" is not assignable to "${ChiriType.stringify(variable.valueType)}"`)
 
 		return {
 			iterable,
