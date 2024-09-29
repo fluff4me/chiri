@@ -8,7 +8,12 @@ export interface ChiriImport {
 
 export default MacroConstruct("import")
 	.body("paths")
-	.consume(({ reader, assignments, body }): ChiriImport | undefined => ({
-		type: "import",
-		paths: body,
-	}))
+	.consume(({ reader, assignments, body }): ChiriImport | undefined => {
+		if (!body)
+			throw reader.error("Expected paths to import")
+
+		return {
+			type: "import",
+			paths: body,
+		}
+	})
