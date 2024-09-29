@@ -169,6 +169,11 @@ export default class ChiriTypeManager {
 				throw this.host.error(`Cannot redefine type "${type.name.value}"`)
 			}
 
+			if (type.generics.length === 1 && type.generics[0].name.value === "*")
+				type.generics = Object.values(this.types)
+					.map(typeDef => typeDef.type)
+					.filter(type => type.name.value !== "body")
+
 			const componentTypeDefinitions = type.generics.map(component => {
 				const typeDef = this.types[component.name.value]
 				if (!typeDef)
