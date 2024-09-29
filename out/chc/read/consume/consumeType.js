@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../type/ChiriType", "./consumeTypeNameOptional", "./consumeWhiteSpaceOptional"], factory);
+        define(["require", "exports", "../../type/ChiriType", "./consumeTypeNameOptional", "./consumeWhiteSpaceOptional", "./consumeWordOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -17,6 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("../../type/ChiriType");
     const consumeTypeNameOptional_1 = __importDefault(require("./consumeTypeNameOptional"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("./consumeWhiteSpaceOptional"));
+    const consumeWordOptional_1 = __importDefault(require("./consumeWordOptional"));
     function consumeType(reader, genericDeclaration) {
         const e = reader.i;
         const type = consumeTypeOptional(reader, genericDeclaration);
@@ -51,7 +52,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (typeof generics === "number") {
             for (let g = 0; g < generics; g++) {
                 reader.consume("!");
-                result.push(consumeType(reader));
+                const anyType = (0, consumeWordOptional_1.default)(reader, "*");
+                if (anyType)
+                    result.push({
+                        type: "type",
+                        name: anyType,
+                        generics: [],
+                    });
+                else
+                    result.push(consumeType(reader));
             }
         }
         else if (generics) {
@@ -72,6 +81,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     if (result.length)
                         if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
                             break;
+                    if (!parenthesised) {
+                        const anyType = (0, consumeWordOptional_1.default)(reader, "*");
+                        if (anyType) {
+                            result.push({
+                                type: "type",
+                                name: anyType,
+                                generics: [],
+                            });
+                            break;
+                        }
+                    }
                     const type = consumeTypeOptional(reader);
                     if (!type)
                         break;

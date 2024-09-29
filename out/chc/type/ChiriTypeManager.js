@@ -126,8 +126,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         registerGenerics(...generics) {
             for (const type of generics) {
-                if (this.types[type.name.value])
+                if (this.types[type.name.value]) {
+                    if (this.types[type.name.value].type === type)
+                        // reregistering due to sub reader
+                        continue;
                     throw this.host.error(`Cannot redefine type "${type.name.value}"`);
+                }
+                if (type.generics.length === 1 && type.generics[0].name.value === "*")
+                    type.generics = Object.values(this.types)
+                        .map(typeDef => typeDef.type)
+                        .filter(type => type.name.value !== "body");
                 const componentTypeDefinitions = type.generics.map(component => {
                     const typeDef = this.types[component.name.value];
                     if (!typeDef)
@@ -223,6 +231,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (toTypes.includes(type) || !toTypes.length)
                 return true;
             toTypes = toTypes.flatMap(type => type.isGeneric ? type.generics : type);
+            if (type.isGeneric && type.generics.every(type => toTypes.some(toType => this.isAssignable(type, toType))))
+                // handle the case of generic assignability into generics
+                return true;
             if (toTypes.length > 1)
                 return toTypes.some(toType => this.isAssignable(type, toType));
             const [toType] = toTypes;

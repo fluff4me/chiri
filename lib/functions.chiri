@@ -1,3 +1,4 @@
 #import:
 	function/number
 	function/string
+	function/list

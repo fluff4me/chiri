@@ -15,9 +15,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
     exports.default = (0, MacroConstruct_1.default)("import")
         .body("paths")
-        .consume(({ reader, assignments, body }) => ({
-        type: "import",
-        paths: body,
-    }));
+        .consume(({ reader, assignments, body }) => {
+        if (!body)
+            throw reader.error("Expected paths to import");
+        return {
+            type: "import",
+            paths: body,
+        };
+    });
 });
 //# sourceMappingURL=macroImport.js.map

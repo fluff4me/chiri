@@ -33,8 +33,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const variable = await (0, consumeCompilerVariableOptional_1.default)(reader, false);
         if (!variable)
             throw reader.error("Expected variable declaration");
-        if (!reader.types.isAssignable(iterableVariable.valueType, variable.valueType))
-            throw reader.error(e, `Iterable type "${ChiriType_1.ChiriType.stringify(iterableVariable.valueType)}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable.valueType)}"`);
+        if (!reader.types.isAssignable(iterableVariable.valueType.generics[0], variable.valueType))
+            throw reader.error(e, `Iterable of type "${ChiriType_1.ChiriType.stringify(iterableVariable.valueType.generics[0])}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable.valueType)}"`);
         return {
             iterable,
             variable,

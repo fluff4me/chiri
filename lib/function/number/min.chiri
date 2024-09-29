@@ -1,0 +1,6 @@
+#function min with number!(dec int uint) returns number:
+	#number a
+	#number b
+	#return match a < b:
+		true: a
+		false: b

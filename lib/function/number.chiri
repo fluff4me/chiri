@@ -4,3 +4,5 @@
 	number/floor
 	number/round
 	number/sign
+	number/min
+	number/max
