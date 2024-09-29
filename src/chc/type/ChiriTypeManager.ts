@@ -292,6 +292,10 @@ export default class ChiriTypeManager {
 			return true
 
 		toTypes = toTypes.flatMap(type => type.isGeneric ? type.generics : type)
+		if (type.isGeneric && type.generics.every(type => toTypes.some(toType => this.isAssignable(type, toType))))
+			// handle the case of generic assignability into generics
+			return true
+
 		if (toTypes.length > 1)
 			return toTypes.some(toType => this.isAssignable(type, toType))
 
