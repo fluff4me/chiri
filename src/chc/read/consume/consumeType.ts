@@ -5,6 +5,7 @@ import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
 import consumeTypeNameOptional from "./consumeTypeNameOptional"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
+import consumeWordOptional from "./consumeWordOptional"
 
 export function consumeType (reader: ChiriReader): ChiriType
 export function consumeType (reader: ChiriReader, genericDeclaration: true): ChiriTypeGeneric
@@ -52,7 +53,15 @@ const consumeGenerics = (reader: ChiriReader, generics?: number | string[][], ge
 	if (typeof generics === "number") {
 		for (let g = 0; g < generics; g++) {
 			reader.consume("!")
-			result.push(consumeType(reader))
+			const anyType = consumeWordOptional(reader, "*")
+			if (anyType)
+				result.push({
+					type: "type",
+					name: anyType,
+					generics: [],
+				})
+			else
+				result.push(consumeType(reader))
 		}
 
 	} else if (generics) {
@@ -74,6 +83,18 @@ const consumeGenerics = (reader: ChiriReader, generics?: number | string[][], ge
 				if (result.length)
 					if (!consumeWhiteSpaceOptional(reader))
 						break
+
+				if (!parenthesised) {
+					const anyType = consumeWordOptional(reader, "*")
+					if (anyType) {
+						result.push({
+							type: "type",
+							name: anyType,
+							generics: [],
+						})
+						break
+					}
+				}
 
 				const type = consumeTypeOptional(reader)
 				if (!type)
