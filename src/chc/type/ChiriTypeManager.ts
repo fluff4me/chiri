@@ -161,8 +161,13 @@ export default class ChiriTypeManager {
 
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
 		for (const type of generics) {
-			if (this.types[type.name.value])
+			if (this.types[type.name.value]) {
+				if (this.types[type.name.value].type === type)
+					// reregistering due to sub reader
+					continue
+
 				throw this.host.error(`Cannot redefine type "${type.name.value}"`)
+			}
 
 			const componentTypeDefinitions = type.generics.map(component => {
 				const typeDef = this.types[component.name.value]
