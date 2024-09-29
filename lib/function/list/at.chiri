@@ -1,0 +1,12 @@
+#function at with t!* returns t:
+	#list!t values
+	#uint index
+
+	#set index = min(index, length(values) - 1)
+
+	#uint i = 0
+	#each values as t value:
+		#if i == index:
+			#return value
+
+		#set i++
