@@ -40,7 +40,7 @@ type TypeName = keyof typeof types
 
 const binaryNumericOperators = ["**", "+", "-", "*", "/", "%", "==", "!=", "<=", ">=", "<", ">"] as const
 const unaryNumericOperators = ["+", "-"] as const
-const binaryBitwiseOperators = ["&", "|", "^"] as const
+const binaryBitwiseOperators = ["&", "|", "^", "<<", ">>", ">>>"] as const
 const unaryBitwiseOperators = ["~"] as const
 const binaryBooleanOperators = ["||", "&&", "==", "!="] as const
 const unaryBooleanOperators = ["!"] as const
@@ -81,6 +81,9 @@ const operatorResults: Record<Operator, string | ((typeA: string, typeB?: string
 	"&": "int",
 	"|": "int",
 	"^": "int",
+	"<<": "int",
+	">>": "int",
+	">>>": "int",
 	".": "string",
 	"x": "string",
 }
