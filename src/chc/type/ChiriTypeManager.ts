@@ -85,6 +85,10 @@ const operatorResults: Record<string, string | ((typeA: string, typeB?: string) 
 	"x": "string",
 }
 
+const operatorOperandCoercion: Record<string, true | [true, false] | [false, true]> = {
+	".": true,
+}
+
 const operatorOperandBTypes: Record<string, string> = {
 	"x": "uint",
 }
@@ -95,8 +99,10 @@ export default class ChiriTypeManager {
 
 	binaryOperators: Record<string, Record<string, Record<string, string>>> = {}
 	unaryOperators: Record<string, Record<string, string>> = {}
+	binaryOperatorCoercion: Record<string, true | [true, false] | [false, true]> = {}
+	unaryOperatorCoercion: Record<string, true> = {}
 
-	registerBinaryOperator (typeA: string, operator: string, typeB: string = typeA, output?: string, reversible: boolean = false) {
+	registerBinaryOperator (typeA: string, operator: string, typeB: string = typeA, output?: string, reversible: boolean = false, coercion?: true | [true, false] | [false, true]) {
 		const operatorsOfTypeA = this.binaryOperators[typeA] ??= {}
 		let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {}
 		let result = output ?? operatorResults[operator]
@@ -108,6 +114,10 @@ export default class ChiriTypeManager {
 			console.warn(ansi.err + `Operation ${typeA}${operator}${typeB}=${instancesOfThisOperator[typeB]} replaced with ${typeA}${operator}${typeB}=${result}`)
 
 		instancesOfThisOperator[typeB] = result
+
+		coercion ??= operatorOperandCoercion[operator]
+		if (coercion)
+			this.binaryOperatorCoercion[operator] = coercion ?? operatorOperandCoercion[operator]
 
 		if (!reversible)
 			return
@@ -125,7 +135,7 @@ export default class ChiriTypeManager {
 		instancesOfThisOperator[typeA] = result
 	}
 
-	registerUnaryOperator (operator: string, type: string, output?: string) {
+	registerUnaryOperator (operator: string, type: string, output?: string, coercion?: true) {
 		const instancesOfThisOperator = this.unaryOperators[operator] ??= {}
 		let result = output ?? operatorResults[operator]
 		result = typeof result === "function" ? result(type) : result
@@ -136,6 +146,10 @@ export default class ChiriTypeManager {
 			console.warn(ansi.err + `Operation ${operator}${type}=${instancesOfThisOperator[type]} replaced with ${operator}${type}=${result}`)
 
 		instancesOfThisOperator[type] = result
+
+		coercion ??= operatorOperandCoercion[operator] ? true : undefined
+		if (coercion)
+			this.unaryOperatorCoercion[type] = coercion
 	}
 
 	constructor (private readonly host: ChiriReader | ChiriCompiler) {
@@ -285,6 +299,11 @@ export default class ChiriTypeManager {
 		return definition.coerce(value, () => {
 			throw this.host.error(`Unable to coerce ${fromType ? `"${ChiriType.stringify(fromType)}"` : typeof value} to "${ChiriType.stringify(type)}"`)
 		})
+	}
+
+	canCoerceOperandB (operator?: string) {
+		const coercion = this.binaryOperatorCoercion[operator!]
+		return coercion === true || coercion?.[1] === true
 	}
 
 	isAssignable (type: ChiriType, ...toTypes: ChiriType[]): boolean {

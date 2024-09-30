@@ -54,8 +54,9 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 
 	consumeWhiteSpaceOptional(reader)
 
+	const operandBTypes = reader.types.canCoerceOperandB(operator) ? [] : [type]
 	const expr = operator === "++" || operator === "--" ? undefined
-		: inline ? consumeExpression.inline(reader, type) : await consumeExpression(reader, type)
+		: inline ? consumeExpression.inline(reader, ...operandBTypes) : await consumeExpression(reader, ...operandBTypes)
 
 	if (operator === "++")
 		operator = "+"
