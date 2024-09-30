@@ -477,7 +477,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 
 			case "property": {
-				css.writingTo("root", () => {
+				css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
 					css.emitProperty(compiler, {
 						...statement,
 						property: resolveWord(statement.property),
@@ -682,7 +682,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					return true
 				}
 
-				const result = types.coerce(resolveExpression(compiler, statement.expression), statement.valueType, statement.expression?.valueType)
+				let result = resolveExpression(compiler, statement.expression)
+				result = types.coerce(result, statement.valueType, statement.expression?.valueType)
 				setVariable(statement.name.value, result, statement.valueType, true)
 				return true
 			}

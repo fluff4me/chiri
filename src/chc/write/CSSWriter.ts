@@ -4,30 +4,32 @@ import type { ChiriAST } from "../read/ChiriReader"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type ChiriCompiler from "./ChiriCompiler"
-import type { ChiriWriteConfig, QueuedWrite } from "./Writer"
-import Writer from "./Writer"
+import type { ChiriWriteConfig } from "./Writer"
+import Writer, { QueuedWrite } from "./Writer"
 
 export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "value"> {
 	property: ChiriWord
 	value: string
 }
 
+export type CSSDocumentSection =
+	| "imports"
+	| "root-properties"
+	| "root-styles"
+	| "default"
+
 export default class CSSWriter extends Writer {
 
-	private writingToType: "default" | "root" | "imports" = "default"
-	private rootQueue: QueuedWrite[] = [{
-		output: "",
-	}]
-	private importsQueue: QueuedWrite[] = [{
-		output: "",
-	}]
+	private currentSection: CSSDocumentSection = "default"
+	private queues: Record<CSSDocumentSection, QueuedWrite[]> = {
+		"imports": QueuedWrite.makeQueue(),
+		"root-properties": QueuedWrite.makeQueue(),
+		"root-styles": QueuedWrite.makeQueue(),
+		"default": this.outputQueue,
+	}
 
 	protected override get queue () {
-		switch (this.writingToType) {
-			case "root": return this.rootQueue
-			case "imports": return this.importsQueue
-			default: return super.queue
-		}
+		return this.queues[this.currentSection]
 	}
 
 	constructor (ast: ChiriAST, dest: string, config?: ChiriWriteConfig) {
@@ -38,14 +40,14 @@ export default class CSSWriter extends Writer {
 		return typeof args["out-css"] === "string" ? path.resolve(args["out-css"], outFile) : super.createDestPath(outFile)
 	}
 
-	writingTo (writingTo: "default" | "root" | "imports", dowhile: () => any) {
-		if (this.writingToType === writingTo)
+	writingTo (section: CSSDocumentSection, dowhile: () => any) {
+		if (this.currentSection === section)
 			return
 
-		const oldWritingTo = this.writingToType
-		this.writingToType = writingTo
+		const oldSection = this.currentSection
+		this.currentSection = section
 		dowhile()
-		this.writingToType = oldWritingTo
+		this.currentSection = oldSection
 	}
 
 	emitProperty (compiler: ChiriCompiler, property: ResolvedProperty) {
@@ -62,22 +64,28 @@ export default class CSSWriter extends Writer {
 
 	override onCompileEnd (compiler: ChiriCompiler): void {
 
-		for (const rootWrite of this.rootQueue)
-			rootWrite.output = rootWrite.output.replaceAll("\n", "\n\t")
+		const headerQueue = QueuedWrite.makeQueue()
 
-		this.rootQueue.unshift({ output: ":root {\n\t" })
-		const lastRootProperty = this.rootQueue.at(-1)!
-		lastRootProperty.output = lastRootProperty.output.slice(0, -1)
-		this.rootQueue.push({ output: "}\n\n" })
+		headerQueue.push(...this.queues.imports)
+		headerQueue.push({ output: "\n" })
 
-		this.outputQueue.unshift(...this.rootQueue)
+		headerQueue.push({ output: ":root {\n\t" })
+		headerQueue.push(...this.queues["root-properties"]
+			.map(wr => ({ ...wr, output: wr.output.replaceAll("\n", "\n\t") })))
 
-		// imports above :root
-		this.importsQueue.push({ output: "\n" })
-		this.outputQueue.unshift(...this.importsQueue)
+		headerQueue.at(-1)!.output = headerQueue.at(-1)!.output.slice(0, -1)
+		headerQueue.push({ output: "\n\t" })
 
-		if (this.writingToType !== "default")
-			this.writingToType = "default"
+		headerQueue.push(...this.queues["root-styles"]
+			.map(wr => ({ ...wr, output: wr.output.replaceAll("\n", "\n\t") })))
+		headerQueue.at(-1)!.output = headerQueue.at(-1)!.output.slice(0, -1)
+
+		headerQueue.push({ output: "}\n\n" })
+
+		this.outputQueue.unshift(...headerQueue)
+
+		if (this.currentSection !== "default")
+			this.currentSection = "default"
 
 		this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`)
 	}

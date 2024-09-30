@@ -19,6 +19,12 @@ export interface QueuedWrite {
 	}
 }
 
+export namespace QueuedWrite {
+	export function makeQueue (): QueuedWrite[] {
+		return [{ output: "" }]
+	}
+}
+
 export default class Writer {
 
 	public static writeBlocks (writers: Writer[], inside: () => any) {
@@ -37,9 +43,7 @@ export default class Writer {
 
 	public readonly dest: string
 	private output = ""
-	protected outputQueue: QueuedWrite[] = [{
-		output: "",
-	}]
+	protected outputQueue = QueuedWrite.makeQueue()
 
 	public readonly map: SourceMapGenerator
 

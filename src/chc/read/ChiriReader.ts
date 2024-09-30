@@ -409,12 +409,8 @@ export default class ChiriReader {
 		}
 
 		const property = consumePropertyOptional(this)
-		if (property) {
-			if (!property.isCustomProperty && this.context.type === "root")
-				throw this.error("Properties cannot be used in this context")
-
+		if (property)
 			return property
-		}
 
 		const rule = this.context.type === "state" ? undefined : (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
 		if (rule)
