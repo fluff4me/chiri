@@ -316,7 +316,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return true;
                 }
                 case "property": {
-                    css.writingTo("root", () => {
+                    css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
                         css.emitProperty(compiler, {
                             ...statement,
                             property: resolveWord(statement.property),
@@ -477,7 +477,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         scope().variables[statement.name.value] = { type: statement.valueType, value: undefined };
                         return true;
                     }
-                    const result = types.coerce((0, resolveExpression_1.default)(compiler, statement.expression), statement.valueType, statement.expression?.valueType);
+                    let result = (0, resolveExpression_1.default)(compiler, statement.expression);
+                    result = types.coerce(result, statement.valueType, statement.expression?.valueType);
                     setVariable(statement.name.value, result, statement.valueType, true);
                     return true;
                 }

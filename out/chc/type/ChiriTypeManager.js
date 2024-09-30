@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const unaryBitwiseOperators = ["~"];
     const binaryBooleanOperators = ["||", "&&", "==", "!="];
     const unaryBooleanOperators = ["!"];
-    const binaryStringOperators = [".", "x"];
+    const binaryStringOperators = [".", "x", "==", "!="];
     const minNumericPrecision2 = (typeA, typeB) => (typeA === "dec" || typeB === "dec") ? "dec"
         : (typeA === "int" || typeB === "int") ? "int"
             : "uint";
@@ -67,6 +67,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ".": "string",
         "x": "string",
     };
+    const operatorOperandCoercion = {
+        ".": true,
+    };
     const operatorOperandBTypes = {
         "x": "uint",
     };
@@ -75,7 +78,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         types = { ...types };
         binaryOperators = {};
         unaryOperators = {};
-        registerBinaryOperator(typeA, operator, typeB = typeA, output, reversible = false) {
+        binaryOperatorCoercion = {};
+        unaryOperatorCoercion = {};
+        registerBinaryOperator(typeA, operator, typeB = typeA, output, reversible = false, coercion) {
             const operatorsOfTypeA = this.binaryOperators[typeA] ??= {};
             let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {};
             let result = output ?? operatorResults[operator];
@@ -85,6 +90,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (instancesOfThisOperator[typeB] && instancesOfThisOperator[typeB] !== result)
                 console.warn(ansi_1.default.err + `Operation ${typeA}${operator}${typeB}=${instancesOfThisOperator[typeB]} replaced with ${typeA}${operator}${typeB}=${result}`);
             instancesOfThisOperator[typeB] = result;
+            coercion ??= operatorOperandCoercion[operator];
+            if (coercion)
+                this.binaryOperatorCoercion[operator] = coercion ?? operatorOperandCoercion[operator];
             if (!reversible)
                 return;
             const operatorsOfTypeB = this.binaryOperators[typeB] ??= {};
@@ -97,7 +105,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 console.warn(ansi_1.default.err + `Operation ${typeB}${operator}${typeA}=${instancesOfThisOperator[typeA]} replaced with ${typeB}${operator}${typeA}=${result}`);
             instancesOfThisOperator[typeA] = result;
         }
-        registerUnaryOperator(operator, type, output) {
+        registerUnaryOperator(operator, type, output, coercion) {
             const instancesOfThisOperator = this.unaryOperators[operator] ??= {};
             let result = output ?? operatorResults[operator];
             result = typeof result === "function" ? result(type) : result;
@@ -106,6 +114,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (instancesOfThisOperator[type] && instancesOfThisOperator[type] !== result)
                 console.warn(ansi_1.default.err + `Operation ${operator}${type}=${instancesOfThisOperator[type]} replaced with ${operator}${type}=${result}`);
             instancesOfThisOperator[type] = result;
+            coercion ??= operatorOperandCoercion[operator] ? true : undefined;
+            if (coercion)
+                this.unaryOperatorCoercion[type] = coercion;
         }
         constructor(host) {
             this.host = host;
@@ -226,6 +237,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return definition.coerce(value, () => {
                 throw this.host.error(`Unable to coerce ${fromType ? `"${ChiriType_1.ChiriType.stringify(fromType)}"` : typeof value} to "${ChiriType_1.ChiriType.stringify(type)}"`);
             });
+        }
+        canCoerceOperandB(operator) {
+            const coercion = this.binaryOperatorCoercion[operator];
+            return coercion === true || coercion?.[1] === true;
         }
         isAssignable(type, ...toTypes) {
             if (toTypes.includes(type) || !toTypes.length)

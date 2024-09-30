@@ -284,11 +284,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return mixinUse;
             }
             const property = (0, consumePropertyOptional_1.default)(this);
-            if (property) {
-                if (!property.isCustomProperty && this.context.type === "root")
-                    throw this.error("Properties cannot be used in this context");
+            if (property)
                 return property;
-            }
             const rule = this.context.type === "state" ? undefined : (await (0, consumeRuleMainOptional_1.default)(this)) || (await (0, consumeRuleStateOptional_1.default)(this));
             if (rule)
                 return rule;

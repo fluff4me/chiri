@@ -1,3 +1,26 @@
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -14,21 +37,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const path_1 = __importDefault(require("path"));
     const args_1 = __importDefault(require("../../args"));
-    const Writer_1 = __importDefault(require("./Writer"));
+    const Writer_1 = __importStar(require("./Writer"));
     class CSSWriter extends Writer_1.default {
-        writingToType = "default";
-        rootQueue = [{
-                output: "",
-            }];
-        importsQueue = [{
-                output: "",
-            }];
+        currentSection = "default";
+        queues = {
+            "imports": Writer_1.QueuedWrite.makeQueue(),
+            "root-properties": Writer_1.QueuedWrite.makeQueue(),
+            "root-styles": Writer_1.QueuedWrite.makeQueue(),
+            "default": this.outputQueue,
+        };
         get queue() {
-            switch (this.writingToType) {
-                case "root": return this.rootQueue;
-                case "imports": return this.importsQueue;
-                default: return super.queue;
-            }
+            return this.queues[this.currentSection];
         }
         constructor(ast, dest, config) {
             super(ast, dest, { extension: ".css", ...config });
@@ -36,13 +55,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         createDestPath(outFile) {
             return typeof args_1.default["out-css"] === "string" ? path_1.default.resolve(args_1.default["out-css"], outFile) : super.createDestPath(outFile);
         }
-        writingTo(writingTo, dowhile) {
-            if (this.writingToType === writingTo)
+        writingTo(section, dowhile) {
+            if (this.currentSection === section)
                 return;
-            const oldWritingTo = this.writingToType;
-            this.writingToType = writingTo;
+            const oldSection = this.currentSection;
+            this.currentSection = section;
             dowhile();
-            this.writingToType = oldWritingTo;
+            this.currentSection = oldSection;
         }
         emitProperty(compiler, property) {
             if (property.isCustomProperty)
@@ -57,18 +76,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         onCompileEnd(compiler) {
-            for (const rootWrite of this.rootQueue)
-                rootWrite.output = rootWrite.output.replaceAll("\n", "\n\t");
-            this.rootQueue.unshift({ output: ":root {\n\t" });
-            const lastRootProperty = this.rootQueue.at(-1);
-            lastRootProperty.output = lastRootProperty.output.slice(0, -1);
-            this.rootQueue.push({ output: "}\n\n" });
-            this.outputQueue.unshift(...this.rootQueue);
-            // imports above :root
-            this.importsQueue.push({ output: "\n" });
-            this.outputQueue.unshift(...this.importsQueue);
-            if (this.writingToType !== "default")
-                this.writingToType = "default";
+            const headerQueue = Writer_1.QueuedWrite.makeQueue();
+            headerQueue.push(...this.queues.imports);
+            headerQueue.push({ output: "\n" });
+            headerQueue.push({ output: ":root {\n\t" });
+            headerQueue.push(...this.queues["root-properties"]
+                .map(wr => ({ ...wr, output: wr.output.replaceAll("\n", "\n\t") })));
+            headerQueue.at(-1).output = headerQueue.at(-1).output.slice(0, -1);
+            headerQueue.push({ output: "\n\t" });
+            headerQueue.push(...this.queues["root-styles"]
+                .map(wr => ({ ...wr, output: wr.output.replaceAll("\n", "\n\t") })));
+            headerQueue.at(-1).output = headerQueue.at(-1).output.slice(0, -1);
+            headerQueue.push({ output: "}\n\n" });
+            this.outputQueue.unshift(...headerQueue);
+            if (this.currentSection !== "default")
+                this.currentSection = "default";
             this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`);
         }
     }

@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.QueuedWrite = void 0;
     const promises_1 = __importDefault(require("fs/promises"));
     const path_1 = __importDefault(require("path"));
     const source_map_1 = require("source-map");
@@ -19,6 +20,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const args_1 = __importDefault(require("../../args"));
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const stringifyText_1 = __importDefault(require("../util/stringifyText"));
+    var QueuedWrite;
+    (function (QueuedWrite) {
+        function makeQueue() {
+            return [{ output: "" }];
+        }
+        QueuedWrite.makeQueue = makeQueue;
+    })(QueuedWrite || (exports.QueuedWrite = QueuedWrite = {}));
     class Writer {
         config;
         static writeBlocks(writers, inside) {
@@ -33,9 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         #indent = 0;
         dest;
         output = "";
-        outputQueue = [{
-                output: "",
-            }];
+        outputQueue = QueuedWrite.makeQueue();
         map;
         get queue() {
             return this.outputQueue;

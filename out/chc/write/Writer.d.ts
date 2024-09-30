@@ -11,6 +11,9 @@ export interface QueuedWrite {
         tokenName?: string | undefined;
     };
 }
+export declare namespace QueuedWrite {
+    function makeQueue(): QueuedWrite[];
+}
 export default class Writer {
     #private;
     readonly config: ChiriWriteConfig;

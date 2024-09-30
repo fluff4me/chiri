@@ -73,7 +73,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     reader.i += 2;
                     appendSegment(pendingNewlines);
                     pendingNewlines = "";
-                    segments.push(consumeExpression_1.default.inline(reader));
+                    const expr = consumeExpression_1.default.inline(reader);
+                    segments.push(expr);
+                    segments.push("");
                     reader.consume("}");
                     reader.i--;
                     break;

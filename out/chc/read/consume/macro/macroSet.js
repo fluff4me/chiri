@@ -64,8 +64,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (operator !== "++" && operator !== "--")
             reader.consume("=");
         (0, consumeWhiteSpaceOptional_1.default)(reader);
+        const operandBTypes = reader.types.canCoerceOperandB(operator) ? [] : [type];
         const expr = operator === "++" || operator === "--" ? undefined
-            : inline ? consumeExpression_1.default.inline(reader, type) : await (0, consumeExpression_1.default)(reader, type);
+            : inline ? consumeExpression_1.default.inline(reader, ...operandBTypes) : await (0, consumeExpression_1.default)(reader, ...operandBTypes);
         if (operator === "++")
             operator = "+";
         if (operator === "--")
