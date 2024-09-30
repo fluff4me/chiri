@@ -81,7 +81,9 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 
 				appendSegment(pendingNewlines)
 				pendingNewlines = ""
-				segments.push(consumeExpression.inline(reader))
+				const expr = consumeExpression.inline(reader)
+				segments.push(expr)
+				segments.push("")
 				reader.consume("}")
 				reader.i--
 				break
