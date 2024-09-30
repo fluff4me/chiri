@@ -85,8 +85,9 @@ const operatorResults: Record<string, string | ((typeA: string, typeB?: string) 
 	"x": "string",
 }
 
-const operatorOperandCoercion: Record<string, true | [true, false] | [false, true]> = {
-	".": true,
+type BinaryCoercion = readonly [string, undefined] | readonly [undefined, string]
+const operatorOperandCoercion: Record<string, string | BinaryCoercion> = {
+	".": "string",
 }
 
 const operatorOperandBTypes: Record<string, string> = {
@@ -97,12 +98,12 @@ export default class ChiriTypeManager {
 
 	types: Record<string, TypeDefinition> = { ...types }
 
-	binaryOperators: Record<string, Record<string, Record<string, string>>> = {}
-	unaryOperators: Record<string, Record<string, string>> = {}
-	binaryOperatorCoercion: Record<string, true | [true, false] | [false, true]> = {}
-	unaryOperatorCoercion: Record<string, true> = {}
+	binaryOperators: Record<string, Partial<Record<Operator, Record<string, string>>>> = {}
+	unaryOperators: Partial<Record<Operator, Record<string, string>>> = {}
+	binaryOperatorCoercion: Partial<Record<Operator, string | BinaryCoercion>> = {}
+	unaryOperatorCoercion: Partial<Record<Operator, true>> = {}
 
-	registerBinaryOperator (typeA: string, operator: string, typeB: string = typeA, output?: string, reversible: boolean = false, coercion?: true | [true, false] | [false, true]) {
+	registerBinaryOperator (typeA: string, operator: Operator, typeB: string = typeA, output?: string, reversible: boolean = false, coercion?: string | BinaryCoercion) {
 		const operatorsOfTypeA = this.binaryOperators[typeA] ??= {}
 		let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {}
 		let result = output ?? operatorResults[operator]
@@ -135,7 +136,7 @@ export default class ChiriTypeManager {
 		instancesOfThisOperator[typeA] = result
 	}
 
-	registerUnaryOperator (operator: string, type: string, output?: string, coercion?: true) {
+	registerUnaryOperator (operator: Operator, type: string, output?: string, coercion?: true) {
 		const instancesOfThisOperator = this.unaryOperators[operator] ??= {}
 		let result = output ?? operatorResults[operator]
 		result = typeof result === "function" ? result(type) : result
@@ -149,7 +150,7 @@ export default class ChiriTypeManager {
 
 		coercion ??= operatorOperandCoercion[operator] ? true : undefined
 		if (coercion)
-			this.unaryOperatorCoercion[type] = coercion
+			this.unaryOperatorCoercion[operator] = coercion
 	}
 
 	constructor (private readonly host: ChiriReader | ChiriCompiler) {
@@ -216,9 +217,9 @@ export default class ChiriTypeManager {
 					// skip, this isn't one of the component types
 					continue
 
-				for (const [operator, instancesOfOperator] of Object.entries(operatorsOfTypeA)) {
+				for (const [operator, instancesOfOperator] of Object.entries(operatorsOfTypeA) as [Operator, Record<string, string>][]) {
 					for (const typeB of Object.keys(instancesOfOperator)) {
-						const returnTypes = [...new Set(type.generics.map(generic => this.binaryOperators[generic.name.value]?.[operator]?.[typeB]))]
+						const returnTypes = [...new Set(type.generics.map(generic => this.binaryOperators[generic.name.value]?.[operator]?.[typeB]))] as string[]
 						if (returnTypes.includes(undefined!))
 							// not common between all component types
 							continue
@@ -237,13 +238,13 @@ export default class ChiriTypeManager {
 
 			// register common operators for `value OPERATOR generic`
 			for (const [typeA, operatorsOfTypeA] of Object.entries(this.binaryOperators)) {
-				for (const [operator, instancesOfOperator] of Object.entries(operatorsOfTypeA)) {
+				for (const [operator, instancesOfOperator] of Object.entries(operatorsOfTypeA) as [Operator, Record<string, string>][]) {
 					for (const typeB of Object.keys(instancesOfOperator)) {
 						if (!type.generics.some(generic => typeB === generic.name.value))
 							// skip, this isn't one of the component types
 							continue
 
-						const returnTypes = [...new Set(type.generics.map(generic => this.binaryOperators[generic.name.value]?.[operator]?.[typeB]))]
+						const returnTypes = [...new Set(type.generics.map(generic => this.binaryOperators[generic.name.value]?.[operator]?.[typeB]))] as string[]
 						if (returnTypes.includes(undefined!))
 							// not common between all component types
 							continue
@@ -261,7 +262,7 @@ export default class ChiriTypeManager {
 			}
 
 			// register common operators for `OPERATOR value`
-			for (const [operator, types] of Object.entries(this.unaryOperators)) {
+			for (const [operator, types] of Object.entries(this.unaryOperators) as [Operator, Record<string, string>][]) {
 				const returnTypes = [...new Set(type.generics.map(generic => types[generic.name.value]))]
 				if (returnTypes.includes(undefined!))
 					// not common between all component types
@@ -302,8 +303,8 @@ export default class ChiriTypeManager {
 	}
 
 	canCoerceOperandB (operator?: string) {
-		const coercion = this.binaryOperatorCoercion[operator!]
-		return coercion === true || coercion?.[1] === true
+		const coercion = this.binaryOperatorCoercion[operator as Operator]
+		return typeof coercion === "string" || !!coercion?.[1]
 	}
 
 	isAssignable (type: ChiriType, ...toTypes: ChiriType[]): boolean {

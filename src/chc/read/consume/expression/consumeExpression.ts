@@ -135,10 +135,10 @@ const consumeOperand = (reader: ChiriReader): ChiriExpressionOperand => {
 	throw reader.error("Unknown expression operand type")
 }
 
-export const consumeOperatorOptional = (reader: ChiriReader, operators: Record<Operator, Record<string, string>>): string | undefined => {
+export const consumeOperatorOptional = (reader: ChiriReader, operators: Partial<Record<Operator, Record<string, string>>>): Operator | undefined => {
 	for (const o in operators)
 		if (reader.consumeOptional(o))
-			return o
+			return o as Operator
 	return undefined
 }
 
@@ -152,20 +152,34 @@ const consumeExpressionInternal = (reader: ChiriReader): ChiriExpressionOperand 
 		if (!consumeWhiteSpaceOptional(reader) || consumeNewBlockLineOptional(reader))
 			return operandA
 
-		const operandATypeName = operandA.valueType.name.value
-		const operatorsForType = binaryOperators[operandATypeName] ?? empy
+		let operandATypeName = operandA.valueType.name.value
+		const operatorsCoerced = Object.fromEntries(Object.entries(reader.types.binaryOperatorCoercion)
+			.filter(([operator, coercion]) => typeof coercion === "string" || !!coercion?.[0])
+			.map(([operator, coercion]) => [operator, reader.types.binaryOperators[typeof coercion === "string" ? coercion : coercion[0]!][operator as Operator]]))
+		const operatorsForType = {
+			...binaryOperators[operandATypeName] ?? empy,
+			...operatorsCoerced,
+		}
+
 		const operator = consumeOperatorOptional(reader, operatorsForType)
 		if (!operator) {
 			reader.i = p
 			return operandA
 		}
 
+		const coercion = reader.types.binaryOperatorCoercion[operator]
+		const coerce = typeof coercion === "string" ? [coercion, coercion] as const : coercion
+		operandATypeName = coerce?.[0] ?? operandATypeName
+
 		consumeWhiteSpace(reader)
 
 		const resultTypesByOperandB = operatorsForType[operator] ?? empy
 
 		const operandB = consumeUnaryExpression(reader)
-		const operandBTypeName = operandB.valueType.name.value
+
+		let operandBTypeName = operandB.valueType.name.value
+		operandBTypeName = coerce?.[0] ?? operandBTypeName
+
 		const resultType = resultTypesByOperandB[operandBTypeName]
 		if (!resultType)
 			throw reader.error(`Undefined operation ${operandATypeName}${operator}${operandBTypeName}`)
