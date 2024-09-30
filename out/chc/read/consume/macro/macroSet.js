@@ -47,13 +47,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeAssignmentData = async (reader, skipInitialWhitespace = false, inline = false) => {
         if (!skipInitialWhitespace)
             (0, consumeWhiteSpace_1.default)(reader);
-        const e = reader.i;
+        let e = reader.i;
         const varName = (0, consumeWord_1.default)(reader);
         const variable = reader.getVariable(varName.value);
         if (variable.valueType.name.value === "body")
             throw reader.error(e, "Cannot reassign a variable of type \"body\"");
         (0, consumeWhiteSpaceOptional_1.default)(reader);
-        const binaryOperators = reader.getBinaryOperators();
+        const binaryOperators = reader.types.binaryOperators;
         const type = variable.valueType;
         const operatorsForType = binaryOperators[type.name.value] ?? empy;
         let operator = undefined
@@ -64,9 +64,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (operator !== "++" && operator !== "--")
             reader.consume("=");
         (0, consumeWhiteSpaceOptional_1.default)(reader);
-        const operandBTypes = reader.types.canCoerceOperandB(operator) ? [] : [type];
+        e = reader.i;
         const expr = operator === "++" || operator === "--" ? undefined
-            : inline ? consumeExpression_1.default.inline(reader, ...operandBTypes) : await (0, consumeExpression_1.default)(reader, ...operandBTypes);
+            : inline ? consumeExpression_1.default.inline(reader) : await (0, consumeExpression_1.default)(reader);
+        const coercible = expr && operator && reader.types.canCoerceOperandB(type.name.value, operator, expr.valueType.name.value);
+        if (expr && !coercible && !reader.types.isAssignable(expr.valueType, type))
+            throw reader.error(e, `Expression of type "${ChiriType_1.ChiriType.stringify(expr.valueType)}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable.valueType)}"`);
         if (operator === "++")
             operator = "+";
         if (operator === "--")

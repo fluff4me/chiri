@@ -7,14 +7,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../consumeNewBlockLineOptional", "../consumeStringOptional", "../consumeTypeConstructorOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "../numeric/consumeDecimalOptional", "../numeric/consumeIntegerOptional", "../numeric/consumeUnsignedIntegerOptional", "./consumeFunctionCallOptional", "./expressionMatch"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../consumeStringOptional", "../consumeTypeConstructorOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "../numeric/consumeDecimalOptional", "../numeric/consumeIntegerOptional", "../numeric/consumeUnsignedIntegerOptional", "./consumeFunctionCallOptional", "./expressionMatch"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.consumeOperatorOptional = void 0;
     const ChiriType_1 = require("../../../type/ChiriType");
-    const consumeNewBlockLineOptional_1 = __importDefault(require("../consumeNewBlockLineOptional"));
     const consumeStringOptional_1 = __importDefault(require("../consumeStringOptional"));
     const consumeTypeConstructorOptional_1 = __importDefault(require("../consumeTypeConstructorOptional"));
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
@@ -85,45 +84,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         throw reader.error("Unknown expression operand type");
     };
-    const consumeOperatorOptional = (reader, operators) => {
-        for (const o in operators)
+    const consumeOperatorOptional = (reader, operators, precedence) => {
+        for (const o in operators) {
+            if (precedence !== undefined && !reader.types.precedence[precedence].includes(o))
+                // not correct precedence, skip for now
+                continue;
             if (reader.consumeOptional(o))
                 return o;
+        }
         return undefined;
     };
     exports.consumeOperatorOptional = consumeOperatorOptional;
-    const consumeExpressionInternal = (reader) => {
+    const consumeExpressionInternal = (reader, precedence = 0) => {
+        if (precedence >= reader.types.precedence.length)
+            return consumeUnaryExpression(reader);
         const e = reader.i;
-        let operandA = consumeUnaryExpression(reader);
-        const binaryOperators = reader.getBinaryOperators();
+        let operandA = consumeExpressionInternal(reader, precedence + 1);
+        const binaryOperators = reader.types.binaryOperators;
         while (true) {
             const p = reader.i;
-            if (!(0, consumeWhiteSpaceOptional_1.default)(reader) || (0, consumeNewBlockLineOptional_1.default)(reader))
+            if (!(0, consumeWhiteSpaceOptional_1.default)(reader) /* || consumeNewBlockLineOptional(reader) */)
                 return operandA;
-            let operandATypeName = operandA.valueType.name.value;
-            const operatorsCoerced = Object.fromEntries(Object.entries(reader.types.binaryOperatorCoercion)
-                .filter(([operator, coercion]) => typeof coercion === "string" || !!coercion?.[0])
-                .map(([operator, coercion]) => [operator, reader.types.binaryOperators[typeof coercion === "string" ? coercion : coercion[0]][operator]]));
-            const operatorsForType = {
-                ...binaryOperators[operandATypeName] ?? empy,
-                ...operatorsCoerced,
-            };
-            const operator = (0, exports.consumeOperatorOptional)(reader, operatorsForType);
+            const operandATypeName = operandA.valueType.name.value;
+            const operatorsForType = binaryOperators[operandATypeName] ?? empy;
+            const operator = (0, exports.consumeOperatorOptional)(reader, operatorsForType, precedence);
             if (!operator) {
                 reader.i = p;
                 return operandA;
             }
-            const coercion = reader.types.binaryOperatorCoercion[operator];
-            const coerce = typeof coercion === "string" ? [coercion, coercion] : coercion;
-            operandATypeName = coerce?.[0] ?? operandATypeName;
             (0, consumeWhiteSpace_1.default)(reader);
             const resultTypesByOperandB = operatorsForType[operator] ?? empy;
-            const operandB = consumeUnaryExpression(reader);
-            let operandBTypeName = operandB.valueType.name.value;
-            operandBTypeName = coerce?.[0] ?? operandBTypeName;
+            const operandB = consumeExpressionInternal(reader, precedence + 1);
+            const operandBTypeName = operandB.valueType.name.value;
             const resultType = resultTypesByOperandB[operandBTypeName];
             if (!resultType)
-                throw reader.error(`Undefined operation ${operandATypeName}${operator}${operandBTypeName}`);
+                throw reader.error(e, `Undefined operation ${operandATypeName}${operator}${operandBTypeName}`);
+            // const coercion = reader.types.binaryOperatorCoercion[operandATypeName]?.[operator]?.[operandBTypeName]
+            // const coerce = typeof coercion === "string" ? [coercion, coercion] as const : coercion
+            // operandATypeName = coerce?.[0] ?? operandATypeName
+            // operandBTypeName = coerce?.[0] ?? operandBTypeName
             operandA = {
                 type: "expression",
                 subType: "binary",
@@ -136,7 +135,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     };
     const consumeUnaryExpression = (reader) => {
         const e = reader.i;
-        const unaryOperators = reader.getUnaryOperators();
+        const unaryOperators = reader.types.unaryOperators;
         const operator = (0, exports.consumeOperatorOptional)(reader, unaryOperators);
         const operand = consumeOperand(reader);
         if (!operator)

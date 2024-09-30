@@ -173,12 +173,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         getTypeOptional(name) {
             return this.types.types[name];
         }
-        getUnaryOperators() {
-            return this.types.unaryOperators;
-        }
-        getBinaryOperators() {
-            return this.types.binaryOperators;
-        }
         getStatements(onlyThisBlock) {
             return !onlyThisBlock ? [...this.#outerStatements, ...this.#statements] : this.#statements;
         }

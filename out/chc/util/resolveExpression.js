@@ -60,6 +60,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             case "*":
                                 return operandA * operandB;
                             case "/":
+                                if (operandB === 0)
+                                    return Infinity;
                                 return operandA / operandB;
                             case "%":
                                 // TODO maybe add an operator for normal %?
@@ -94,6 +96,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 return `${operandA}`.repeat(+operandB || 1);
                             case "??":
                                 return operandA ?? operandB;
+                            case "<<":
+                                return operandA << operandB;
+                            case ">>":
+                                return operandA >> operandB;
+                            case ">>>":
+                                return operandA >>> operandB;
                             default:
                                 throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`);
                         }

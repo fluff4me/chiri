@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const isNumeric = (type) => numericTypes.includes(type);
     const binaryNumericOperators = ["**", "+", "-", "*", "/", "%", "==", "!=", "<=", ">=", "<", ">"];
     const unaryNumericOperators = ["+", "-"];
-    const binaryBitwiseOperators = ["&", "|", "^"];
+    const binaryBitwiseOperators = ["&", "|", "^", "<<", ">>", ">>>"];
     const unaryBitwiseOperators = ["~"];
     const binaryBooleanOperators = ["||", "&&", "==", "!="];
     const unaryBooleanOperators = ["!"];
@@ -64,23 +64,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         "&": "int",
         "|": "int",
         "^": "int",
+        "<<": "int",
+        ">>": "int",
+        ">>>": "int",
         ".": "string",
         "x": "string",
     };
-    const operatorOperandCoercion = {
+    const operatorPrecedence = [
+        ["||"],
+        ["&&"],
+        ["|"],
+        ["^"],
+        ["&"],
+        ["==", "!="],
+        ["<", "<=", ">", ">="],
+        ["<<", ">>", ">>>"],
+        ["x"],
+        ["."],
+        ["+", "-"],
+        ["*", "/", "%"],
+        ["**"],
+        ["!"],
+        ["~"],
+    ];
+    const binaryOperatorOperandCoercion = {
         ".": "string",
     };
+    const unaryOperatorOperandCoercion = {};
     const operatorOperandBTypes = {
         "x": "uint",
     };
     class ChiriTypeManager {
         host;
+        precedence = operatorPrecedence.map(a => a.slice());
         types = { ...types };
         binaryOperators = {};
         unaryOperators = {};
         binaryOperatorCoercion = {};
         unaryOperatorCoercion = {};
-        registerBinaryOperator(typeA, operator, typeB = typeA, output, reversible = false, coercion) {
+        registerBinaryOperator(typeA, operator, typeB = typeA, output, reversible = false) {
             const operatorsOfTypeA = this.binaryOperators[typeA] ??= {};
             let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {};
             let result = output ?? operatorResults[operator];
@@ -90,9 +112,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (instancesOfThisOperator[typeB] && instancesOfThisOperator[typeB] !== result)
                 console.warn(ansi_1.default.err + `Operation ${typeA}${operator}${typeB}=${instancesOfThisOperator[typeB]} replaced with ${typeA}${operator}${typeB}=${result}`);
             instancesOfThisOperator[typeB] = result;
-            coercion ??= operatorOperandCoercion[operator];
-            if (coercion)
-                this.binaryOperatorCoercion[operator] = coercion ?? operatorOperandCoercion[operator];
             if (!reversible)
                 return;
             const operatorsOfTypeB = this.binaryOperators[typeB] ??= {};
@@ -105,7 +124,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 console.warn(ansi_1.default.err + `Operation ${typeB}${operator}${typeA}=${instancesOfThisOperator[typeA]} replaced with ${typeB}${operator}${typeA}=${result}`);
             instancesOfThisOperator[typeA] = result;
         }
-        registerUnaryOperator(operator, type, output, coercion) {
+        registerUnaryOperator(operator, type, output) {
             const instancesOfThisOperator = this.unaryOperators[operator] ??= {};
             let result = output ?? operatorResults[operator];
             result = typeof result === "function" ? result(type) : result;
@@ -114,9 +133,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (instancesOfThisOperator[type] && instancesOfThisOperator[type] !== result)
                 console.warn(ansi_1.default.err + `Operation ${operator}${type}=${instancesOfThisOperator[type]} replaced with ${operator}${type}=${result}`);
             instancesOfThisOperator[type] = result;
-            coercion ??= operatorOperandCoercion[operator] ? true : undefined;
-            if (coercion)
-                this.unaryOperatorCoercion[operator] = coercion;
+        }
+        registerBinaryCoercion(operator, coercion) {
+            const coercibleTypes = Object.keys(types).filter((type) => type !== "body");
+            const registerBinaryCoercion = (operandAType, operationsOfType) => {
+                if (typeof coercion === "string" || coercion[1]) {
+                    for (const operandBType of coercibleTypes) {
+                        let result = operatorResults[operator];
+                        result = typeof result === "function" ? result(operandAType, operandBType) : result;
+                        this.registerBinaryOperator(operandAType, operator, operandBType, result);
+                        const coercionsA = this.binaryOperatorCoercion[operandAType] ??= {};
+                        const operations = coercionsA[operator] ??= {};
+                        operations[operandBType] = coercion;
+                    }
+                }
+                else {
+                    for (const [operandBType, result] of Object.entries(operationsOfType)) {
+                        this.registerBinaryOperator(operandAType, operator, operandBType, result);
+                        const coercionsA = this.binaryOperatorCoercion[operandAType] ??= {};
+                        const operations = coercionsA[operator] ??= {};
+                        operations[operandBType] = coercion;
+                    }
+                }
+            };
+            if (typeof coercion === "string" || coercion[0]) {
+                for (const operandAType of coercibleTypes) {
+                    const operatorsOfTypeA = this.binaryOperators[operandAType] ??= {};
+                    const instancesOfThisOperator = operatorsOfTypeA[operator] ??= {};
+                    registerBinaryCoercion(operandAType, instancesOfThisOperator);
+                }
+            }
+            else {
+                for (const [operandAType, operators] of Object.entries(this.binaryOperators)) {
+                    const existingOperation = operators[operator];
+                    if (!existingOperation)
+                        continue;
+                    registerBinaryCoercion(operandAType, existingOperation);
+                }
+            }
+        }
+        registerUnaryCoercion(operator, coercion) {
+            const coercibleTypes = Object.keys(types).filter((type) => type !== "body");
+            for (const operandType of coercibleTypes) {
+                let result = operatorResults[operator];
+                result = typeof result === "function" ? result(operandType) : result;
+                this.registerUnaryOperator(operator, operandType, result);
+                const operations = this.unaryOperatorCoercion[operator] ??= {};
+                operations[operandType] = coercion;
+            }
         }
         constructor(host) {
             this.host = host;
@@ -134,6 +198,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.registerUnaryOperator(operator, "bool");
             for (const operator of binaryStringOperators)
                 this.registerBinaryOperator("string", operator, operatorOperandBTypes[operator] ?? "string");
+            for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion)) {
+                this.registerBinaryCoercion(operator, coercion);
+            }
+            for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion)) {
+                this.registerUnaryCoercion(operator, coercion);
+            }
         }
         registerGenerics(...generics) {
             for (const type of generics) {
@@ -238,8 +308,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 throw this.host.error(`Unable to coerce ${fromType ? `"${ChiriType_1.ChiriType.stringify(fromType)}"` : typeof value} to "${ChiriType_1.ChiriType.stringify(type)}"`);
             });
         }
-        canCoerceOperandB(operator) {
-            const coercion = this.binaryOperatorCoercion[operator];
+        canCoerceOperandB(operandAType, operator, operandBType) {
+            const coercion = this.binaryOperatorCoercion[operandAType]?.[operator]?.[operandBType];
             return typeof coercion === "string" || !!coercion?.[1];
         }
         isAssignable(type, ...toTypes) {
