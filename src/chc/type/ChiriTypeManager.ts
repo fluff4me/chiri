@@ -88,6 +88,26 @@ const operatorResults: Record<Operator, string | ((typeA: string, typeB?: string
 	"x": "string",
 }
 
+const operatorPrecedence = [
+	["||"],
+	["&&"],
+	["|"],
+	["^"],
+	["&"],
+	["==", "!="],
+	["<", "<=", ">", ">="],
+	["<<", ">>", ">>>"],
+	["x"],
+	["."],
+	["+", "-"],
+	["*", "/", "%"],
+	["**"],
+	["!"],
+	["~"],
+] satisfies Operator[][]
+
+type VerifyHasAllOperators = { [KEY in (typeof operatorPrecedence)[number][number]]: true }[Operator]
+
 type BinaryCoercion = readonly [string, undefined] | readonly [undefined, string]
 const binaryOperatorOperandCoercion: Partial<Record<Operator, string | BinaryCoercion>> = {
 	".": "string",
