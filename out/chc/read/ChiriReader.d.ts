@@ -79,8 +79,8 @@ export default class ChiriReader {
     };
     getType(name: string | ChiriType): TypeDefinition<string>;
     getTypeOptional(name: string): TypeDefinition | undefined;
-    getUnaryOperators(): Record<string, Record<string, string>>;
-    getBinaryOperators(): Record<string, Record<string, Record<string, string>>>;
+    getUnaryOperators(): Partial<Record<import("../type/ChiriTypeManager").Operator, Record<string, string>>>;
+    getBinaryOperators(): Record<string, Partial<Record<import("../type/ChiriTypeManager").Operator, Record<string, string>>>>;
     getStatements(onlyThisBlock?: true): readonly ChiriStatement[];
     setExport(): void;
     read(): Promise<ChiriAST>;

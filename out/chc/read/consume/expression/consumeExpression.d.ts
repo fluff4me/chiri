@@ -35,4 +35,4 @@ declare namespace consumeExpression {
     function inline(reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpressionOperand;
 }
 export default consumeExpression;
-export declare const consumeOperatorOptional: (reader: ChiriReader, operators: Record<Operator, Record<string, string>>) => string | undefined;
+export declare const consumeOperatorOptional: (reader: ChiriReader, operators: Partial<Record<Operator, Record<string, string>>>) => Operator | undefined;

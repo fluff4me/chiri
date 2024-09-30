@@ -100,17 +100,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const p = reader.i;
             if (!(0, consumeWhiteSpaceOptional_1.default)(reader) || (0, consumeNewBlockLineOptional_1.default)(reader))
                 return operandA;
-            const operandATypeName = operandA.valueType.name.value;
-            const operatorsForType = binaryOperators[operandATypeName] ?? empy;
+            let operandATypeName = operandA.valueType.name.value;
+            const operatorsCoerced = Object.fromEntries(Object.entries(reader.types.binaryOperatorCoercion)
+                .filter(([operator, coercion]) => typeof coercion === "string" || !!coercion?.[0])
+                .map(([operator, coercion]) => [operator, reader.types.binaryOperators[typeof coercion === "string" ? coercion : coercion[0]][operator]]));
+            const operatorsForType = {
+                ...binaryOperators[operandATypeName] ?? empy,
+                ...operatorsCoerced,
+            };
             const operator = (0, exports.consumeOperatorOptional)(reader, operatorsForType);
             if (!operator) {
                 reader.i = p;
                 return operandA;
             }
+            const coercion = reader.types.binaryOperatorCoercion[operator];
+            const coerce = typeof coercion === "string" ? [coercion, coercion] : coercion;
+            operandATypeName = coerce?.[0] ?? operandATypeName;
             (0, consumeWhiteSpace_1.default)(reader);
             const resultTypesByOperandB = operatorsForType[operator] ?? empy;
             const operandB = consumeUnaryExpression(reader);
-            const operandBTypeName = operandB.valueType.name.value;
+            let operandBTypeName = operandB.valueType.name.value;
+            operandBTypeName = coerce?.[0] ?? operandBTypeName;
             const resultType = resultTypesByOperandB[operandBTypeName];
             if (!resultType)
                 throw reader.error(`Undefined operation ${operandATypeName}${operator}${operandBTypeName}`);

@@ -68,7 +68,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         "x": "string",
     };
     const operatorOperandCoercion = {
-        ".": true,
+        ".": "string",
     };
     const operatorOperandBTypes = {
         "x": "uint",
@@ -116,7 +116,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             instancesOfThisOperator[type] = result;
             coercion ??= operatorOperandCoercion[operator] ? true : undefined;
             if (coercion)
-                this.unaryOperatorCoercion[type] = coercion;
+                this.unaryOperatorCoercion[operator] = coercion;
         }
         constructor(host) {
             this.host = host;
@@ -240,7 +240,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         canCoerceOperandB(operator) {
             const coercion = this.binaryOperatorCoercion[operator];
-            return coercion === true || coercion?.[1] === true;
+            return typeof coercion === "string" || !!coercion?.[1];
         }
         isAssignable(type, ...toTypes) {
             if (toTypes.includes(type) || !toTypes.length)
