@@ -58,6 +58,8 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 						case "*":
 							return operandA * operandB
 						case "/":
+							if (operandB === 0)
+								return Infinity
 							return operandA / operandB
 						case "%":
 							// TODO maybe add an operator for normal %?
