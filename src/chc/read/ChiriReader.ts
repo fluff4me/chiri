@@ -267,14 +267,6 @@ export default class ChiriReader {
 		return this.types.types[name]
 	}
 
-	getUnaryOperators () {
-		return this.types.unaryOperators
-	}
-
-	getBinaryOperators () {
-		return this.types.binaryOperators
-	}
-
 	getStatements (onlyThisBlock?: true): readonly ChiriStatement[] {
 		return !onlyThisBlock ? [...this.#outerStatements, ...this.#statements] : this.#statements
 	}

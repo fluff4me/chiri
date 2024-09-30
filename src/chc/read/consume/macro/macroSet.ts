@@ -32,7 +32,7 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 	if (!skipInitialWhitespace)
 		consumeWhiteSpace(reader)
 
-	const e = reader.i
+	let e = reader.i
 	const varName = consumeWord(reader)
 
 	const variable = reader.getVariable(varName.value)
@@ -41,7 +41,7 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 
 	consumeWhiteSpaceOptional(reader)
 
-	const binaryOperators = reader.getBinaryOperators()
+	const binaryOperators = reader.types.binaryOperators
 	const type = variable.valueType
 	const operatorsForType = binaryOperators[type.name.value] ?? empy
 	let operator = undefined
@@ -55,9 +55,13 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 
 	consumeWhiteSpaceOptional(reader)
 
-	const operandBTypes = reader.types.canCoerceOperandB(operator) ? [] : [type]
+	e = reader.i
 	const expr = operator === "++" || operator === "--" ? undefined
-		: inline ? consumeExpression.inline(reader, ...operandBTypes) : await consumeExpression(reader, ...operandBTypes)
+		: inline ? consumeExpression.inline(reader) : await consumeExpression(reader)
+
+	const coercible = expr && operator && reader.types.canCoerceOperandB(type.name.value, operator, expr.valueType.name.value)
+	if (expr && !coercible && !reader.types.isAssignable(expr.valueType, type))
+		throw reader.error(e, `Expression of type "${ChiriType.stringify(expr.valueType)}" is not assignable to "${ChiriType.stringify(variable.valueType)}"`)
 
 	if (operator === "++")
 		operator = "+"
