@@ -44,7 +44,7 @@ const binaryBitwiseOperators = ["&", "|", "^"] as const
 const unaryBitwiseOperators = ["~"] as const
 const binaryBooleanOperators = ["||", "&&", "==", "!="] as const
 const unaryBooleanOperators = ["!"] as const
-const binaryStringOperators = [".", "x"] as const
+const binaryStringOperators = [".", "x", "==", "!="] as const
 
 export type Operator =
 	| (typeof binaryNumericOperators)[number]
