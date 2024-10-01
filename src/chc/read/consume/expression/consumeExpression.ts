@@ -289,7 +289,7 @@ function consumeOperand (reader: ChiriReader): ChiriExpressionOperand {
 			return {
 				type: "get",
 				name: word,
-				valueType: variable.valueType,
+				valueType: variable.valueType.name.value === "raw" ? ChiriType.of("string") : variable.valueType,
 				position: word.position,
 			}
 
