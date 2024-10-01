@@ -273,11 +273,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (mixin)
                 return mixin;
             const mixinUse = (0, consumeMixinUseOptional_1.default)(this);
-            if (mixinUse) {
-                if (this.context.type === "root")
-                    throw this.error("Cannot use mixins in root context");
+            if (mixinUse)
                 return mixinUse;
-            }
             const property = (0, consumePropertyOptional_1.default)(this);
             if (property)
                 return property;

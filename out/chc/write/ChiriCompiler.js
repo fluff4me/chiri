@@ -316,6 +316,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                     return true;
                 }
+                case "mixin-use": {
+                    const mixin = getMixin(statement.name.value, statement.name.position);
+                    for (const property of mixin.content) {
+                        css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
+                            css.emitProperty(compiler, property);
+                        });
+                    }
+                    return true;
+                }
                 case "property": {
                     css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
                         css.emitProperty(compiler, {
@@ -691,7 +700,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function resolveWord(word) {
             return {
                 type: "word",
-                value: (0, stringifyText_1.default)(compiler, word),
+                value: (0, stringifyText_1.default)(compiler, word).replace(/\W+/g, "-").toLowerCase(),
                 position: word.position,
             };
         }
