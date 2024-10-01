@@ -5,13 +5,15 @@
 %border-1: border: 1px solid
 %border-2: border: 2px solid
 
-#for var i = 1, i <= 5, set i++:
+#for var i = 0, i <= 5, set i++:
 	%border-radius-#{i}: border-radius: $space-#{i}
 	%gap-#{i}: gap: $space-#{i}
 	%padding-#{i}: padding: $space-#{i}
+	%margin-#{i}: margin: $space-#{i}
 
 	#for var j = 1, j <= 5, set j++:
 		%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
+		%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 
 #for var i = 0, i <= 5, set i++:
 	%color-dark-#{i}: colour: $dark-#{i}
