@@ -355,6 +355,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const properties = results.filter(result => result.type === "property");
             const mixins = results.filter(result => result.type === "word");
             const states = results.filter(result => result.type === "state");
+            const componentSelectorString = (0, stringifyText_1.default)(compiler, selector);
             let propertyGroup;
             let groupIndex = 1;
             for (const result of [...results, { type: "word" }]) {
@@ -369,10 +370,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (!propertyGroup)
                             break;
                         const position = groupIndex === 1 ? selector.position : properties[0].position;
-                        const selfMixinName = { type: "word", value: `${(0, stringifyText_1.default)(compiler, selector)}${groupIndex === 1 ? "" : `_${groupIndex}`}`, position };
+                        const stateName = state?.value.startsWith(":") ? `${state.value.slice(1)}-any` : state?.value ?? "";
+                        const selfMixinName = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${!stateName ? "" : `_${stateName}`}`, position };
                         setMixin({
                             type: "mixin",
                             name: selfMixinName,
+                            state: state?.value,
                             position,
                             content: properties,
                             affects: properties.flatMap(getPropertyAffects),
@@ -386,6 +389,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             for (const state of states) {
                 for (const name of state.mixins) {
                     const mixin = getMixin(name.value, name.position);
+                    if (mixin.state) {
+                        mixins.push(name);
+                        continue;
+                    }
                     const stateName = state.state.value.startsWith(":") ? `${state.state.value.slice(1)}-any` : state.state.value;
                     const stateMixinName = { type: "word", value: `${name.value}_${stateName}`, position: mixin.name.position };
                     if (!getMixin(stateMixinName.value, mixin.name.position, true))
