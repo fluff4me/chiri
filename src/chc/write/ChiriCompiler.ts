@@ -512,12 +512,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		type: "component"
 		selector: ChiriWordInterpolated
 		mixins: ChiriWord[]
-		properties: ChiriProperty[]
+		properties: ResolvedProperty[]
 	}
 
-	interface State extends Omit<Component, "type" | "selector"> {
+	interface State extends Omit<Component, "type" | "selector" | "content"> {
 		type: "state"
 		state: ChiriWord
+		content: (ChiriWord | ResolvedProperty)[]
 	}
 
 	function compileComponent (statement: ChiriStatement): (Component | State)[] | undefined {
@@ -544,6 +545,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		const mixins = results.filter(result => result.type === "word")
 		const states = results.filter(result => result.type === "state")
 
+		const componentSelectorString = stringifyText(compiler, selector)
+
 		let propertyGroup: ResolvedProperty[] | undefined
 		let groupIndex = 1
 		for (const result of [...results, { type: "word" as const }]) {
@@ -559,10 +562,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						break
 
 					const position = groupIndex === 1 ? selector.position : properties[0].position
-					const selfMixinName: ChiriWord = { type: "word", value: `${stringifyText(compiler, selector)}${groupIndex === 1 ? "" : `_${groupIndex}`}`, position }
+					const stateName = state?.value.startsWith(":") ? `${state.value.slice(1)}-any` : state?.value ?? ""
+					const selfMixinName: ChiriWord = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${!stateName ? "" : `_${stateName}`}`, position }
 					setMixin({
 						type: "mixin",
 						name: selfMixinName,
+						state: state?.value as ComponentState | undefined,
 						position,
 						content: properties,
 						affects: properties.flatMap(getPropertyAffects),
@@ -578,6 +583,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		for (const state of states) {
 			for (const name of state.mixins) {
 				const mixin = getMixin(name.value, name.position)
+				if (mixin.state) {
+					mixins.push(name)
+					continue
+				}
+
 				const stateName = state.state.value.startsWith(":") ? `${state.state.value.slice(1)}-any` : state.state.value
 				const stateMixinName: ChiriWord = { type: "word", value: `${name.value}_${stateName}`, position: mixin.name.position }
 				if (!getMixin(stateMixinName.value, mixin.name.position, true))
@@ -587,6 +597,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						state: state.state.value as ComponentState,
 						affects: mixin.content.flatMap(getPropertyAffects),
 					})
+
 				mixins.push(stateMixinName)
 			}
 		}
