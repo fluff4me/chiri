@@ -20,3 +20,10 @@ $space-5: 32px
 	$background-#{i}: light-dark($light-#{i}, $dark-#{i})
 	$color-#{i}: light-dark($dark-#{i}, $light-#{i})
 	$colour-#{i}: light-dark($dark-#{i}, $light-#{i})
+
+#for var weight = 1, weight <= 9, set weight++:
+	$weight-#{weight}: #{weight * 100}
+
+$weight-normal: 300
+$weight-bold: 500
+$weight-bolder: 700

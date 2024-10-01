@@ -178,3 +178,7 @@
 %size-constrain-text:
 	max-width: 1em
 	max-height: 1em
+
+%weight-normal: font-weight: $weight-normal
+%weight-bold: font-weight: $weight-bold
+%weight-bolder: font-weight: $weight-bolder

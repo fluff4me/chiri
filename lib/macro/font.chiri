@@ -1,0 +1,11 @@
+#macro font:
+	#string name
+	#uint weight-normal ??= 300
+	#uint weight-bold ??= 500
+	#uint weight-bolder ??= 700
+
+	%font-#{name}:
+		font-family: "#{name}"
+		$weight-normal: #{weight-normal}
+		$weight-bold: #{weight-bold}
+		$weight-bolder: #{weight-bolder}
