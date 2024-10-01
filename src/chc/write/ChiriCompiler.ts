@@ -975,7 +975,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function resolveWord (word: ChiriWordInterpolated): ChiriWord {
 		return {
 			type: "word",
-			value: stringifyText(compiler, word),
+			value: stringifyText(compiler, word).replace(/\W+/g, "-").toLowerCase(),
 			position: word.position,
 		}
 	}
