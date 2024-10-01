@@ -220,7 +220,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return {
                     type: "get",
                     name: word,
-                    valueType: variable.valueType,
+                    valueType: variable.valueType.name.value === "raw" ? ChiriType_1.ChiriType.of("string") : variable.valueType,
                     position: word.position,
                 };
             throw reader.error(e, `No variable "${word.value}"`);
