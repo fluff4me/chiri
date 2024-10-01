@@ -7,12 +7,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/Arrays", "../util/componentStates", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
+        define(["require", "exports", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/Arrays", "../util/componentStates", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const path_1 = __importDefault(require("path"));
     const ansi_1 = __importDefault(require("../../ansi"));
     const constants_1 = require("../../constants");
     const ChiriType_1 = require("../type/ChiriType");
@@ -20,6 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const typeString_1 = __importDefault(require("../type/typeString"));
     const Arrays_1 = __importDefault(require("../util/Arrays"));
     const componentStates_1 = require("../util/componentStates");
+    const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const resolveExpression_1 = __importDefault(require("../util/resolveExpression"));
     const stringifyExpression_1 = __importDefault(require("../util/stringifyExpression"));
     const stringifyText_1 = __importDefault(require("../util/stringifyText"));
@@ -239,7 +239,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 + (err ? ansi_1.default.err : ansi_1.default.filepos) + `        ${" ".repeat(position.column - 1)}${"^"}`
                 + ansi_1.default.reset;
             const filename = !position?.file ? "Unknown location"
-                : ansi_1.default.path + path_1.default.relative(process.cwd(), position.file).replaceAll("\\", "/")
+                : ansi_1.default.path + (0, relToCwd_1.default)(position.file)
                     + ansi_1.default.filepos + `:${position.line}:${position.column}` + ansi_1.default.reset;
             const stackString = err?.stack ?? new Error().stack ?? "";
             console[err ? "error" : "info"](filename
