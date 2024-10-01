@@ -1,4 +1,3 @@
-import path from "path"
 import ansi from "../../ansi"
 import { PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriPosition, ChiriStatement } from "../read/ChiriReader"
@@ -17,6 +16,7 @@ import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody
 import typeString from "../type/typeString"
 import Arrays from "../util/Arrays"
 import { STATE_MAP, type ComponentState } from "../util/componentStates"
+import relToCwd from "../util/relToCwd"
 import type { Value } from "../util/resolveExpression"
 import resolveExpression from "../util/resolveExpression"
 import stringifyExpression from "../util/stringifyExpression"
@@ -387,7 +387,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			+ ansi.reset
 
 		const filename = !position?.file ? "Unknown location"
-			: ansi.path + path.relative(process.cwd(), position.file).replaceAll("\\", "/")
+			: ansi.path + relToCwd(position.file)
 			+ ansi.filepos + `:${position.line}:${position.column}` + ansi.reset
 
 		const stackString = err?.stack ?? new Error().stack ?? ""
