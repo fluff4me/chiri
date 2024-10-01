@@ -12,7 +12,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponent | undefined> 
 	if (!prefix)
 		return undefined
 
-	const className = consumeWordInterpolated(reader)
+	const className = consumeWordInterpolated(reader, prefix === "&-")
 	reader.consume(":")
 
 	return {

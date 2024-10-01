@@ -55,6 +55,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 					type: "get",
 					name: word,
 					valueType: variableInScope.valueType,
+					position: word.position,
 				}
 				return
 			}

@@ -32,10 +32,13 @@ export interface ChiriValueText {
 	position: ChiriPosition
 }
 
-export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
+export default (reader: ChiriReader, multiline: boolean, until?: () => boolean): ChiriValueText => {
 	const start = reader.getPosition()
 
 	const content: ChiriValueText["content"] = []
+
+	let stringChar: string | undefined
+	let paren = 0
 
 	let textStart = start
 	let text = ""
@@ -50,7 +53,22 @@ export default (reader: ChiriReader, multiline: boolean): ChiriValueText => {
 
 		const varType = reader.consumeOptional("#{", "$")
 		if (!varType) {
-			text += reader.input[reader.i++]
+			const char = reader.input[reader.i]
+			if (char === stringChar) {
+				stringChar = undefined
+			} else if (!stringChar && (char === "\"" || char === "'")) {
+				stringChar = char
+			} else if (!stringChar && char === "(") {
+				paren++
+			} else if (!stringChar && paren && char === ")") {
+				paren--
+			}
+
+			if (!stringChar && !paren && until?.())
+				break
+
+			text += char
+			reader.i++
 			continue
 		}
 

@@ -3,6 +3,7 @@ import getFunctionParameters from "../../../util/getFunctionParameters"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
+import consumeValueText from "../consumeValueText"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
@@ -77,7 +78,9 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 			if (parameter.assignment === "??=")
 				expectedType.push(ChiriType.of("undefined"))
 
-			assignments[parameter.name.value] = consumeExpression.inline(reader, ...expectedType)
+			assignments[parameter.name.value] =
+				parameter.valueType.name.value !== "raw" ? consumeExpression.inline(reader, ...expectedType)
+					: consumeValueText(reader, false, () => !!reader.peek(")"))
 		}
 
 		reader.consumeOptional(")")

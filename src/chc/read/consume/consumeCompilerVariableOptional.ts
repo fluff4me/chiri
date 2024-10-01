@@ -75,6 +75,9 @@ export default async (reader: ChiriReader, prefix = true): Promise<ChiriCompiler
 			throw reader.error(save.i, "Mixins cannot accept parameters")
 	}
 
+	if (assignment !== "=" && reader.getStatements(true).some(statement => statement.type === "variable" && statement.valueType.name.value === "raw"))
+		throw reader.error(save.i, "No further parameters can appear after a parameter of type \"raw\"")
+
 	return {
 		type: "variable",
 		valueType,

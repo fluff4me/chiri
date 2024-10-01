@@ -1,5 +1,3 @@
-
-
 import consumeOptionalString from "../read/consume/consumeStringOptional"
 import { ChiriType } from "./ChiriType"
 import TypeDefinition from "./TypeDefinition"

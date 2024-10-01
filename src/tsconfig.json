@@ -13,6 +13,7 @@
 		"declaration": true,
         "incremental": true,
 		"preserveWatchOutput": true,
+		"allowUnreachableCode": false,
 		"pretty": true,
 		"sourceMap": true,
 		"plugins": [

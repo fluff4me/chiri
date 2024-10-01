@@ -22,7 +22,7 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	if (!word)
 		return undefined
 
-	if (reader.getStatements().some(statement => statement.type === "mixin-use" && statement.name.value === word.value))
+	if (reader.getStatements(true).some(statement => statement.type === "mixin-use" && statement.name.value === word.value))
 		throw reader.error(start, `%${word.value} is already included in this context`)
 
 	// const assignments = consumeFunctionParameters(reader, start, mixin)

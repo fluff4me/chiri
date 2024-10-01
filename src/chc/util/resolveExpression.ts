@@ -1,16 +1,20 @@
 import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression"
 import type ChiriCompiler from "../write/ChiriCompiler"
 import resolveLiteralValue from "./resolveLiteralValue"
+import type { default as stringifyTextType } from "./stringifyText"
 
 export type Literal = undefined | number | boolean | string
 export type Value = Literal | Value[]
-const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpressionResult): Value => {
+function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressionResult): Value {
 	if (!expression)
 		return undefined
 
 	switch (expression.type) {
 		case "literal":
 			return resolveLiteralValue(compiler, expression)
+
+		case "text":
+			return resolveExpression.stringifyText(compiler, expression)
 
 		case "get":
 			return compiler.getVariable(expression.name.value, expression.name.position)
@@ -118,7 +122,14 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 			}
 	}
 
+	// @ts-expect-error Assert we never get here
+	expression = expression as ChiriExpressionResult
+	// @ts-expect-error ___
 	throw compiler.error(expression.position, `Cannot compile expression result type "${expression.type}" yet`)
+}
+
+namespace resolveExpression {
+	export let stringifyText: typeof stringifyTextType
 }
 
 resolveLiteralValue.resolveExpression = resolveExpression

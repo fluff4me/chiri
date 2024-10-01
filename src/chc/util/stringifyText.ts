@@ -1,6 +1,7 @@
 import type { ChiriValueText } from "../read/consume/consumeValueText"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type ChiriCompiler from "../write/ChiriCompiler"
+import resolveExpression from "./resolveExpression"
 import stringifyExpression from "./stringifyExpression"
 
 const stringifyText = (compiler: ChiriCompiler, text: ChiriValueText | ChiriWord): string => {
@@ -34,5 +35,7 @@ const stringifyText = (compiler: ChiriCompiler, text: ChiriValueText | ChiriWord
 
 	return result
 }
+
+resolveExpression.stringifyText = stringifyText
 
 export default stringifyText

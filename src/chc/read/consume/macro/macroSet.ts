@@ -76,9 +76,10 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 				type: "expression",
 				subType: "binary",
 				operator,
-				operandA: { type: "get", name: varName, valueType: variable.valueType },
+				operandA: { type: "get", name: varName, valueType: variable.valueType, position: varName.position },
 				operandB: expr ? expr : { type: "literal", subType: "int", valueType: ChiriType.of("int"), value: "1", position: INTERNAL_POSITION },
 				valueType: ChiriType.of(reader.types.binaryOperators[variable.valueType.name.value]?.[operator as Operator]?.[expr?.valueType.name.value ?? "int"] ?? "*"),
+				position: varName.position,
 			},
 	}
 }

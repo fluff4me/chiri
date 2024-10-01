@@ -32,7 +32,7 @@ export interface ChiriBinaryExpression {
 	operandB: ChiriExpressionResult
 	operator: string
 	valueType: ChiriType
-	wrapped?: true
+	position: ChiriPosition
 }
 
 export interface ChiriUnaryExpression {
@@ -41,12 +41,14 @@ export interface ChiriUnaryExpression {
 	operand: ChiriExpressionOperand
 	operator: string
 	valueType: ChiriType
+	position: ChiriPosition
 }
 
 export interface ChiriVariableReference {
 	type: "get"
 	name: ChiriWord
 	valueType: ChiriType
+	position: ChiriPosition
 }
 
 export interface ChiriPipe {
@@ -77,7 +79,7 @@ export type ChiriExpressionResult =
 	| ChiriExpressionOperand
 	| ChiriExpressionMatch
 
-type VerifyExpressionResult = ChiriExpressionResult["valueType"]
+type VerifyExpressionResult = ChiriExpressionResult["valueType"] | ChiriExpressionResult["position"]
 
 export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand
 
@@ -193,6 +195,7 @@ function consumeExpressionInternal (reader: ChiriReader, precedence = 0): ChiriE
 	if (precedence >= reader.types.precedence.length)
 		return consumeUnaryExpression(reader)
 
+	const position = reader.getPosition()
 	const e = reader.i
 	let operandA = consumeExpressionInternal(reader, precedence + 1)
 
@@ -233,6 +236,7 @@ function consumeExpressionInternal (reader: ChiriReader, precedence = 0): ChiriE
 			operandB,
 			operator,
 			valueType: ChiriType.of(resultType),
+			position,
 		}
 	}
 }
@@ -241,8 +245,6 @@ function consumeOperand (reader: ChiriReader): ChiriExpressionOperand {
 	if (reader.consumeOptional("(")) {
 		const expr = consumeExpressionInternal(reader)
 		reader.consume(")")
-		if (expr.type === "expression" && expr.subType === "binary")
-			expr.wrapped = true
 		return expr
 	}
 
@@ -288,6 +290,7 @@ function consumeOperand (reader: ChiriReader): ChiriExpressionOperand {
 				type: "get",
 				name: word,
 				valueType: variable.valueType,
+				position: word.position,
 			}
 
 		throw reader.error(e, `No variable "${word.value}"`)
@@ -335,6 +338,7 @@ function consumeInlinePipe (reader: ChiriReader): ChiriExpressionOperand {
 }
 
 function consumeUnaryExpression (reader: ChiriReader): ChiriUnaryExpression | ChiriExpressionOperand {
+	const position = reader.getPosition()
 	const e = reader.i
 	const unaryOperators = reader.types.unaryOperators
 	const operator = consumeOperatorOptional(reader, unaryOperators)
@@ -356,5 +360,6 @@ function consumeUnaryExpression (reader: ChiriReader): ChiriUnaryExpression | Ch
 		operand,
 		operator,
 		valueType: ChiriType.of(returnType),
+		position,
 	}
 }
