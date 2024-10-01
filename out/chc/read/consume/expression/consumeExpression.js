@@ -143,6 +143,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     function consumeExpressionInternal(reader, precedence = 0) {
         if (precedence >= reader.types.precedence.length)
             return consumeUnaryExpression(reader);
+        const position = reader.getPosition();
         const e = reader.i;
         let operandA = consumeExpressionInternal(reader, precedence + 1);
         const binaryOperators = reader.types.binaryOperators;
@@ -175,6 +176,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 operandB,
                 operator,
                 valueType: ChiriType_1.ChiriType.of(resultType),
+                position,
             };
         }
     }
@@ -182,8 +184,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (reader.consumeOptional("(")) {
             const expr = consumeExpressionInternal(reader);
             reader.consume(")");
-            if (expr.type === "expression" && expr.subType === "binary")
-                expr.wrapped = true;
             return expr;
         }
         let e = reader.i;
@@ -221,6 +221,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "get",
                     name: word,
                     valueType: variable.valueType,
+                    position: word.position,
                 };
             throw reader.error(e, `No variable "${word.value}"`);
         }
@@ -260,6 +261,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
     }
     function consumeUnaryExpression(reader) {
+        const position = reader.getPosition();
         const e = reader.i;
         const unaryOperators = reader.types.unaryOperators;
         const operator = consumeOperatorOptional(reader, unaryOperators);
@@ -277,6 +279,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             operand,
             operator,
             valueType: ChiriType_1.ChiriType.of(returnType),
+            position,
         };
     }
 });

@@ -57,6 +57,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         type: "get",
                         name: word,
                         valueType: variableInScope.valueType,
+                        position: word.position,
                     };
                     return;
                 }

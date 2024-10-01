@@ -13,12 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const resolveLiteralValue_1 = __importDefault(require("./resolveLiteralValue"));
-    const resolveExpression = (compiler, expression) => {
+    function resolveExpression(compiler, expression) {
         if (!expression)
             return undefined;
         switch (expression.type) {
             case "literal":
                 return (0, resolveLiteralValue_1.default)(compiler, expression);
+            case "text":
+                return resolveExpression.stringifyText(compiler, expression);
             case "get":
                 return compiler.getVariable(expression.name.value, expression.name.position);
             case "function-call":
@@ -117,8 +119,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                 }
         }
+        // @ts-expect-error Assert we never get here
+        expression = expression;
+        // @ts-expect-error ___
         throw compiler.error(expression.position, `Cannot compile expression result type "${expression.type}" yet`);
-    };
+    }
+    (function (resolveExpression) {
+    })(resolveExpression || (resolveExpression = {}));
     resolveLiteralValue_1.default.resolveExpression = resolveExpression;
     exports.default = resolveExpression;
 });

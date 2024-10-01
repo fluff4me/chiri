@@ -82,9 +82,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "expression",
                     subType: "binary",
                     operator,
-                    operandA: { type: "get", name: varName, valueType: variable.valueType },
+                    operandA: { type: "get", name: varName, valueType: variable.valueType, position: varName.position },
                     operandB: expr ? expr : { type: "literal", subType: "int", valueType: ChiriType_1.ChiriType.of("int"), value: "1", position: constants_1.INTERNAL_POSITION },
                     valueType: ChiriType_1.ChiriType.of(reader.types.binaryOperators[variable.valueType.name.value]?.[operator]?.[expr?.valueType.name.value ?? "int"] ?? "*"),
+                    position: varName.position,
                 },
         };
     };

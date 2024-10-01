@@ -4,5 +4,5 @@ import { type ChiriExpressionOperand } from "./expression/consumeExpression";
 export interface ChiriWordInterpolated extends ChiriValueText {
     content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[];
 }
-declare const _default: (reader: ChiriReader) => ChiriWordInterpolated | undefined;
+declare const _default: (reader: ChiriReader, allowDashStart?: boolean) => ChiriWordInterpolated | undefined;
 export default _default;

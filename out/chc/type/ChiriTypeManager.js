@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "./ChiriType", "./typeBody", "./typeBool", "./typeDec", "./typeInt", "./typeList", "./typeString", "./typeUint"], factory);
+        define(["require", "exports", "../../ansi", "./ChiriType", "./typeBody", "./typeBool", "./typeDec", "./typeInt", "./typeList", "./typeRaw", "./typeString", "./typeUint"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -19,6 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const typeDec_1 = __importDefault(require("./typeDec"));
     const typeInt_1 = __importDefault(require("./typeInt"));
     const typeList_1 = __importDefault(require("./typeList"));
+    const typeRaw_1 = __importDefault(require("./typeRaw"));
     const typeString_1 = __importDefault(require("./typeString"));
     const typeUint_1 = __importDefault(require("./typeUint"));
     const typesList = [
@@ -29,6 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         typeList_1.default,
         typeBody_1.default,
         typeBool_1.default,
+        typeRaw_1.default,
     ];
     const types = Object.fromEntries(typesList.map(typedef => [typedef.type.name.value, typedef]));
     const numericTypes = ["uint", "int", "dec"];

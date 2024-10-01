@@ -7,11 +7,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./stringifyExpression"], factory);
+        define(["require", "exports", "./resolveExpression", "./stringifyExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const resolveExpression_1 = __importDefault(require("./resolveExpression"));
     const stringifyExpression_1 = __importDefault(require("./stringifyExpression"));
     const stringifyText = (compiler, text) => {
         if (text.type === "word")
@@ -41,6 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         return result;
     };
+    resolveExpression_1.default.stringifyText = stringifyText;
     exports.default = stringifyText;
 });
 //# sourceMappingURL=stringifyText.js.map

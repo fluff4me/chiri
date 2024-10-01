@@ -16,9 +16,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeNewBlockLineOptional_1 = __importDefault(require("./consumeNewBlockLineOptional"));
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
-    exports.default = (reader, multiline) => {
+    exports.default = (reader, multiline, until) => {
         const start = reader.getPosition();
         const content = [];
+        let stringChar;
+        let paren = 0;
         let textStart = start;
         let text = "";
         for (; reader.i < reader.input.length;) {
@@ -30,7 +32,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             const varType = reader.consumeOptional("#{", "$");
             if (!varType) {
-                text += reader.input[reader.i++];
+                const char = reader.input[reader.i];
+                if (char === stringChar) {
+                    stringChar = undefined;
+                }
+                else if (!stringChar && (char === "\"" || char === "'")) {
+                    stringChar = char;
+                }
+                else if (!stringChar && char === "(") {
+                    paren++;
+                }
+                else if (!stringChar && paren && char === ")") {
+                    paren--;
+                }
+                if (!stringChar && !paren && until?.())
+                    break;
+                text += char;
+                reader.i++;
                 continue;
             }
             if (text) {

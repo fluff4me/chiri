@@ -25,5 +25,5 @@ export interface ChiriValueText {
     content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand | string)[];
     position: ChiriPosition;
 }
-declare const _default: (reader: ChiriReader, multiline: boolean) => ChiriValueText;
+declare const _default: (reader: ChiriReader, multiline: boolean, until?: () => boolean) => ChiriValueText;
 export default _default;

@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../../../util/getFunctionParameters", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "./consumeExpression"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../util/getFunctionParameters", "../consumeValueText", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "./consumeExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -15,6 +15,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.consumePartialFuntionCall = consumePartialFuntionCall;
     const ChiriType_1 = require("../../../type/ChiriType");
     const getFunctionParameters_1 = __importDefault(require("../../../util/getFunctionParameters"));
+    const consumeValueText_1 = __importDefault(require("../consumeValueText"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     const consumeExpression_1 = __importDefault(require("./consumeExpression"));
@@ -65,7 +66,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const expectedType = [parameter.valueType];
                 if (parameter.assignment === "??=")
                     expectedType.push(ChiriType_1.ChiriType.of("undefined"));
-                assignments[parameter.name.value] = consumeExpression_1.default.inline(reader, ...expectedType);
+                assignments[parameter.name.value] =
+                    parameter.valueType.name.value !== "raw" ? consumeExpression_1.default.inline(reader, ...expectedType)
+                        : (0, consumeValueText_1.default)(reader, false, () => !!reader.peek(")"));
             }
             reader.consumeOptional(")");
         }

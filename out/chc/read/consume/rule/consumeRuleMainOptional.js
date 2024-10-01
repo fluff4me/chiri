@@ -21,7 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const prefix = reader.consumeOptional(reader.context.type === "component" ? "&-" : ".");
         if (!prefix)
             return undefined;
-        const className = (0, consumeWordInterpolated_1.default)(reader);
+        const className = (0, consumeWordInterpolated_1.default)(reader, prefix === "&-");
         reader.consume(":");
         return {
             type: "component",

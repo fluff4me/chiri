@@ -14,7 +14,7 @@ export interface ChiriBinaryExpression {
     operandB: ChiriExpressionResult;
     operator: string;
     valueType: ChiriType;
-    wrapped?: true;
+    position: ChiriPosition;
 }
 export interface ChiriUnaryExpression {
     type: "expression";
@@ -22,11 +22,13 @@ export interface ChiriUnaryExpression {
     operand: ChiriExpressionOperand;
     operator: string;
     valueType: ChiriType;
+    position: ChiriPosition;
 }
 export interface ChiriVariableReference {
     type: "get";
     name: ChiriWord;
     valueType: ChiriType;
+    position: ChiriPosition;
 }
 export interface ChiriPipe {
     type: "pipe";
