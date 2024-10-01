@@ -26,12 +26,109 @@
 %block: display: block
 %grid: display: grid
 %flex: display: flex
+%hidden: display: none
 %inline-block: display: inline-block
 %inline-grid: display: inline-grid
 %inline-flex: display: inline-flex
 
 %flex-column: flex-direction: column
 %flex-row: flex-direction: row
+%flex-wrap: flex-wrap: wrap
+%flex-no-wrap: flex-wrap: nowrap
+%flex-wrap-reverse: flex-wrap: reverse
+
+%align-content-normal: align-content: normal
+%align-content-start: align-content: start
+%align-content-end: align-content: end
+%align-content-flex-start: align-content: flex-start
+%align-content-flex-end: align-content: flex-end
+%align-content-center: align-content: center
+%align-content-centre: align-content: center
+%align-content-space-between: align-content: space-between
+%align-content-space-around: align-content: space-around
+%align-content-space-evenly: align-content: space-evenly
+%align-content-stretch: align-content: stretch
+%align-content-baseline: align-content: baseline
+%align-content-first-baseline: align-content: first-baseline
+%align-content-last-baseline: align-content: last-baseline
+%align-items-normal: align-items: normal
+%align-items-stretch: align-items: stretch
+%align-items-center: align-items: center
+%align-items-centre: align-items: center
+%align-items-start: align-items: start
+%align-items-end: align-items: end
+%align-items-flex-start: align-items: flex-start
+%align-items-flex-end: align-items: flex-end
+%align-items-self-start: align-items: self-start
+%align-items-self-end: align-items: self-end
+%align-items-stretch: align-items: stretch
+%align-items-anchor-center: align-items: anchor-center
+%align-items-anchor-centre: align-items: anchor-center
+%align-items-baseline: align-items: baseline
+%align-items-first-baseline: align-items: first-baseline
+%align-items-last-baseline: align-items: last-baseline
+%align-self-auto: align-self: auto
+%align-self-normal: align-self: normal
+%align-self-stretch: align-self: stretch
+%align-self-center: align-self: center
+%align-self-centre: align-self: center
+%align-self-start: align-self: start
+%align-self-end: align-self: end
+%align-self-flex-start: align-self: flex-start
+%align-self-flex-end: align-self: flex-end
+%align-self-self-start: align-self: self-start
+%align-self-self-end: align-self: self-end
+%align-self-stretch: align-self: stretch
+%align-self-anchor-center: align-self: anchor-center
+%align-self-anchor-centre: align-self: anchor-center
+%align-self-baseline: align-self: baseline
+%align-self-first-baseline: align-self: first-baseline
+%align-self-last-baseline: align-self: last-baseline
+
+%justify-content-normal: justify-content: normal
+%justify-content-start: justify-content: start
+%justify-content-end: justify-content: end
+%justify-content-flex-start: justify-content: flex-start
+%justify-content-flex-end: justify-content: flex-end
+%justify-content-center: justify-content: center
+%justify-content-centre: justify-content: center
+%justify-content-space-between: justify-content: space-between
+%justify-content-space-around: justify-content: space-around
+%justify-content-space-evenly: justify-content: space-evenly
+%justify-content-stretch: justify-content: stretch
+%justify-items-normal: justify-items: normal
+%justify-items-stretch: justify-items: stretch
+%justify-items-center: justify-items: center
+%justify-items-centre: justify-items: center
+%justify-items-start: justify-items: start
+%justify-items-end: justify-items: end
+%justify-items-flex-start: justify-items: flex-start
+%justify-items-flex-end: justify-items: flex-end
+%justify-items-self-start: justify-items: self-start
+%justify-items-self-end: justify-items: self-end
+%justify-items-stretch: justify-items: stretch
+%justify-items-anchor-center: justify-items: anchor-center
+%justify-items-anchor-centre: justify-items: anchor-center
+%justify-items-baseline: justify-items: baseline
+%justify-items-first-baseline: justify-items: first-baseline
+%justify-items-last-baseline: justify-items: last-baseline
+%justify-self-auto: justify-self: auto
+%justify-self-normal: justify-self: normal
+%justify-self-stretch: justify-self: stretch
+%justify-self-center: justify-self: center
+%justify-self-centre: justify-self: center
+%justify-self-start: justify-self: start
+%justify-self-end: justify-self: end
+%justify-self-flex-start: justify-self: flex-start
+%justify-self-flex-end: justify-self: flex-end
+%justify-self-self-start: justify-self: self-start
+%justify-self-self-end: justify-self: self-end
+%justify-self-stretch: justify-self: stretch
+%justify-self-anchor-center: justify-self: anchor-center
+%justify-self-anchor-centre: justify-self: anchor-center
+%justify-self-baseline: justify-self: baseline
+%justify-self-first-baseline: justify-self: first-baseline
+%justify-self-last-baseline: justify-self: last-baseline
 
 #do:
 	#var cursor-values=[
@@ -77,3 +174,7 @@
 
 %no-select: user-select: none
 %user-select-none: user-select: none
+
+%size-constrain-text:
+	max-width: 1em
+	max-height: 1em
