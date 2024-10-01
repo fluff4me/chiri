@@ -7,31 +7,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "./consumeExpression"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../util/getFunctionParameters", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "./consumeExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.consumePartialFuntionCall = consumePartialFuntionCall;
     const ChiriType_1 = require("../../../type/ChiriType");
+    const getFunctionParameters_1 = __importDefault(require("../../../util/getFunctionParameters"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     const consumeExpression_1 = __importDefault(require("./consumeExpression"));
     exports.default = (reader, ...expectedTypes) => {
         const position = reader.getPosition();
         const restore = reader.savePosition();
+        const e = reader.i;
         const name = (0, consumeWordOptional_1.default)(reader);
         const fn = name && reader.getFunctionOptional(name.value);
         if (!fn) {
             reader.restorePosition(restore);
             return undefined;
         }
-        const assignments = {};
-        const parameters = fn.content.filter((statement) => statement.type === "variable" && statement.assignment !== "=");
+        const parameters = (0, getFunctionParameters_1.default)(fn);
         const variableSharingName = reader.getVariableOptional(name.value);
         if (variableSharingName && parameters.length && !reader.consumeOptional("(")) {
             reader.restorePosition(restore);
             return undefined;
         }
+        if (!parameters.length && !reader.peek("("))
+            throw reader.error(e, `Ambiguous usage of name "${name.value}" — could be #${ChiriType_1.ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType_1.ChiriType.stringify(fn.returnType)}`);
+        return consumePartialFuntionCall(reader, position, name, fn, parameters, ...expectedTypes);
+    };
+    function consumePartialFuntionCall(reader, position, name, fn, parameters, ...expectedTypes) {
+        const assignments = {};
         if (parameters.length) {
             reader.consume("(");
             for (let i = 0; i < parameters.length; i++) {
@@ -64,9 +72,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         else if (reader.consumeOptional("(")) {
             reader.consumeOptional(")");
         }
-        else if (variableSharingName) {
-            throw reader.error(`Ambiguous usage of name "${name.value}" — could be #${ChiriType_1.ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType_1.ChiriType.stringify(fn.returnType)}`);
-        }
         const returnType = resolveReturnType(reader, fn, assignments);
         if (!reader.types.isAssignable(returnType, ...expectedTypes))
             throw reader.error(`Expected ${expectedTypes.map(type => `"${ChiriType_1.ChiriType.stringify(type)}"`).join(", ")}, but #${fn.name.value} will return "${ChiriType_1.ChiriType.stringify(returnType)}"`);
@@ -77,7 +82,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             valueType: returnType,
             position,
         };
-    };
+    }
     function resolveReturnType(reader, fn, assignments) {
         if (!fn.returnType.isGeneric)
             return fn.returnType;

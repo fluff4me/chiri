@@ -55,6 +55,10 @@ export default class ChiriReader {
     used: Set<string>;
     reusable: Set<string>;
     importName?: string;
+    readonly pipeValueStack: {
+        type: ChiriType;
+        used: boolean;
+    }[];
     readonly basename: string;
     readonly dirname: string;
     readonly cwd: string;
@@ -72,7 +76,7 @@ export default class ChiriReader {
     getVariableOptional(name: string): ChiriCompilerVariable | undefined;
     getVariable(name: string, start?: number): ChiriCompilerVariable;
     getFunctionOptional(name: string): ChiriFunction | undefined;
-    getFunction(name: string, start?: number): ChiriCompilerVariable;
+    getFunction(name: string, start?: number): ChiriFunction;
     getMacroOptional(name: string): ChiriMacro | undefined;
     with(...scopeStatements: ChiriStatement[]): {
         do: <T>(callback: () => PromiseOr<T>) => Promise<T>;

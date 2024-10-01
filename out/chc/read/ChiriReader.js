@@ -63,6 +63,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         used = new Set();
         reusable = new Set();
         importName;
+        pipeValueStack = [];
         basename;
         dirname;
         cwd;
@@ -140,10 +141,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 ?? this.#outerStatements.findLast((statement) => statement.type === "function" && statement.name.value === name);
         }
         getFunction(name, start = this.i) {
-            const variable = this.getVariableOptional(name);
-            if (!variable)
-                throw this.error(start, `No variable "${name}" exists`);
-            return variable;
+            const fn = this.getFunctionOptional(name);
+            if (!fn)
+                throw this.error(start, `No function "${name}" exists`);
+            return fn;
         }
         getMacroOptional(name) {
             return undefined

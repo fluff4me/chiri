@@ -32,6 +32,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     throw compiler.error(expression.position, "No cases of match expression matched, add an else case");
                 return resolveExpression(compiler, expression.elseCase.expression);
             }
+            case "pipe": {
+                const left = resolveExpression(compiler, expression.left);
+                compiler.pipeValueStack.push(left);
+                const result = resolveExpression(compiler, expression.right);
+                compiler.pipeValueStack.pop();
+                return result;
+            }
+            case "pipe-use-left":
+                return compiler.pipeValueStack.at(-1);
             case "expression":
                 switch (expression.subType) {
                     case "unary": {

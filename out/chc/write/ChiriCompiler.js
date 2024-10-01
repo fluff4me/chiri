@@ -55,6 +55,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             ast,
             css, es, dts,
             writers,
+            pipeValueStack: [],
             writeFiles,
             compile,
             error, logLine,
