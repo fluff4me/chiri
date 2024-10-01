@@ -1,4 +1,5 @@
 import { ChiriType } from "../../../type/ChiriType"
+import getFunctionParameters from "../../../util/getFunctionParameters"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
@@ -6,13 +7,13 @@ import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
 import type { ChiriFunction } from "../macro/macroFunctionDeclaration"
-import type { ChiriExpressionOperand } from "./consumeExpression"
+import type { ChiriExpressionOperand, ChiriExpressionResult } from "./consumeExpression"
 import consumeExpression from "./consumeExpression"
 
 export interface ChiriFunctionCall {
 	type: "function-call"
 	name: ChiriWord
-	assignments: Record<string, ChiriExpressionOperand>
+	assignments: Record<string, ChiriExpressionResult>
 	valueType: ChiriType
 	position: ChiriPosition
 }
@@ -21,6 +22,7 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 	const position = reader.getPosition()
 	const restore = reader.savePosition()
 
+	const e = reader.i
 	const name = consumeWordOptional(reader)
 	const fn = name && reader.getFunctionOptional(name.value)
 	if (!fn) {
@@ -28,8 +30,7 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 		return undefined
 	}
 
-	const assignments: Record<string, ChiriExpressionOperand> = {}
-	const parameters = fn.content.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable" && statement.assignment !== "=")
+	const parameters = getFunctionParameters(fn)
 
 	const variableSharingName = reader.getVariableOptional(name.value)
 	if (variableSharingName && parameters.length && !reader.consumeOptional("(")) {
@@ -37,6 +38,14 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 		return undefined
 	}
 
+	if (!parameters.length && !reader.peek("("))
+		throw reader.error(e, `Ambiguous usage of name "${name.value}" — could be #${ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType.stringify(fn.returnType)}`)
+
+	return consumePartialFuntionCall(reader, position, name, fn, parameters, ...expectedTypes)
+}
+
+export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction, parameters: ChiriCompilerVariable[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
+	const assignments: Record<string, ChiriExpressionOperand> = {}
 	if (parameters.length) {
 		reader.consume("(")
 		for (let i = 0; i < parameters.length; i++) {
@@ -75,9 +84,6 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 
 	} else if (reader.consumeOptional("(")) {
 		reader.consumeOptional(")")
-
-	} else if (variableSharingName) {
-		throw reader.error(`Ambiguous usage of name "${name.value}" — could be #${ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType.stringify(fn.returnType)}`)
 	}
 
 	const returnType = resolveReturnType(reader, fn, assignments)

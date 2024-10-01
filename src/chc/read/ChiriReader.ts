@@ -131,9 +131,11 @@ export default class ChiriReader {
 	reusable: Set<string> = new Set()
 	importName?: string
 
-	public readonly basename: string
-	public readonly dirname: string
-	public readonly cwd: string
+	readonly pipeValueStack: { type: ChiriType, used: boolean }[] = []
+
+	readonly basename: string
+	readonly dirname: string
+	readonly cwd: string
 
 	public get errored () {
 		return this.#errored
@@ -227,11 +229,11 @@ export default class ChiriReader {
 	}
 
 	getFunction (name: string, start = this.i) {
-		const variable = this.getVariableOptional(name)
-		if (!variable)
-			throw this.error(start, `No variable "${name}" exists`)
+		const fn = this.getFunctionOptional(name)
+		if (!fn)
+			throw this.error(start, `No function "${name}" exists`)
 
-		return variable
+		return fn
 	}
 
 	getMacroOptional (name: string) {

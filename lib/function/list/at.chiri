@@ -3,9 +3,9 @@
 	#int index
 
 	#if index < 0:
-		#set index = max(0, length(values) - index)
+		#set index = max(0, values::length - index)
 
-	#set index = min(index, length(values) - 1)
+	#set index = min(index, values::length - 1)
 
 	#uint i = 0
 	#each values as t value:

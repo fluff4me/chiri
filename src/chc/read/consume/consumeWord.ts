@@ -23,7 +23,7 @@ export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord => {
 
 	let word = reader.input[reader.i++]
 	for (; reader.i < reader.input.length; reader.i++)
-		if (reader.isWordChar())
+		if (reader.isWordChar() && (reader.input[reader.i] !== "-" || reader.input[reader.i + 1] !== ">"))
 			word += reader.input[reader.i]
 		else
 			break

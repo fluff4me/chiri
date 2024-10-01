@@ -7,7 +7,7 @@ import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriWordInterpolated } from "../read/consume/consumeWordInterpolatedOptional"
-import type { ChiriExpressionOperand } from "../read/consume/expression/consumeExpression"
+import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression"
 import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional"
 import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
@@ -85,6 +85,8 @@ interface ChiriCompiler {
 	readonly dts: DTSWriter
 	readonly writers: readonly Writer[]
 
+	readonly pipeValueStack: Value[]
+
 	compile (): void
 	writeFiles (): Promise<void>
 	error (message?: string): ErrorPositioned
@@ -124,6 +126,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		ast,
 		css, es, dts,
 		writers,
+
+		pipeValueStack: [],
 
 		writeFiles,
 		compile,
@@ -941,7 +945,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return statement.type + name
 	}
 
-	function resolveAssignments (assignments: Record<string, ChiriExpressionOperand>): Partial<Scope> {
+	function resolveAssignments (assignments: Record<string, ChiriExpressionResult>): Partial<Scope> {
 		return Scope.variables(Object.fromEntries(Object.entries(assignments)
 			.map(([name, expr]) =>
 				[name, { type: expr.valueType, value: resolveExpression(compiler, expr) }])))

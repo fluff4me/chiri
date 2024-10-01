@@ -30,6 +30,17 @@ const resolveExpression = (compiler: ChiriCompiler, expression?: ChiriExpression
 			return resolveExpression(compiler, expression.elseCase.expression)
 		}
 
+		case "pipe": {
+			const left = resolveExpression(compiler, expression.left)
+			compiler.pipeValueStack.push(left)
+			const result = resolveExpression(compiler, expression.right)
+			compiler.pipeValueStack.pop()
+			return result
+		}
+
+		case "pipe-use-left":
+			return compiler.pipeValueStack.at(-1)
+
 		case "expression":
 			switch (expression.subType) {
 				case "unary": {
