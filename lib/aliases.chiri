@@ -1,5 +1,6 @@
 #alias colour: color
 #alias background-colour: background-color
+#alias colour-scheme: color-scheme
 
 #do:
 	#list!string properties = [
