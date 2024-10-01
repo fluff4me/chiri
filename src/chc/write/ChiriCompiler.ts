@@ -480,6 +480,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 
+			case "mixin-use": {
+				const mixin = getMixin(statement.name.value, statement.name.position)
+				for (const property of mixin.content) {
+					css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
+						css.emitProperty(compiler, property)
+					})
+				}
+				return true
+			}
+
 			case "property": {
 				css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
 					css.emitProperty(compiler, {

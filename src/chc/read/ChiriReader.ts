@@ -395,12 +395,8 @@ export default class ChiriReader {
 			return mixin
 
 		const mixinUse = consumeMixinUseOptional(this)
-		if (mixinUse) {
-			if (this.context.type === "root")
-				throw this.error("Cannot use mixins in root context")
-
+		if (mixinUse)
 			return mixinUse
-		}
 
 		const property = consumePropertyOptional(this)
 		if (property)
