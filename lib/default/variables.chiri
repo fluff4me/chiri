@@ -14,3 +14,8 @@ $space-5: 32px
 #for var i = 0, i <= 5, set i++:
 	#string hex = hex(15 - i)
 	$light-#{i}: ##{hex x 3}
+
+#for var i = 0, i <= 5, set i++:
+	$background-#{i}: light-dark($light-#{i}, $dark-#{i})
+	$color-#{i}: light-dark($dark-#{i}, $light-#{i})
+	$colour-#{i}: light-dark($dark-#{i}, $light-#{i})
