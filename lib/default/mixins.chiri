@@ -208,3 +208,9 @@
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
+
+%box-shadow-none: box-shadow: none
+%box-shadow-0: box-shadow: none
+%box-shadow-1: box-shadow: 0 $space-1 $space-1 calc($space-1 * -1) #000
+%box-shadow-2: box-shadow: 0 $space-2 $space-2 calc($space-1 * -1) #0005
+%box-shadow-inset-1: box-shadow: inset 0 $space-1 $space-1 calc($space-1 * -1) #000
