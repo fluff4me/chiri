@@ -73,7 +73,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         async writeFile() {
             this.output = "";
             for (const queued of this.queue) {
-                if (queued.mapping) {
+                if (queued.mapping && queued.mapping.sourcePosition.file !== "internal") {
                     this.map.addMapping({
                         generated: this.getPosition(),
                         source: queued.mapping.sourcePosition.file,

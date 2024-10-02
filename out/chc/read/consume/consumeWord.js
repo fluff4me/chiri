@@ -9,7 +9,8 @@
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = (reader, ...expectedWords) => {
+    exports.default = consumeWord;
+    function consumeWord(reader, ...expectedWords) {
         const e = reader.i;
         if (expectedWords.length) {
             const value = reader.consume(...expectedWords);
@@ -34,6 +35,6 @@
             value: word,
             position: reader.getPosition(e),
         };
-    };
+    }
 });
 //# sourceMappingURL=consumeWord.js.map

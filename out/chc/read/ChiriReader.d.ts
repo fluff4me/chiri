@@ -8,6 +8,7 @@ import { type ChiriDocumentation } from "./consume/consumeDocumentationOptional"
 import type { ChiriMacroUse } from "./consume/consumeMacroUseOptional";
 import type { ChiriMixin } from "./consume/consumeMixinOptional";
 import { type ChiriMixinUse } from "./consume/consumeMixinUseOptional";
+import type { ChiriPropertyDefinition } from "./consume/consumePropertyOptional";
 import { type ChiriProperty } from "./consume/consumePropertyOptional";
 import type { ChiriValueText } from "./consume/consumeValueText";
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional";
@@ -30,7 +31,7 @@ export interface ChiriPosition {
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];
@@ -94,8 +95,8 @@ export default class ChiriReader {
     formatFilePos(lineNumber?: number, columnNumber?: number): string;
     formatFilePosAt(at?: number): string;
     formatFilePosAtFromScratch(at: number): string;
-    consume(...strings: string[]): string;
-    consumeOptional(...strings: string[]): string | undefined;
+    consume<STRING extends string>(...strings: STRING[]): STRING;
+    consumeOptional<STRING extends string>(...strings: STRING[]): STRING | undefined;
     /**
      * @param  {...string} strings
      */

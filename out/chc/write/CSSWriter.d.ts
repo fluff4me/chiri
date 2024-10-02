@@ -8,7 +8,7 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
     property: ChiriWord;
     value: string;
 }
-export type CSSDocumentSection = "imports" | "root-properties" | "root-styles" | "default";
+export type CSSDocumentSection = "imports" | "property-definitions" | "root-properties" | "root-styles" | "default";
 export default class CSSWriter extends Writer {
     private currentSection;
     private queues;

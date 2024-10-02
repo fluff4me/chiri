@@ -340,14 +340,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.i += string.length;
                 return string;
             }
-            strings = strings.map(string => string
+            const expected = strings.map(string => string
                 .replace(/\r/g, "\u240D")
                 .replace(/\n/g, "\u240A")
                 .replace(/ /g, "\u00B7")
                 .replace(/\t/g, "\u2192"));
             throw this.error("Expected "
-                + (strings.length === 1 ? strings[0]
-                    : "any of" + strings.map(string => `"${string}"`).join(", ")));
+                + (expected.length === 1 ? expected[0]
+                    : "any of" + expected.map(string => `"${string}"`).join(", ")));
         }
         consumeOptional(...strings) {
             NextString: for (const string of strings) {

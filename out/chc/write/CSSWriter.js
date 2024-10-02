@@ -42,6 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         currentSection = "default";
         queues = {
             "imports": Writer_1.QueuedWrite.makeQueue(),
+            "property-definitions": Writer_1.QueuedWrite.makeQueue(),
             "root-properties": Writer_1.QueuedWrite.makeQueue(),
             "root-styles": Writer_1.QueuedWrite.makeQueue(),
             "default": this.outputQueue,
@@ -78,6 +79,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         onCompileEnd(compiler) {
             const headerQueue = Writer_1.QueuedWrite.makeQueue();
             headerQueue.push(...this.queues.imports);
+            headerQueue.push({ output: "\n" });
+            headerQueue.push(...this.queues["property-definitions"]);
             headerQueue.push({ output: "\n" });
             headerQueue.push({ output: ":root {\n\t" });
             headerQueue.push(...this.queues["root-properties"]
