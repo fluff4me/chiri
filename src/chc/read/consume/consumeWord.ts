@@ -7,7 +7,9 @@ export interface ChiriWord<WORD extends string = string> {
 	position: ChiriPosition
 }
 
-export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord => {
+export default function consumeWord (reader: ChiriReader): ChiriWord
+export default function consumeWord<WORD extends string> (reader: ChiriReader, ...expectedWords: WORD[]): ChiriWord<WORD>
+export default function consumeWord (reader: ChiriReader, ...expectedWords: string[]): ChiriWord {
 	const e = reader.i
 	if (expectedWords.length) {
 		const value = reader.consume(...expectedWords)

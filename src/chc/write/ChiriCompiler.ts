@@ -491,7 +491,33 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 
-			case "property": {
+			case "property-definition":
+				css.writingTo("property-definitions", () => {
+					css.write("@property ")
+					const name = resolveWord(statement.property)
+					name.value = `--${name.value}`
+					css.writeWord(name)
+					css.writeSpaceOptional()
+					css.writeBlock(() => {
+						css.write("syntax:")
+						css.writeSpaceOptional()
+						css.write("\"")
+						css.writeWord(statement.syntax)
+						css.writeLine("\";")
+
+						css.write("inherits:")
+						css.writeSpaceOptional()
+						css.writeLine("false;")
+
+						css.write("initial-value:")
+						css.writeSpaceOptional()
+						css.writeTextInterpolated(compiler, statement.value)
+						css.writeLine(";")
+					})
+				})
+				return true
+
+			case "property":
 				css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
 					css.emitProperty(compiler, {
 						...statement,
@@ -500,7 +526,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					})
 				})
 				return true
-			}
 
 			case "import-css": {
 				css.writingTo("imports", () => {

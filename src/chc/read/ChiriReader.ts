@@ -22,6 +22,7 @@ import type { ChiriMixin } from "./consume/consumeMixinOptional"
 import consumeMixinOptional from "./consume/consumeMixinOptional"
 import consumeMixinUseOptional, { type ChiriMixinUse } from "./consume/consumeMixinUseOptional"
 import consumeNewBlockLineOptional from "./consume/consumeNewBlockLineOptional"
+import type { ChiriPropertyDefinition } from "./consume/consumePropertyOptional"
 import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePropertyOptional"
 import type { ChiriValueText } from "./consume/consumeValueText"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
@@ -72,6 +73,7 @@ export type ChiriStatement =
 	| ChiriMixin
 	| ChiriShorthand
 	| ChiriAlias
+	| ChiriPropertyDefinition
 	// mixin
 	| ChiriProperty
 	// rule
@@ -469,7 +471,7 @@ export default class ChiriReader {
 		return this.formatFilePos(newlines, columns)
 	}
 
-	consume (...strings: string[]) {
+	consume<STRING extends string> (...strings: STRING[]) {
 		NextString: for (const string of strings) {
 			for (let j = 0; j < string.length; j++)
 				if (this.input[this.i + j] !== string[j])
@@ -479,17 +481,17 @@ export default class ChiriReader {
 			return string
 		}
 
-		strings = strings.map(string => string
+		const expected = strings.map(string => string
 			.replace(/\r/g, "\u240D")
 			.replace(/\n/g, "\u240A")
 			.replace(/ /g, "\u00B7")
 			.replace(/\t/g, "\u2192"))
 		throw this.error("Expected "
-			+ (strings.length === 1 ? strings[0]
-				: "any of" + strings.map(string => `"${string}"`).join(", ")))
+			+ (expected.length === 1 ? expected[0]
+				: "any of" + expected.map(string => `"${string}"`).join(", ")))
 	}
 
-	consumeOptional (...strings: string[]) {
+	consumeOptional<STRING extends string> (...strings: STRING[]) {
 		NextString: for (const string of strings) {
 			for (let j = 0; j < string.length; j++)
 				if (this.input[this.i + j] !== string[j])

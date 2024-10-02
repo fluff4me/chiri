@@ -14,6 +14,7 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
 
 export type CSSDocumentSection =
 	| "imports"
+	| "property-definitions"
 	| "root-properties"
 	| "root-styles"
 	| "default"
@@ -23,6 +24,7 @@ export default class CSSWriter extends Writer {
 	private currentSection: CSSDocumentSection = "default"
 	private queues: Record<CSSDocumentSection, QueuedWrite[]> = {
 		"imports": QueuedWrite.makeQueue(),
+		"property-definitions": QueuedWrite.makeQueue(),
 		"root-properties": QueuedWrite.makeQueue(),
 		"root-styles": QueuedWrite.makeQueue(),
 		"default": this.outputQueue,
@@ -67,6 +69,9 @@ export default class CSSWriter extends Writer {
 		const headerQueue = QueuedWrite.makeQueue()
 
 		headerQueue.push(...this.queues.imports)
+		headerQueue.push({ output: "\n" })
+
+		headerQueue.push(...this.queues["property-definitions"])
 		headerQueue.push({ output: "\n" })
 
 		headerQueue.push({ output: ":root {\n\t" })
