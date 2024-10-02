@@ -7,17 +7,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../constants", "../../type/ChiriType", "./consumeBlockStartOptional", "./consumeValueText", "./consumeWhiteSpace", "./consumeWhiteSpaceOptional", "./consumeWord", "./consumeWordInterpolated"], factory);
+        define(["require", "exports", "../../../constants", "../../type/ChiriType", "./consumeBody", "./consumeWord", "./consumeWordInterpolated"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const constants_1 = require("../../../constants");
     const ChiriType_1 = require("../../type/ChiriType");
-    const consumeBlockStartOptional_1 = __importDefault(require("./consumeBlockStartOptional"));
-    const consumeValueText_1 = __importDefault(require("./consumeValueText"));
-    const consumeWhiteSpace_1 = __importDefault(require("./consumeWhiteSpace"));
-    const consumeWhiteSpaceOptional_1 = __importDefault(require("./consumeWhiteSpaceOptional"));
+    const consumeBody_1 = __importDefault(require("./consumeBody"));
     const consumeWord_1 = __importDefault(require("./consumeWord"));
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     const customPropertyDefinitionTypes = {
@@ -31,7 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         },
     };
     const typeNames = Object.keys(customPropertyDefinitionTypes);
-    exports.default = (reader) => {
+    exports.default = async (reader) => {
         const e = reader.i;
         if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
             return undefined;
@@ -48,16 +45,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const type = !typeWord ? undefined : customPropertyDefinitionTypes[typeWord.value];
         let consumeValue;
         if (!isCustomPropertyDefinition || type?.initialValue === undefined)
-            consumeValue = reader.consume(":") && (0, consumeWhiteSpace_1.default)(reader);
+            consumeValue = !!reader.consume(":");
         else
-            consumeValue = !!reader.consumeOptional(":") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true);
-        const value = consumeValue ? (0, consumeValueText_1.default)(reader, !!(0, consumeBlockStartOptional_1.default)(reader))
-            : {
+            consumeValue = !!reader.consumeOptional(":");
+        let value;
+        if (!consumeValue) {
+            value = {
                 type: "text",
                 content: [type.initialValue],
                 position: constants_1.INTERNAL_POSITION,
                 valueType: ChiriType_1.ChiriType.of("string"),
             };
+        }
+        else {
+            const position = reader.getPosition();
+            const textBody = await (0, consumeBody_1.default)(reader, "text");
+            value = {
+                type: "text",
+                position,
+                valueType: ChiriType_1.ChiriType.of("string"),
+                ...textBody.content[0],
+                content: textBody.content.flatMap(text => text.content),
+            };
+        }
         if (type)
             return {
                 type: "property-definition",

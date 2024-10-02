@@ -17,5 +17,5 @@ export interface ChiriPropertyDefinition {
     value: ChiriValueText;
     position: ChiriPosition;
 }
-declare const _default: (reader: ChiriReader) => ChiriProperty | ChiriPropertyDefinition | undefined;
+declare const _default: (reader: ChiriReader) => Promise<ChiriProperty | ChiriPropertyDefinition | undefined>;
 export default _default;

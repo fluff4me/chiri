@@ -275,7 +275,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const mixinUse = (0, consumeMixinUseOptional_1.default)(this);
             if (mixinUse)
                 return mixinUse;
-            const property = (0, consumePropertyOptional_1.default)(this);
+            const property = await (0, consumePropertyOptional_1.default)(this);
             if (property)
                 return property;
             const rule = this.context.type === "state" ? undefined : (await (0, consumeRuleMainOptional_1.default)(this)) || (await (0, consumeRuleStateOptional_1.default)(this));
