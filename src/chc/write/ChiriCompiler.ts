@@ -63,7 +63,7 @@ namespace Scope {
 ////////////////////////////////////
 
 interface PreRegisteredMixin extends Omit<ChiriMixin, "content" | "name"> {
-	state?: ComponentState
+	states: (ComponentState | undefined)[]
 	name: ChiriWord
 	content: ResolvedProperty[]
 	affects: string[]
@@ -427,6 +427,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				setMixin({
 					...statement,
 					name: resolveWord(statement.name),
+					states: [undefined],
 					content: properties,
 					affects: properties.flatMap(getPropertyAffects),
 				})
@@ -458,13 +459,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 				for (const component of components) {
 					if (component.type === "state")
-						throw error(component.state.position, "Internal Error: Unprocessed state")
+						throw error(component.states[0]?.position, "Internal Error: Unprocessed state")
 
 					es.write("\"")
 					es.writeTextInterpolated(compiler, component.selector)
 					es.write("\"")
 					es.writeLineStartBlock(": [")
-					for (const mixin of component.mixins) {
+					for (const mixin of new Set(component.mixins)) {
 						es.write("\"")
 						es.writeWord(mixin)
 						es.writeLine("\",")
@@ -527,7 +528,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	interface State extends Omit<Component, "type" | "selector" | "content"> {
 		type: "state"
-		state: ChiriWord
+		states: ChiriWord[]
 		content: (ChiriWord | ResolvedProperty)[]
 	}
 
@@ -536,7 +537,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			return undefined
 
 		const className = statement.className?.content ?? []
-		const state = statement.state
+		const isStates = !!statement.states.length
+		const states = !isStates ? [undefined] : statement.states
 
 		const containingSelector = selectorStack[selectorStack.length - 1]
 
@@ -544,7 +546,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			type: "text",
 			valueType: ChiriType.of("string"),
 			content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
-			position: (statement.className?.position ?? statement.state?.position)!,
+			position: (statement.className?.position ?? statement.states?.[0]?.position)!,
 		}
 		selectorStack.push(selector)
 		const results = compileStatements(statement.content, undefined, compileComponentContent)
@@ -553,7 +555,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		const components: (Component | State)[] = results.filter(result => result.type === "component")
 		const properties = results.filter(result => result.type === "property")
 		const mixins = results.filter(result => result.type === "word")
-		const states = results.filter(result => result.type === "state")
+		const subStates = results.filter(result => result.type === "state")
 
 		const componentSelectorString = stringifyText(compiler, selector)
 
@@ -572,12 +574,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						break
 
 					const position = groupIndex === 1 ? selector.position : properties[0].position
-					const stateName = state?.value.startsWith(":") ? `${state.value.slice(1)}-any` : state?.value ?? ""
-					const selfMixinName: ChiriWord = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${!stateName ? "" : `_${stateName}`}`, position }
+					let stateName = ""
+					for (const s of states)
+						if (s)
+							stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value)
+
+					const selfMixinName: ChiriWord = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}`, position }
 					setMixin({
 						type: "mixin",
 						name: selfMixinName,
-						state: state?.value as ComponentState | undefined,
+						states: states.map(state => state?.value as ComponentState | undefined),
 						position,
 						content: properties,
 						affects: properties.flatMap(getPropertyAffects),
@@ -590,21 +596,24 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 		}
 
-		for (const state of states) {
+		for (const state of subStates) {
 			for (const name of state.mixins) {
 				const mixin = getMixin(name.value, name.position)
-				if (mixin.state) {
+				if (mixin.states.some(state => state)) {
 					mixins.push(name)
 					continue
 				}
 
-				const stateName = state.state.value.startsWith(":") ? `${state.state.value.slice(1)}-any` : state.state.value
-				const stateMixinName: ChiriWord = { type: "word", value: `${name.value}_${stateName}`, position: mixin.name.position }
+				let stateName = ""
+				for (const s of state.states)
+					stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value)
+
+				const stateMixinName: ChiriWord = { type: "word", value: `${name.value}${stateName}`, position: mixin.name.position }
 				if (!getMixin(stateMixinName.value, mixin.name.position, true))
 					setMixin({
 						...mixin,
 						name: stateMixinName,
-						state: state.state.value as ComponentState,
+						states: state.states.map(state => state?.value as ComponentState | undefined),
 						affects: mixin.content.flatMap(getPropertyAffects),
 					})
 
@@ -612,7 +621,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 		}
 
-		if (!state) {
+		if (!isStates) {
 			const visited: RegisteredMixin[] = []
 			for (let i = 0; i < mixins.length; i++) {
 				const mixin = useMixin(getMixin(mixins[i].value, mixins[i].position), visited)
@@ -622,9 +631,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		}
 
 		const component = {
-			type: state ? "state" as const : "component" as const,
+			type: isStates ? "state" as const : "component" as const,
 			selector,
-			state,
+			states,
 			mixins,
 		} as Omit<Partial<Component> & Partial<State>, "type"> & { type?: Component["type"] | State["type"] } as Component | State
 
@@ -675,10 +684,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function emitMixin (mixin: RegisteredMixin) {
-		css.write(".")
-		css.writeWord(mixin.name)
-		if (mixin.state)
-			css.write(STATE_MAP[mixin.state])
+		let i = 0
+		for (const state of mixin.states) {
+			if (i) {
+				css.write(",")
+				css.writeSpaceOptional()
+			}
+
+			css.write(".")
+			css.writeWord(mixin.name)
+			if (state)
+				css.write(STATE_MAP[state])
+
+			i++
+		}
+
 		css.writeSpaceOptional()
 		css.writeLineStartBlock("{")
 		for (const property of mixin.content)

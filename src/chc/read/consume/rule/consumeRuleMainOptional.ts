@@ -18,7 +18,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponent | undefined> 
 	return {
 		type: "component",
 		className,
-		state: undefined,
+		states: [],
 		...await consumeBody(reader, "component"),
 		position,
 	}
