@@ -2,6 +2,7 @@ import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
+import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordInterpolated from "./consumeWordInterpolated"
 import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
@@ -16,6 +17,7 @@ export interface ChiriInterpolationVariable {
 export interface ChiriInterpolationProperty {
 	type: "interpolation-property"
 	name: ChiriWordInterpolated
+	defaultValue?: ChiriValueText
 	position: ChiriPosition
 }
 
@@ -32,7 +34,7 @@ export interface ChiriValueText {
 	position: ChiriPosition
 }
 
-export default (reader: ChiriReader, multiline: boolean, until?: () => boolean): ChiriValueText => {
+export default function consumeValueText (reader: ChiriReader, multiline: boolean, until?: () => boolean): ChiriValueText {
 	const start = reader.getPosition()
 
 	const content: ChiriValueText["content"] = []
@@ -83,14 +85,23 @@ export default (reader: ChiriReader, multiline: boolean, until?: () => boolean):
 		if (varType === "$") {
 			const wrapped = reader.consumeOptional("{")
 			const property = consumeWordInterpolated(reader)
+			let defaultValue: ChiriValueText | undefined
+
+			if (wrapped) {
+				if (reader.consumeOptional(":")) {
+					consumeWhiteSpaceOptional(reader)
+					defaultValue = consumeValueText(reader, false, () => !!reader.peek("}"))
+				}
+
+				reader.consume("}")
+			}
+
 			content.push({
 				type: "interpolation-property",
 				name: property,
+				defaultValue,
 				position: property.position,
 			})
-
-			if (wrapped)
-				reader.consume("}")
 
 		} else {
 			content.push(consumeExpression.inline(reader))

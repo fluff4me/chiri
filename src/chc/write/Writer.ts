@@ -132,12 +132,20 @@ export default class Writer {
 		this.currentWrite.output += "\n" + "\t".repeat(this.#indent)
 	}
 
+	getNewLineOptional () {
+		return "\n" + "\t".repeat(this.#indent)
+	}
+
+	getSpaceOptional () {
+		return " "
+	}
+
 	writeNewLineOptional () {
-		this.writeNewLine()
+		this.currentWrite.output += this.getNewLineOptional()
 	}
 
 	writeSpaceOptional () {
-		this.currentWrite.output += " "
+		this.currentWrite.output += this.getSpaceOptional()
 	}
 
 	writeBlock (inside: () => any) {

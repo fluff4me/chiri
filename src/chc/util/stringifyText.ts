@@ -23,7 +23,7 @@ const stringifyText = (compiler: ChiriCompiler, text: ChiriValueText | ChiriWord
 				result += value.text
 				continue
 			case "interpolation-property":
-				result += `var(--${stringifyText(compiler, value.name)})`
+				result += `var(--${stringifyText(compiler, value.name)}${!value.defaultValue ? "" : `,${compiler.css.getSpaceOptional()}${stringifyText(compiler, value.defaultValue)}`})`
 				continue
 			case "interpolation-variable":
 				result += stringifyExpression(compiler, compiler.getVariable(value.name.value, value.name.position))

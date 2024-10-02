@@ -5,11 +5,25 @@
 %border-1: border: 1px solid
 %border-2: border: 2px solid
 
+%translate: translate: ${translate-x: 0px} ${translate-y: 0px}
+
 #for var i = 0, i <= 5, set i++:
 	%border-radius-#{i}: border-radius: $space-#{i}
 	%gap-#{i}: gap: $space-#{i}
 	%padding-#{i}: padding: $space-#{i}
 	%margin-#{i}: margin: $space-#{i}
+	%translate-up-#{i}:
+		%translate
+		$translate-y: calc($space-#{i} * -1)
+	%translate-down-#{i}:
+		%translate
+		$translate-y: $space-#{i}
+	%translate-left-#{i}:
+		%translate
+		$translate-x: calc($space-#{i} * -1)
+	%translate-right-#{i}:
+		%translate
+		$translate-x: $space-#{i}
 
 	#for var j = 1, j <= 5, set j++:
 		%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
