@@ -12,6 +12,7 @@ export interface ChiriInterpolationVariable {
 export interface ChiriInterpolationProperty {
     type: "interpolation-property";
     name: ChiriWordInterpolated;
+    defaultValue?: ChiriValueText;
     position: ChiriPosition;
 }
 export interface ChiriTextRaw {
@@ -25,5 +26,4 @@ export interface ChiriValueText {
     content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriExpressionOperand | string)[];
     position: ChiriPosition;
 }
-declare const _default: (reader: ChiriReader, multiline: boolean, until?: () => boolean) => ChiriValueText;
-export default _default;
+export default function consumeValueText(reader: ChiriReader, multiline: boolean, until?: () => boolean): ChiriValueText;

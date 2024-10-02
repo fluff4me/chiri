@@ -112,11 +112,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         writeNewLine() {
             this.currentWrite.output += "\n" + "\t".repeat(this.#indent);
         }
+        getNewLineOptional() {
+            return "\n" + "\t".repeat(this.#indent);
+        }
+        getSpaceOptional() {
+            return " ";
+        }
         writeNewLineOptional() {
-            this.writeNewLine();
+            this.currentWrite.output += this.getNewLineOptional();
         }
         writeSpaceOptional() {
-            this.currentWrite.output += " ";
+            this.currentWrite.output += this.getSpaceOptional();
         }
         writeBlock(inside) {
             const startIndex = this.currentWrite.output.length;

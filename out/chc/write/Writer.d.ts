@@ -36,6 +36,8 @@ export default class Writer {
     writeTextInterpolated(compiler: ChiriCompiler, source: ChiriValueText): void;
     writeWord(source: ChiriWord): void;
     writeNewLine(): void;
+    getNewLineOptional(): string;
+    getSpaceOptional(): string;
     writeNewLineOptional(): void;
     writeSpaceOptional(): void;
     writeBlock(inside: () => any): void;
