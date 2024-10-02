@@ -1,9 +1,27 @@
-%font-small: font-size: $font-small
-%font-large: font-size: $font-large 
+%block: display: block
+%grid: display: grid
+%flex: display: flex
+%hidden: display: none
+%inline-block: display: inline-block
+%inline-grid: display: inline-grid
+%inline-flex: display: inline-flex
+
+%static: position: static
+%relative: position: relative
+%absolute: position: absolute
+%fixed: position: fixed
+%sticky: position: sticky
+
+#for var i = 1, i <= 6, set i++:
+	%font-#{i}: font-size: $font-#{i}
 
 %borderless: border: none
 %border-1: border: 1px solid
 %border-2: border: 2px solid
+
+%font-vertical-align:
+	%relative
+	top: ${font-vertical-align: 0em}
 
 %translate: translate: ${translate-x: 0px} ${translate-y: 0px}
 
@@ -36,14 +54,6 @@
 	%colour-light-#{i}: colour: $light-#{i}
 	%background-dark-#{i}: background: $dark-#{i}
 	%background-light-#{i}: background: $light-#{i}
-
-%block: display: block
-%grid: display: grid
-%flex: display: flex
-%hidden: display: none
-%inline-block: display: inline-block
-%inline-grid: display: inline-grid
-%inline-flex: display: inline-flex
 
 %flex-column: flex-direction: column
 %flex-row: flex-direction: row
