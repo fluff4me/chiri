@@ -42,6 +42,8 @@
 	%translate-right-#{i}:
 		%translate
 		$translate-x: $space-#{i}
+	%translate-y-0: $translate-y: $space-0
+	%translate-x-0: $translate-x: $space-0
 
 	#for var j = 1, j <= 5, set j++:
 		%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
