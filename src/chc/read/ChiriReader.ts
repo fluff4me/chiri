@@ -400,7 +400,7 @@ export default class ChiriReader {
 		if (mixinUse)
 			return mixinUse
 
-		const property = consumePropertyOptional(this)
+		const property = await consumePropertyOptional(this)
 		if (property)
 			return property
 

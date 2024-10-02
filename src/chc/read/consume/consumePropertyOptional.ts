@@ -2,11 +2,8 @@ import { INTERNAL_POSITION } from "../../../constants"
 import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
-import consumeBlockStartOptional from "./consumeBlockStartOptional"
+import consumeBody from "./consumeBody"
 import type { ChiriValueText } from "./consumeValueText"
-import consumeValueText from "./consumeValueText"
-import consumeWhiteSpace from "./consumeWhiteSpace"
-import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 import type { ChiriWord } from "./consumeWord"
 import consumeWord from "./consumeWord"
 import consumeWordInterpolated from "./consumeWordInterpolated"
@@ -46,7 +43,7 @@ const customPropertyDefinitionTypes = {
 
 const typeNames = Object.keys(customPropertyDefinitionTypes) as (keyof typeof customPropertyDefinitionTypes)[]
 
-export default (reader: ChiriReader): ChiriProperty | ChiriPropertyDefinition | undefined => {
+export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropertyDefinition | undefined> => {
 	const e = reader.i
 	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
 		return undefined
@@ -70,17 +67,30 @@ export default (reader: ChiriReader): ChiriProperty | ChiriPropertyDefinition | 
 
 	let consumeValue: boolean
 	if (!isCustomPropertyDefinition || type?.initialValue === undefined)
-		consumeValue = reader.consume(":") && consumeWhiteSpace(reader)
+		consumeValue = !!reader.consume(":")
 	else
-		consumeValue = !!reader.consumeOptional(":") && (consumeWhiteSpaceOptional(reader) || true)
+		consumeValue = !!reader.consumeOptional(":")
 
-	const value: ChiriValueText = consumeValue ? consumeValueText(reader, !!consumeBlockStartOptional(reader))
-		: {
+	let value: ChiriValueText | undefined
+	if (!consumeValue) {
+		value = {
 			type: "text",
 			content: [type!.initialValue],
 			position: INTERNAL_POSITION,
 			valueType: ChiriType.of("string"),
 		}
+
+	} else {
+		const position = reader.getPosition()
+		const textBody = await consumeBody(reader, "text")
+		value = {
+			type: "text",
+			position,
+			valueType: ChiriType.of("string"),
+			...textBody.content[0] as ChiriValueText | undefined,
+			content: textBody.content.flatMap(text => text.content),
+		}
+	}
 
 	if (type)
 		return {
