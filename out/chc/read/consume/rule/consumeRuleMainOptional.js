@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return {
             type: "component",
             className,
-            state: undefined,
+            states: [],
             ...await (0, consumeBody_1.default)(reader, "component"),
             position,
         };

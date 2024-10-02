@@ -271,6 +271,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     setMixin({
                         ...statement,
                         name: resolveWord(statement.name),
+                        states: [undefined],
                         content: properties,
                         affects: properties.flatMap(getPropertyAffects),
                     });
@@ -298,12 +299,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         components = [components];
                     for (const component of components) {
                         if (component.type === "state")
-                            throw error(component.state.position, "Internal Error: Unprocessed state");
+                            throw error(component.states[0]?.position, "Internal Error: Unprocessed state");
                         es.write("\"");
                         es.writeTextInterpolated(compiler, component.selector);
                         es.write("\"");
                         es.writeLineStartBlock(": [");
-                        for (const mixin of component.mixins) {
+                        for (const mixin of new Set(component.mixins)) {
                             es.write("\"");
                             es.writeWord(mixin);
                             es.writeLine("\",");
@@ -349,13 +350,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (statement.type !== "component")
                 return undefined;
             const className = statement.className?.content ?? [];
-            const state = statement.state;
+            const isStates = !!statement.states.length;
+            const states = !isStates ? [undefined] : statement.states;
             const containingSelector = selectorStack[selectorStack.length - 1];
             const selector = !className.length ? containingSelector : {
                 type: "text",
                 valueType: ChiriType_1.ChiriType.of("string"),
                 content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
-                position: (statement.className?.position ?? statement.state?.position),
+                position: (statement.className?.position ?? statement.states?.[0]?.position),
             };
             selectorStack.push(selector);
             const results = compileStatements(statement.content, undefined, compileComponentContent);
@@ -363,7 +365,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const components = results.filter(result => result.type === "component");
             const properties = results.filter(result => result.type === "property");
             const mixins = results.filter(result => result.type === "word");
-            const states = results.filter(result => result.type === "state");
+            const subStates = results.filter(result => result.type === "state");
             const componentSelectorString = (0, stringifyText_1.default)(compiler, selector);
             let propertyGroup;
             let groupIndex = 1;
@@ -379,12 +381,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (!propertyGroup)
                             break;
                         const position = groupIndex === 1 ? selector.position : properties[0].position;
-                        const stateName = state?.value.startsWith(":") ? `${state.value.slice(1)}-any` : state?.value ?? "";
-                        const selfMixinName = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${!stateName ? "" : `_${stateName}`}`, position };
+                        let stateName = "";
+                        for (const s of states)
+                            if (s)
+                                stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
+                        const selfMixinName = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}`, position };
                         setMixin({
                             type: "mixin",
                             name: selfMixinName,
-                            state: state?.value,
+                            states: states.map(state => state?.value),
                             position,
                             content: properties,
                             affects: properties.flatMap(getPropertyAffects),
@@ -395,26 +400,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                 }
             }
-            for (const state of states) {
+            for (const state of subStates) {
                 for (const name of state.mixins) {
                     const mixin = getMixin(name.value, name.position);
-                    if (mixin.state) {
+                    if (mixin.states.some(state => state)) {
                         mixins.push(name);
                         continue;
                     }
-                    const stateName = state.state.value.startsWith(":") ? `${state.state.value.slice(1)}-any` : state.state.value;
-                    const stateMixinName = { type: "word", value: `${name.value}_${stateName}`, position: mixin.name.position };
+                    let stateName = "";
+                    for (const s of state.states)
+                        stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
+                    const stateMixinName = { type: "word", value: `${name.value}${stateName}`, position: mixin.name.position };
                     if (!getMixin(stateMixinName.value, mixin.name.position, true))
                         setMixin({
                             ...mixin,
                             name: stateMixinName,
-                            state: state.state.value,
+                            states: state.states.map(state => state?.value),
                             affects: mixin.content.flatMap(getPropertyAffects),
                         });
                     mixins.push(stateMixinName);
                 }
             }
-            if (!state) {
+            if (!isStates) {
                 const visited = [];
                 for (let i = 0; i < mixins.length; i++) {
                     const mixin = useMixin(getMixin(mixins[i].value, mixins[i].position), visited);
@@ -423,9 +430,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
             }
             const component = {
-                type: state ? "state" : "component",
+                type: isStates ? "state" : "component",
                 selector,
-                state,
+                states,
                 mixins,
             };
             components.unshift(component);
@@ -468,10 +475,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             };
         }
         function emitMixin(mixin) {
-            css.write(".");
-            css.writeWord(mixin.name);
-            if (mixin.state)
-                css.write(componentStates_1.STATE_MAP[mixin.state]);
+            let i = 0;
+            for (const state of mixin.states) {
+                if (i) {
+                    css.write(",");
+                    css.writeSpaceOptional();
+                }
+                css.write(".");
+                css.writeWord(mixin.name);
+                if (state)
+                    css.write(componentStates_1.STATE_MAP[state]);
+                i++;
+            }
             css.writeSpaceOptional();
             css.writeLineStartBlock("{");
             for (const property of mixin.content)

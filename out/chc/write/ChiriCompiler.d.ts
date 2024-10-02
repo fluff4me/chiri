@@ -14,7 +14,7 @@ import DTSWriter from "./DTSWriter";
 import ESWriter from "./ESWriter";
 import type Writer from "./Writer";
 interface PreRegisteredMixin extends Omit<ChiriMixin, "content" | "name"> {
-    state?: ComponentState;
+    states: (ComponentState | undefined)[];
     name: ChiriWord;
     content: ResolvedProperty[];
     affects: string[];

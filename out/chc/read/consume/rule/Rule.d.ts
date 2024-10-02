@@ -4,7 +4,7 @@ import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
 export interface ChiriComponent {
     type: "component";
     className: ChiriWordInterpolated | undefined;
-    state: ChiriWord | undefined;
+    states: ChiriWord[];
     content: ChiriStatement[];
     position: ChiriPosition;
 }

@@ -17,7 +17,7 @@
         "focus-any": ":focus",
         ":hover": ":hover",
         ":active": ":active",
-        ":focus": ":has(:focus-visible)",
+        ":focus": ":where(:focus-visible, :has(:focus-visible))",
         ":focus-any": ":focus-within",
     };
     exports.STATES = Object.keys(exports.STATE_MAP);
