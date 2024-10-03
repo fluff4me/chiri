@@ -41,6 +41,7 @@ import type { ChiriAssignment } from "./consume/macro/macroSet"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
+import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import type { ChiriComponent } from "./consume/rule/Rule"
 
@@ -403,7 +404,10 @@ export default class ChiriReader {
 		if (property)
 			return property
 
-		const rule = this.context.type === "state" ? undefined : (await consumeRuleMainOptional(this)) || (await consumeRuleStateOptional(this))
+		const rule = undefined
+			?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await consumeRuleMainOptional(this))
+			?? (this.context.type === "pseudo" ? undefined : await consumeRuleStateOptional(this))
+			?? await consumeRulePseudoOptional(this)
 		if (rule)
 			return rule
 

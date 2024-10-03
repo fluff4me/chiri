@@ -10,6 +10,7 @@ const Contexts = [
 	"mixin" as const,
 	"component" as const,
 	"state" as const,
+	"pseudo" as const,
 	"property-name" as const,
 ]
 
@@ -29,6 +30,7 @@ export interface ContextData {
 	mixin?: undefined
 	component?: undefined
 	state?: undefined
+	pseudo?: undefined
 	"property-name"?: undefined
 	paths?: undefined
 	text?: undefined

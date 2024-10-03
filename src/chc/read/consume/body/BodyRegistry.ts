@@ -14,6 +14,7 @@ const BodyRegistry = {
 	mixin: undefined,
 	component: undefined,
 	state: undefined,
+	pseudo: undefined,
 	"property-name": bodyPropertyName,
 	paths: bodyPaths,
 	text: bodyText,

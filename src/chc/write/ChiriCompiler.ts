@@ -1,5 +1,5 @@
 import ansi from "../../ansi"
-import { PACKAGE_ROOT } from "../../constants"
+import { INTERNAL_POSITION, PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriPosition, ChiriStatement } from "../read/ChiriReader"
 import type { ChiriCompilerVariable } from "../read/consume/consumeCompilerVariableOptional"
 import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
@@ -64,6 +64,7 @@ namespace Scope {
 
 interface PreRegisteredMixin extends Omit<ChiriMixin, "content" | "name"> {
 	states: (ComponentState | undefined)[]
+	pseudos: ("before" | "after" | undefined)[]
 	name: ChiriWord
 	content: ResolvedProperty[]
 	affects: string[]
@@ -146,6 +147,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	const types = new ChiriTypeManager(compiler)
 	Object.assign(compiler, { types })
+
+	const blankContent: ResolvedProperty = {
+		type: "property",
+		property: {
+			type: "word",
+			value: "content",
+			position: INTERNAL_POSITION,
+		},
+		value: "\"\"",
+		position: INTERNAL_POSITION,
+	}
 
 	return compiler
 
@@ -428,6 +440,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					...statement,
 					name: resolveWord(statement.name),
 					states: [undefined],
+					pseudos: [undefined],
 					content: properties,
 					affects: properties.flatMap(getPropertyAffects),
 				})
@@ -460,6 +473,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				for (const component of components) {
 					if (component.type === "state")
 						throw error(component.states[0]?.position, "Internal Error: Unprocessed state")
+					if (component.type === "pseudo")
+						throw error(component.pseudos[0]?.position, "Internal Error: Unprocessed pseudo")
 
 					es.write("\"")
 					es.writeTextInterpolated(compiler, component.selector)
@@ -557,13 +572,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		content: (ChiriWord | ResolvedProperty)[]
 	}
 
-	function compileComponent (statement: ChiriStatement): (Component | State)[] | undefined {
+	interface Pseudo extends Omit<Component, "type" | "selector" | "content"> {
+		type: "pseudo"
+		pseudos: ChiriWord[]
+		content: (ChiriWord | ResolvedProperty)[]
+	}
+
+	function compileComponent (statement: ChiriStatement): (Component | State | Pseudo)[] | undefined {
 		if (statement.type !== "component")
 			return undefined
 
 		const className = statement.className?.content ?? []
 		const isStates = !!statement.states.length
+		const isPseudos = !!statement.pseudoElements.length
 		const states = !isStates ? [undefined] : statement.states
+		const pseudos = !isPseudos ? [undefined] : statement.pseudoElements
 
 		const containingSelector = selectorStack[selectorStack.length - 1]
 
@@ -571,16 +594,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			type: "text",
 			valueType: ChiriType.of("string"),
 			content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
-			position: (statement.className?.position ?? statement.states?.[0]?.position)!,
+			position: (statement.className?.position ?? statement.states?.[0]?.position ?? statement.pseudoElements?.[0]?.position)!,
 		}
 		selectorStack.push(selector)
 		const results = compileStatements(statement.content, undefined, compileComponentContent)
 		selectorStack.pop()
 
-		const components: (Component | State)[] = results.filter(result => result.type === "component")
+		const components: (Component | State | Pseudo)[] = results.filter(result => result.type === "component")
 		const properties = results.filter(result => result.type === "property")
-		const mixins = results.filter(result => result.type === "word")
+		let mixins = results.filter(result => result.type === "word")
 		const subStates = results.filter(result => result.type === "state")
+		const subPseudos = results.filter(result => result.type === "pseudo")
 
 		const componentSelectorString = stringifyText(compiler, selector)
 
@@ -604,11 +628,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						if (s)
 							stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value)
 
-					const selfMixinName: ChiriWord = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}`, position }
+					let pseudoName = ""
+					for (const s of pseudos)
+						if (s)
+							pseudoName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value)
+
+					const selfMixinName: ChiriWord = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}${pseudoName}`, position }
 					setMixin({
 						type: "mixin",
 						name: selfMixinName,
 						states: states.map(state => state?.value as ComponentState | undefined),
+						pseudos: pseudos.map(pseudo => pseudo?.value as "before" | "after" | undefined),
 						position,
 						content: properties,
 						affects: properties.flatMap(getPropertyAffects),
@@ -646,6 +676,39 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 		}
 
+		for (const pseudo of subPseudos) {
+			mixins.push({ type: "word", value: `${pseudo.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("_")}`, position: pseudo.pseudos[0].position })
+
+			let pseudoName = ""
+			for (const s of pseudo.pseudos)
+				pseudoName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value)
+
+			for (const name of pseudo.mixins) {
+				const mixin = getMixin(name.value, name.position)
+				if (mixin.pseudos.some(pseudo => pseudo)) {
+					mixins.push(name)
+					continue
+				}
+
+				const pseudoMixinName: ChiriWord = { type: "word", value: `${name.value}${pseudoName}`, position: mixin.name.position }
+				if (!getMixin(pseudoMixinName.value, mixin.name.position, true))
+					setMixin({
+						...mixin,
+						name: pseudoMixinName,
+						pseudos: pseudo.pseudos.map(pseudo => pseudo?.value as "before" | "after" | undefined),
+						affects: mixin.content.flatMap(getPropertyAffects),
+					})
+
+				mixins.push(pseudoMixinName)
+			}
+		}
+
+		if (mixins.some(m => m.value === "before") && mixins.some(m => m.value === "after") && !mixins.some(m => m.value === "before_after"))
+			mixins.push({ type: "word", value: "before_after", position: INTERNAL_POSITION })
+
+		if (mixins.some(m => m.value === "before_after"))
+			mixins = mixins.filter(m => m.value !== "before" && m.value !== "after")
+
 		if (!isStates) {
 			const visited: RegisteredMixin[] = []
 			for (let i = 0; i < mixins.length; i++) {
@@ -656,17 +719,18 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		}
 
 		const component = {
-			type: isStates ? "state" as const : "component" as const,
+			type: isStates ? "state" as const : isPseudos ? "pseudo" : "component" as const,
 			selector,
 			states,
+			pseudos,
 			mixins,
-		} as Omit<Partial<Component> & Partial<State>, "type"> & { type?: Component["type"] | State["type"] } as Component | State
+		} as Omit<Partial<Component> & Partial<State> & Partial<Pseudo>, "type"> & { type?: Component["type"] | State["type"] | Pseudo["type"] } as Component | State | Pseudo
 
 		components.unshift(component)
 		return components
 	}
 
-	function compileComponentContent (statement: ChiriStatement): ArrayOr<ChiriWord | ResolvedProperty | Component | State> | undefined {
+	function compileComponentContent (statement: ChiriStatement): ArrayOr<ChiriWord | ResolvedProperty | Component | State | Pseudo> | undefined {
 		const componentResults = compileComponent(statement)
 		if (componentResults !== undefined)
 			return componentResults
@@ -711,17 +775,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function emitMixin (mixin: RegisteredMixin) {
 		let i = 0
 		for (const state of mixin.states) {
-			if (i) {
-				css.write(",")
-				css.writeSpaceOptional()
+			for (const pseudo of mixin.pseudos) {
+				if (i) {
+					css.write(",")
+					css.writeSpaceOptional()
+				}
+
+				css.write(".")
+				css.writeWord(mixin.name)
+				if (state)
+					css.write(STATE_MAP[state])
+				if (pseudo)
+					css.write(`::${pseudo}`)
+
+				i++
 			}
-
-			css.write(".")
-			css.writeWord(mixin.name)
-			if (state)
-				css.write(STATE_MAP[state])
-
-			i++
 		}
 
 		css.writeSpaceOptional()
@@ -941,6 +1009,36 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined, end?: () => void): T[] {
 		scopes.push(using ?? {})
+
+		if (scopes.length === 1) {
+			setMixin({
+				type: "mixin",
+				pseudos: ["before"],
+				states: [undefined],
+				content: [blankContent],
+				affects: ["content"],
+				name: { type: "word", value: "before", position: INTERNAL_POSITION },
+				position: INTERNAL_POSITION,
+			})
+			setMixin({
+				type: "mixin",
+				pseudos: ["after"],
+				states: [undefined],
+				content: [blankContent],
+				affects: ["content"],
+				name: { type: "word", value: "after", position: INTERNAL_POSITION },
+				position: INTERNAL_POSITION,
+			})
+			setMixin({
+				type: "mixin",
+				pseudos: ["before", "after"],
+				states: [undefined],
+				content: [blankContent],
+				affects: ["content"],
+				name: { type: "word", value: "before_after", position: INTERNAL_POSITION },
+				position: INTERNAL_POSITION,
+			})
+		}
 		// console.log(inspect(scopes, undefined, 3, true))
 		// logLine(undefined, error(statements[0].position, ""))
 
