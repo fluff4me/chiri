@@ -17,6 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeBody_1 = __importDefault(require("./consumeBody"));
     const consumeWord_1 = __importDefault(require("./consumeWord"));
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/@property
     const customPropertyDefinitionTypes = {
         number: {
             syntax: "<number>",

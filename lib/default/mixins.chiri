@@ -25,11 +25,28 @@
 
 %translate: translate: ${translate-x: 0px} ${translate-y: 0px}
 
-#for var i = 0, i <= 5, set i++:
+#for var i = 0, i <= 6, set i++:
+	#if i == 6:
+		#set i = 100
+
 	%border-radius-#{i}: border-radius: $space-#{i}
 	%gap-#{i}: gap: $space-#{i}
 	%padding-#{i}: padding: $space-#{i}
+	%padding-left-#{i}: padding-left: $space-#{i}
+	%padding-right-#{i}: padding-right: $space-#{i}
+	%padding-top-#{i}: padding-top: $space-#{i}
+	%padding-bottom-#{i}: padding-bottom: $space-#{i}
 	%margin-#{i}: margin: $space-#{i}
+	%margin-left-#{i}: margin-left: $space-#{i}
+	%margin-right-#{i}: margin-right: $space-#{i}
+	%margin-top-#{i}: margin-top: $space-#{i}
+	%margin-bottom-#{i}: margin-bottom: $space-#{i}
+	%width-#{i}: width: $space-#{i}
+	%height-#{i}: height: $space-#{i}
+	%size-#{i}:
+		width: $space-#{i}
+		height: $space-#{i}
+
 	%translate-up-#{i}:
 		%translate
 		$translate-y: calc($space-#{i} * -1)
@@ -49,6 +66,8 @@
 		%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 		%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 
+
+
 #for var i = 0, i <= 5, set i++:
 	%color-dark-#{i}: colour: $dark-#{i}
 	%colour-dark-#{i}: colour: $dark-#{i}
@@ -62,6 +81,8 @@
 %flex-wrap: flex-wrap: wrap
 %flex-no-wrap: flex-wrap: nowrap
 %flex-wrap-reverse: flex-wrap: reverse
+%flex-grow: flex-grow: 1
+%flex-shrink: flex-shrink: 1
 
 %align-content-normal: align-content: normal
 %align-content-start: align-content: start
@@ -201,9 +222,21 @@
 %no-select: user-select: none
 %user-select-none: user-select: none
 
-%size-constrain-text:
-	max-width: 1em
-	max-height: 1em
+#do:
+	#list!string units = ["em", "lh"]
+
+	#each units as var unit:
+		%width-#{unit}: width: 1#{unit}
+		%height-#{unit}: height: 1#{unit}
+		%size-#{unit}:
+			width: 1#{unit}
+			height: 1#{unit}
+
+		%width-constrain-#{unit}: max-width: 1#{unit}
+		%height-constrain-#{unit}: max-height: 1#{unit}
+		%size-constrain-#{unit}:
+			max-width: 1#{unit}
+			max-height: 1#{unit}
 
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
