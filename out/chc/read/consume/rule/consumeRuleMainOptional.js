@@ -27,6 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             type: "component",
             className,
             states: [],
+            pseudoElements: [],
             ...await (0, consumeBody_1.default)(reader, "component"),
             position,
         };

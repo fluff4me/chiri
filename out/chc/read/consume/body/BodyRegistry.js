@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         mixin: undefined,
         component: undefined,
         state: undefined,
+        pseudo: undefined,
         "property-name": bodyPropertyName_1.default,
         paths: bodyPaths_1.default,
         text: bodyText_1.default,

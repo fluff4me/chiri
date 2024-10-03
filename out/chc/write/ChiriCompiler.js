@@ -69,6 +69,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         };
         const types = new ChiriTypeManager_1.default(compiler);
         Object.assign(compiler, { types });
+        const blankContent = {
+            type: "property",
+            property: {
+                type: "word",
+                value: "content",
+                position: constants_1.INTERNAL_POSITION,
+            },
+            value: "\"\"",
+            position: constants_1.INTERNAL_POSITION,
+        };
         return compiler;
         function compile() {
             typeString_1.default.coerce = value => (0, stringifyExpression_1.default)(compiler, value);
@@ -272,6 +282,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         ...statement,
                         name: resolveWord(statement.name),
                         states: [undefined],
+                        pseudos: [undefined],
                         content: properties,
                         affects: properties.flatMap(getPropertyAffects),
                     });
@@ -300,6 +311,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     for (const component of components) {
                         if (component.type === "state")
                             throw error(component.states[0]?.position, "Internal Error: Unprocessed state");
+                        if (component.type === "pseudo")
+                            throw error(component.pseudos[0]?.position, "Internal Error: Unprocessed pseudo");
                         es.write("\"");
                         es.writeTextInterpolated(compiler, component.selector);
                         es.write("\"");
@@ -373,21 +386,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return undefined;
             const className = statement.className?.content ?? [];
             const isStates = !!statement.states.length;
+            const isPseudos = !!statement.pseudoElements.length;
             const states = !isStates ? [undefined] : statement.states;
+            const pseudos = !isPseudos ? [undefined] : statement.pseudoElements;
             const containingSelector = selectorStack[selectorStack.length - 1];
             const selector = !className.length ? containingSelector : {
                 type: "text",
                 valueType: ChiriType_1.ChiriType.of("string"),
                 content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
-                position: (statement.className?.position ?? statement.states?.[0]?.position),
+                position: (statement.className?.position ?? statement.states?.[0]?.position ?? statement.pseudoElements?.[0]?.position),
             };
             selectorStack.push(selector);
             const results = compileStatements(statement.content, undefined, compileComponentContent);
             selectorStack.pop();
             const components = results.filter(result => result.type === "component");
             const properties = results.filter(result => result.type === "property");
-            const mixins = results.filter(result => result.type === "word");
+            let mixins = results.filter(result => result.type === "word");
             const subStates = results.filter(result => result.type === "state");
+            const subPseudos = results.filter(result => result.type === "pseudo");
             const componentSelectorString = (0, stringifyText_1.default)(compiler, selector);
             let propertyGroup;
             let groupIndex = 1;
@@ -407,11 +423,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         for (const s of states)
                             if (s)
                                 stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
-                        const selfMixinName = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}`, position };
+                        let pseudoName = "";
+                        for (const s of pseudos)
+                            if (s)
+                                pseudoName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
+                        const selfMixinName = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}${pseudoName}`, position };
                         setMixin({
                             type: "mixin",
                             name: selfMixinName,
                             states: states.map(state => state?.value),
+                            pseudos: pseudos.map(pseudo => pseudo?.value),
                             position,
                             content: properties,
                             affects: properties.flatMap(getPropertyAffects),
@@ -443,6 +464,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     mixins.push(stateMixinName);
                 }
             }
+            for (const pseudo of subPseudos) {
+                mixins.push({ type: "word", value: `${pseudo.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("_")}`, position: pseudo.pseudos[0].position });
+                let pseudoName = "";
+                for (const s of pseudo.pseudos)
+                    pseudoName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
+                for (const name of pseudo.mixins) {
+                    const mixin = getMixin(name.value, name.position);
+                    if (mixin.pseudos.some(pseudo => pseudo)) {
+                        mixins.push(name);
+                        continue;
+                    }
+                    const pseudoMixinName = { type: "word", value: `${name.value}${pseudoName}`, position: mixin.name.position };
+                    if (!getMixin(pseudoMixinName.value, mixin.name.position, true))
+                        setMixin({
+                            ...mixin,
+                            name: pseudoMixinName,
+                            pseudos: pseudo.pseudos.map(pseudo => pseudo?.value),
+                            affects: mixin.content.flatMap(getPropertyAffects),
+                        });
+                    mixins.push(pseudoMixinName);
+                }
+            }
+            if (mixins.some(m => m.value === "before") && mixins.some(m => m.value === "after") && !mixins.some(m => m.value === "before_after"))
+                mixins.push({ type: "word", value: "before_after", position: constants_1.INTERNAL_POSITION });
+            if (mixins.some(m => m.value === "before_after"))
+                mixins = mixins.filter(m => m.value !== "before" && m.value !== "after");
             if (!isStates) {
                 const visited = [];
                 for (let i = 0; i < mixins.length; i++) {
@@ -452,9 +499,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
             }
             const component = {
-                type: isStates ? "state" : "component",
+                type: isStates ? "state" : isPseudos ? "pseudo" : "component",
                 selector,
                 states,
+                pseudos,
                 mixins,
             };
             components.unshift(component);
@@ -499,15 +547,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function emitMixin(mixin) {
             let i = 0;
             for (const state of mixin.states) {
-                if (i) {
-                    css.write(",");
-                    css.writeSpaceOptional();
+                for (const pseudo of mixin.pseudos) {
+                    if (i) {
+                        css.write(",");
+                        css.writeSpaceOptional();
+                    }
+                    css.write(".");
+                    css.writeWord(mixin.name);
+                    if (state)
+                        css.write(componentStates_1.STATE_MAP[state]);
+                    if (pseudo)
+                        css.write(`::${pseudo}`);
+                    i++;
                 }
-                css.write(".");
-                css.writeWord(mixin.name);
-                if (state)
-                    css.write(componentStates_1.STATE_MAP[state]);
-                i++;
             }
             css.writeSpaceOptional();
             css.writeLineStartBlock("{");
@@ -676,6 +728,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Internals
         function compileStatements(statements, using, contextCompiler, end) {
             scopes.push(using ?? {});
+            if (scopes.length === 1) {
+                setMixin({
+                    type: "mixin",
+                    pseudos: ["before"],
+                    states: [undefined],
+                    content: [blankContent],
+                    affects: ["content"],
+                    name: { type: "word", value: "before", position: constants_1.INTERNAL_POSITION },
+                    position: constants_1.INTERNAL_POSITION,
+                });
+                setMixin({
+                    type: "mixin",
+                    pseudos: ["after"],
+                    states: [undefined],
+                    content: [blankContent],
+                    affects: ["content"],
+                    name: { type: "word", value: "after", position: constants_1.INTERNAL_POSITION },
+                    position: constants_1.INTERNAL_POSITION,
+                });
+                setMixin({
+                    type: "mixin",
+                    pseudos: ["before", "after"],
+                    states: [undefined],
+                    content: [blankContent],
+                    affects: ["content"],
+                    name: { type: "word", value: "before_after", position: constants_1.INTERNAL_POSITION },
+                    position: constants_1.INTERNAL_POSITION,
+                });
+            }
             // console.log(inspect(scopes, undefined, 3, true))
             // logLine(undefined, error(statements[0].position, ""))
             let ended = false;

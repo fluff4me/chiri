@@ -5,6 +5,7 @@ export interface ChiriComponent {
     type: "component";
     className: ChiriWordInterpolated | undefined;
     states: ChiriWord[];
+    pseudoElements: ChiriWord[];
     content: ChiriStatement[];
     position: ChiriPosition;
 }

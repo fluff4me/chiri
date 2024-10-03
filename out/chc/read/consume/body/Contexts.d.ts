@@ -1,5 +1,5 @@
 import type { ChiriTypeGeneric } from "../../../type/ChiriType";
-declare const Contexts: ("function" | "text" | "component" | "mixin" | "inherit" | "root" | "generic" | "paths" | "state" | "property-name")[];
+declare const Contexts: ("function" | "text" | "component" | "mixin" | "inherit" | "root" | "generic" | "paths" | "state" | "pseudo" | "property-name")[];
 export default Contexts;
 export type ChiriContextType = (typeof Contexts)[number];
 export interface ChiriFunctionBodyContext {
@@ -13,6 +13,7 @@ export interface ContextData {
     mixin?: undefined;
     component?: undefined;
     state?: undefined;
+    pseudo?: undefined;
     "property-name"?: undefined;
     paths?: undefined;
     text?: undefined;

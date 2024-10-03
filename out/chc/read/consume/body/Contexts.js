@@ -19,6 +19,7 @@
         "mixin",
         "component",
         "state",
+        "pseudo",
         "property-name",
     ];
     exports.default = Contexts;

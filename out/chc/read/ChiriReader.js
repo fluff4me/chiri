@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRuleStateOptional"], factory);
+        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRulePseudoOptional", "./consume/rule/consumeRuleStateOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -31,6 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumePropertyOptional_1 = __importDefault(require("./consume/consumePropertyOptional"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("./consume/consumeWhiteSpaceOptional"));
     const consumeRuleMainOptional_1 = __importDefault(require("./consume/rule/consumeRuleMainOptional"));
+    const consumeRulePseudoOptional_1 = __importDefault(require("./consume/rule/consumeRulePseudoOptional"));
     const consumeRuleStateOptional_1 = __importDefault(require("./consume/rule/consumeRuleStateOptional"));
     class ChiriReader {
         filename;
@@ -277,7 +278,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const property = await (0, consumePropertyOptional_1.default)(this);
             if (property)
                 return property;
-            const rule = this.context.type === "state" ? undefined : (await (0, consumeRuleMainOptional_1.default)(this)) || (await (0, consumeRuleStateOptional_1.default)(this));
+            const rule = undefined
+                ?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await (0, consumeRuleMainOptional_1.default)(this))
+                ?? (this.context.type === "pseudo" ? undefined : await (0, consumeRuleStateOptional_1.default)(this))
+                ?? await (0, consumeRulePseudoOptional_1.default)(this);
             if (rule)
                 return rule;
             return [];

@@ -25,47 +25,54 @@
 
 %translate: translate: ${translate-x: 0px} ${translate-y: 0px}
 
-#for var i = 0, i <= 6, set i++:
-	#if i == 6:
-		#set i = 100
+#do:
+	#list!int spaces = [0, 1, 2, 3, 4, 5, 20, 25, 50, 100]
+	#each spaces as var i:
+		%border-radius-#{i}: border-radius: $space-#{i}
+		%gap-#{i}: gap: $space-#{i}
 
-	%border-radius-#{i}: border-radius: $space-#{i}
-	%gap-#{i}: gap: $space-#{i}
-	%padding-#{i}: padding: $space-#{i}
-	%padding-left-#{i}: padding-left: $space-#{i}
-	%padding-right-#{i}: padding-right: $space-#{i}
-	%padding-top-#{i}: padding-top: $space-#{i}
-	%padding-bottom-#{i}: padding-bottom: $space-#{i}
-	%margin-#{i}: margin: $space-#{i}
-	%margin-left-#{i}: margin-left: $space-#{i}
-	%margin-right-#{i}: margin-right: $space-#{i}
-	%margin-top-#{i}: margin-top: $space-#{i}
-	%margin-bottom-#{i}: margin-bottom: $space-#{i}
-	%width-#{i}: width: $space-#{i}
-	%height-#{i}: height: $space-#{i}
-	%size-#{i}:
-		width: $space-#{i}
-		height: $space-#{i}
+		%inset-#{i}: inset: $space-#{i}
+		%left-#{i}: left: $space-#{i}
+		%right-#{i}: right: $space-#{i}
+		%top-#{i}: top: $space-#{i}
+		%bottom-#{i}: bottom: $space-#{i}
 
-	%translate-up-#{i}:
-		%translate
-		$translate-y: calc($space-#{i} * -1)
-	%translate-down-#{i}:
-		%translate
-		$translate-y: $space-#{i}
-	%translate-left-#{i}:
-		%translate
-		$translate-x: calc($space-#{i} * -1)
-	%translate-right-#{i}:
-		%translate
-		$translate-x: $space-#{i}
-	%translate-y-0: $translate-y: $space-0
-	%translate-x-0: $translate-x: $space-0
+		%padding-#{i}: padding: $space-#{i}
+		%padding-left-#{i}: padding-left: $space-#{i}
+		%padding-right-#{i}: padding-right: $space-#{i}
+		%padding-top-#{i}: padding-top: $space-#{i}
+		%padding-bottom-#{i}: padding-bottom: $space-#{i}
 
-	#for var j = 1, j <= 5, set j++:
-		%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
-		%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
+		%margin-#{i}: margin: $space-#{i}
+		%margin-left-#{i}: margin-left: $space-#{i}
+		%margin-right-#{i}: margin-right: $space-#{i}
+		%margin-top-#{i}: margin-top: $space-#{i}
+		%margin-bottom-#{i}: margin-bottom: $space-#{i}
 
+		%width-#{i}: width: $space-#{i}
+		%height-#{i}: height: $space-#{i}
+		%size-#{i}:
+			width: $space-#{i}
+			height: $space-#{i}
+
+		%translate-up-#{i}:
+			%translate
+			$translate-y: calc($space-#{i} * -1)
+		%translate-down-#{i}:
+			%translate
+			$translate-y: $space-#{i}
+		%translate-left-#{i}:
+			%translate
+			$translate-x: calc($space-#{i} * -1)
+		%translate-right-#{i}:
+			%translate
+			$translate-x: $space-#{i}
+		%translate-y-0: $translate-y: $space-0
+		%translate-x-0: $translate-x: $space-0
+
+		#for var j = 1, j <= 5, set j++:
+			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
+			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 
 
 #for var i = 0, i <= 5, set i++:
@@ -75,6 +82,9 @@
 	%colour-light-#{i}: colour: $light-#{i}
 	%background-dark-#{i}: background: $dark-#{i}
 	%background-light-#{i}: background: $light-#{i}
+
+%background-currentcolor: background: currentcolor
+%background-currentcolour: background: currentcolor
 
 %flex-column: flex-direction: column
 %flex-row: flex-direction: row
@@ -247,3 +257,13 @@
 %box-shadow-1: box-shadow: 0 $space-1 $space-1 calc($space-1 * -1) #000
 %box-shadow-2: box-shadow: 0 $space-2 $space-2 calc($space-1 * -1) #0005
 %box-shadow-inset-1: box-shadow: inset 0 $space-1 $space-1 calc($space-1 * -1) #000
+
+%rotate-45: rotate: 45deg
+%rotate-135: rotate: 135deg
+
+%transparent: opacity: 0
+%opaque: opacity: 1
+%opacity-0: opacity: 0
+%opacity-1: opacity: 1
+%transparency-1: opacity: 0
+%transparency-0: opacity: 1

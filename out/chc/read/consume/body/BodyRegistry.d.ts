@@ -9,6 +9,7 @@ declare const BodyRegistry: {
     mixin: undefined;
     component: undefined;
     state: undefined;
+    pseudo: undefined;
     "property-name": BodyConsumer.Sync<import("../consumeWordInterpolatedOptional").ChiriWordInterpolated, []>;
     paths: BodyConsumer.Sync<import("../consumePathOptional").ChiriPath, []>;
     text: BodyConsumer.Sync<import("../consumeValueText").ChiriValueText, []>;
