@@ -31,6 +31,7 @@ interface CustomPropertyDefinitionType {
 	initialValue?: string
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/CSS/@property
 const customPropertyDefinitionTypes = {
 	number: {
 		syntax: "<number>",

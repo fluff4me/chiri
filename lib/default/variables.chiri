@@ -19,6 +19,7 @@ $space-2: 0.4rem
 $space-3: 0.8rem
 $space-4: 1.6rem
 $space-5: 3rem
+$space-100: 100%
 
 #for var i = 0, i <= 5, set i++:
 	#string hex = hex(i)
