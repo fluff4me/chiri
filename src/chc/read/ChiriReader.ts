@@ -16,8 +16,8 @@ import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./
 import consumeBlockEnd from "./consume/consumeBlockEnd"
 import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional"
 import consumeDocumentationOptional, { type ChiriDocumentation } from "./consume/consumeDocumentationOptional"
-import type { ChiriMacroUse } from "./consume/consumeMacroUseOptional"
-import { default as consumeMacroOptional, default as consumeMacroUseOptional } from "./consume/consumeMacroUseOptional"
+import type { ChiriMacroUse, MacroResult } from "./consume/consumeMacroUseOptional"
+import consumeMacroUseOptional from "./consume/consumeMacroUseOptional"
 import type { ChiriMixin } from "./consume/consumeMixinOptional"
 import consumeMixinOptional from "./consume/consumeMixinOptional"
 import consumeMixinUseOptional, { type ChiriMixinUse } from "./consume/consumeMixinUseOptional"
@@ -33,7 +33,7 @@ import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFor } from "./consume/macro/macroFor"
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
 import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf"
-import type { ChiriCSSImport } from "./consume/macro/macroImport"
+import type { ChiriCSSImport, ChiriImport } from "./consume/macro/macroImport"
 import type { ChiriInclude } from "./consume/macro/macroInclude"
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
 import type { ChiriReturn } from "./consume/macro/macroReturn"
@@ -68,6 +68,7 @@ export type ChiriStatement =
 	| ChiriElse
 	| ChiriInclude
 	| ChiriCSSImport
+	| ChiriImport
 	// root
 	| ChiriComponent
 	| ChiriMixin
@@ -281,10 +282,14 @@ export default class ChiriReader {
 
 	async read (): Promise<ChiriAST>
 	async read<STATEMENT = ChiriStatement> (consumer: ChiriBodyConsumer<STATEMENT>): Promise<ChiriAST<STATEMENT>>
-	async read (configuredConsumer: ChiriBodyConsumer<object> = this.consumeBodyDefault): Promise<ChiriAST<object>> {
-		const consumer = async () => undefined
-			?? await configuredConsumer(this)
-			?? await consumeMacroUseOptional(this)
+	async read (configuredConsumer?: ChiriBodyConsumer<ChiriStatement>): Promise<ChiriAST<object>> {
+		const consumer = async (): Promise<ArrayOr<ChiriStatement | undefined>> => {
+			const macroResult = await consumeMacroUseOptional(this, (configuredConsumer ? undefined : this.#isSubReader ? "generic" : "root")!)
+			if (!configuredConsumer)
+				return this.consumeBodyDefault(macroResult)
+
+			return macroResult ?? await configuredConsumer(this)
+		}
 
 		try {
 			if (!this.#multiline) {
@@ -295,7 +300,7 @@ export default class ChiriReader {
 				if (!consumed)
 					throw this.error(e, `Expected ${this.context.type} content`)
 
-				this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish) as ChiriStatement[])
+				this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish))
 
 			} else {
 				do {
@@ -308,12 +313,11 @@ export default class ChiriReader {
 					if (!consumed)
 						throw this.error(e, `Expected ${this.context.type} content`)
 
-					this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish) as ChiriStatement[])
+					this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish))
 				} while (consumeNewBlockLineOptional(this))
 
 				if (this.i < this.input.length)
-					if (!consumeBlockEnd(this))
-						throw this.error("Expected block end")
+					consumeBlockEnd(this)
 			}
 
 			if (!this.#isSubReader && this.i < this.input.length)
@@ -332,19 +336,9 @@ export default class ChiriReader {
 		}
 	}
 
-	async consumeBodyDefault (): Promise<ChiriStatement | ChiriStatement[]> {
-		const documentation = consumeDocumentationOptional(this)
-		if (documentation)
-			return documentation
-
-		const e = this.i
-
+	async consumeBodyDefault (macro?: MacroResult): Promise<ChiriStatement | ChiriStatement[]> {
 		////////////////////////////////////
 		//#region Macro
-
-		const macro = await consumeMacroOptional(this, this.#isSubReader ? "generic" : "root")
-		if (macro?.type === "variable")
-			return macro
 
 		if (macro?.type === "import") {
 			for (const imp of macro.paths) {
@@ -391,6 +385,11 @@ export default class ChiriReader {
 
 		//#endregion
 		////////////////////////////////////
+
+		const documentation = consumeDocumentationOptional(this)
+		if (documentation)
+			// ignore documentation atm because it isn't set up right
+			return []
 
 		const mixin = await consumeMixinOptional(this)
 		if (mixin)

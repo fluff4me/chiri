@@ -65,6 +65,15 @@ export interface ChiriPipeUseLeft {
 	position: ChiriPosition
 }
 
+export interface ChiriConditional {
+	type: "conditional"
+	condition: ChiriExpressionOperand
+	ifTrue: ChiriExpressionOperand
+	ifFalse: ChiriExpressionOperand
+	valueType: ChiriType
+	position: ChiriPosition
+}
+
 export type ChiriExpressionOperand =
 	| ChiriBinaryExpression
 	| ChiriUnaryExpression
@@ -74,6 +83,7 @@ export type ChiriExpressionOperand =
 	| ChiriFunctionCall
 	| ChiriPipe
 	| ChiriPipeUseLeft
+	| ChiriConditional
 
 export type ChiriExpressionResult =
 	| ChiriExpressionOperand
@@ -191,7 +201,43 @@ export function consumeOperatorOptional (reader: ChiriReader, operators: Partial
 	return undefined
 }
 
+function consumeConditionalOptional (reader: ChiriReader): ChiriConditional | undefined {
+	const position = reader.getPosition()
+	const e = reader.i
+	if (!reader.consumeOptional("if "))
+		return undefined
+
+	const condition = consumeExpression.inline(reader)
+
+	reader.consume(":")
+
+	consumeWhiteSpaceOptional(reader)
+	const ifTrue = consumeExpression.inline(reader)
+
+	consumeWhiteSpace(reader)
+	reader.consume("else:")
+
+	consumeWhiteSpaceOptional(reader)
+	const ifFalse = consumeExpression.inline(reader)
+
+	if (ifTrue.valueType.name.value !== ifFalse.valueType.name.value || ifTrue.valueType.generics.some((generic, i) => generic.name.value !== ifFalse.valueType.generics[i].name.value))
+		throw reader.error(e, `Conditional expression must return the same value type for both branches. Currently returning "${ChiriType.stringify(ifTrue.valueType)}" and "${ChiriType.stringify(ifFalse.valueType)}"`)
+
+	return {
+		type: "conditional",
+		valueType: ifTrue.valueType,
+		condition,
+		ifTrue,
+		ifFalse,
+		position,
+	}
+}
+
 function consumeExpressionInternal (reader: ChiriReader, precedence = 0): ChiriExpressionOperand {
+	const ternary = consumeConditionalOptional(reader)
+	if (ternary)
+		return ternary
+
 	if (precedence >= reader.types.precedence.length)
 		return consumeUnaryExpression(reader)
 

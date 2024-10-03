@@ -20,4 +20,5 @@ export default TypeDefinition({
 
 		throw error()
 	},
+	is: value => typeof value === "number" && Number.isInteger(value) && value >= 0,
 })

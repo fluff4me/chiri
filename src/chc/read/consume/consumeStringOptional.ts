@@ -1,10 +1,11 @@
 import { INTERNAL_POSITION } from "../../../constants"
-import type { ChiriType } from "../../type/ChiriType"
+import { ChiriType } from "../../type/ChiriType"
 import assertNotWhiteSpaceAndNewLine from "../assert/assertNotWhiteSpaceAndNewLine"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import consumeBlockEnd from "./consumeBlockEnd"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
+import consumeCustomPropertyInterpolation from "./consumeCustomPropertyInterpolation"
 import consumeIndentOptional from "./consumeIndentOptional"
 import consumeNewBlockLineOptional from "./consumeNewBlockLineOptional"
 import type { ChiriExpressionOperand } from "./expression/consumeExpression"
@@ -20,6 +21,27 @@ export interface ChiriLiteralString {
 
 export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 	const position = reader.getPosition()
+	if (reader.consumeOptional("$")) {
+		const isName = reader.consumeOptional("$")
+		const varType = isName ? "$$" as const : "$" as const
+		return {
+			type: "literal",
+			subType: "string",
+			valueType: ChiriType.of("string"),
+			segments: [
+				{
+					type: "text",
+					valueType: ChiriType.of("string"),
+					content: [
+						consumeCustomPropertyInterpolation(reader, varType),
+					],
+					position,
+				},
+			],
+			position,
+		}
+	}
+
 	if (!reader.consumeOptional('"'))
 		return undefined
 

@@ -47,6 +47,7 @@ const unaryBitwiseOperators = ["~"] as const
 const binaryBooleanOperators = ["||", "&&", "==", "!="] as const
 const unaryBooleanOperators = ["!"] as const
 const binaryStringOperators = [".", "x", "==", "!="] as const
+const otherOperators = ["is"] as const
 
 export type Operator =
 	| (typeof binaryNumericOperators)[number]
@@ -56,6 +57,7 @@ export type Operator =
 	| (typeof binaryBooleanOperators)[number]
 	| (typeof unaryBooleanOperators)[number]
 	| (typeof binaryStringOperators)[number]
+	| (typeof otherOperators)[number]
 
 const minNumericPrecision2 = (typeA: string, typeB: string): "uint" | "int" | "dec" => (typeA === "dec" || typeB === "dec") ? "dec"
 	: (typeA === "int" || typeB === "int") ? "int"
@@ -88,6 +90,7 @@ const operatorResults: Record<Operator, string | ((typeA: string, typeB?: string
 	">>>": "int",
 	".": "string",
 	"x": "string",
+	"is": "bool",
 }
 
 const operatorPrecedence = [
@@ -98,6 +101,7 @@ const operatorPrecedence = [
 	["&"],
 	["==", "!="],
 	["<", "<=", ">", ">="],
+	["is"],
 	["<<", ">>", ">>>"],
 	["x"],
 	["."],
@@ -250,13 +254,14 @@ export default class ChiriTypeManager {
 		for (const operator of binaryStringOperators)
 			this.registerBinaryOperator("string", operator, operatorOperandBTypes[operator] ?? "string")
 
-		for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion)) {
+		for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion))
 			this.registerBinaryCoercion(operator as Operator, coercion)
-		}
 
-		for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion)) {
+		for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion))
 			this.registerUnaryCoercion(operator as Operator, coercion)
-		}
+
+		for (const type of Object.keys(types) as (keyof typeof types)[])
+			this.registerBinaryOperator(type, "is", "string", "bool")
 	}
 
 	registerGenerics (...generics: ChiriTypeGeneric[]) {

@@ -6,10 +6,11 @@ import type { ContextStatement } from "./body/BodyRegistry"
 import BodyRegistry from "./body/BodyRegistry"
 import type { ChiriContextType, ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData } from "./body/Contexts"
 import consumeBlockStartOptional from "./consumeBlockStartOptional"
+import type { MacroResult } from "./consumeMacroUseOptional"
 import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
 
 export interface ChiriBody<STATEMENT = ChiriStatement> {
-	content: STATEMENT[]
+	content: (STATEMENT | MacroResult)[]
 }
 
 async function consumeBody<CONTEXT extends ChiriContextTypeWithoutData> (reader: ChiriReader, context: CONTEXT, initialiser?: (sub: ChiriReader) => any, singleLineOnly?: true): Promise<ChiriBody<ContextStatement<CONTEXT>>>

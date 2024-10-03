@@ -9,6 +9,7 @@ interface TypeDefinition<TYPE extends string = string> {
 	coerce?(value: Value, error: () => any): Value
 	generics?: number | true | string[][]
 	stringable?: true
+	is?(value: Value): boolean
 }
 
 function TypeDefinition<TYPE extends string = string> (definition: TypeDefinition<TYPE>) {

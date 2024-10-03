@@ -6,5 +6,6 @@ export default TypeDefinition({
 	type: ChiriType.of("string"),
 	stringable: true,
 	consumeOptionalConstructor: consumeOptionalString,
+	is: value => typeof value === "string",
 })
 

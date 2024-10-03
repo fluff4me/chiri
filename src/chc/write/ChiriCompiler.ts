@@ -511,7 +511,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 						css.write("initial-value:")
 						css.writeSpaceOptional()
-						css.writeTextInterpolated(compiler, statement.value)
+						css.write(compileStatements(statement.value, undefined, compileText).join(""))
 						css.writeLine(";")
 					})
 				})
@@ -522,7 +522,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					css.emitProperty(compiler, {
 						...statement,
 						property: resolveWord(statement.property),
-						value: stringifyText(compiler, statement.value),
+						value: compileStatements(statement.value, undefined, compileText).join(""),
 					})
 				})
 				return true
@@ -678,7 +678,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return {
 					...statement,
 					property: resolveWord(statement.property),
-					value: stringifyText(compiler, statement.value),
+					value: compileStatements(statement.value, undefined, compileText).join(""),
 				}
 		}
 	}
@@ -704,7 +704,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return {
 			...property,
 			property: resolveWord(property.property),
-			value: stringifyText(compiler, property.value),
+			value: compileStatements(property.value, undefined, compileText).join(""),
 		}
 	}
 

@@ -6,17 +6,19 @@ import MacroConstruct from "./MacroConstruct"
 export interface ChiriImport {
 	type: "import"
 	paths: ChiriPath[]
+	position: ChiriPosition
 }
 
 export default MacroConstruct("import")
 	.body("paths")
-	.consume(({ reader, assignments, body, extra }): ChiriImport | undefined => {
+	.consume(({ reader, body, position }): ChiriImport | undefined => {
 		if (!body)
 			throw reader.error("Expected paths to import")
 
 		return {
 			type: "import",
 			paths: body,
+			position,
 		}
 	})
 

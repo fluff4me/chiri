@@ -3,6 +3,7 @@ import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import consumeBody from "./consumeBody"
+import type { MacroResult } from "./consumeMacroUseOptional"
 import type { ChiriValueText } from "./consumeValueText"
 import type { ChiriWord } from "./consumeWord"
 import consumeWord from "./consumeWord"
@@ -13,7 +14,7 @@ export interface ChiriProperty {
 	type: "property"
 	isCustomProperty?: true
 	property: ChiriWordInterpolated
-	value: ChiriValueText
+	value: (ChiriValueText | MacroResult)[]
 	position: ChiriPosition
 }
 
@@ -21,7 +22,7 @@ export interface ChiriPropertyDefinition {
 	type: "property-definition"
 	syntax: ChiriWord
 	property: ChiriWordInterpolated
-	value: ChiriValueText
+	value: (ChiriValueText | MacroResult)[]
 	position: ChiriPosition
 }
 
@@ -31,6 +32,22 @@ interface CustomPropertyDefinitionType {
 }
 
 const customPropertyDefinitionTypes = {
+	number: {
+		syntax: "<number>",
+		initialValue: "0",
+	},
+	dec: {
+		syntax: "<number>",
+		initialValue: "0",
+	},
+	int: {
+		syntax: "<integer>",
+		initialValue: "0",
+	},
+	time: {
+		syntax: "<time>",
+		initialValue: "0s",
+	},
 	color: {
 		syntax: "<color>",
 		initialValue: "#000",
@@ -71,25 +88,19 @@ export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropert
 	else
 		consumeValue = !!reader.consumeOptional(":")
 
-	let value: ChiriValueText | undefined
+	let value: (ChiriValueText | MacroResult)[]
 	if (!consumeValue) {
-		value = {
+		value = [{
 			type: "text",
 			content: [type!.initialValue],
 			position: INTERNAL_POSITION,
 			valueType: ChiriType.of("string"),
-		}
+		}]
 
 	} else {
 		const position = reader.getPosition()
 		const textBody = await consumeBody(reader, "text")
-		value = {
-			type: "text",
-			position,
-			valueType: ChiriType.of("string"),
-			...textBody.content[0] as ChiriValueText | undefined,
-			content: textBody.content.flatMap(text => text.content),
-		}
+		value = textBody.content
 	}
 
 	if (type)

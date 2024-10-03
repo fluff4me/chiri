@@ -45,6 +45,11 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 		case "pipe-use-left":
 			return compiler.pipeValueStack.at(-1)
 
+		case "conditional":
+			return resolveExpression(compiler, expression.condition)
+				? resolveExpression(compiler, expression.ifTrue)
+				: resolveExpression(compiler, expression.ifFalse)
+
 		case "expression":
 			switch (expression.subType) {
 				case "unary": {
@@ -115,6 +120,8 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 							return operandA >> operandB
 						case ">>>":
 							return operandA >>> operandB
+						case "is":
+							return compiler.types.types[operandB as string].is?.(operandA as Value) ?? false
 						default:
 							throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`)
 					}

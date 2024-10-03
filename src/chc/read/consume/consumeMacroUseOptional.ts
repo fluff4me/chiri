@@ -62,6 +62,9 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 	if (reader.input[reader.i] !== "#" || reader.input[reader.i + 1] === "{")
 		return undefined
 
+	if (reader.peek("#return "))
+		return undefined
+
 	const context = args as [ChiriContextType, ResolveContextDataTuple<ChiriContextType>[0]]
 	if (await macroExport.consumeOptional(reader, ...context))
 		return undefined
@@ -87,6 +90,9 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await consumeCompilerVariable(reader)
 
 	if (!result) {
+		if (reader.context?.type === "text")
+			return undefined
+
 		const saved = reader.savePosition()
 		const e = reader.i
 		reader.consume("#")

@@ -57,4 +57,5 @@ export default TypeDefinition({
 		}
 	},
 	coerce: value => Array.isArray(value) ? value : [value],
+	is: value => Array.isArray(value),
 })
