@@ -140,7 +140,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         return undefined;
     }
+    function consumeConditionalOptional(reader) {
+        const position = reader.getPosition();
+        const e = reader.i;
+        if (!reader.consumeOptional("if "))
+            return undefined;
+        const condition = consumeExpression.inline(reader);
+        reader.consume(":");
+        (0, consumeWhiteSpaceOptional_1.default)(reader);
+        const ifTrue = consumeExpression.inline(reader);
+        (0, consumeWhiteSpace_1.default)(reader);
+        reader.consume("else:");
+        (0, consumeWhiteSpaceOptional_1.default)(reader);
+        const ifFalse = consumeExpression.inline(reader);
+        if (ifTrue.valueType.name.value !== ifFalse.valueType.name.value || ifTrue.valueType.generics.some((generic, i) => generic.name.value !== ifFalse.valueType.generics[i].name.value))
+            throw reader.error(e, `Conditional expression must return the same value type for both branches. Currently returning "${ChiriType_1.ChiriType.stringify(ifTrue.valueType)}" and "${ChiriType_1.ChiriType.stringify(ifFalse.valueType)}"`);
+        return {
+            type: "conditional",
+            valueType: ifTrue.valueType,
+            condition,
+            ifTrue,
+            ifFalse,
+            position,
+        };
+    }
     function consumeExpressionInternal(reader, precedence = 0) {
+        const ternary = consumeConditionalOptional(reader);
+        if (ternary)
+            return ternary;
         if (precedence >= reader.types.precedence.length)
             return consumeUnaryExpression(reader);
         const position = reader.getPosition();

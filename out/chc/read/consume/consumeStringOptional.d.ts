@@ -1,4 +1,4 @@
-import type { ChiriType } from "../../type/ChiriType";
+import { ChiriType } from "../../type/ChiriType";
 import type ChiriReader from "../ChiriReader";
 import type { ChiriPosition } from "../ChiriReader";
 import type { ChiriExpressionOperand } from "./expression/consumeExpression";

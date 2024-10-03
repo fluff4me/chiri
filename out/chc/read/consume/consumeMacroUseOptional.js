@@ -59,6 +59,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     async function default_1(reader, ...args) {
         if (reader.input[reader.i] !== "#" || reader.input[reader.i + 1] === "{")
             return undefined;
+        if (reader.peek("#return "))
+            return undefined;
         const context = args;
         if (await macroExport_1.default.consumeOptional(reader, ...context))
             return undefined;
@@ -82,6 +84,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             ?? await consumeDeclaredUse(reader)
             ?? await (0, consumeCompilerVariableOptional_1.default)(reader);
         if (!result) {
+            if (reader.context?.type === "text")
+                return undefined;
             const saved = reader.savePosition();
             const e = reader.i;
             reader.consume("#");

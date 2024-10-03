@@ -4,6 +4,7 @@ import type { ChiriValueText } from "../consumeValueText";
 export interface ChiriImport {
     type: "import";
     paths: ChiriPath[];
+    position: ChiriPosition;
 }
 declare const _default: import("./MacroConstruct").ChiriMacroInternal<ChiriImport>;
 export default _default;

@@ -28,6 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return value;
             throw error();
         },
+        is: value => typeof value === "number",
     });
 });
 //# sourceMappingURL=typeDec.js.map

@@ -57,6 +57,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             };
         },
         coerce: value => Array.isArray(value) ? value : [value],
+        is: value => Array.isArray(value),
     });
 });
 //# sourceMappingURL=typeList.js.map

@@ -42,6 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const binaryBooleanOperators = ["||", "&&", "==", "!="];
     const unaryBooleanOperators = ["!"];
     const binaryStringOperators = [".", "x", "==", "!="];
+    const otherOperators = ["is"];
     const minNumericPrecision2 = (typeA, typeB) => (typeA === "dec" || typeB === "dec") ? "dec"
         : (typeA === "int" || typeB === "int") ? "int"
             : "uint";
@@ -71,6 +72,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ">>>": "int",
         ".": "string",
         "x": "string",
+        "is": "bool",
     };
     const operatorPrecedence = [
         ["||"],
@@ -80,6 +82,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ["&"],
         ["==", "!="],
         ["<", "<=", ">", ">="],
+        ["is"],
         ["<<", ">>", ">>>"],
         ["x"],
         ["."],
@@ -200,12 +203,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.registerUnaryOperator(operator, "bool");
             for (const operator of binaryStringOperators)
                 this.registerBinaryOperator("string", operator, operatorOperandBTypes[operator] ?? "string");
-            for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion)) {
+            for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion))
                 this.registerBinaryCoercion(operator, coercion);
-            }
-            for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion)) {
+            for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion))
                 this.registerUnaryCoercion(operator, coercion);
-            }
+            for (const type of Object.keys(types))
+                this.registerBinaryOperator(type, "is", "string", "bool");
         }
         registerGenerics(...generics) {
             for (const type of generics) {

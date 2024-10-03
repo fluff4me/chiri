@@ -18,6 +18,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWord_1 = __importDefault(require("./consumeWord"));
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     const customPropertyDefinitionTypes = {
+        number: {
+            syntax: "<number>",
+            initialValue: "0",
+        },
+        dec: {
+            syntax: "<number>",
+            initialValue: "0",
+        },
+        int: {
+            syntax: "<integer>",
+            initialValue: "0",
+        },
+        time: {
+            syntax: "<time>",
+            initialValue: "0s",
+        },
         color: {
             syntax: "<color>",
             initialValue: "#000",
@@ -50,23 +66,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             consumeValue = !!reader.consumeOptional(":");
         let value;
         if (!consumeValue) {
-            value = {
-                type: "text",
-                content: [type.initialValue],
-                position: constants_1.INTERNAL_POSITION,
-                valueType: ChiriType_1.ChiriType.of("string"),
-            };
+            value = [{
+                    type: "text",
+                    content: [type.initialValue],
+                    position: constants_1.INTERNAL_POSITION,
+                    valueType: ChiriType_1.ChiriType.of("string"),
+                }];
         }
         else {
             const position = reader.getPosition();
             const textBody = await (0, consumeBody_1.default)(reader, "text");
-            value = {
-                type: "text",
-                position,
-                valueType: ChiriType_1.ChiriType.of("string"),
-                ...textBody.content[0],
-                content: textBody.content.flatMap(text => text.content),
-            };
+            value = textBody.content;
         }
         if (type)
             return {

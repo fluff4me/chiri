@@ -179,10 +179,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         setExport() {
         }
-        async read(configuredConsumer = this.consumeBodyDefault) {
-            const consumer = async () => undefined
-                ?? await configuredConsumer(this)
-                ?? await (0, consumeMacroUseOptional_1.default)(this);
+        async read(configuredConsumer) {
+            const consumer = async () => {
+                const macroResult = await (0, consumeMacroUseOptional_1.default)(this, (configuredConsumer ? undefined : this.#isSubReader ? "generic" : "root"));
+                if (!configuredConsumer)
+                    return this.consumeBodyDefault(macroResult);
+                return macroResult ?? await configuredConsumer(this);
+            };
             try {
                 if (!this.#multiline) {
                     (0, consumeWhiteSpaceOptional_1.default)(this);
@@ -204,8 +207,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         this.#statements.push(...Arrays_1.default.resolve(consumed).filter(Arrays_1.default.filterNullish));
                     } while ((0, consumeNewBlockLineOptional_1.default)(this));
                     if (this.i < this.input.length)
-                        if (!(0, consumeBlockEnd_1.default)(this))
-                            throw this.error("Expected block end");
+                        (0, consumeBlockEnd_1.default)(this);
                 }
                 if (!this.#isSubReader && this.i < this.input.length)
                     throw this.error("Failed to continue parsing input file");
@@ -221,16 +223,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 statements: this.#statements,
             };
         }
-        async consumeBodyDefault() {
-            const documentation = (0, consumeDocumentationOptional_1.default)(this);
-            if (documentation)
-                return documentation;
-            const e = this.i;
+        async consumeBodyDefault(macro) {
             ////////////////////////////////////
             //#region Macro
-            const macro = await (0, consumeMacroUseOptional_1.default)(this, this.#isSubReader ? "generic" : "root");
-            if (macro?.type === "variable")
-                return macro;
             if (macro?.type === "import") {
                 for (const imp of macro.paths) {
                     const raw = (imp.module ? `${imp.module}:` : "") + imp.path;
@@ -269,6 +264,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             // 	throw this.error(e, `Macro result type "${(macro as MacroResult).type}" is not supported yet`)
             //#endregion
             ////////////////////////////////////
+            const documentation = (0, consumeDocumentationOptional_1.default)(this);
+            if (documentation)
+                // ignore documentation atm because it isn't set up right
+                return [];
             const mixin = await (0, consumeMixinOptional_1.default)(this);
             if (mixin)
                 return mixin;

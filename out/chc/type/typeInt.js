@@ -28,6 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return Math.trunc(value);
             throw error();
         },
+        is: value => typeof value === "number" && Number.isInteger(value),
     });
 });
 //# sourceMappingURL=typeInt.js.map

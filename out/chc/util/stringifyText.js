@@ -33,6 +33,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "interpolation-property":
                     result += `var(--${stringifyText(compiler, value.name)}${!value.defaultValue ? "" : `,${compiler.css.getSpaceOptional()}${stringifyText(compiler, value.defaultValue)}`})`;
                     continue;
+                case "interpolation-property-name":
+                    result += `--${stringifyText(compiler, value.name)}`;
+                    continue;
                 case "interpolation-variable":
                     result += (0, stringifyExpression_1.default)(compiler, compiler.getVariable(value.name.value, value.name.position));
                     continue;

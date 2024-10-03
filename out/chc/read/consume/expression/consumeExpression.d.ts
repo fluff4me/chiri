@@ -42,7 +42,15 @@ export interface ChiriPipeUseLeft {
     valueType: ChiriType;
     position: ChiriPosition;
 }
-export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText | ChiriFunctionCall | ChiriPipe | ChiriPipeUseLeft;
+export interface ChiriConditional {
+    type: "conditional";
+    condition: ChiriExpressionOperand;
+    ifTrue: ChiriExpressionOperand;
+    ifFalse: ChiriExpressionOperand;
+    valueType: ChiriType;
+    position: ChiriPosition;
+}
+export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText | ChiriFunctionCall | ChiriPipe | ChiriPipeUseLeft | ChiriConditional;
 export type ChiriExpressionResult = ChiriExpressionOperand | ChiriExpressionMatch;
 export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand;
 declare function consumeExpression(reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult>;

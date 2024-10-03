@@ -7,20 +7,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../constants", "../assert/assertNotWhiteSpaceAndNewLine", "./consumeBlockEnd", "./consumeBlockStartOptional", "./consumeIndentOptional", "./consumeNewBlockLineOptional", "./expression/consumeExpression"], factory);
+        define(["require", "exports", "../../../constants", "../../type/ChiriType", "../assert/assertNotWhiteSpaceAndNewLine", "./consumeBlockEnd", "./consumeBlockStartOptional", "./consumeCustomPropertyInterpolation", "./consumeIndentOptional", "./consumeNewBlockLineOptional", "./expression/consumeExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const constants_1 = require("../../../constants");
+    const ChiriType_1 = require("../../type/ChiriType");
     const assertNotWhiteSpaceAndNewLine_1 = __importDefault(require("../assert/assertNotWhiteSpaceAndNewLine"));
     const consumeBlockEnd_1 = __importDefault(require("./consumeBlockEnd"));
     const consumeBlockStartOptional_1 = __importDefault(require("./consumeBlockStartOptional"));
+    const consumeCustomPropertyInterpolation_1 = __importDefault(require("./consumeCustomPropertyInterpolation"));
     const consumeIndentOptional_1 = __importDefault(require("./consumeIndentOptional"));
     const consumeNewBlockLineOptional_1 = __importDefault(require("./consumeNewBlockLineOptional"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
     exports.default = (reader) => {
         const position = reader.getPosition();
+        if (reader.consumeOptional("$")) {
+            const isName = reader.consumeOptional("$");
+            const varType = isName ? "$$" : "$";
+            return {
+                type: "literal",
+                subType: "string",
+                valueType: ChiriType_1.ChiriType.of("string"),
+                segments: [
+                    {
+                        type: "text",
+                        valueType: ChiriType_1.ChiriType.of("string"),
+                        content: [
+                            (0, consumeCustomPropertyInterpolation_1.default)(reader, varType),
+                        ],
+                        position,
+                    },
+                ],
+                position,
+            };
+        }
         if (!reader.consumeOptional('"'))
             return undefined;
         (0, assertNotWhiteSpaceAndNewLine_1.default)(reader);

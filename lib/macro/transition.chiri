@@ -1,0 +1,6 @@
+#macro transition:
+	#body!text transitions
+
+	$transition-duration: $transition-blur
+	transition:
+		#include transitions

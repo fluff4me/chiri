@@ -19,6 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         type: ChiriType_1.ChiriType.of("string"),
         stringable: true,
         consumeOptionalConstructor: consumeStringOptional_1.default,
+        is: value => typeof value === "string",
     });
 });
 //# sourceMappingURL=typeString.js.map

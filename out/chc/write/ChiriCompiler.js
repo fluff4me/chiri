@@ -344,7 +344,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             css.writeLine("false;");
                             css.write("initial-value:");
                             css.writeSpaceOptional();
-                            css.writeTextInterpolated(compiler, statement.value);
+                            css.write(compileStatements(statement.value, undefined, compileText).join(""));
                             css.writeLine(";");
                         });
                     });
@@ -354,7 +354,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         css.emitProperty(compiler, {
                             ...statement,
                             property: resolveWord(statement.property),
-                            value: (0, stringifyText_1.default)(compiler, statement.value),
+                            value: compileStatements(statement.value, undefined, compileText).join(""),
                         });
                     });
                     return true;
@@ -471,7 +471,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return {
                         ...statement,
                         property: resolveWord(statement.property),
-                        value: (0, stringifyText_1.default)(compiler, statement.value),
+                        value: compileStatements(statement.value, undefined, compileText).join(""),
                     };
             }
         }
@@ -493,7 +493,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return {
                 ...property,
                 property: resolveWord(property.property),
-                value: (0, stringifyText_1.default)(compiler, property.value),
+                value: compileStatements(property.value, undefined, compileText).join(""),
             };
         }
         function emitMixin(mixin) {

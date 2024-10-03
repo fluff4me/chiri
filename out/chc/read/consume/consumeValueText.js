@@ -7,16 +7,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../type/ChiriType", "./consumeNewBlockLineOptional", "./consumeWhiteSpaceOptional", "./consumeWordInterpolated", "./expression/consumeExpression"], factory);
+        define(["require", "exports", "../../type/ChiriType", "./consumeCustomPropertyInterpolation", "./consumeNewBlockLineOptional", "./expression/consumeExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = consumeValueText;
     const ChiriType_1 = require("../../type/ChiriType");
+    const consumeCustomPropertyInterpolation_1 = __importDefault(require("./consumeCustomPropertyInterpolation"));
     const consumeNewBlockLineOptional_1 = __importDefault(require("./consumeNewBlockLineOptional"));
-    const consumeWhiteSpaceOptional_1 = __importDefault(require("./consumeWhiteSpaceOptional"));
-    const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
     function consumeValueText(reader, multiline, until) {
         const start = reader.getPosition();
@@ -32,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 text += " ";
                 continue;
             }
-            const varType = reader.consumeOptional("#{", "$");
+            const varType = reader.consumeOptional("#{", "$$", "$");
             if (!varType) {
                 const char = reader.input[reader.i];
                 if (char === stringChar) {
@@ -60,23 +59,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     text,
                 });
             }
-            if (varType === "$") {
-                const wrapped = reader.consumeOptional("{");
-                const property = (0, consumeWordInterpolated_1.default)(reader);
-                let defaultValue;
-                if (wrapped) {
-                    if (reader.consumeOptional(":")) {
-                        (0, consumeWhiteSpaceOptional_1.default)(reader);
-                        defaultValue = consumeValueText(reader, false, () => !!reader.peek("}"));
-                    }
-                    reader.consume("}");
-                }
-                content.push({
-                    type: "interpolation-property",
-                    name: property,
-                    defaultValue,
-                    position: property.position,
-                });
+            if (varType === "$" || varType === "$$") {
+                content.push((0, consumeCustomPropertyInterpolation_1.default)(reader, varType));
             }
             else {
                 content.push(consumeExpression_1.default.inline(reader));
@@ -98,5 +82,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             position: start,
         };
     }
+    consumeCustomPropertyInterpolation_1.default.consumeValueText = consumeValueText;
 });
 //# sourceMappingURL=consumeValueText.js.map

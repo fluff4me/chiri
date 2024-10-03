@@ -32,3 +32,7 @@ $space-5: 3rem
 	$background-#{i}: light-dark($light-#{i}, $dark-#{i})
 	$color-#{i}: light-dark($dark-#{i}, $light-#{i})
 	$colour-#{i}: light-dark($dark-#{i}, $light-#{i})
+
+$transition-focus: .1s
+$transition-action: .05s
+$transition-blur: .3s

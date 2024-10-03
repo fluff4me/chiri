@@ -5,7 +5,7 @@ import type { ArrayOr, PromiseOr } from "../util/Type";
 import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./consume/body/Contexts";
 import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional";
 import { type ChiriDocumentation } from "./consume/consumeDocumentationOptional";
-import type { ChiriMacroUse } from "./consume/consumeMacroUseOptional";
+import type { ChiriMacroUse, MacroResult } from "./consume/consumeMacroUseOptional";
 import type { ChiriMixin } from "./consume/consumeMixinOptional";
 import { type ChiriMixinUse } from "./consume/consumeMixinUseOptional";
 import type { ChiriPropertyDefinition } from "./consume/consumePropertyOptional";
@@ -18,7 +18,7 @@ import type { ChiriEach } from "./consume/macro/macroEach";
 import type { ChiriFor } from "./consume/macro/macroFor";
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration";
 import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf";
-import type { ChiriCSSImport } from "./consume/macro/macroImport";
+import type { ChiriCSSImport, ChiriImport } from "./consume/macro/macroImport";
 import type { ChiriInclude } from "./consume/macro/macroInclude";
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration";
 import type { ChiriReturn } from "./consume/macro/macroReturn";
@@ -31,7 +31,7 @@ export interface ChiriPosition {
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];
@@ -88,7 +88,7 @@ export default class ChiriReader {
     setExport(): void;
     read(): Promise<ChiriAST>;
     read<STATEMENT = ChiriStatement>(consumer: ChiriBodyConsumer<STATEMENT>): Promise<ChiriAST<STATEMENT>>;
-    consumeBodyDefault(): Promise<ChiriStatement | ChiriStatement[]>;
+    consumeBodyDefault(macro?: MacroResult): Promise<ChiriStatement | ChiriStatement[]>;
     logState(): void;
     logLine(start?: number, errOrMessage?: Error | string): void;
     formatFilename(): string;

@@ -43,6 +43,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             case "pipe-use-left":
                 return compiler.pipeValueStack.at(-1);
+            case "conditional":
+                return resolveExpression(compiler, expression.condition)
+                    ? resolveExpression(compiler, expression.ifTrue)
+                    : resolveExpression(compiler, expression.ifFalse);
             case "expression":
                 switch (expression.subType) {
                     case "unary": {
@@ -113,6 +117,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 return operandA >> operandB;
                             case ">>>":
                                 return operandA >>> operandB;
+                            case "is":
+                                return compiler.types.types[operandB].is?.(operandA) ?? false;
                             default:
                                 throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`);
                         }
