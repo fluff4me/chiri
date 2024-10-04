@@ -17,6 +17,16 @@ namespace Arrays {
 			array.splice(index, 0, value)
 		return array
 	}
+
+	export function assert<VALUE, IS extends VALUE> (error: (value: VALUE) => Error, guard: (value: VALUE, index: number, array: VALUE[]) => value is IS): (value: VALUE, index: number, array: VALUE[]) => value is IS {
+		return (value, index, array): value is IS => {
+			const is = guard(value, index, array)
+			if (!is)
+				throw error(value)
+
+			return true
+		}
+	}
 }
 
 export default Arrays

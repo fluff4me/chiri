@@ -43,7 +43,7 @@ import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
-import type { ChiriComponent } from "./consume/rule/Rule"
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState } from "./consume/rule/Rule"
 
 export interface ChiriPosition {
 	file: string
@@ -76,6 +76,10 @@ export type ChiriStatement =
 	| ChiriShorthand
 	| ChiriAlias
 	| ChiriPropertyDefinition
+	// component
+	| ChiriComponentCustomState
+	| ChiriComponentState
+	| ChiriComponentPseudo
 	// mixin
 	| ChiriProperty
 	// rule

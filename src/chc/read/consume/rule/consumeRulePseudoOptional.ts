@@ -3,34 +3,33 @@ import consumeBody from "../consumeBody"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWord from "../consumeWord"
-import type { ChiriComponent } from "./Rule"
+import type { ChiriComponentPseudo } from "./Rule"
 
-export default async (reader: ChiriReader): Promise<ChiriComponent | undefined> => {
+export default async (reader: ChiriReader): Promise<ChiriComponentPseudo | undefined> => {
 	const position = reader.getPosition()
 	const e = reader.i
-	const pseudoElements: ChiriWord[] = []
+	const pseudos: ChiriWord[] = []
 	do {
 		const prefix = reader.consumeOptional("@")
 		if (!prefix)
 			break
 
-		pseudoElements.push(consumeWord(reader, "before", "after"))
+		pseudos.push(consumeWord(reader, "before", "after"))
 	} while (reader.consumeOptional(",") && (consumeWhiteSpaceOptional(reader) || true))
 
-	if (!pseudoElements.length)
+	if (!pseudos.length)
 		return undefined
 
-	const duplicates = new Set(pseudoElements.map(e => e.value))
-	if (pseudoElements.length > 2 || duplicates.size !== pseudoElements.length)
+	const duplicates = new Set(pseudos.map(e => e.value))
+	if (pseudos.length > 2 || duplicates.size !== pseudos.length)
 		throw reader.error(e, "Duplicate pseudoelement selector")
 
 	reader.consume(":")
 
 	return {
 		type: "component",
-		className: undefined,
-		states: [],
-		pseudoElements,
+		subType: "pseudo",
+		pseudos,
 		...await consumeBody(reader, "pseudo"),
 		position,
 	}

@@ -4,9 +4,9 @@ import consumeBody from "../consumeBody"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWord from "../consumeWord"
-import type { ChiriComponent } from "./Rule"
+import type { ChiriComponentState } from "./Rule"
 
-export default async (reader: ChiriReader): Promise<ChiriComponent | undefined> => {
+export default async (reader: ChiriReader): Promise<ChiriComponentState | undefined> => {
 	const position = reader.getPosition()
 	const states: ChiriWord[] = []
 	do {
@@ -24,9 +24,8 @@ export default async (reader: ChiriReader): Promise<ChiriComponent | undefined> 
 
 	return {
 		type: "component",
-		className: undefined,
+		subType: "state",
 		states,
-		pseudoElements: [],
 		...await consumeBody(reader, "state"),
 		position,
 	}
