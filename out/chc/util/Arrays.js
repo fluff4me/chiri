@@ -28,6 +28,15 @@
             return array;
         }
         Arrays.insertBefore = insertBefore;
+        function assert(error, guard) {
+            return (value, index, array) => {
+                const is = guard(value, index, array);
+                if (!is)
+                    throw error(value);
+                return true;
+            };
+        }
+        Arrays.assert = assert;
     })(Arrays || (Arrays = {}));
     exports.default = Arrays;
 });

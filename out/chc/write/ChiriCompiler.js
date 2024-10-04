@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/Arrays", "../util/componentStates", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
+        define(["require", "exports", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/componentStates", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -17,7 +17,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("../type/ChiriType");
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const typeString_1 = __importDefault(require("../type/typeString"));
-    const Arrays_1 = __importDefault(require("../util/Arrays"));
     const componentStates_1 = require("../util/componentStates");
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const resolveExpression_1 = __importDefault(require("../util/resolveExpression"));
@@ -107,6 +106,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const variables = scopes[i].variables;
                 if (variables && name in variables)
                     return variables[name].value;
+            }
+            if (!optional)
+                throw error(position, `Variable ${name} is not defined`);
+        }
+        function getVariableType(name, position, optional = false) {
+            for (let i = scopes.length - 1; i >= 0; i--) {
+                const variables = scopes[i].variables;
+                if (variables && name in variables)
+                    return variables[name].type;
             }
             if (!optional)
                 throw error(position, `Variable ${name} is not defined`);
@@ -236,6 +244,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             position = typeof position === "string" ? undefined : position;
             return Object.assign(new Error(message ?? "Compilation failed for an unknown reason"), { position });
         }
+        function internalError(position, message) {
+            message = typeof position === "string" ? position : message;
+            position = typeof position === "string" ? undefined : position;
+            return error(position, `Internal Error: ${message ?? "Compilation failed for an unknown reason"}`);
+        }
         function logLine(position, message, stack = true, preview = true) {
             const err = message instanceof Error ? message : undefined;
             if (message instanceof Error) {
@@ -309,24 +322,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     if (!Array.isArray(components))
                         components = [components];
                     for (const component of components) {
-                        if (component.type === "state")
-                            throw error(component.states[0]?.position, "Internal Error: Unprocessed state");
-                        if (component.type === "pseudo")
-                            throw error(component.pseudos[0]?.position, "Internal Error: Unprocessed pseudo");
-                        es.write("\"");
-                        es.writeTextInterpolated(compiler, component.selector);
-                        es.write("\"");
-                        es.writeLineStartBlock(": [");
-                        for (const mixin of new Set(component.mixins)) {
-                            es.write("\"");
-                            es.writeWord(mixin);
-                            es.writeLine("\",");
+                        const visited = [];
+                        for (let i = 0; i < component.mixins.length; i++) {
+                            const mixin = useMixin(getMixin(component.mixins[i].value, component.mixins[i].position), visited);
+                            component.mixins[i] = mixin.name;
+                            visited.push(mixin);
                         }
-                        es.writeLineEndBlock("],");
-                        dts.write("\"");
-                        dts.writeTextInterpolated(compiler, component.selector);
-                        dts.write("\"");
-                        dts.writeLine(": string[],");
+                        for (const selector of component.selector) {
+                            es.write("\"");
+                            es.writeWord(selector);
+                            es.write("\"");
+                            es.writeLineStartBlock(": [");
+                            for (const mixin of new Set(component.mixins)) {
+                                es.write("\"");
+                                es.writeWord(mixin);
+                                es.writeLine("\",");
+                            }
+                            es.writeLineEndBlock("],");
+                            dts.write("\"");
+                            dts.writeWord(selector);
+                            dts.write("\"");
+                            dts.writeLine(": string[],");
+                        }
                     }
                     return true;
                 }
@@ -384,144 +401,160 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function compileComponent(statement) {
             if (statement.type !== "component")
                 return undefined;
-            const className = statement.className?.content ?? [];
-            const isStates = !!statement.states.length;
-            const isPseudos = !!statement.pseudoElements.length;
-            const states = !isStates ? [undefined] : statement.states;
-            const pseudos = !isPseudos ? [undefined] : statement.pseudoElements;
-            const containingSelector = selectorStack[selectorStack.length - 1];
-            const selector = !className.length ? containingSelector : {
-                type: "text",
-                valueType: ChiriType_1.ChiriType.of("string"),
-                content: !containingSelector ? className : [...containingSelector?.content ?? [], "-", ...className],
-                position: (statement.className?.position ?? statement.states?.[0]?.position ?? statement.pseudoElements?.[0]?.position),
-            };
+            const containingSelector = selectorStack.at(-1);
+            if (statement.subType === "component" || statement.subType === "custom-state") {
+                const selector = createSelector(undefined, {
+                    class: mergeWords(containingSelector?.class, statement.subType === "component" ? "-" : "--", statement.names),
+                });
+                const content = compileSelector(selector, statement.content, true);
+                const component = {
+                    type: "compiled-component",
+                    selector: selector.class,
+                    mixins: content.filter(item => item.type === "word"),
+                };
+                if ((component.mixins.some(m => m.value === "before") && component.mixins.some(m => m.value === "after")) || component.mixins.some(m => m.value === "before-after")) {
+                    component.mixins = component.mixins.filter(mixin => mixin.value !== "before-after");
+                    component.mixins.unshift({ type: "word", value: "before-after", position: constants_1.INTERNAL_POSITION });
+                }
+                if (component.mixins.some(m => m.value === "before-after"))
+                    component.mixins = component.mixins.filter(m => m.value !== "before" && m.value !== "after");
+                const components = content.filter(item => item.type === "compiled-component");
+                components.unshift(component);
+                return components;
+            }
+            let selector;
+            switch (statement.subType) {
+                case "state":
+                    selector = createSelector(containingSelector, {
+                        class: mergeWords(containingSelector?.class, "_", [getStatesClassNameAffix(statement.states)]),
+                        state: mergeWords(containingSelector?.state, ":", statement.states),
+                    });
+                    break;
+                case "pseudo":
+                    selector = createSelector(containingSelector, {
+                        class: mergeWords(containingSelector?.class, "_", [getPseudosClassNameAffix(statement.pseudos)]),
+                        pseudo: mergeWords(containingSelector?.pseudo, "::", statement.pseudos),
+                    });
+                    break;
+            }
+            const result = compileSelector(selector, statement.content);
+            if (statement.subType === "pseudo") {
+                const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-");
+                result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position });
+            }
+            return result;
+        }
+        function getStatesClassNameAffix(states) {
+            return !states.length ? "" : "_" + states
+                .map(state => state.value.startsWith(":") ? `${state.value.slice(1)}-any` : state.value)
+                .join("_");
+        }
+        function getPseudosClassNameAffix(pseudos) {
+            return !pseudos.length ? "" : "_" + pseudos
+                .map(pseudo => pseudo.value)
+                .join("-");
+        }
+        function compileSelector(selector, content, allowComponents = false) {
             selectorStack.push(selector);
-            const results = compileStatements(statement.content, undefined, compileComponentContent);
-            selectorStack.pop();
-            const components = results.filter(result => result.type === "component");
-            const properties = results.filter(result => result.type === "property");
-            let mixins = results.filter(result => result.type === "word");
-            const subStates = results.filter(result => result.type === "state");
-            const subPseudos = results.filter(result => result.type === "pseudo");
-            const componentSelectorString = (0, stringifyText_1.default)(compiler, selector);
+            const compiledContent = compileStatements(content, undefined, compileComponentContent);
+            const results = [];
             let propertyGroup;
             let groupIndex = 1;
-            for (const result of [...results, { type: "word" }]) {
-                switch (result.type) {
+            for (const item of [...compiledContent, { type: "end" }]) {
+                switch (item.type) {
+                    case "compiled-component":
+                        if (!allowComponents)
+                            throw internalError(item.selector[0].position, "Unexpected component in this context");
+                        results.push(item);
+                        break; // irrelevant for this mixin generation
                     case "property": {
+                        // a CSS property assignment rather than a mixin usage — add it to a group that will be made into a dynamic mixin
                         propertyGroup ??= [];
-                        propertyGroup.push(result);
+                        propertyGroup.push(item);
                         break;
                     }
+                    case "end":
                     case "word": {
-                        // mixin use (end group)
-                        if (!propertyGroup)
+                        // mixin use — end the dynamic mixin CSS property group, if it exists
+                        if (!propertyGroup?.length) {
+                            if (item.type === "word")
+                                results.push(item);
                             break;
-                        const position = groupIndex === 1 ? selector.position : properties[0].position;
-                        let stateName = "";
-                        for (const s of states)
-                            if (s)
-                                stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
-                        let pseudoName = "";
-                        for (const s of pseudos)
-                            if (s)
-                                pseudoName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
-                        const selfMixinName = { type: "word", value: `${componentSelectorString}${groupIndex === 1 ? "" : `_${groupIndex}`}${stateName}${pseudoName}`, position };
+                        }
+                        const position = propertyGroup[0].position;
+                        const nameString = `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`;
+                        const name = { type: "word", value: nameString, position };
                         setMixin({
                             type: "mixin",
-                            name: selfMixinName,
-                            states: states.map(state => state?.value),
-                            pseudos: pseudos.map(pseudo => pseudo?.value),
+                            name,
+                            states: selector.state.map(state => state?.value),
+                            pseudos: selector.pseudo.map(pseudo => pseudo?.value),
                             position,
-                            content: properties,
-                            affects: properties.flatMap(getPropertyAffects),
+                            content: propertyGroup,
+                            affects: propertyGroup.flatMap(getPropertyAffects),
                         });
-                        Arrays_1.default.insertBefore(mixins, selfMixinName, result);
+                        results.push(name);
                         propertyGroup = undefined;
                         groupIndex++;
+                        if (item.type === "word")
+                            results.push(item);
                     }
                 }
             }
-            for (const state of subStates) {
-                for (const name of state.mixins) {
-                    const mixin = getMixin(name.value, name.position);
-                    if (mixin.states.some(state => state)) {
-                        mixins.push(name);
-                        continue;
-                    }
-                    let stateName = "";
-                    for (const s of state.states)
-                        stateName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
-                    const stateMixinName = { type: "word", value: `${name.value}${stateName}`, position: mixin.name.position };
-                    if (!getMixin(stateMixinName.value, mixin.name.position, true))
-                        setMixin({
-                            ...mixin,
-                            name: stateMixinName,
-                            states: state.states.map(state => state?.value),
-                            affects: mixin.content.flatMap(getPropertyAffects),
-                        });
-                    mixins.push(stateMixinName);
-                }
-            }
-            for (const pseudo of subPseudos) {
-                mixins.push({ type: "word", value: `${pseudo.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("_")}`, position: pseudo.pseudos[0].position });
-                let pseudoName = "";
-                for (const s of pseudo.pseudos)
-                    pseudoName += "_" + (s.value.startsWith(":") ? `${s.value.slice(1)}-any` : s.value);
-                for (const name of pseudo.mixins) {
-                    const mixin = getMixin(name.value, name.position);
-                    if (mixin.pseudos.some(pseudo => pseudo)) {
-                        mixins.push(name);
-                        continue;
-                    }
-                    const pseudoMixinName = { type: "word", value: `${name.value}${pseudoName}`, position: mixin.name.position };
-                    if (!getMixin(pseudoMixinName.value, mixin.name.position, true))
-                        setMixin({
-                            ...mixin,
-                            name: pseudoMixinName,
-                            pseudos: pseudo.pseudos.map(pseudo => pseudo?.value),
-                            affects: mixin.content.flatMap(getPropertyAffects),
-                        });
-                    mixins.push(pseudoMixinName);
-                }
-            }
-            if (mixins.some(m => m.value === "before") && mixins.some(m => m.value === "after") && !mixins.some(m => m.value === "before_after"))
-                mixins.push({ type: "word", value: "before_after", position: constants_1.INTERNAL_POSITION });
-            if (mixins.some(m => m.value === "before_after"))
-                mixins = mixins.filter(m => m.value !== "before" && m.value !== "after");
-            if (!isStates) {
-                const visited = [];
-                for (let i = 0; i < mixins.length; i++) {
-                    const mixin = useMixin(getMixin(mixins[i].value, mixins[i].position), visited);
-                    mixins[i] = mixin.name;
-                    visited.push(mixin);
-                }
-            }
-            const component = {
-                type: isStates ? "state" : isPseudos ? "pseudo" : "component",
-                selector,
-                states,
-                pseudos,
-                mixins,
-            };
-            components.unshift(component);
-            return components;
+            selectorStack.pop();
+            return results;
         }
         function compileComponentContent(statement) {
-            const componentResults = compileComponent(statement);
+            const componentResults = compileComponent(statement, true);
             if (componentResults !== undefined)
                 return componentResults;
             switch (statement.type) {
-                case "mixin-use":
-                    return statement.name;
                 case "property":
                     return {
                         ...statement,
                         property: resolveWord(statement.property),
                         value: compileStatements(statement.value, undefined, compileText).join(""),
                     };
+                case "mixin-use": {
+                    let name = statement.name;
+                    const selector = selectorStack.at(-1);
+                    if (!selector)
+                        throw error(name.position, "Unable to use mixin here, no selector");
+                    if (!selector.state.length && !selector.pseudo.length)
+                        return name;
+                    if (selector.state.length)
+                        name = {
+                            type: "word",
+                            value: `${name.value}_${getStatesClassNameAffix(selector.state)}`,
+                            position: name.position,
+                        };
+                    if (selector.pseudo.length)
+                        name = {
+                            type: "word",
+                            value: `${name.value}_${getPseudosClassNameAffix(selector.pseudo)}`,
+                            position: name.position,
+                        };
+                    const existingMixin = getMixin(name.value, name.position, true);
+                    if (!existingMixin)
+                        setMixin({
+                            ...getMixin(statement.name.value, statement.name.position),
+                            name,
+                            states: selector.state.map(state => state?.value),
+                            pseudos: selector.pseudo.map(pseudo => pseudo?.value),
+                        });
+                    return name;
+                }
             }
+        }
+        function createSelector(selector, assignFrom) {
+            if (!selector && !assignFrom.class?.length)
+                throw internalError("Unable to construct a selector with no class name");
+            return {
+                type: "selector",
+                class: (assignFrom.class ?? selector?.class),
+                state: assignFrom.state ?? selector?.state ?? [],
+                pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
+            };
         }
         //#endregion
         ////////////////////////////////////
@@ -546,6 +579,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         function emitMixin(mixin) {
             let i = 0;
+            if (!mixin.states.length)
+                mixin.states.push(undefined);
+            if (!mixin.pseudos.length)
+                mixin.pseudos.push(undefined);
             for (const state of mixin.states) {
                 for (const pseudo of mixin.pseudos) {
                     if (i) {
@@ -617,11 +654,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const bodyParameter = fn.content.find((statement) => statement.type === "variable" && statement.valueType.name.value === "body");
                     if (bodyParameter) {
                         assignments.variables ??= {};
-                        const bodyType = bodyParameter.valueType.generics[0].name.value;
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         assignments.variables[bodyParameter.name.value] = {
                             type: bodyParameter.valueType,
-                            value: Object.assign(compileStatements(statement.content, undefined, getContextConsumer(bodyType)), { isBody: true }),
+                            value: Object.assign([...statement.content], { isBody: true }),
                         };
                     }
                     const result = compileStatements(fn.content, assignments, contextConsumer, end);
@@ -677,8 +713,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 case "do":
                     return compileStatements(statement.content, undefined, contextConsumer, end);
-                case "include":
-                    return getVariable(statement.name.value, statement.name.position) ?? [];
+                case "include": {
+                    const statements = getVariable(statement.name.value, statement.name.position) ?? [];
+                    const type = getVariableType(statement.name.value, statement.name.position);
+                    const bodyType = type.generics[0].name.value;
+                    return compileStatements(statements, undefined, getContextConsumer(bodyType));
+                }
             }
         }
         function getContextConsumer(context) {
@@ -753,7 +793,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     states: [undefined],
                     content: [blankContent],
                     affects: ["content"],
-                    name: { type: "word", value: "before_after", position: constants_1.INTERNAL_POSITION },
+                    name: { type: "word", value: "before-after", position: constants_1.INTERNAL_POSITION },
                     position: constants_1.INTERNAL_POSITION,
                 });
             }
@@ -789,7 +829,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (ended)
                     break;
                 if (result === undefined)
-                    throw error(statement.position, `Failed to compile ${debugStatementString(statement)}`);
+                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)}`);
             }
             if (scopes.length > 1) // don't remove the root scope once it's set up
                 scopes.pop();
@@ -799,9 +839,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const fn = getFunction(call.name.value, call.position);
             const result = compileStatements(fn.content, resolveAssignments(call.assignments), compileFunction);
             if (result.length > 1)
-                throw error(call.position, "Internal Error: Function call returned multiple values");
+                throw internalError(call.position, "Function call returned multiple values");
             if (result.length === 0)
-                throw error(call.position, "Internal Error: Function call did not return a value");
+                throw internalError(call.position, "Function call did not return a value");
             return result[0]?.value;
         }
         function getPropertyAffects(property) {
@@ -816,10 +856,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 .map(([name, expr]) => [name, { type: expr.valueType, value: (0, resolveExpression_1.default)(compiler, expr) }])));
         }
         function resolveWord(word) {
-            return {
+            return typeof word === "object" && word.type === "word" ? word : {
                 type: "word",
-                value: (0, stringifyText_1.default)(compiler, word).replace(/\W+/g, "-").toLowerCase(),
-                position: word.position,
+                value: typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word).replace(/[^\w-]+/g, "-").toLowerCase(),
+                position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
+            };
+        }
+        function mergeWords(words, separator, newSegment) {
+            return !words?.length ? newSegment.map(resolveWord) : words.flatMap(selector => newSegment.map((newSegment) => resolveWord({
+                type: "text",
+                valueType: ChiriType_1.ChiriType.of("string"),
+                content: [
+                    selector.value,
+                    ...!separator ? [] : [separator],
+                    ...typeof newSegment === "string" ? [newSegment] : newSegment.type === "word" ? [newSegment.value] : newSegment.content,
+                ],
+                position: typeof newSegment === "string" ? constants_1.INTERNAL_POSITION : newSegment.position,
+            })));
+        }
+        function mergeText(position, ...texts) {
+            return {
+                type: "text",
+                valueType: ChiriType_1.ChiriType.of("string"),
+                content: texts.flatMap(text => text.content),
+                position,
             };
         }
         function root() {

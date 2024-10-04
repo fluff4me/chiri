@@ -1,4 +1,4 @@
 import type ChiriReader from "../../ChiriReader";
-import type { ChiriComponent } from "./Rule";
-declare const _default: (reader: ChiriReader) => Promise<ChiriComponent | undefined>;
+import type { ChiriComponentPseudo } from "./Rule";
+declare const _default: (reader: ChiriReader) => Promise<ChiriComponentPseudo | undefined>;
 export default _default;

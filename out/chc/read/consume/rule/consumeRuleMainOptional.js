@@ -7,27 +7,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../consumeBody", "../consumeWordInterpolated"], factory);
+        define(["require", "exports", "../consumeBody", "../consumeWhiteSpaceOptional", "../consumeWordInterpolated"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeBody_1 = __importDefault(require("../consumeBody"));
+    const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordInterpolated_1 = __importDefault(require("../consumeWordInterpolated"));
     exports.default = async (reader) => {
         if (reader.context.type === "mixin")
             return undefined;
         const position = reader.getPosition();
-        const prefix = reader.consumeOptional(reader.context.type === "component" ? "&-" : ".");
-        if (!prefix)
-            return undefined;
-        const className = (0, consumeWordInterpolated_1.default)(reader, prefix === "&-");
+        const names = [];
+        let validPrefixes = reader.context.type === "component" ? ["&--", "&-"] : ["."];
+        do {
+            const prefix = reader.consumeOptional(...validPrefixes);
+            if (!prefix)
+                return undefined;
+            validPrefixes = [prefix]; // only allow one kind of prefix
+            names.push((0, consumeWordInterpolated_1.default)(reader));
+        } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
         reader.consume(":");
         return {
             type: "component",
-            className,
-            states: [],
-            pseudoElements: [],
+            subType: validPrefixes[0] === "&--" ? "custom-state" : "component",
+            names,
             ...await (0, consumeBody_1.default)(reader, "component"),
             position,
         };

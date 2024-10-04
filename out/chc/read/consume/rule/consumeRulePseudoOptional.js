@@ -18,24 +18,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = async (reader) => {
         const position = reader.getPosition();
         const e = reader.i;
-        const pseudoElements = [];
+        const pseudos = [];
         do {
             const prefix = reader.consumeOptional("@");
             if (!prefix)
                 break;
-            pseudoElements.push((0, consumeWord_1.default)(reader, "before", "after"));
+            pseudos.push((0, consumeWord_1.default)(reader, "before", "after"));
         } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
-        if (!pseudoElements.length)
+        if (!pseudos.length)
             return undefined;
-        const duplicates = new Set(pseudoElements.map(e => e.value));
-        if (pseudoElements.length > 2 || duplicates.size !== pseudoElements.length)
+        const duplicates = new Set(pseudos.map(e => e.value));
+        if (pseudos.length > 2 || duplicates.size !== pseudos.length)
             throw reader.error(e, "Duplicate pseudoelement selector");
         reader.consume(":");
         return {
             type: "component",
-            className: undefined,
-            states: [],
-            pseudoElements,
+            subType: "pseudo",
+            pseudos,
             ...await (0, consumeBody_1.default)(reader, "pseudo"),
             position,
         };

@@ -1,6 +1,9 @@
 #alias colour: color
 #alias background-colour: background-color
 #alias colour-scheme: color-scheme
+#alias size:
+	width
+	height
 
 #do:
 	#list!string properties = [

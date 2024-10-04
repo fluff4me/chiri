@@ -14,14 +14,14 @@ $weight-bold: 500
 $weight-bolder: 700
 
 $space-0: 0rem
-$space-1: 0.2rem
-$space-2: 0.4rem
-$space-3: 0.8rem
-$space-4: 1.6rem
-$space-5: 3rem
-$space-20: 20%
-$space-25: 25%
-$space-50: 50%
+$space-1: round(0.2rem, 1px)
+$space-2: round(0.4rem, 1px)
+$space-3: round(0.8rem, 1px)
+$space-4: round(1.6rem, 1px)
+$space-5: round(3rem, 1px)
+$space-20: round(20%, 1px)
+$space-25: round(25%, 1px)
+$space-50: round(50%, 1px)
 $space-100: 100%
 
 #for var i = 0, i <= 5, set i++:

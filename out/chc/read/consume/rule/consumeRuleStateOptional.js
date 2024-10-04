@@ -30,9 +30,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         reader.consume(":");
         return {
             type: "component",
-            className: undefined,
+            subType: "state",
             states,
-            pseudoElements: [],
             ...await (0, consumeBody_1.default)(reader, "state"),
             position,
         };

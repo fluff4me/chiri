@@ -236,17 +236,17 @@
 	#list!string units = ["em", "lh"]
 
 	#each units as var unit:
-		%width-#{unit}: width: 1#{unit}
-		%height-#{unit}: height: 1#{unit}
+		%width-#{unit}: width: round(1#{unit}, 1px)
+		%height-#{unit}: height: round(1#{unit}, 1px)
 		%size-#{unit}:
-			width: 1#{unit}
-			height: 1#{unit}
+			width: round(1#{unit}, 1px)
+			height: round(1#{unit}, 1px)
 
-		%width-constrain-#{unit}: max-width: 1#{unit}
-		%height-constrain-#{unit}: max-height: 1#{unit}
+		%width-constrain-#{unit}: max-width: round(1#{unit}, 1px)
+		%height-constrain-#{unit}: max-height: round(1#{unit}, 1px)
 		%size-constrain-#{unit}:
-			max-width: 1#{unit}
-			max-height: 1#{unit}
+			max-width: round(1#{unit}, 1px)
+			max-height: round(1#{unit}, 1px)
 
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold

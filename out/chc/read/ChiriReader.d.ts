@@ -25,13 +25,13 @@ import type { ChiriReturn } from "./consume/macro/macroReturn";
 import type { ChiriAssignment } from "./consume/macro/macroSet";
 import type { ChiriShorthand } from "./consume/macro/macroShorthand";
 import type { ChiriWhile } from "./consume/macro/macroWhile";
-import type { ChiriComponent } from "./consume/rule/Rule";
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState } from "./consume/rule/Rule";
 export interface ChiriPosition {
     file: string;
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriComponentCustomState | ChiriComponentState | ChiriComponentPseudo | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];
