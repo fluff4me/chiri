@@ -269,3 +269,29 @@
 %opacity-1: opacity: 1
 %transparency-1: opacity: 0
 %transparency-0: opacity: 1
+
+%z-index-0: z-index: 0
+%z-index-bg: z-index: -1
+
+%outline:
+	text-shadow:
+		#for var i = 0, i < 16, set i++:
+			#string angle = "#{i} * pi * 2 / 16
+			#string width = ${outline-width: 0.1em}
+			#string colour = ${outline-colour: ${outline-color: #000}}
+
+			calc(#{width} * cos(#{angle})) calc(#{width} * sin(#{angle}))
+			0
+			#{colour}
+			#{if i == 15: "" else: ","}
+
+#macro outline:
+	#string width?
+	#string colour?
+
+	#if width != _:
+		$outline-width: #{width}
+	#if colour != _:
+		$outline-colour: #{colour}
+
+	%outline

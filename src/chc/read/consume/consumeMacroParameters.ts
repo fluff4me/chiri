@@ -12,7 +12,7 @@ import type { ChiriMacroBase } from "./macro/MacroConstruct"
 
 export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 	const fnTypeSymbol = fn.type === "mixin" ? "%"
-		: fn.type === "function" || fn.type === "function:internal" ? "#"
+		: fn.type === "macro" || fn.type === "macro:internal" ? "#"
 			: "???"
 
 	const parameters = getFunctionParameters(fn)
@@ -85,7 +85,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 	do consumeParameterAssignment()
 	while (consumeParameterSeparatorOptional(reader))
 
-	const missing = parameters.filter(parameter => !parameter.expression && !assignments[parameter.name.value])
+	const missing = parameters.filter(parameter => !parameter.assignment && !(parameter.name.value in assignments))
 	if (missing.length)
 		throw reader.error(start, `Missing parameters for ${fnTypeSymbol}${fn.name.value}: ${parameters
 			.filter(param => !assignments[param.name.value])
