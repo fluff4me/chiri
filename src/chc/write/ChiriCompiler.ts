@@ -678,7 +678,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 		const results: (ChiriWord | Component)[] = []
 		let propertyGroup: ResolvedProperty[] | undefined
-		let groupIndex = 1
+		let groupIndex = 0
+		const getDedupedClassName = () => `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`
 		for (const item of [...compiledContent, { type: "end" as const }]) {
 			switch (item.type) {
 				case "compiled-component":
@@ -705,8 +706,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					}
 
 					const position = propertyGroup[0].position
-					const nameString = `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`
+					let nameString: string
+					do {
+						groupIndex++
+						nameString = getDedupedClassName()
+					} while (getMixin(nameString, position, true))
 					const name: ChiriWord = { type: "word", value: nameString, position }
+
 					setMixin({
 						type: "mixin",
 						name,
