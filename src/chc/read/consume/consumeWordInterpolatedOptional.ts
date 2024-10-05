@@ -9,10 +9,10 @@ export interface ChiriWordInterpolated extends ChiriValueText {
 	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[]
 }
 
-export default (reader: ChiriReader, allowDashStart = false): ChiriWordInterpolated | undefined => {
+export default (reader: ChiriReader, skipStartRequirements = false): ChiriWordInterpolated | undefined => {
 	const e = reader.i
 
-	if (!reader.isLetter() && !reader.peek("#{") && (!allowDashStart || !reader.peek("-")))
+	if (!reader.isLetter() && !reader.peek("#{") && (!skipStartRequirements || (!reader.peek("-") && !reader.isDigit())))
 		return undefined
 
 	const content: ChiriWordInterpolated["content"] = []

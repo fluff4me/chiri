@@ -20,7 +20,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponent | ChiriCompon
 			return undefined
 
 		validPrefixes = [prefix] // only allow one kind of prefix
-		names.push(consumeWordInterpolated(reader))
+		names.push(consumeWordInterpolated(reader, true))
 	} while (reader.consumeOptional(",") && (consumeWhiteSpaceOptional(reader) || true))
 
 	reader.consume(":")
