@@ -1,0 +1,4 @@
+#function alpha returns string:
+	#dec alpha
+	#raw colour
+	#return "color-mix(in lch, #{colour}, transparent #{(1 - alpha) * 100}%)

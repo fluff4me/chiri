@@ -1,5 +1,18 @@
 $font-scale-factor: 1
-$font-1: calc(0.8rem / $font-scale-factor)
+#do:
+	#list!dec font-sizes = [
+		0.8
+		1.0
+		1.2
+		1.5
+		2.0
+		3.0
+
+	#for var i = 0, i < font-sizes::length, set i++:
+		#dec font-size = font-sizes::at(i)
+		$font-#{i + 1}: calc(#{font-size}rem / $font-scale-factor)
+		$font-scaling-#{i + 1}: #{font-size}
+
 $font-2: calc(1rem / $font-scale-factor)
 $font-3: calc(1.2rem / $font-scale-factor)
 $font-4: calc(1.5rem / $font-scale-factor)
@@ -34,6 +47,7 @@ $space-100: 100%
 
 #for var i = 0, i <= 5, set i++:
 	$background-#{i}: light-dark($light-#{i}, $dark-#{i})
+	$background-interact-#{i}: light-dark($light-#{5 - i}, $dark-#{i})
 	$color-#{i}: light-dark($dark-#{i}, $light-#{i})
 	$colour-#{i}: light-dark($dark-#{i}, $light-#{i})
 
