@@ -260,8 +260,11 @@ export default class ChiriTypeManager {
 		for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion))
 			this.registerUnaryCoercion(operator as Operator, coercion)
 
-		for (const type of Object.keys(types) as (keyof typeof types)[])
+		for (const type of Object.keys(types) as (keyof typeof types)[]) {
 			this.registerBinaryOperator(type, "is", "string", "bool")
+			this.registerBinaryOperator(type, "==", "undefined", "bool")
+			this.registerBinaryOperator(type, "!=", "undefined", "bool")
+		}
 	}
 
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
