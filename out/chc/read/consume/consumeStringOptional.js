@@ -104,6 +104,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         position,
                     });
                     segments.push("");
+                    reader.i--;
                     break;
                 }
                 // case "$":
