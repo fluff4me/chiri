@@ -741,7 +741,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return {
 					...statement,
 					property: resolveWord(statement.property),
-					value: compileStatements(statement.value, undefined, compileText).join(""),
+					value: compileStatements(statement.value, undefined, compileText).join(" "),
 				}
 
 			case "mixin-use": {
@@ -815,7 +815,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return {
 			...property,
 			property: resolveWord(property.property),
-			value: compileStatements(property.value, undefined, compileText).join(""),
+			value: compileStatements(property.value, undefined, compileText).join(" "),
 		}
 	}
 
