@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
     exports.default = (reader, start, fn) => {
         const fnTypeSymbol = fn.type === "mixin" ? "%"
-            : fn.type === "function" || fn.type === "function:internal" ? "#"
+            : fn.type === "macro" || fn.type === "macro:internal" ? "#"
                 : "???";
         const parameters = (0, getFunctionParameters_1.default)(fn)
             .sort((a, b) => +!!a.expression - +!!b.expression)
@@ -82,7 +82,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         do
             consumeParameterAssignment();
         while (consumeParameterSeparatorOptional(reader));
-        const missing = parameters.filter(parameter => !parameter.expression && !assignments[parameter.name.value]);
+        const missing = parameters.filter(parameter => !parameter.assignment && !(parameter.name.value in assignments));
         if (missing.length)
             throw reader.error(start, `Missing parameters for ${fnTypeSymbol}${fn.name.value}: ${parameters
                 .filter(param => !assignments[param.name.value])

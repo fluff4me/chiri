@@ -207,8 +207,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.registerBinaryCoercion(operator, coercion);
             for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion))
                 this.registerUnaryCoercion(operator, coercion);
-            for (const type of Object.keys(types))
+            for (const type of Object.keys(types)) {
                 this.registerBinaryOperator(type, "is", "string", "bool");
+                this.registerBinaryOperator(type, "==", "undefined", "bool");
+                this.registerBinaryOperator(type, "!=", "undefined", "bool");
+            }
         }
         registerGenerics(...generics) {
             for (const type of generics) {

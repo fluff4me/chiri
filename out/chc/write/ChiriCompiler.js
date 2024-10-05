@@ -513,7 +513,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return {
                         ...statement,
                         property: resolveWord(statement.property),
-                        value: compileStatements(statement.value, undefined, compileText).join(""),
+                        value: compileStatements(statement.value, undefined, compileText).join(" "),
                     };
                 case "mixin-use": {
                     let name = statement.name;
@@ -574,7 +574,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return {
                 ...property,
                 property: resolveWord(property.property),
-                value: compileStatements(property.value, undefined, compileText).join(""),
+                value: compileStatements(property.value, undefined, compileText).join(" "),
             };
         }
         function emitMixin(mixin) {
