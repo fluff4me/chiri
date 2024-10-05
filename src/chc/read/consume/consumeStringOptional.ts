@@ -112,6 +112,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				})
 
 				segments.push("")
+				reader.i--
 				break
 			}
 			// case "$":
