@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!prefix)
                 return undefined;
             validPrefixes = [prefix]; // only allow one kind of prefix
-            names.push((0, consumeWordInterpolated_1.default)(reader));
+            names.push((0, consumeWordInterpolated_1.default)(reader, true));
         } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
         reader.consume(":");
         return {

@@ -1,16 +1,22 @@
 #macro font:
 	#string name
-	#uint weight-normal ??= 300
-	#uint weight-bold ??= 500
-	#uint weight-bolder ??= 700
+	#uint weight-normal ??= 400
+	#uint weight-bold ??= 600
+	#uint weight-bolder ??= 800
 	#dec scale-factor ??= 1
 	;; in em unit
 	#dec vertical-align ??= 0
+	;; in em unit
+	#dec letter-spacing ??= 0
 
 	%font-#{name}:
-		font-family: "#{name}"
 		$weight-normal: #{weight-normal}
 		$weight-bold: #{weight-bold}
 		$weight-bolder: #{weight-bolder}
 		$font-scale-factor: #{scale-factor}
 		$font-vertical-align: #{vertical-align}em
+		$font-letter-spacing: #{letter-spacing}em
+		font-family: "#{name}"
+		font-weight: $weight-normal
+		letter-spacing: $font-letter-spacing
+

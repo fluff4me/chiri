@@ -13,10 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeWordInterpolatedOptional_1 = __importDefault(require("./consumeWordInterpolatedOptional"));
-    exports.default = (reader, allowDashStart = false) => {
-        if (!reader.isLetter() && !reader.peek("#") && (!allowDashStart || !reader.peek("-")))
+    exports.default = (reader, skipStartRequirements = false) => {
+        if (!reader.isLetter() && !reader.peek("#") && (!skipStartRequirements || (!reader.peek("-") && !reader.isDigit())))
             throw reader.error("Words must start with a letter");
-        return (0, consumeWordInterpolatedOptional_1.default)(reader, allowDashStart);
+        return (0, consumeWordInterpolatedOptional_1.default)(reader, skipStartRequirements);
     };
 });
 //# sourceMappingURL=consumeWordInterpolated.js.map

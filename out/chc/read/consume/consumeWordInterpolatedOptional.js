@@ -14,9 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const ChiriType_1 = require("../../type/ChiriType");
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
-    exports.default = (reader, allowDashStart = false) => {
+    exports.default = (reader, skipStartRequirements = false) => {
         const e = reader.i;
-        if (!reader.isLetter() && !reader.peek("#{") && (!allowDashStart || !reader.peek("-")))
+        if (!reader.isLetter() && !reader.peek("#{") && (!skipStartRequirements || (!reader.peek("-") && !reader.isDigit())))
             return undefined;
         const content = [];
         const start = reader.getPosition();
