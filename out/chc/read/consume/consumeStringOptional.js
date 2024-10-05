@@ -81,11 +81,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                     break;
                 }
-                case "$":
-                case "`":
-                    appendSegment(pendingNewlines + `\\${char}`);
+                case "$": {
+                    appendSegment(pendingNewlines);
                     pendingNewlines = "";
+                    reader.i++;
+                    const isName = reader.consumeOptional("$");
+                    const varType = isName ? "$$" : "$";
+                    segments.push({
+                        type: "literal",
+                        subType: "string",
+                        valueType: ChiriType_1.ChiriType.of("string"),
+                        segments: [
+                            {
+                                type: "text",
+                                valueType: ChiriType_1.ChiriType.of("string"),
+                                content: [
+                                    (0, consumeCustomPropertyInterpolation_1.default)(reader, varType),
+                                ],
+                                position,
+                            },
+                        ],
+                        position,
+                    });
+                    segments.push("");
                     break;
+                }
+                // case "$":
+                // case "`":
+                // 	appendSegment(pendingNewlines + `\\${char}`)
+                // 	pendingNewlines = ""
+                // 	break
                 case "#": {
                     if (reader.input[reader.i + 1] !== "{") {
                         appendSegment(pendingNewlines + `${char}`);

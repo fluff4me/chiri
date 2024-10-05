@@ -13,13 +13,32 @@
 %sticky: position: sticky
 
 #for var i = 1, i <= 6, set i++:
-	%font-#{i}: font-size: $font-#{i}
+	%font-#{i}:
+		font-size: $font-#{i}
+		$font-scaling: $font-scaling-#{i}
 
 %font-inherit: font-size: inherit
 
+$$border-colour!colour: currentcolor
 %borderless: border: none
-%border-1: border: 1px solid
-%border-2: border: 2px solid
+#do:
+	#list!string border-properties = [
+		"border
+		"border-inline
+		"border-block
+		"border-top
+		"border-left
+		"border-right
+		"border-bottom
+
+	#each border-properties as var property:
+		%#{property}-1: #{property}: 1px solid $border-colour
+		%#{property}-2: #{property}: 2px solid $border-colour
+
+#string box-shadow-inset-border-1 = "inset 0 0 0 1px $border-colour
+#string box-shadow-inset-border-2 = "inset 0 0 0 2px $border-colour
+%inset-border-1: box-shadow: #{box-shadow-inset-border-1}
+%inset-border-2: box-shadow: #{box-shadow-inset-border-2}
 
 %font-vertical-align:
 	%relative
@@ -40,16 +59,27 @@
 		%bottom-#{i}: bottom: $space-#{i}
 
 		%padding-#{i}: padding: $space-#{i}
+		%padding-inline-#{i}: padding-inline: $space-#{i}
+		%padding-block-#{i}: padding-block: $space-#{i}
 		%padding-left-#{i}: padding-left: $space-#{i}
 		%padding-right-#{i}: padding-right: $space-#{i}
 		%padding-top-#{i}: padding-top: $space-#{i}
 		%padding-bottom-#{i}: padding-bottom: $space-#{i}
 
 		%margin-#{i}: margin: $space-#{i}
+		%margin-inline-#{i}: margin-inline: $space-#{i}
+		%margin-block-#{i}: margin-block: $space-#{i}
 		%margin-left-#{i}: margin-left: $space-#{i}
 		%margin-right-#{i}: margin-right: $space-#{i}
 		%margin-top-#{i}: margin-top: $space-#{i}
 		%margin-bottom-#{i}: margin-bottom: $space-#{i}
+		%unmargin-#{i}: margin: calc($space-#{i} * -1)
+		%unmargin-inline-#{i}: margin-inline: calc($space-#{i} * -1)
+		%unmargin-block-#{i}: margin-block: calc($space-#{i} * -1)
+		%unmargin-left-#{i}: margin-left: calc($space-#{i} * -1)
+		%unmargin-right-#{i}: margin-right: calc($space-#{i} * -1)
+		%unmargin-top-#{i}: margin-top: calc($space-#{i} * -1)
+		%unmargin-bottom-#{i}: margin-bottom: calc($space-#{i} * -1)
 
 		%width-#{i}: width: $space-#{i}
 		%height-#{i}: height: $space-#{i}
@@ -78,10 +108,13 @@
 
 
 #for var i = 0, i <= 5, set i++:
+	%color-#{i}: colour: light-dark($dark-#{i}, $light-#{i})
+	%colour-#{i}: colour: light-dark($dark-#{i}, $light-#{i})
 	%color-dark-#{i}: colour: $dark-#{i}
 	%colour-dark-#{i}: colour: $dark-#{i}
 	%color-light-#{i}: colour: $light-#{i}
 	%colour-light-#{i}: colour: $light-#{i}
+	%background-#{i}: background: light-dark($light-#{i}, $dark-#{i})
 	%background-dark-#{i}: background: $dark-#{i}
 	%background-light-#{i}: background: $light-#{i}
 
@@ -256,9 +289,12 @@
 
 %box-shadow-none: box-shadow: none
 %box-shadow-0: box-shadow: none
-%box-shadow-1: box-shadow: 0 $space-1 $space-1 calc($space-1 * -1) #000
-%box-shadow-2: box-shadow: 0 $space-2 $space-2 calc($space-1 * -1) #0005
-%box-shadow-inset-1: box-shadow: inset 0 $space-1 $space-1 calc($space-1 * -1) #000
+#string box-shadow-1 = "0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-2 = "0 $space-2 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
+#string box-shadow-inset-1 = "inset 0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+%box-shadow-1: box-shadow: #{box-shadow-1}
+%box-shadow-2: box-shadow: #{box-shadow-2}
+%box-shadow-inset-1: box-shadow: #{box-shadow-inset-1}
 
 %rotate-45: rotate: 45deg
 %rotate-135: rotate: 135deg
@@ -295,3 +331,5 @@
 		$outline-colour: #{colour}
 
 	%outline
+
+%text-shadow: text-shadow: 0 calc($space-1 * ($font-scaling / 3)) calc(($space-1 / 2) * ($font-scaling / 3)) light-dark(#0003, #0008)

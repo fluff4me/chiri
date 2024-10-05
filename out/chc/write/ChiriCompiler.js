@@ -459,7 +459,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const compiledContent = compileStatements(content, undefined, compileComponentContent);
             const results = [];
             let propertyGroup;
-            let groupIndex = 1;
+            let groupIndex = 0;
+            const getDedupedClassName = () => `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`;
             for (const item of [...compiledContent, { type: "end" }]) {
                 switch (item.type) {
                     case "compiled-component":
@@ -482,7 +483,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             break;
                         }
                         const position = propertyGroup[0].position;
-                        const nameString = `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`;
+                        let nameString;
+                        do {
+                            groupIndex++;
+                            nameString = getDedupedClassName();
+                        } while (getMixin(nameString, position, true));
                         const name = { type: "word", value: nameString, position };
                         setMixin({
                             type: "mixin",
