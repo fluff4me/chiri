@@ -87,11 +87,38 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				}
 				break
 			}
-			case "$":
-			case "`":
-				appendSegment(pendingNewlines + `\\${char}`)
+			case "$": {
+				appendSegment(pendingNewlines)
 				pendingNewlines = ""
+
+				reader.i++
+				const isName = reader.consumeOptional("$")
+				const varType = isName ? "$$" as const : "$" as const
+				segments.push({
+					type: "literal",
+					subType: "string",
+					valueType: ChiriType.of("string"),
+					segments: [
+						{
+							type: "text",
+							valueType: ChiriType.of("string"),
+							content: [
+								consumeCustomPropertyInterpolation(reader, varType),
+							],
+							position,
+						},
+					],
+					position,
+				})
+
+				segments.push("")
 				break
+			}
+			// case "$":
+			// case "`":
+			// 	appendSegment(pendingNewlines + `\\${char}`)
+			// 	pendingNewlines = ""
+			// 	break
 			case "#": {
 				if (reader.input[reader.i + 1] !== "{") {
 					appendSegment(pendingNewlines + `${char}`)
