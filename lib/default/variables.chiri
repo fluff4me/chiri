@@ -9,9 +9,9 @@ $font-6: calc(3rem / $font-scale-factor)
 #for var weight = 1, weight <= 9, set weight++:
 	$weight-#{weight}: #{weight * 100}
 
-$weight-normal: 300
-$weight-bold: 500
-$weight-bolder: 700
+$weight-normal: 400
+$weight-bold: 600
+$weight-bolder: 800
 
 $space-0: 0rem
 $space-1: round(0.2rem, 1px)
