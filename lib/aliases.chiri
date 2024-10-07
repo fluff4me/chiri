@@ -5,6 +5,10 @@
 	width
 	height
 
+#alias mask-image:
+	mask-image
+	-webkit-mask-image
+
 #do:
 	#list!string properties = [
 		"border"
