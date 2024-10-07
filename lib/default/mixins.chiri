@@ -12,6 +12,8 @@
 %fixed: position: fixed
 %sticky: position: sticky
 
+%box-sizing-border-box: box-sizing: border-box
+
 #for var i = 1, i <= 6, set i++:
 	%font-#{i}:
 		font-size: $font-#{i}
@@ -106,20 +108,49 @@ $$border-colour!colour: currentcolor
 			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 
+%margin-auto: margin: auto
+%margin-block-auto: margin-block: auto
+%margin-inline-auto: margin-inline: auto
+%margin-left-auto: margin-left: auto
+%margin-right-auto: margin-right: auto
+%margin-top-auto: margin-top: auto
+%margin-bottom-auto: margin-bottom: auto
 
 #for var i = 0, i <= 5, set i++:
-	%color-#{i}: colour: light-dark($dark-#{i}, $light-#{i})
-	%colour-#{i}: colour: light-dark($dark-#{i}, $light-#{i})
-	%color-dark-#{i}: colour: $dark-#{i}
-	%colour-dark-#{i}: colour: $dark-#{i}
-	%color-light-#{i}: colour: $light-#{i}
-	%colour-light-#{i}: colour: $light-#{i}
-	%background-#{i}: background: light-dark($light-#{i}, $dark-#{i})
-	%background-dark-#{i}: background: $dark-#{i}
-	%background-light-#{i}: background: $light-#{i}
+	#list!string background-properties = [
+		"background
+		"border-color
+		"border-colour
+		"border-block-color
+		"border-block-colour
+		"border-inline-color
+		"border-inline-colour
+		"border-left-color
+		"border-left-colour
+		"border-top-color
+		"border-top-colour
+		"border-bottom-color
+		"border-bottom-colour
+		"border-right-color
+		"border-right-colour
+
+	#each background-properties as var property:
+		%#{property}-#{i}: #{property}: light-dark($light-#{i}, $dark-#{i})
+		%#{property}-dark-#{i}: #{property}: $dark-#{i}
+		%#{property}-light-#{i}: #{property}: $light-#{i}
+
+	#list!string foreground-properties = [
+		"color
+		"colour
+
+	#each foreground-properties as var property:
+		%#{property}-#{i}: #{property}: light-dark($dark-#{i}, $light-#{i})
+		%#{property}-dark-#{i}: #{property}: $dark-#{i}
+		%#{property}-light-#{i}: #{property}: $light-#{i}
 
 %background-currentcolor: background: currentcolor
 %background-currentcolour: background: currentcolor
+%background-none: background: none
 
 %flex-column: flex-direction: column
 %flex-row: flex-direction: row
@@ -292,9 +323,15 @@ $$border-colour!colour: currentcolor
 #string box-shadow-1 = "0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
 #string box-shadow-2 = "0 $space-2 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
 #string box-shadow-inset-1 = "inset 0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-right-1 = "$space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-right-2 = "$space-2 0 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
+#string box-shadow-right-inset-1 = "inset $space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
 %box-shadow-1: box-shadow: #{box-shadow-1}
 %box-shadow-2: box-shadow: #{box-shadow-2}
 %box-shadow-inset-1: box-shadow: #{box-shadow-inset-1}
+%box-shadow-right-1: box-shadow: #{box-shadow-right-1}
+%box-shadow-right-2: box-shadow: #{box-shadow-right-2}
+%box-shadow-right-inset-1: box-shadow: #{box-shadow-right-inset-1}
 
 %rotate-45: rotate: 45deg
 %rotate-135: rotate: 135deg
@@ -333,3 +370,23 @@ $$border-colour!colour: currentcolor
 	%outline
 
 %text-shadow: text-shadow: 0 calc($space-1 * ($font-scaling / 3)) calc(($space-1 / 2) * ($font-scaling / 3)) light-dark(#0003, #0008)
+
+$$gradient-mask-height!length-percentage
+%gradient-mask:
+	mask-image: linear-gradient(to bottom, transparent 0%, black $gradient-mask-height, black calc(100% - $gradient-mask-height), transparent 100%)
+
+%overflow-hidden: overflow: hidden
+%overflow-auto: overflow: auto
+%overflow-scroll: overflow: scroll
+%overflow-auto-y:
+	overflow-x: hidden
+	overflow-y: auto
+%overflow-scroll-y:
+	overflow-x: hidden
+	overflow-y: scroll
+%overflow-auto-x:
+	overflow-x: auto
+	overflow-y: hidden
+%overflow-scroll-x:
+	overflow-x: scroll
+	overflow-y: hidden

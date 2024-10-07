@@ -19,6 +19,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     // https://developer.mozilla.org/en-US/docs/Web/CSS/@property
     const customPropertyDefinitionTypes = {
+        "length-percentage": {
+            syntax: "<length-percentage>",
+            initialValue: "0px",
+        },
+        length: {
+            syntax: "<length>",
+            initialValue: "0px",
+        },
+        percentage: {
+            syntax: "<percentage>",
+            initialValue: "0%",
+        },
         number: {
             syntax: "<number>",
             initialValue: "0",
@@ -47,7 +59,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const typeNames = Object.keys(customPropertyDefinitionTypes);
     exports.default = async (reader) => {
         const e = reader.i;
-        if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
+        if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#" && reader.input[reader.i] !== "-")
             return undefined;
         if (reader.input[reader.i] === "#" && reader.input[reader.i + 1] !== "{")
             return undefined;
@@ -56,7 +68,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const isCustomPropertyDefinition = isCustomProperty && reader.consumeOptional("$");
         if (isCustomPropertyDefinition && reader.context.type !== "root")
             throw reader.error("Custom property definitions must be in the root context");
-        const property = (0, consumeWordInterpolated_1.default)(reader);
+        const property = (0, consumeWordInterpolated_1.default)(reader, true);
         const typeWord = !isCustomPropertyDefinition ? undefined
             : reader.consume("!") && (0, consumeWord_1.default)(reader, ...typeNames);
         const type = !typeWord ? undefined : customPropertyDefinitionTypes[typeWord.value];
