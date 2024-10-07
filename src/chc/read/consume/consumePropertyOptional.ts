@@ -33,6 +33,18 @@ interface CustomPropertyDefinitionType {
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/@property
 const customPropertyDefinitionTypes = {
+	"length-percentage": {
+		syntax: "<length-percentage>",
+		initialValue: "0px",
+	},
+	length: {
+		syntax: "<length>",
+		initialValue: "0px",
+	},
+	percentage: {
+		syntax: "<percentage>",
+		initialValue: "0%",
+	},
 	number: {
 		syntax: "<number>",
 		initialValue: "0",
