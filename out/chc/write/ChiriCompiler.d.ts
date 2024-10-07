@@ -1,24 +1,16 @@
 import type { ChiriAST, ChiriPosition } from "../read/ChiriReader";
-import type { ChiriMixin } from "../read/consume/consumeMixinOptional";
-import type { ChiriWord } from "../read/consume/consumeWord";
 import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional";
 import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration";
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration";
 import { ChiriType } from "../type/ChiriType";
 import ChiriTypeManager from "../type/ChiriTypeManager";
-import { type ComponentState } from "../util/componentStates";
 import type { Value } from "../util/resolveExpression";
-import type { ResolvedProperty } from "./CSSWriter";
+import type { ResolvedMixin } from "./CSSWriter";
 import CSSWriter from "./CSSWriter";
 import DTSWriter from "./DTSWriter";
 import ESWriter from "./ESWriter";
 import type Writer from "./Writer";
-interface PreRegisteredMixin extends Omit<ChiriMixin, "content" | "name"> {
-    states: (ComponentState | undefined)[];
-    pseudos: ("before" | "after" | undefined)[];
-    name: ChiriWord;
-    content: ResolvedProperty[];
-    affects: string[];
+interface PreRegisteredMixin extends Omit<ResolvedMixin, "index"> {
 }
 interface ErrorPositioned extends Error {
     position?: ChiriPosition;

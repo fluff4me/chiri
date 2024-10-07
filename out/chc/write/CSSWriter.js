@@ -30,13 +30,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "path", "../../args", "./Writer"], factory);
+        define(["require", "exports", "path", "../../args", "../util/componentStates", "./Writer"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const path_1 = __importDefault(require("path"));
     const args_1 = __importDefault(require("../../args"));
+    const componentStates_1 = require("../util/componentStates");
     const Writer_1 = __importStar(require("./Writer"));
     class CSSWriter extends Writer_1.default {
         currentSection = "default";
@@ -46,6 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             "root-properties": Writer_1.QueuedWrite.makeQueue(),
             "root-styles": Writer_1.QueuedWrite.makeQueue(),
             "default": this.outputQueue,
+            "animations": Writer_1.QueuedWrite.makeQueue(),
         };
         get queue() {
             return this.queues[this.currentSection];
@@ -75,6 +77,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.write(property.value);
                 this.writeLine(";");
             }
+        }
+        emitMixin(compiler, mixin) {
+            let i = 0;
+            if (!mixin.states.length)
+                mixin.states.push(undefined);
+            if (!mixin.pseudos.length)
+                mixin.pseudos.push(undefined);
+            for (const state of mixin.states) {
+                for (const pseudo of mixin.pseudos) {
+                    if (i) {
+                        this.write(",");
+                        this.writeSpaceOptional();
+                    }
+                    this.write(".");
+                    this.writeWord(mixin.name);
+                    if (state)
+                        this.write(componentStates_1.STATE_MAP[state]);
+                    if (pseudo)
+                        this.write(`::${pseudo}`);
+                    i++;
+                }
+            }
+            this.writeSpaceOptional();
+            this.writeLineStartBlock("{");
+            for (const property of mixin.content)
+                this.emitProperty(compiler, property);
+            this.writeLineEndBlock("}");
+        }
+        emitAnimation(compiler, animation) {
+            this.write("@keyframes ");
+            this.writeWord(animation.name);
+            this.writeSpaceOptional();
+            this.writeBlock(() => {
+                for (const keyframe of animation.content) {
+                    this.write(`${keyframe.at}%`);
+                    this.writeSpaceOptional();
+                    this.writeBlock(() => {
+                        for (const property of keyframe.content)
+                            this.emitProperty(compiler, property);
+                    });
+                }
+            });
         }
         onCompileEnd(compiler) {
             const headerQueue = Writer_1.QueuedWrite.makeQueue();

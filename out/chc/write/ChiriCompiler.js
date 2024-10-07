@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/componentStates", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
+        define(["require", "exports", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -17,7 +17,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("../type/ChiriType");
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const typeString_1 = __importDefault(require("../type/typeString"));
-    const componentStates_1 = require("../util/componentStates");
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const resolveExpression_1 = __importDefault(require("../util/resolveExpression"));
     const stringifyExpression_1 = __importDefault(require("../util/stringifyExpression"));
@@ -43,6 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const scopes = [];
         const selectorStack = [];
         const usedMixins = {};
+        const components = {};
         let usedMixinIndex = 0;
         let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
@@ -86,7 +86,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     writer.onCompileStart(compiler);
                 compileStatements(ast.statements, undefined, statement => compileRoot(statement));
                 for (const mixin of Object.values(usedMixins))
-                    emitMixin(mixin);
+                    css.emitMixin(compiler, mixin);
+                for (const animation of Object.values(root().animations ?? {}))
+                    css.emitAnimation(compiler, animation);
+                for (const component of Object.values(components))
+                    es.emitComponent(compiler, component);
                 for (const writer of writers)
                     writer.onCompileEnd(compiler);
             }
@@ -239,6 +243,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const aliases = root().aliases ??= {};
             aliases[property] = properties;
         }
+        //#endregion
+        ////////////////////////////////////
+        ////////////////////////////////////
+        //#region Animations
+        function setAnimation(animation) {
+            const animations = root().animations ??= {};
+            if (animations[animation.name.value])
+                throw error(animation.position, `Cannot redefine animation "${animation.name.value}"`);
+            animations[animation.name.value] = animation;
+        }
         function error(position, message) {
             message = typeof position === "string" ? position : message;
             position = typeof position === "string" ? undefined : position;
@@ -316,12 +330,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return true;
                 }
                 case "component": {
-                    let components = compileComponent(statement);
-                    if (components === undefined)
+                    let results = compileComponent(statement);
+                    if (results === undefined)
                         return undefined;
-                    if (!Array.isArray(components))
-                        components = [components];
-                    for (const component of components) {
+                    if (!Array.isArray(results))
+                        results = [results];
+                    for (const component of results) {
                         const visited = [];
                         for (let i = 0; i < component.mixins.length; i++) {
                             const mixin = useMixin(getMixin(component.mixins[i].value, component.mixins[i].position), visited);
@@ -329,16 +343,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             visited.push(mixin);
                         }
                         for (const selector of component.selector) {
-                            es.write("\"");
-                            es.writeWord(selector);
-                            es.write("\"");
-                            es.writeLineStartBlock(": [");
-                            for (const mixin of new Set(component.mixins)) {
-                                es.write("\"");
-                                es.writeWord(mixin);
-                                es.writeLine("\",");
-                            }
-                            es.writeLineEndBlock("],");
+                            const registered = components[selector.value] ??= {
+                                selector,
+                                mixins: [],
+                            };
+                            registered.mixins.push(...component.mixins.map(mixin => mixin.value));
                             dts.write("\"");
                             dts.writeWord(selector);
                             dts.write("\"");
@@ -582,33 +591,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 value: compileStatements(property.value, undefined, compileText).join(" "),
             };
         }
-        function emitMixin(mixin) {
-            let i = 0;
-            if (!mixin.states.length)
-                mixin.states.push(undefined);
-            if (!mixin.pseudos.length)
-                mixin.pseudos.push(undefined);
-            for (const state of mixin.states) {
-                for (const pseudo of mixin.pseudos) {
-                    if (i) {
-                        css.write(",");
-                        css.writeSpaceOptional();
-                    }
-                    css.write(".");
-                    css.writeWord(mixin.name);
-                    if (state)
-                        css.write(componentStates_1.STATE_MAP[state]);
-                    if (pseudo)
-                        css.write(`::${pseudo}`);
-                    i++;
-                }
-            }
-            css.writeSpaceOptional();
-            css.writeLineStartBlock("{");
-            for (const property of mixin.content)
-                css.emitProperty(compiler, property);
-            css.writeLineEndBlock("}");
-        }
         //#endregion
         ////////////////////////////////////
         ////////////////////////////////////
@@ -724,6 +706,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const bodyType = type.generics[0].name.value;
                     return compileStatements(statements, undefined, getContextConsumer(bodyType));
                 }
+                case "animation": {
+                    const name = resolveWord(statement.name);
+                    const keyframes = compileStatements(statement.content, undefined, compileKeyframes);
+                    setAnimation({
+                        ...statement,
+                        name,
+                        content: keyframes,
+                    });
+                    return [];
+                }
             }
         }
         function getContextConsumer(context) {
@@ -763,6 +755,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     end();
                     return { type: "result", value: (0, resolveExpression_1.default)(compiler, statement.expression) };
                 }
+            }
+        }
+        //#endregion
+        ////////////////////////////////////
+        ////////////////////////////////////
+        //#region Context: Animation
+        function compileKeyframes(statement) {
+            switch (statement.type) {
+                case "keyframe":
+                    return {
+                        ...statement,
+                        at: +(0, resolveExpression_1.default)(compiler, statement.at) || 0,
+                        content: compileStatements(statement.content, undefined, compileMixinContent),
+                    };
             }
         }
         //#endregion
@@ -834,7 +840,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (ended)
                     break;
                 if (result === undefined)
-                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)}`);
+                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name ?? "unknown"}"`);
             }
             if (scopes.length > 1) // don't remove the root scope once it's set up
                 scopes.pop();

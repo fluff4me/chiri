@@ -21,6 +21,8 @@
         "state",
         "pseudo",
         "property-name",
+        "keyframes",
+        "keyframe",
     ];
     exports.default = Contexts;
 });

@@ -10,9 +10,11 @@ declare const BodyRegistry: {
     component: undefined;
     state: undefined;
     pseudo: undefined;
+    keyframe: undefined;
     "property-name": BodyConsumer.Sync<import("../consumeWordInterpolatedOptional").ChiriWordInterpolated, []>;
     paths: BodyConsumer.Sync<import("../consumePathOptional").ChiriPath, []>;
     text: BodyConsumer.Sync<import("../consumeValueText").ChiriValueText, []>;
+    keyframes: BodyConsumer.Sync<Promise<import("../consumeKeyframe").ChiriKeyframe>, []>;
 };
 export default BodyRegistry;
 export type ContextStatement<CONTEXT extends ChiriContextType> = (typeof BodyRegistry)[CONTEXT] extends BodyConsumer<infer T, []> ? T : ChiriStatement;

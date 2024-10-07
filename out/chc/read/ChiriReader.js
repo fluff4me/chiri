@@ -278,10 +278,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const property = await (0, consumePropertyOptional_1.default)(this);
             if (property)
                 return property;
-            const rule = undefined
+            const rule = this.context.type === "keyframe" ? undefined : (undefined
                 ?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await (0, consumeRuleMainOptional_1.default)(this))
                 ?? (this.context.type === "pseudo" ? undefined : await (0, consumeRuleStateOptional_1.default)(this))
-                ?? await (0, consumeRulePseudoOptional_1.default)(this);
+                ?? await (0, consumeRulePseudoOptional_1.default)(this));
             if (rule)
                 return rule;
             return [];

@@ -41,6 +41,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.writeLineStartBlock(UMD_PREFIX);
             this.writeLineStartBlock("exports.default = {");
         }
+        emitComponent(compiler, component) {
+            this.write("\"");
+            this.writeWord(component.selector);
+            this.write("\"");
+            this.writeLineStartBlock(": [");
+            for (const mixin of new Set(component.mixins))
+                this.writeLine(`"${mixin}",`);
+            this.writeLineEndBlock("],");
+        }
         onCompileEnd(compiler) {
             this.writeLineEndBlock("};");
             this.writeLineEndBlock(UMD_SUFFIX);

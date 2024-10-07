@@ -5,6 +5,7 @@ import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
 import type { ContextStatement } from "../body/BodyRegistry";
 import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData, ResolveContextDataTuple } from "../body/Contexts";
 import type { ChiriWord } from "../consumeWord";
+import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
 import type { ChiriExpressionOperand } from "../expression/consumeExpression";
 export interface ChiriMacroBase {
     type: string;
@@ -18,24 +19,27 @@ export interface ChiriMacroInternal<T> extends ChiriMacroBase {
     consumeOptional<CONTEXT extends ChiriContextType>(reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<T | undefined>;
     consumeOptional(reader: ChiriReader, ...context: ChiriContextSpreadable): Promise<T | undefined>;
 }
-export interface ChiriMacroInternalConsumerInfo<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
     reader: ChiriReader;
     assignments: Record<string, ChiriExpressionOperand>;
     body: (BODY extends null ? never : BODY)[];
-    name: NAMED extends true ? ChiriWord : undefined;
+    name: NAMED extends "plain" ? ChiriWord : NAMED extends "interpolated" ? ChiriWordInterpolated : undefined;
     extra: EXTRA;
     position: ChiriPosition;
     start: number;
 }
-export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends boolean = false, EXTRA = never> = Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body">;
+type NameType = "plain" | "interpolated" | undefined;
+export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> = Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body">;
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>;
-export interface ChiriMacroInternalFactory<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
     usability(...types: ChiriContextType[]): this;
     consumeParameters<T>(consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>;
-    named(): ChiriMacroInternalFactory<true, BODY>;
+    named(): ChiriMacroInternalFactory<"plain", BODY>;
+    named(allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>;
     parameter(name: string, type: ChiriType, value?: ChiriExpressionOperand): this;
     body<CONTEXT extends ChiriContextTypeWithoutData>(context: CONTEXT): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>;
     body<CONTEXT extends ChiriContextTypeWithData>(context: CONTEXT, data: (info: ChiriMacroInternalBodyContextSupplierInfo<NAMED, EXTRA>) => ContextData[CONTEXT]): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>;
     consume<T>(consumer: (info: ChiriMacroInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriMacroInternal<T>;
 }
 export default function (macroName: string): ChiriMacroInternalFactory;
+export {};
