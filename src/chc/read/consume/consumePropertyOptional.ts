@@ -63,7 +63,7 @@ const typeNames = Object.keys(customPropertyDefinitionTypes) as (keyof typeof cu
 
 export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropertyDefinition | undefined> => {
 	const e = reader.i
-	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#")
+	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#" && reader.input[reader.i] !== "-")
 		return undefined
 
 	if (reader.input[reader.i] === "#" && reader.input[reader.i + 1] !== "{")
@@ -76,7 +76,7 @@ export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropert
 	if (isCustomPropertyDefinition && reader.context.type !== "root")
 		throw reader.error("Custom property definitions must be in the root context")
 
-	const property = consumeWordInterpolated(reader)
+	const property = consumeWordInterpolated(reader, true)
 
 	const typeWord = !isCustomPropertyDefinition ? undefined
 		: reader.consume("!") && consumeWord(reader, ...typeNames)
