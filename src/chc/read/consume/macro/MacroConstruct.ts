@@ -11,6 +11,7 @@ import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
 import consumeMacroParameters from "../consumeMacroParameters"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
+import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional"
 import consumeWordOptional from "../consumeWordOptional"
 import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 
@@ -28,25 +29,27 @@ export interface ChiriMacroInternal<T> extends ChiriMacroBase {
 	consumeOptional (reader: ChiriReader, ...context: ChiriContextSpreadable): Promise<T | undefined>
 }
 
-export interface ChiriMacroInternalConsumerInfo<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
 	reader: ChiriReader
 	assignments: Record<string, ChiriExpressionOperand>
 	body: (BODY extends null ? never : BODY)[]
-	name: NAMED extends true ? ChiriWord : undefined
+	name: NAMED extends "plain" ? ChiriWord : NAMED extends "interpolated" ? ChiriWordInterpolated : undefined
 	extra: EXTRA
 	position: ChiriPosition
 	start: number
 }
 
-export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends boolean = false, EXTRA = never> =
+type NameType = "plain" | "interpolated" | undefined
+export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> =
 	Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body">
 
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>
 
-export interface ChiriMacroInternalFactory<NAMED extends boolean = false, BODY = null, EXTRA = never> {
+export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
 	usability (...types: ChiriContextType[]): this
 	consumeParameters<T> (consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>
-	named (): ChiriMacroInternalFactory<true, BODY>
+	named (): ChiriMacroInternalFactory<"plain", BODY>
+	named (allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>
 	parameter (name: string, type: ChiriType, value?: ChiriExpressionOperand): this
 	body<CONTEXT extends ChiriContextTypeWithoutData> (context: CONTEXT): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
 	body<CONTEXT extends ChiriContextTypeWithData> (context: CONTEXT, data: (info: ChiriMacroInternalBodyContextSupplierInfo<NAMED, EXTRA>) => ContextData[CONTEXT]): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
@@ -56,7 +59,7 @@ export interface ChiriMacroInternalFactory<NAMED extends boolean = false, BODY =
 export default function (macroName: string): ChiriMacroInternalFactory {
 	const parameters: ChiriCompilerVariable[] = []
 	let parametersConsumer: ChiriMacroInternalParametersConsumer<any> | undefined
-	type ContextTuple = [ChiriContextType, ((info: ChiriMacroInternalBodyContextSupplierInfo<boolean, any>) => ContextData[ChiriContextType])?]
+	type ContextTuple = [ChiriContextType, ((info: ChiriMacroInternalBodyContextSupplierInfo<NameType, any>) => ContextData[ChiriContextType])?]
 	let bodyContext: ContextTuple | undefined
 	let named = false
 	let usability = Contexts.slice()
@@ -67,7 +70,7 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 		},
 		named () {
 			named = true
-			return this as ChiriMacroInternalFactory<boolean, any> as ChiriMacroInternalFactory<true, any>
+			return this as ChiriMacroInternalFactory<NameType, any>
 		},
 		consumeParameters (consumer) {
 			parametersConsumer = consumer
@@ -120,7 +123,7 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 					const extra = await parametersConsumer?.(reader) as never
 					const assignments = parametersConsumer ? {} : consumeMacroParameters(reader, start, macro)
 
-					const info: ChiriMacroInternalBodyContextSupplierInfo<false, never> & Partial<ChiriMacroInternalConsumerInfo<false, any, never>> = {
+					const info: ChiriMacroInternalBodyContextSupplierInfo<NameType, never> & Partial<ChiriMacroInternalConsumerInfo<NameType, any, never>> = {
 						reader,
 						assignments,
 						name: name as undefined,
@@ -134,7 +137,7 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 					const body = context ? await consumeBodyOptional(reader, ...[context.type, context.data] as ["generic", undefined]) : []
 					info.body = body
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-					const result = await consumer(info as ChiriMacroInternalConsumerInfo<false, any, never>)
+					const result = await consumer(info as ChiriMacroInternalConsumerInfo<NameType, any, never>)
 
 					if (!result)
 						reader.restorePosition(savedPosition)

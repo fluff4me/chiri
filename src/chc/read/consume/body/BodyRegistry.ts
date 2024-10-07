@@ -1,6 +1,7 @@
 import type { ChiriStatement } from "../../ChiriReader"
 import type BodyConsumer from "./BodyConsumer"
 import bodyFunction from "./bodyFunction"
+import bodyKeyframes from "./bodyKeyframes"
 import bodyPaths from "./bodyPaths"
 import bodyPropertyName from "./bodyPropertyName"
 import bodyText from "./bodyText"
@@ -15,9 +16,11 @@ const BodyRegistry = {
 	component: undefined,
 	state: undefined,
 	pseudo: undefined,
+	keyframe: undefined,
 	"property-name": bodyPropertyName,
 	paths: bodyPaths,
 	text: bodyText,
+	keyframes: bodyKeyframes,
 } satisfies Record<ChiriContextType, BodyConsumer<any, []> | undefined>
 
 export default BodyRegistry

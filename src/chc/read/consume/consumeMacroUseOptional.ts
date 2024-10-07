@@ -12,6 +12,8 @@ import consumeWordOptional from "./consumeWordOptional"
 import type { ChiriExpressionOperand } from "./expression/consumeExpression"
 import type { ChiriAlias } from "./macro/macroAlias"
 import macroAlias from "./macro/macroAlias"
+import type { ChiriAnimation } from "./macro/macroAnimation"
+import macroAnimation from "./macro/macroAnimation"
 import macroDebug from "./macro/macroDebug"
 import type { ChiriDo } from "./macro/macroDo"
 import macroDo from "./macro/macroDo"
@@ -54,6 +56,7 @@ export type MacroResult =
 	| ChiriElse
 	| ChiriInclude
 	| ChiriCSSImport
+	| ChiriAnimation
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
 export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
@@ -85,6 +88,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroIf.consumeOptional(reader, ...context)
 		?? await macroIfElse.consumeOptional(reader, ...context)
 		?? await macroElse.consumeOptional(reader, ...context)
+		?? await macroAnimation.consumeOptional(reader, ...context)
 		?? await macroInclude.consumeOptional(reader, ...context)
 		?? await consumeDeclaredUse(reader)
 		?? await consumeCompilerVariable(reader)

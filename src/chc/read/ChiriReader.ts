@@ -16,6 +16,7 @@ import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./
 import consumeBlockEnd from "./consume/consumeBlockEnd"
 import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional"
 import consumeDocumentationOptional, { type ChiriDocumentation } from "./consume/consumeDocumentationOptional"
+import type { ChiriKeyframe } from "./consume/consumeKeyframe"
 import type { ChiriMacroUse, MacroResult } from "./consume/consumeMacroUseOptional"
 import consumeMacroUseOptional from "./consume/consumeMacroUseOptional"
 import type { ChiriMixin } from "./consume/consumeMixinOptional"
@@ -28,6 +29,7 @@ import type { ChiriValueText } from "./consume/consumeValueText"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
 import type { ChiriAlias } from "./consume/macro/macroAlias"
+import type { ChiriAnimation } from "./consume/macro/macroAnimation"
 import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFor } from "./consume/macro/macroFor"
@@ -70,6 +72,7 @@ export type ChiriStatement =
 	| ChiriInclude
 	| ChiriCSSImport
 	| ChiriImport
+	| ChiriAnimation
 	// root
 	| ChiriComponent
 	| ChiriMixin
@@ -86,6 +89,8 @@ export type ChiriStatement =
 	| ChiriMixinUse
 	// shorthand
 	| ChiriWordInterpolated
+	// animation
+	| ChiriKeyframe
 	// debug
 	| ChiriValueText
 
@@ -408,10 +413,10 @@ export default class ChiriReader {
 		if (property)
 			return property
 
-		const rule = undefined
+		const rule = this.context.type === "keyframe" ? undefined : (undefined
 			?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await consumeRuleMainOptional(this))
 			?? (this.context.type === "pseudo" ? undefined : await consumeRuleStateOptional(this))
-			?? await consumeRulePseudoOptional(this)
+			?? await consumeRulePseudoOptional(this))
 		if (rule)
 			return rule
 
