@@ -318,6 +318,8 @@ $$border-colour!colour: currentcolor
 
 %no-select: user-select: none
 %user-select-none: user-select: none
+%no-pointer-events: pointer-events: none
+%pointer-events-none: pointer-events: none
 
 #do:
 	#list!string units = ["em", "lh"]
