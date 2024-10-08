@@ -28,6 +28,7 @@ import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePr
 import type { ChiriValueText } from "./consume/consumeValueText"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
+import type { ChiriAfter } from "./consume/macro/macroAfter"
 import type { ChiriAlias } from "./consume/macro/macroAlias"
 import type { ChiriAnimation } from "./consume/macro/macroAnimation"
 import type { ChiriDo } from "./consume/macro/macroDo"
@@ -79,13 +80,12 @@ export type ChiriStatement =
 	| ChiriShorthand
 	| ChiriAlias
 	| ChiriPropertyDefinition
-	// component
+	// component/mixin
 	| ChiriComponentCustomState
 	| ChiriComponentState
 	| ChiriComponentPseudo
-	// mixin
+	| ChiriAfter
 	| ChiriProperty
-	// rule
 	| ChiriMixinUse
 	// shorthand
 	| ChiriWordInterpolated

@@ -518,11 +518,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					results = [results]
 
 				for (const component of results) {
-					const visited: ResolvedMixin[] = []
+					const registeredMixins: ResolvedMixin[] = []
+					const visited: ResolvedMixin[] = component.after
 					for (let i = 0; i < component.mixins.length; i++) {
 						const mixin = useMixin(getMixin(component.mixins[i].value, component.mixins[i].position), visited)
 						component.mixins[i] = mixin.name
 						visited.push(mixin)
+						registeredMixins.push(mixin)
 					}
 
 					for (const selector of component.selector) {
@@ -530,7 +532,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 							selector,
 							mixins: [],
 						}
-						registered.mixins.push(...component.mixins.map(mixin => mixin.value))
+						registered.mixins.push(...registeredMixins)
 
 						dts.write("\"")
 						dts.writeWord(selector)
@@ -609,6 +611,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		type: "compiled-component"
 		selector: ChiriWord[]
 		mixins: ChiriWord[]
+		after: ResolvedMixin[]
+	}
+
+	interface ResolvedAfter {
+		type: "compiled-after"
+		selectors: ChiriWord[]
 	}
 
 	function compileComponent (statement: ChiriStatement): Component[] | undefined
@@ -629,6 +637,15 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				type: "compiled-component",
 				selector: selector.class,
 				mixins: content.filter(item => item.type === "word"),
+				after: content.filter(item => item.type === "compiled-after")
+					.flatMap(after => after.selectors)
+					.flatMap(selector => {
+						const afterComponent = components[selector.value]
+						if (!afterComponent)
+							throw error(selector.position, `Component .${selector.value} has not been defined`)
+
+						return afterComponent.mixins
+					}),
 			}
 
 			if ((component.mixins.some(m => m.value === "before") && component.mixins.some(m => m.value === "after")) || component.mixins.some(m => m.value === "before-after")) {
@@ -639,9 +656,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			if (component.mixins.some(m => m.value === "before-after"))
 				component.mixins = component.mixins.filter(m => m.value !== "before" && m.value !== "after")
 
-			const components = content.filter(item => item.type === "compiled-component")
-			components.unshift(component)
-			return components
+			const results = content.filter(item => item.type === "compiled-component")
+			results.unshift(component)
+			return results
 		}
 
 		let selector: ChiriSelector
@@ -685,17 +702,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function compileSelector (selector: ChiriSelector, content: ChiriStatement[]): ChiriWord[]
-	function compileSelector (selector: ChiriSelector, content: ChiriStatement[], allowComponents: true): (ChiriWord | Component)[]
+	function compileSelector (selector: ChiriSelector, content: ChiriStatement[], allowComponents: true): (ChiriWord | ResolvedAfter | Component)[]
 	function compileSelector (selector: ChiriSelector, content: ChiriStatement[], allowComponents = false) {
 		selectorStack.push(selector)
 		const compiledContent = compileStatements(content, undefined, compileComponentContent)
 
-		const results: (ChiriWord | Component)[] = []
+		const results: (ChiriWord | ResolvedAfter | Component)[] = []
 		let propertyGroup: ResolvedProperty[] | undefined
 		let groupIndex = 0
 		const getDedupedClassName = () => `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`
 		for (const item of [...compiledContent, { type: "end" as const }]) {
 			switch (item.type) {
+				case "compiled-after":
+					results.push(item)
+					break // irrelevant for this mixin generation
+
 				case "compiled-component":
 					if (!allowComponents)
 						throw internalError(item.selector[0].position, "Unexpected component in this context")
@@ -751,12 +772,18 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return results
 	}
 
-	function compileComponentContent (statement: ChiriStatement): ArrayOr<ChiriWord | ResolvedProperty | Component> | undefined {
+	function compileComponentContent (statement: ChiriStatement): ArrayOr<ChiriWord | ResolvedAfter | ResolvedProperty | Component> | undefined {
 		const componentResults = compileComponent(statement, true)
 		if (componentResults !== undefined)
 			return componentResults
 
 		switch (statement.type) {
+			case "after":
+				return {
+					type: "compiled-after",
+					selectors: statement.content.map(resolveWord),
+				}
+
 			case "property":
 				return {
 					...statement,

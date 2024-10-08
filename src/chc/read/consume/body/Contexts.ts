@@ -14,6 +14,7 @@ const Contexts = [
 	"property-name" as const,
 	"keyframes" as const,
 	"keyframe" as const,
+	"selectors" as const,
 ]
 
 export default Contexts
@@ -38,6 +39,7 @@ export interface ContextData {
 	text?: undefined
 	keyframes?: undefined
 	keyframe?: undefined
+	selectors?: undefined
 }
 
 type VerifyContexts = ContextData[ChiriContextType]

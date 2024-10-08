@@ -3,12 +3,13 @@ import args from "../../args"
 import type { ChiriAST } from "../read/ChiriReader"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type ChiriCompiler from "./ChiriCompiler"
+import type { ResolvedMixin } from "./CSSWriter"
 import type { ChiriWriteConfig } from "./Writer"
 import Writer from "./Writer"
 
 export interface ResolvedComponent {
 	selector: ChiriWord
-	mixins: string[]
+	mixins: ResolvedMixin[]
 }
 
 const UMD_PREFIX = `
@@ -50,7 +51,7 @@ export default class ESWriter extends Writer {
 		this.write("\"")
 		this.writeLineStartBlock(": [")
 		for (const mixin of new Set(component.mixins))
-			this.writeLine(`"${mixin}",`)
+			this.writeLine(`"${mixin.name.value}",`)
 		this.writeLineEndBlock("],")
 	}
 
