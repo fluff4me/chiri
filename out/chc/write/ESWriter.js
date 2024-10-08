@@ -47,7 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.write("\"");
             this.writeLineStartBlock(": [");
             for (const mixin of new Set(component.mixins))
-                this.writeLine(`"${mixin}",`);
+                this.writeLine(`"${mixin.name.value}",`);
             this.writeLineEndBlock("],");
         }
         onCompileEnd(compiler) {

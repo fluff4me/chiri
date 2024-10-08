@@ -19,7 +19,9 @@
 		font-size: $font-#{i}
 		$font-scaling: $font-scaling-#{i}
 
-%font-inherit: font-size: inherit
+%font-inherit:
+	font-size: inherit
+	$font-scaling: inherit
 
 $$border-colour!colour: currentcolor
 %borderless: border: none

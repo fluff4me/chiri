@@ -30,7 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../util/getFunctionParameters", "./body/Contexts", "./consumeBodyOptional", "./consumeCompilerVariableOptional", "./consumeMacroParameters", "./consumeWordOptional", "./macro/macroAlias", "./macro/macroAnimation", "./macro/macroDebug", "./macro/macroDo", "./macro/macroEach", "./macro/macroExport", "./macro/macroFor", "./macro/macroFunctionDeclaration", "./macro/macroIf", "./macro/macroImport", "./macro/macroInclude", "./macro/macroMacroDeclaration", "./macro/macroSet", "./macro/macroShorthand", "./macro/macroWhile"], factory);
+        define(["require", "exports", "../../util/getFunctionParameters", "./body/Contexts", "./consumeBodyOptional", "./consumeCompilerVariableOptional", "./consumeMacroParameters", "./consumeWordOptional", "./macro/macroAfter", "./macro/macroAlias", "./macro/macroAnimation", "./macro/macroDebug", "./macro/macroDo", "./macro/macroEach", "./macro/macroExport", "./macro/macroFor", "./macro/macroFunctionDeclaration", "./macro/macroIf", "./macro/macroImport", "./macro/macroInclude", "./macro/macroMacroDeclaration", "./macro/macroSet", "./macro/macroShorthand", "./macro/macroWhile"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -42,6 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeCompilerVariableOptional_1 = __importDefault(require("./consumeCompilerVariableOptional"));
     const consumeMacroParameters_1 = __importDefault(require("./consumeMacroParameters"));
     const consumeWordOptional_1 = __importDefault(require("./consumeWordOptional"));
+    const macroAfter_1 = __importDefault(require("./macro/macroAfter"));
     const macroAlias_1 = __importDefault(require("./macro/macroAlias"));
     const macroAnimation_1 = __importDefault(require("./macro/macroAnimation"));
     const macroDebug_1 = __importDefault(require("./macro/macroDebug"));
@@ -82,6 +83,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             ?? await macroIf_1.macroIfElse.consumeOptional(reader, ...context)
             ?? await macroIf_1.macroElse.consumeOptional(reader, ...context)
             ?? await macroAnimation_1.default.consumeOptional(reader, ...context)
+            ?? await macroAfter_1.default.consumeOptional(reader, ...context)
             ?? await macroInclude_1.default.consumeOptional(reader, ...context)
             ?? await consumeDeclaredUse(reader)
             ?? await (0, consumeCompilerVariableOptional_1.default)(reader);

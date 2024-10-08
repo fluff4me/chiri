@@ -15,6 +15,7 @@ declare const BodyRegistry: {
     paths: BodyConsumer.Sync<import("../consumePathOptional").ChiriPath, []>;
     text: BodyConsumer.Sync<import("../consumeValueText").ChiriValueText, []>;
     keyframes: BodyConsumer.Sync<Promise<import("../consumeKeyframe").ChiriKeyframe>, []>;
+    selectors: BodyConsumer.Sync<import("../consumeWordInterpolatedOptional").ChiriWordInterpolated, []>;
 };
 export default BodyRegistry;
 export type ContextStatement<CONTEXT extends ChiriContextType> = (typeof BodyRegistry)[CONTEXT] extends BodyConsumer<infer T, []> ? T : ChiriStatement;

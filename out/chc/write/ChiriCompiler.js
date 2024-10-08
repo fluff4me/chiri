@@ -336,18 +336,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     if (!Array.isArray(results))
                         results = [results];
                     for (const component of results) {
-                        const visited = [];
+                        const registeredMixins = [];
+                        const visited = component.after;
                         for (let i = 0; i < component.mixins.length; i++) {
                             const mixin = useMixin(getMixin(component.mixins[i].value, component.mixins[i].position), visited);
                             component.mixins[i] = mixin.name;
                             visited.push(mixin);
+                            registeredMixins.push(mixin);
                         }
                         for (const selector of component.selector) {
                             const registered = components[selector.value] ??= {
                                 selector,
                                 mixins: [],
                             };
-                            registered.mixins.push(...component.mixins.map(mixin => mixin.value));
+                            registered.mixins.push(...registeredMixins);
                             dts.write("\"");
                             dts.writeWord(selector);
                             dts.write("\"");
@@ -420,6 +422,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "compiled-component",
                     selector: selector.class,
                     mixins: content.filter(item => item.type === "word"),
+                    after: content.filter(item => item.type === "compiled-after")
+                        .flatMap(after => after.selectors)
+                        .flatMap(selector => {
+                        const afterComponent = components[selector.value];
+                        if (!afterComponent)
+                            throw error(selector.position, `Component .${selector.value} has not been defined`);
+                        return afterComponent.mixins;
+                    }),
                 };
                 if ((component.mixins.some(m => m.value === "before") && component.mixins.some(m => m.value === "after")) || component.mixins.some(m => m.value === "before-after")) {
                     component.mixins = component.mixins.filter(mixin => mixin.value !== "before-after");
@@ -427,9 +437,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 if (component.mixins.some(m => m.value === "before-after"))
                     component.mixins = component.mixins.filter(m => m.value !== "before" && m.value !== "after");
-                const components = content.filter(item => item.type === "compiled-component");
-                components.unshift(component);
-                return components;
+                const results = content.filter(item => item.type === "compiled-component");
+                results.unshift(component);
+                return results;
             }
             let selector;
             switch (statement.subType) {
@@ -472,6 +482,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const getDedupedClassName = () => `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`;
             for (const item of [...compiledContent, { type: "end" }]) {
                 switch (item.type) {
+                    case "compiled-after":
+                        results.push(item);
+                        break; // irrelevant for this mixin generation
                     case "compiled-component":
                         if (!allowComponents)
                             throw internalError(item.selector[0].position, "Unexpected component in this context");
@@ -523,6 +536,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (componentResults !== undefined)
                 return componentResults;
             switch (statement.type) {
+                case "after":
+                    return {
+                        type: "compiled-after",
+                        selectors: statement.content.map(resolveWord),
+                    };
                 case "property":
                     return {
                         ...statement,

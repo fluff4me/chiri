@@ -23,6 +23,7 @@
         "property-name",
         "keyframes",
         "keyframe",
+        "selectors",
     ];
     exports.default = Contexts;
 });

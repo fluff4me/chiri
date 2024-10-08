@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./bodyFunction", "./bodyKeyframes", "./bodyPaths", "./bodyPropertyName", "./bodyText"], factory);
+        define(["require", "exports", "./bodyFunction", "./bodyKeyframes", "./bodyPaths", "./bodyPropertyName", "./bodySelectors", "./bodyText"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,6 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const bodyKeyframes_1 = __importDefault(require("./bodyKeyframes"));
     const bodyPaths_1 = __importDefault(require("./bodyPaths"));
     const bodyPropertyName_1 = __importDefault(require("./bodyPropertyName"));
+    const bodySelectors_1 = __importDefault(require("./bodySelectors"));
     const bodyText_1 = __importDefault(require("./bodyText"));
     const BodyRegistry = {
         function: bodyFunction_1.default,
@@ -31,6 +32,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         paths: bodyPaths_1.default,
         text: bodyText_1.default,
         keyframes: bodyKeyframes_1.default,
+        selectors: bodySelectors_1.default,
     };
     exports.default = BodyRegistry;
 });
