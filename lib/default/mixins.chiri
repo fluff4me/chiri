@@ -41,8 +41,27 @@ $$border-colour!colour: currentcolor
 
 #string box-shadow-inset-border-1 = "inset 0 0 0 1px $border-colour
 #string box-shadow-inset-border-2 = "inset 0 0 0 2px $border-colour
+#string box-shadow-inset-border-bottom-1 = "inset 0 -1px 0 0 $border-colour
 %inset-border-1: box-shadow: #{box-shadow-inset-border-1}
 %inset-border-2: box-shadow: #{box-shadow-inset-border-2}
+%inset-border-bottom-1: box-shadow: #{box-shadow-inset-border-bottom-1}
+
+%box-shadow-none: box-shadow: none
+%box-shadow-0: box-shadow: none
+#string box-shadow-1 = "0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-2 = "0 $space-2 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
+#string box-shadow-inset-1 = "inset 0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-inset-bottom-1 = "inset 0 calc($space-1 * -1) $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-right-1 = "$space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-right-2 = "$space-2 0 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
+#string box-shadow-right-inset-1 = "inset $space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+%box-shadow-1: box-shadow: #{box-shadow-1}
+%box-shadow-2: box-shadow: #{box-shadow-2}
+%box-shadow-inset-1: box-shadow: #{box-shadow-inset-1}
+%box-shadow-inset-bottom-1: box-shadow: #{box-shadow-inset-bottom-1}
+%box-shadow-right-1: box-shadow: #{box-shadow-right-1}
+%box-shadow-right-2: box-shadow: #{box-shadow-right-2}
+%box-shadow-right-inset-1: box-shadow: #{box-shadow-right-inset-1}
 
 %font-vertical-align:
 	%relative
@@ -316,24 +335,17 @@ $$border-colour!colour: currentcolor
 			max-width: round(1#{unit}, 1px)
 			max-height: round(1#{unit}, 1px)
 
+	#list!string content-sizes = ["fit", "max", "min"]
+	#each content-sizes as var size:
+		%width-#{size}: width: #{size}-content
+		%height-#{size}: height: #{size}-content
+		%size-#{size}:
+			width: #{size}-content
+			height: #{size}-content
+
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
-
-%box-shadow-none: box-shadow: none
-%box-shadow-0: box-shadow: none
-#string box-shadow-1 = "0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
-#string box-shadow-2 = "0 $space-2 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
-#string box-shadow-inset-1 = "inset 0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
-#string box-shadow-right-1 = "$space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
-#string box-shadow-right-2 = "$space-2 0 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
-#string box-shadow-right-inset-1 = "inset $space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
-%box-shadow-1: box-shadow: #{box-shadow-1}
-%box-shadow-2: box-shadow: #{box-shadow-2}
-%box-shadow-inset-1: box-shadow: #{box-shadow-inset-1}
-%box-shadow-right-1: box-shadow: #{box-shadow-right-1}
-%box-shadow-right-2: box-shadow: #{box-shadow-right-2}
-%box-shadow-right-inset-1: box-shadow: #{box-shadow-right-inset-1}
 
 %rotate-45: rotate: 45deg
 %rotate-135: rotate: 135deg
