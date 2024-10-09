@@ -11,12 +11,12 @@
     Object.defineProperty(exports, "__esModule", { value: true });
     const constants_1 = require("../../../constants");
     const ChiriType_1 = require("../../type/ChiriType");
-    exports.default = (bool, position = constants_1.INTERNAL_POSITION) => ({
+    exports.default = (string, position = constants_1.INTERNAL_POSITION) => ({
         type: "literal",
-        subType: "bool",
-        valueType: ChiriType_1.ChiriType.of("bool"),
-        value: bool,
+        subType: "string",
+        valueType: ChiriType_1.ChiriType.of("string"),
+        segments: typeof string === "string" ? [string] : string,
         position,
     });
 });
-//# sourceMappingURL=literalBool.js.map
+//# sourceMappingURL=makeLiteralString.js.map

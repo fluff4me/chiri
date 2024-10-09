@@ -33,6 +33,9 @@ export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = u
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>;
 export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
     usability(...types: ChiriContextType[]): this;
+    /**
+     * Note: This does not consume white space for you, in case the parameters are optional
+     */
     consumeParameters<T>(consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>;
     named(): ChiriMacroInternalFactory<"plain", BODY>;
     named(allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>;

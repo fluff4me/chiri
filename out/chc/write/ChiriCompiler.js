@@ -7,13 +7,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
+        define(["require", "exports", "../../ansi", "../../constants", "../read/factory/makeWord", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const ansi_1 = __importDefault(require("../../ansi"));
     const constants_1 = require("../../constants");
+    const makeWord_1 = __importDefault(require("../read/factory/makeWord"));
     const ChiriType_1 = require("../type/ChiriType");
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const typeString_1 = __importDefault(require("../type/typeString"));
@@ -43,6 +44,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const selectorStack = [];
         const usedMixins = {};
         const components = {};
+        const viewTransitions = [];
         let usedMixinIndex = 0;
         let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
@@ -89,6 +91,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     css.emitMixin(compiler, mixin);
                 for (const animation of Object.values(root().animations ?? {}))
                     css.emitAnimation(compiler, animation);
+                for (const viewTransition of viewTransitions)
+                    css.emitViewTransition(compiler, viewTransition);
                 for (const component of Object.values(components))
                     es.emitComponent(compiler, component);
                 for (const writer of writers)
@@ -247,11 +251,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         ////////////////////////////////////
         //#region Animations
-        function setAnimation(animation) {
+        function setAnimation(animation, dedupe = false) {
             const animations = root().animations ??= {};
-            if (animations[animation.name.value])
-                throw error(animation.position, `Cannot redefine animation "${animation.name.value}"`);
-            animations[animation.name.value] = animation;
+            let name = animation.name.value;
+            let i = 1;
+            while (animations[name]) {
+                if (!dedupe)
+                    throw error(animation.position, `Cannot redefine animation "${name}"`);
+                name = `${animation.name.value}_${++i}`;
+            }
+            animation.name.value = name;
+            animations[name] = animation;
+            return animation.name;
         }
         function error(position, message) {
             message = typeof position === "string" ? position : message;
@@ -441,17 +452,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 results.unshift(component);
                 return results;
             }
+            if (statement.subType === "view-transition") {
+                const viewTransitionName = !containingSelector ? "root" : [
+                    containingSelector.class.map(word => word.value).join("_"),
+                    getStatesNameAffix(containingSelector.pseudo),
+                    getPseudosNameAffix(containingSelector.pseudo),
+                ].filter(s => s).join("_");
+                const selector = createSelector(containingSelector, {
+                    class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
+                });
+                selectorStack.push(selector);
+                const content = compileStatements(statement.content, undefined, compileComponentContent);
+                selectorStack.pop();
+                const properties = [];
+                for (const item of content) {
+                    switch (item.type) {
+                        case "compiled-after":
+                            throw error("#after cannot be used in this context");
+                        case "compiled-component":
+                            throw error("Sub-component selectors cannot be used in this context");
+                        case "property":
+                            properties.push(item);
+                            continue;
+                        case "word": {
+                            const mixin = getMixin(item.value, item.position);
+                            properties.push(...mixin.content);
+                            continue;
+                        }
+                    }
+                }
+                viewTransitions.push({
+                    type: "view-transition",
+                    subTypes: statement.pseudos.map(w => w.value.slice(-3)),
+                    name: (0, makeWord_1.default)(viewTransitionName, statement.position),
+                    content: properties,
+                    position: statement.position,
+                });
+                return [{
+                        type: "property",
+                        property: (0, makeWord_1.default)("view-transition-name", statement.position),
+                        value: viewTransitionName,
+                        position: statement.position,
+                    }];
+            }
             let selector;
             switch (statement.subType) {
                 case "state":
                     selector = createSelector(containingSelector, {
-                        class: mergeWords(containingSelector?.class, "_", [getStatesClassNameAffix(statement.states)]),
+                        class: mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
                         state: mergeWords(containingSelector?.state, ":", statement.states),
                     });
                     break;
                 case "pseudo":
                     selector = createSelector(containingSelector, {
-                        class: mergeWords(containingSelector?.class, "_", [getPseudosClassNameAffix(statement.pseudos)]),
+                        class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
                         pseudo: mergeWords(containingSelector?.pseudo, "::", statement.pseudos),
                     });
                     break;
@@ -463,12 +517,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             return result;
         }
-        function getStatesClassNameAffix(states) {
+        function getStatesNameAffix(states) {
             return !states.length ? "" : "_" + states
                 .map(state => state.value.startsWith(":") ? `${state.value.slice(1)}-any` : state.value)
                 .join("_");
         }
-        function getPseudosClassNameAffix(pseudos) {
+        function getPseudosNameAffix(pseudos) {
             return !pseudos.length ? "" : "_" + pseudos
                 .map(pseudo => pseudo.value)
                 .join("-");
@@ -557,13 +611,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     if (selector.state.length)
                         name = {
                             type: "word",
-                            value: `${name.value}_${getStatesClassNameAffix(selector.state)}`,
+                            value: `${name.value}_${getStatesNameAffix(selector.state)}`,
                             position: name.position,
                         };
                     if (selector.pseudo.length)
                         name = {
                             type: "word",
-                            value: `${name.value}_${getPseudosClassNameAffix(selector.pseudo)}`,
+                            value: `${name.value}_${getPseudosNameAffix(selector.pseudo)}`,
                             position: name.position,
                         };
                     const existingMixin = getMixin(name.value, name.position, true);
@@ -575,6 +629,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
                         });
                     return name;
+                }
+                case "animate": {
+                    const selector = selectorStack.at(-1);
+                    if (!selector)
+                        throw error(statement.position, "#animate cannot be used in this context");
+                    const baseAnimationName = [
+                        selector.class.map(word => word.value).join("_"),
+                        getStatesNameAffix(selector.pseudo),
+                        getPseudosNameAffix(selector.pseudo),
+                    ].filter(s => s).join("_");
+                    const keyframes = compileStatements(statement.content, undefined, compileKeyframes);
+                    const dedupedName = setAnimation({
+                        type: "animation",
+                        name: (0, makeWord_1.default)(baseAnimationName, statement.position),
+                        content: keyframes,
+                        position: statement.position,
+                    }, true);
+                    return {
+                        type: "property",
+                        property: (0, makeWord_1.default)("animation", statement.position),
+                        value: `${(0, stringifyText_1.default)(compiler, statement.shorthand)} ${dedupedName.value}`,
+                        position: statement.position,
+                        merge: true,
+                    };
                 }
             }
         }

@@ -1,4 +1,4 @@
-import type { ChiriAST } from "../read/ChiriReader";
+import type { ChiriAST, ChiriPosition } from "../read/ChiriReader";
 import type { ChiriKeyframe } from "../read/consume/consumeKeyframe";
 import type { ChiriMixin } from "../read/consume/consumeMixinOptional";
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional";
@@ -11,6 +11,7 @@ import Writer, { QueuedWrite } from "./Writer";
 export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "value"> {
     property: ChiriWord;
     value: string;
+    merge?: true;
 }
 export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
     states: (ComponentState | undefined)[];
@@ -28,6 +29,13 @@ export interface ResolvedAnimationKeyframe extends Omit<ChiriKeyframe, "at" | "c
     at: number;
     content: ResolvedProperty[];
 }
+export interface ResolvedViewTransition {
+    type: "view-transition";
+    subTypes: ("old" | "new")[];
+    name: ChiriWord;
+    content: ResolvedProperty[];
+    position: ChiriPosition;
+}
 export type CSSDocumentSection = "imports" | "property-definitions" | "root-properties" | "root-styles" | "default" | "animations";
 export default class CSSWriter extends Writer {
     private currentSection;
@@ -39,5 +47,6 @@ export default class CSSWriter extends Writer {
     emitProperty(compiler: ChiriCompiler, property: ResolvedProperty): void;
     emitMixin(compiler: ChiriCompiler, mixin: ResolvedMixin): void;
     emitAnimation(compiler: ChiriCompiler, animation: ResolvedAnimation): void;
+    emitViewTransition(compiler: ChiriCompiler, viewTransition: ResolvedViewTransition): void;
     onCompileEnd(compiler: ChiriCompiler): void;
 }

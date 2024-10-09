@@ -7,13 +7,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../type/typeDec", "../factory/literalDec", "./consumeBody", "./consumeWordOptional", "./expression/consumeExpression", "./numeric/consumeDecimalOptional"], factory);
+        define(["require", "exports", "../../type/typeDec", "../factory/makeLiteralDec", "./consumeBody", "./consumeWordOptional", "./expression/consumeExpression", "./numeric/consumeDecimalOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const typeDec_1 = __importDefault(require("../../type/typeDec"));
-    const literalDec_1 = __importDefault(require("../factory/literalDec"));
+    const makeLiteralDec_1 = __importDefault(require("../factory/makeLiteralDec"));
     const consumeBody_1 = __importDefault(require("./consumeBody"));
     const consumeWordOptional_1 = __importDefault(require("./consumeWordOptional"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
@@ -32,8 +32,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     function consumeKeyframeAt(reader) {
         const keyword = (0, consumeWordOptional_1.default)(reader, "from", "to");
         switch (keyword?.value) {
-            case "from": return (0, literalDec_1.default)(0);
-            case "to": return (0, literalDec_1.default)(100);
+            case "from": return (0, makeLiteralDec_1.default)(0);
+            case "to": return (0, makeLiteralDec_1.default)(100);
         }
         const dec = (0, consumeDecimalOptional_1.default)(reader);
         if (dec) {

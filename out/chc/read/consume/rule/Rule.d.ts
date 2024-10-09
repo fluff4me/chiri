@@ -21,5 +21,9 @@ export interface ChiriComponentState extends ChiriComponentBase {
 }
 export interface ChiriComponentPseudo extends ChiriComponentBase {
     subType: "pseudo";
-    pseudos: ChiriWord[];
+    pseudos: ChiriWord<"before" | "after">[];
+}
+export interface ChiriComponentViewTransition extends ChiriComponentBase {
+    subType: "view-transition";
+    pseudos: ChiriWord<"view-transition!old" | "view-transition!new">[];
 }

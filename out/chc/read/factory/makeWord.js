@@ -4,19 +4,16 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../constants", "../../type/ChiriType"], factory);
+        define(["require", "exports", "../../../constants"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const constants_1 = require("../../../constants");
-    const ChiriType_1 = require("../../type/ChiriType");
-    exports.default = (uint, position = constants_1.INTERNAL_POSITION) => ({
-        type: "literal",
-        subType: "uint",
-        valueType: ChiriType_1.ChiriType.of("uint"),
-        value: `${uint}`,
+    exports.default = (value, position = constants_1.INTERNAL_POSITION) => ({
+        type: "word",
+        value,
         position,
     });
 });
-//# sourceMappingURL=literalUint.js.map
+//# sourceMappingURL=makeWord.js.map

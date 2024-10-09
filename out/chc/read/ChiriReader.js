@@ -350,7 +350,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 .replace(/\t/g, "\u2192"));
             throw this.error("Expected "
                 + (expected.length === 1 ? expected[0]
-                    : "any of" + expected.map(string => `"${string}"`).join(", ")));
+                    : "any of " + expected.map(string => `"${string}"`).join(", ")));
         }
         consumeOptional(...strings) {
             NextString: for (const string of strings) {

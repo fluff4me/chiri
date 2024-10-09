@@ -30,13 +30,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "path", "../../args", "../util/componentStates", "./Writer"], factory);
+        define(["require", "exports", "path", "../../args", "../read/factory/makeWord", "../util/componentStates", "./Writer"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const path_1 = __importDefault(require("path"));
     const args_1 = __importDefault(require("../../args"));
+    const makeWord_1 = __importDefault(require("../read/factory/makeWord"));
     const componentStates_1 = require("../util/componentStates");
     const Writer_1 = __importStar(require("./Writer"));
     class CSSWriter extends Writer_1.default {
@@ -101,7 +102,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             this.writeSpaceOptional();
             this.writeLineStartBlock("{");
-            for (const property of mixin.content)
+            for (const property of mergeProperties(mixin.content))
                 this.emitProperty(compiler, property);
             this.writeLineEndBlock("}");
         }
@@ -118,6 +119,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             this.emitProperty(compiler, property);
                     });
                 }
+            });
+        }
+        emitViewTransition(compiler, viewTransition) {
+            this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position));
+            if (viewTransition.subTypes[1]) {
+                this.write(",");
+                this.writeSpaceOptional();
+                this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position));
+            }
+            this.writeSpaceOptional();
+            this.writeBlock(() => {
+                for (const property of viewTransition.content)
+                    this.emitProperty(compiler, property);
             });
         }
         onCompileEnd(compiler) {
@@ -142,5 +156,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
     }
     exports.default = CSSWriter;
+    const alreadyEmitted = [];
+    function mergeProperties(properties) {
+        let mergeProperties;
+        let newProperties;
+        for (let i = 0; i < properties.length; i++) {
+            const property = properties[i];
+            if (!property.merge) {
+                delete mergeProperties?.[property.property.value];
+                newProperties?.push(property);
+                continue;
+            }
+            newProperties ??= properties.slice(0, i);
+            mergeProperties ??= {};
+            const mergeProperty = mergeProperties[property.property.value];
+            if (!mergeProperty) {
+                mergeProperties[property.property.value] = property;
+                newProperties.push(property);
+                continue;
+            }
+            mergeProperty.value = `${mergeProperty.value}, ${property.value}`;
+        }
+        properties = newProperties ?? properties;
+        newProperties = undefined;
+        alreadyEmitted.length = 0;
+        for (let i = properties.length - 1; i >= 0; i--) {
+            const property = properties[i];
+            if (alreadyEmitted.includes(property.property.value)) {
+                newProperties ??= properties.slice(i + 1);
+                continue;
+            }
+            newProperties?.unshift(property);
+            alreadyEmitted.push(property.property.value);
+        }
+        return newProperties ?? properties;
+    }
 });
 //# sourceMappingURL=CSSWriter.js.map

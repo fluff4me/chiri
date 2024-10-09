@@ -11,12 +11,11 @@
     Object.defineProperty(exports, "__esModule", { value: true });
     const constants_1 = require("../../../constants");
     const ChiriType_1 = require("../../type/ChiriType");
-    exports.default = (dec, position = constants_1.INTERNAL_POSITION) => ({
+    exports.default = (position = constants_1.INTERNAL_POSITION) => ({
         type: "literal",
-        subType: "dec",
-        valueType: ChiriType_1.ChiriType.of("dec"),
-        value: `${dec}`,
+        subType: "undefined",
+        valueType: ChiriType_1.ChiriType.of("undefined"),
         position,
     });
 });
-//# sourceMappingURL=literalDec.js.map
+//# sourceMappingURL=makeLiteralUndefined.js.map

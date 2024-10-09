@@ -7,37 +7,56 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../consumeBody", "../consumeWhiteSpaceOptional", "../consumeWord"], factory);
+        define(["require", "exports", "../consumeBody", "../consumeWhiteSpaceOptional", "../consumeWordOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeBody_1 = __importDefault(require("../consumeBody"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
-    const consumeWord_1 = __importDefault(require("../consumeWord"));
+    const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     exports.default = async (reader) => {
         const position = reader.getPosition();
         const e = reader.i;
-        const pseudos = [];
-        do {
-            const prefix = reader.consumeOptional("@");
-            if (!prefix)
-                break;
-            pseudos.push((0, consumeWord_1.default)(reader, "before", "after"));
-        } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
-        if (!pseudos.length)
+        const result = undefined
+            ?? consumePseudoType(reader, "pseudo", "before", "after")
+            ?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new");
+        if (!result)
             return undefined;
-        const duplicates = new Set(pseudos.map(e => e.value));
-        if (pseudos.length > 2 || duplicates.size !== pseudos.length)
+        const duplicates = new Set(result.pseudos.map(e => e.value));
+        if (result.pseudos.length > 2 || duplicates.size !== result.pseudos.length)
             throw reader.error(e, "Duplicate pseudoelement selector");
         reader.consume(":");
         return {
             type: "component",
-            subType: "pseudo",
-            pseudos,
+            subType: result.type,
+            pseudos: result.pseudos,
             ...await (0, consumeBody_1.default)(reader, "pseudo"),
             position,
         };
     };
+    function consumePseudoType(reader, type, ...pseudos) {
+        const restore = reader.savePosition();
+        const results = [];
+        do {
+            const prefix = reader.consumeOptional("@");
+            if (!prefix)
+                break;
+            const word = (0, consumeWordOptional_1.default)(reader, ...pseudos);
+            if (!word) {
+                reader.restorePosition(restore);
+                return undefined;
+            }
+            results.push(word);
+        } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
+        if (!results.length) {
+            reader.restorePosition(restore);
+            return undefined;
+        }
+        return {
+            type,
+            pseudos: results,
+        };
+    }
 });
 //# sourceMappingURL=consumeRulePseudoOptional.js.map

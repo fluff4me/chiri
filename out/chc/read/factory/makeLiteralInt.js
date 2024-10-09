@@ -19,4 +19,4 @@
         position,
     });
 });
-//# sourceMappingURL=literalInt.js.map
+//# sourceMappingURL=makeLiteralInt.js.map
