@@ -10,6 +10,7 @@ import type { ChiriExpressionResult } from "../read/consume/expression/consumeEx
 import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional"
 import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
+import makeWord from "../read/factory/makeWord"
 import { ChiriType } from "../type/ChiriType"
 import ChiriTypeManager from "../type/ChiriTypeManager"
 import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
@@ -22,7 +23,7 @@ import stringifyExpression from "../util/stringifyExpression"
 import stringifyText from "../util/stringifyText"
 import Strings from "../util/Strings"
 import type { ArrayOr } from "../util/Type"
-import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMixin, ResolvedProperty } from "./CSSWriter"
+import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMixin, ResolvedProperty, ResolvedViewTransition } from "./CSSWriter"
 import CSSWriter from "./CSSWriter"
 import DTSWriter from "./DTSWriter"
 import type { ResolvedComponent } from "./ESWriter"
@@ -120,6 +121,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	const selectorStack: ChiriSelector[] = []
 	const usedMixins: Record<string, ResolvedMixin> = {}
 	const components: Record<string, ResolvedComponent> = {}
+	const viewTransitions: ResolvedViewTransition[] = []
 	let usedMixinIndex = 0
 	let ifState = true
 
@@ -181,6 +183,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			for (const animation of Object.values(root().animations ?? {}))
 				css.emitAnimation(compiler, animation)
+
+			for (const viewTransition of viewTransitions)
+				css.emitViewTransition(compiler, viewTransition)
 
 			for (const component of Object.values(components))
 				es.emitComponent(compiler, component)
@@ -396,12 +401,20 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Animations
 
-	function setAnimation (animation: ResolvedAnimation) {
+	function setAnimation (animation: ResolvedAnimation, dedupe = false): ChiriWord {
 		const animations = root().animations ??= {}
-		if (animations[animation.name.value])
-			throw error(animation.position, `Cannot redefine animation "${animation.name.value}"`)
+		let name = animation.name.value
+		let i = 1
+		while (animations[name]) {
+			if (!dedupe)
+				throw error(animation.position, `Cannot redefine animation "${name}"`)
 
-		animations[animation.name.value] = animation
+			name = `${animation.name.value}_${++i}`
+		}
+
+		animation.name.value = name
+		animations[name] = animation
+		return animation.name
 	}
 
 	//#endregion
@@ -620,8 +633,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function compileComponent (statement: ChiriStatement): Component[] | undefined
-	function compileComponent (statement: ChiriStatement, allowMixins: true): (Component | ChiriWord)[] | undefined
-	function compileComponent (statement: ChiriStatement): (Component | ChiriWord)[] | undefined {
+	function compileComponent (statement: ChiriStatement, allowMixins: true): (Component | ChiriWord | ResolvedProperty)[] | undefined
+	function compileComponent (statement: ChiriStatement): (Component | ChiriWord | ResolvedProperty)[] | undefined {
 		if (statement.type !== "component")
 			return undefined
 
@@ -661,19 +674,67 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			return results
 		}
 
+		if (statement.subType === "view-transition") {
+			const viewTransitionName = !containingSelector ? "root" : [
+				containingSelector.class.map(word => word.value).join("_"),
+				getStatesNameAffix(containingSelector.pseudo),
+				getPseudosNameAffix(containingSelector.pseudo),
+			].filter(s => s).join("_")
+
+			const selector = createSelector(containingSelector, {
+				class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
+			})
+
+			selectorStack.push(selector)
+			const content = compileStatements(statement.content, undefined, compileComponentContent)
+			selectorStack.pop()
+
+			const properties: ResolvedProperty[] = []
+			for (const item of content) {
+				switch (item.type) {
+					case "compiled-after":
+						throw error("#after cannot be used in this context")
+					case "compiled-component":
+						throw error("Sub-component selectors cannot be used in this context")
+					case "property":
+						properties.push(item)
+						continue
+					case "word": {
+						const mixin = getMixin(item.value, item.position)
+						properties.push(...mixin.content)
+						continue
+					}
+				}
+			}
+
+			viewTransitions.push({
+				type: "view-transition",
+				subTypes: statement.pseudos.map(w => w.value.slice(-3)) as ("old" | "new")[],
+				name: makeWord(viewTransitionName, statement.position),
+				content: properties,
+				position: statement.position,
+			})
+			return [{
+				type: "property",
+				property: makeWord("view-transition-name", statement.position),
+				value: viewTransitionName,
+				position: statement.position,
+			}]
+		}
+
 		let selector: ChiriSelector
 		switch (statement.subType) {
 
 			case "state":
 				selector = createSelector(containingSelector, {
-					class: mergeWords(containingSelector?.class, "_", [getStatesClassNameAffix(statement.states)]),
+					class: mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
 					state: mergeWords(containingSelector?.state, ":", statement.states),
 				})
 				break
 
 			case "pseudo":
 				selector = createSelector(containingSelector, {
-					class: mergeWords(containingSelector?.class, "_", [getPseudosClassNameAffix(statement.pseudos)]),
+					class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
 					pseudo: mergeWords(containingSelector?.pseudo, "::", statement.pseudos),
 				})
 				break
@@ -689,13 +750,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return result
 	}
 
-	function getStatesClassNameAffix (states: ChiriWord[]) {
+	function getStatesNameAffix (states: ChiriWord[]) {
 		return !states.length ? "" : "_" + states
 			.map(state => state.value.startsWith(":") ? `${state.value.slice(1)}-any` : state.value)
 			.join("_")
 	}
 
-	function getPseudosClassNameAffix (pseudos: ChiriWord[]) {
+	function getPseudosNameAffix (pseudos: ChiriWord[]) {
 		return !pseudos.length ? "" : "_" + pseudos
 			.map(pseudo => pseudo.value)
 			.join("-")
@@ -804,14 +865,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				if (selector.state.length)
 					name = {
 						type: "word",
-						value: `${name.value}_${getStatesClassNameAffix(selector.state)}`,
+						value: `${name.value}_${getStatesNameAffix(selector.state)}`,
 						position: name.position,
 					}
 
 				if (selector.pseudo.length)
 					name = {
 						type: "word",
-						value: `${name.value}_${getPseudosClassNameAffix(selector.pseudo)}`,
+						value: `${name.value}_${getPseudosNameAffix(selector.pseudo)}`,
 						position: name.position,
 					}
 
@@ -825,6 +886,34 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					})
 
 				return name
+			}
+
+			case "animate": {
+				const selector = selectorStack.at(-1)
+				if (!selector)
+					throw error(statement.position, "#animate cannot be used in this context")
+
+				const baseAnimationName = [
+					selector.class.map(word => word.value).join("_"),
+					getStatesNameAffix(selector.pseudo),
+					getPseudosNameAffix(selector.pseudo),
+				].filter(s => s).join("_")
+
+				const keyframes = compileStatements(statement.content, undefined, compileKeyframes)
+				const dedupedName = setAnimation({
+					type: "animation",
+					name: makeWord(baseAnimationName, statement.position),
+					content: keyframes,
+					position: statement.position,
+				}, true)
+
+				return {
+					type: "property",
+					property: makeWord("animation", statement.position),
+					value: `${stringifyText(compiler, statement.shorthand)} ${dedupedName.value}`,
+					position: statement.position,
+					merge: true,
+				} satisfies ResolvedProperty
 			}
 		}
 	}

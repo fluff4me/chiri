@@ -14,6 +14,8 @@ import type { ChiriAfter } from "./macro/macroAfter"
 import macroAfter from "./macro/macroAfter"
 import type { ChiriAlias } from "./macro/macroAlias"
 import macroAlias from "./macro/macroAlias"
+import type { ChiriAnimate } from "./macro/macroAnimate"
+import macroAnimate from "./macro/macroAnimate"
 import type { ChiriAnimation } from "./macro/macroAnimation"
 import macroAnimation from "./macro/macroAnimation"
 import macroDebug from "./macro/macroDebug"
@@ -59,6 +61,7 @@ export type MacroResult =
 	| ChiriInclude
 	| ChiriCSSImport
 	| ChiriAnimation
+	| ChiriAnimate
 	| ChiriAfter
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
@@ -92,6 +95,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroIfElse.consumeOptional(reader, ...context)
 		?? await macroElse.consumeOptional(reader, ...context)
 		?? await macroAnimation.consumeOptional(reader, ...context)
+		?? await macroAnimate.consumeOptional(reader, ...context)
 		?? await macroAfter.consumeOptional(reader, ...context)
 		?? await macroInclude.consumeOptional(reader, ...context)
 		?? await consumeDeclaredUse(reader)

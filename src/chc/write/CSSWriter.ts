@@ -1,11 +1,12 @@
 import path from "path"
 import args from "../../args"
-import type { ChiriAST } from "../read/ChiriReader"
+import type { ChiriAST, ChiriPosition } from "../read/ChiriReader"
 import type { ChiriKeyframe } from "../read/consume/consumeKeyframe"
 import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriAnimation } from "../read/consume/macro/macroAnimation"
+import makeWord from "../read/factory/makeWord"
 import type { ComponentState } from "../util/componentStates"
 import { STATE_MAP } from "../util/componentStates"
 import type ChiriCompiler from "./ChiriCompiler"
@@ -15,6 +16,7 @@ import Writer, { QueuedWrite } from "./Writer"
 export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "value"> {
 	property: ChiriWord
 	value: string
+	merge?: true
 }
 
 export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
@@ -34,6 +36,14 @@ export interface ResolvedAnimation extends Omit<ChiriAnimation, "content" | "nam
 export interface ResolvedAnimationKeyframe extends Omit<ChiriKeyframe, "at" | "content"> {
 	at: number
 	content: ResolvedProperty[]
+}
+
+export interface ResolvedViewTransition {
+	type: "view-transition"
+	subTypes: ("old" | "new")[]
+	name: ChiriWord
+	content: ResolvedProperty[]
+	position: ChiriPosition
 }
 
 export type CSSDocumentSection =
@@ -117,7 +127,7 @@ export default class CSSWriter extends Writer {
 
 		this.writeSpaceOptional()
 		this.writeLineStartBlock("{")
-		for (const property of mixin.content)
+		for (const property of mergeProperties(mixin.content))
 			this.emitProperty(compiler, property)
 		this.writeLineEndBlock("}")
 	}
@@ -135,6 +145,21 @@ export default class CSSWriter extends Writer {
 						this.emitProperty(compiler, property)
 				})
 			}
+		})
+	}
+
+	emitViewTransition (compiler: ChiriCompiler, viewTransition: ResolvedViewTransition) {
+		this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position))
+		if (viewTransition.subTypes[1]) {
+			this.write(",")
+			this.writeSpaceOptional()
+			this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position))
+		}
+
+		this.writeSpaceOptional()
+		this.writeBlock(() => {
+			for (const property of viewTransition.content)
+				this.emitProperty(compiler, property)
 		})
 	}
 
@@ -168,4 +193,47 @@ export default class CSSWriter extends Writer {
 
 		this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`)
 	}
+}
+
+const alreadyEmitted: string[] = []
+function mergeProperties (properties: ResolvedProperty[]): ResolvedProperty[] {
+	let mergeProperties: Record<string, ResolvedProperty> | undefined
+	let newProperties: ResolvedProperty[] | undefined
+	for (let i = 0; i < properties.length; i++) {
+		const property = properties[i]
+		if (!property.merge) {
+			delete mergeProperties?.[property.property.value]
+			newProperties?.push(property)
+			continue
+		}
+
+		newProperties ??= properties.slice(0, i)
+		mergeProperties ??= {}
+
+		const mergeProperty = mergeProperties[property.property.value]
+		if (!mergeProperty) {
+			mergeProperties[property.property.value] = property
+			newProperties.push(property)
+			continue
+		}
+
+		mergeProperty.value = `${mergeProperty.value}, ${property.value}`
+	}
+
+	properties = newProperties ?? properties
+
+	newProperties = undefined
+	alreadyEmitted.length = 0
+	for (let i = properties.length - 1; i >= 0; i--) {
+		const property = properties[i]
+		if (alreadyEmitted.includes(property.property.value)) {
+			newProperties ??= properties.slice(i + 1)
+			continue
+		}
+
+		newProperties?.unshift(property)
+		alreadyEmitted.push(property.property.value)
+	}
+
+	return newProperties ?? properties
 }

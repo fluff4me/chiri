@@ -30,6 +30,7 @@ import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
 import type { ChiriAfter } from "./consume/macro/macroAfter"
 import type { ChiriAlias } from "./consume/macro/macroAlias"
+import type { ChiriAnimate } from "./consume/macro/macroAnimate"
 import type { ChiriAnimation } from "./consume/macro/macroAnimation"
 import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
@@ -46,7 +47,7 @@ import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
-import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState } from "./consume/rule/Rule"
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState, ChiriComponentViewTransition } from "./consume/rule/Rule"
 
 export interface ChiriPosition {
 	file: string
@@ -74,6 +75,7 @@ export type ChiriStatement =
 	| ChiriCSSImport
 	| ChiriImport
 	| ChiriAnimation
+	| ChiriAnimate
 	// root
 	| ChiriComponent
 	| ChiriMixin
@@ -84,6 +86,7 @@ export type ChiriStatement =
 	| ChiriComponentCustomState
 	| ChiriComponentState
 	| ChiriComponentPseudo
+	| ChiriComponentViewTransition
 	| ChiriAfter
 	| ChiriProperty
 	| ChiriMixinUse
@@ -500,7 +503,7 @@ export default class ChiriReader {
 			.replace(/\t/g, "\u2192"))
 		throw this.error("Expected "
 			+ (expected.length === 1 ? expected[0]
-				: "any of" + expected.map(string => `"${string}"`).join(", ")))
+				: "any of " + expected.map(string => `"${string}"`).join(", ")))
 	}
 
 	consumeOptional<STRING extends string> (...strings: STRING[]) {

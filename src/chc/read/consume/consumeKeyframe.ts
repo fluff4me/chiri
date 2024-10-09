@@ -1,7 +1,7 @@
 import typeDec from "../../type/typeDec"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition, ChiriStatement } from "../ChiriReader"
-import literalDec from "../factory/literalDec"
+import makeLiteralDec from "../factory/makeLiteralDec"
 import consumeBody from "./consumeBody"
 import consumeWordOptional from "./consumeWordOptional"
 import type { ChiriExpressionOperand } from "./expression/consumeExpression"
@@ -32,8 +32,8 @@ export default async (reader: ChiriReader): Promise<ChiriKeyframe> => {
 function consumeKeyframeAt (reader: ChiriReader): ChiriExpressionOperand {
 	const keyword = consumeWordOptional(reader, "from", "to")
 	switch (keyword?.value) {
-		case "from": return literalDec(0)
-		case "to": return literalDec(100)
+		case "from": return makeLiteralDec(0)
+		case "to": return makeLiteralDec(100)
 	}
 
 	const dec = consumeDecimalOptional(reader)
