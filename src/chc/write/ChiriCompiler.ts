@@ -495,10 +495,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 
 			case "mixin": {
+				const name = resolveWord(statement.name)
+
 				const properties = compileStatements(statement.content, undefined, compileMixinContent)
 				setMixin({
 					...statement,
-					name: resolveWord(statement.name),
+					name,
 					states: [undefined],
 					pseudos: [undefined],
 					content: properties,
