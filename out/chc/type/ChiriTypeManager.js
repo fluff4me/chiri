@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "./ChiriType", "./typeBody", "./typeBool", "./typeDec", "./typeInt", "./typeList", "./typeRaw", "./typeString", "./typeUint"], factory);
+        define(["require", "exports", "../../ansi", "./ChiriType", "./typeBody", "./typeBool", "./typeDec", "./typeInt", "./typeList", "./typeRaw", "./typeRecord", "./typeString", "./typeUint"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -20,6 +20,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const typeInt_1 = __importDefault(require("./typeInt"));
     const typeList_1 = __importDefault(require("./typeList"));
     const typeRaw_1 = __importDefault(require("./typeRaw"));
+    const typeRecord_1 = __importDefault(require("./typeRecord"));
     const typeString_1 = __importDefault(require("./typeString"));
     const typeUint_1 = __importDefault(require("./typeUint"));
     const typesList = [
@@ -28,6 +29,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         typeInt_1.default,
         typeUint_1.default,
         typeList_1.default,
+        typeRecord_1.default,
         typeBody_1.default,
         typeBool_1.default,
         typeRaw_1.default,

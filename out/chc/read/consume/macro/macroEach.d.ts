@@ -4,6 +4,7 @@ import type { ChiriWord } from "../consumeWord";
 export interface ChiriEach {
     type: "each";
     iterable: ChiriWord;
+    keyVariable?: ChiriCompilerVariable;
     variable: ChiriCompilerVariable;
     content: ChiriStatement[];
     position: ChiriPosition;

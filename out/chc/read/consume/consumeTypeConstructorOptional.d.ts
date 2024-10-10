@@ -1,5 +1,6 @@
 import type { ChiriType } from "../../type/ChiriType";
 import type { ChiriLiteralList } from "../../type/typeList";
+import type { ChiriLiteralRecord } from "../../type/typeRecord";
 import type ChiriReader from "../ChiriReader";
 import type { ChiriPosition } from "../ChiriReader";
 import type { ChiriLiteralString } from "./consumeStringOptional";
@@ -18,6 +19,6 @@ export interface ChiriLiteralUndefined {
     position: ChiriPosition;
     value?: undefined;
 }
-export type ChiriLiteralValue = ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBool | ChiriLiteralUndefined | ChiriLiteralList;
+export type ChiriLiteralValue = ChiriLiteralString | ChiriLiteralNumeric | ChiriLiteralBool | ChiriLiteralUndefined | ChiriLiteralList | ChiriLiteralRecord;
 declare const _default: (reader: ChiriReader, type?: ChiriType) => ChiriLiteralValue | undefined;
 export default _default;

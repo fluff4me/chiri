@@ -1,5 +1,25 @@
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
@@ -7,12 +27,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./resolveExpression"], factory);
+        define(["require", "exports", "../type/ChiriType", "./resolveExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const resolveExpression_1 = __importDefault(require("./resolveExpression"));
+    const ChiriType_1 = require("../type/ChiriType");
+    const resolveExpression_1 = __importStar(require("./resolveExpression"));
     function resolveLiteralValue(compiler, expression) {
         const subType = expression.subType;
         switch (subType) {
@@ -30,7 +51,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     .join("");
             case "list":
                 return expression.value
-                    .map(value => (0, resolveExpression_1.default)(compiler, value));
+                    .flatMap(content => {
+                    if (content.type !== "list-spread")
+                        return [(0, resolveExpression_1.default)(compiler, content)];
+                    const value = (0, resolveExpression_1.default)(compiler, content.value);
+                    if (!Array.isArray(value))
+                        throw compiler.error(content.position, `Unable to spread a value of type "${ChiriType_1.ChiriType.stringify(content.value.valueType)}"`);
+                    return value;
+                });
+            case "record":
+                return Object.fromEntries(expression.value
+                    .flatMap(content => {
+                    if (Array.isArray(content)) {
+                        const [key, value] = content;
+                        return [[resolveLiteralValue.stringifyExpression(compiler, key), (0, resolveExpression_1.default)(compiler, value)]];
+                    }
+                    const value = resolveLiteralValue.resolveExpression(compiler, content);
+                    if (!resolveExpression_1.Record.is(value))
+                        throw compiler.error(content.position, `Unable to spread a value of type "${ChiriType_1.ChiriType.stringify(content.valueType)}"`);
+                    return Object.entries(value);
+                }));
             default: {
                 const e2 = expression;
                 throw compiler.error(e2.position, `Unable to resolve literal value type ${e2.subType}`);

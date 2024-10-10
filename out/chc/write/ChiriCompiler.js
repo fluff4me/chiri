@@ -1,3 +1,26 @@
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -19,7 +42,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const typeString_1 = __importDefault(require("../type/typeString"));
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
-    const resolveExpression_1 = __importDefault(require("../util/resolveExpression"));
+    const resolveExpression_1 = __importStar(require("../util/resolveExpression"));
     const stringifyExpression_1 = __importDefault(require("../util/stringifyExpression"));
     const stringifyText_1 = __importDefault(require("../util/stringifyText"));
     const Strings_1 = __importDefault(require("../util/Strings"));
@@ -747,12 +770,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return result;
                 }
                 case "each": {
-                    const list = getVariable(statement.iterable.value, statement.iterable.position);
-                    if (!Array.isArray(list))
+                    let list = getVariable(statement.iterable.value, statement.iterable.position);
+                    if (!Array.isArray(list) && (!resolveExpression_1.Record.is(list) || !statement.keyVariable))
                         throw error(statement.iterable.position, "Variable is not iterable");
+                    list = !statement.keyVariable ? list
+                        : !Array.isArray(list) ? Object.entries(list)
+                            : Object.values(list).map((v, i) => [i, v]);
                     const result = [];
-                    for (const value of list) {
-                        result.push(...compileStatements(statement.content, Scope.variables({ [statement.variable.name.value]: { type: statement.variable.valueType, value } }), contextConsumer, end));
+                    for (const entry of list) {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                        const key = statement.keyVariable ? entry[0] : undefined;
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                        const value = statement.keyVariable ? entry[1] : entry;
+                        result.push(...compileStatements(statement.content, Scope.variables({
+                            [statement.variable.name.value]: { type: statement.variable.valueType, value },
+                            ...statement.keyVariable && {
+                                [statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
+                            },
+                        }), contextConsumer, end));
                     }
                     return result;
                 }

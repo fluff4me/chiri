@@ -12,7 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Record = exports.SYMBOL_IS_RECORD = void 0;
     const resolveLiteralValue_1 = __importDefault(require("./resolveLiteralValue"));
+    exports.SYMBOL_IS_RECORD = Symbol("IS_RECORD");
+    var Record;
+    (function (Record) {
+        function is(value) {
+            return typeof value === "object" && !!value && value[exports.SYMBOL_IS_RECORD];
+        }
+        Record.is = is;
+    })(Record || (exports.Record = Record = {}));
     function resolveExpression(compiler, expression) {
         if (!expression)
             return undefined;
