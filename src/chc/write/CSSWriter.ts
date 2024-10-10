@@ -266,13 +266,14 @@ function mergeProperties (properties: ResolvedProperty[]): ResolvedProperty[] {
 	alreadyEmitted.length = 0
 	for (let i = properties.length - 1; i >= 0; i--) {
 		const property = properties[i]
-		if (alreadyEmitted.includes(property.property.value)) {
+		const propertyId = `${property.isCustomProperty ? "$" : ""}${property.property.value}`
+		if (alreadyEmitted.includes(propertyId)) {
 			newProperties ??= properties.slice(i + 1)
 			continue
 		}
 
 		newProperties?.unshift(property)
-		alreadyEmitted.push(property.property.value)
+		alreadyEmitted.push(propertyId)
 	}
 
 	return newProperties ?? properties
