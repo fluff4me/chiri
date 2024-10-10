@@ -34,6 +34,7 @@ import type { ChiriAnimate } from "./consume/macro/macroAnimate"
 import type { ChiriAnimation } from "./consume/macro/macroAnimation"
 import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
+import type { ChiriFontFace } from "./consume/macro/macroFontFace"
 import type { ChiriFor } from "./consume/macro/macroFor"
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
 import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf"
@@ -82,6 +83,7 @@ export type ChiriStatement =
 	| ChiriShorthand
 	| ChiriAlias
 	| ChiriPropertyDefinition
+	| ChiriFontFace
 	// component/mixin
 	| ChiriComponentCustomState
 	| ChiriComponentState

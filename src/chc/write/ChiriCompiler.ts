@@ -176,16 +176,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			for (const writer of writers)
 				writer.onCompileStart(compiler)
 
-			compileStatements(ast.statements, undefined, statement => compileRoot(statement))
+			compileStatements(ast.statements, undefined, compileRoot)
 
 			for (const mixin of Object.values(usedMixins))
-				css.emitMixin(compiler, mixin)
-
-			for (const animation of Object.values(root().animations ?? {}))
-				css.emitAnimation(compiler, animation)
+				css.writeMixin(compiler, mixin)
 
 			for (const viewTransition of viewTransitions)
-				css.emitViewTransition(compiler, viewTransition)
+				css.writeViewTransition(compiler, viewTransition)
+
+			for (const animation of Object.values(root().animations ?? {}))
+				css.writeAnimation(compiler, animation)
 
 			for (const component of Object.values(components))
 				es.emitComponent(compiler, component)
@@ -561,7 +561,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				const mixin = getMixin(statement.name.value, statement.name.position)
 				for (const property of mixin.content) {
 					css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
-						css.emitProperty(compiler, property)
+						css.writeProperty(compiler, property)
 					})
 				}
 				return true
@@ -595,7 +595,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			case "property":
 				css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
-					css.emitProperty(compiler, {
+					css.writeProperty(compiler, {
 						...statement,
 						property: resolveWord(statement.property),
 						value: compileStatements(statement.value, undefined, compileText).join(""),
@@ -608,6 +608,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					for (const imp of statement.imports) {
 						css.writeLine(`@import ${stringifyText(compiler, imp)};`)
 					}
+				})
+				return true
+			}
+
+			case "font-face": {
+				css.writeFontFace(compiler, {
+					family: makeWord(stringifyExpression(compiler, statement.family), statement.family.position),
+					content: compileStatements(statement.content, undefined, compileMixinContent),
 				})
 				return true
 			}
@@ -1281,7 +1289,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				break
 
 			if (result === undefined)
-				throw internalError((statement as { position?: ChiriPosition }).position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name ?? "unknown"}"`)
+				throw internalError((statement as { position?: ChiriPosition }).position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`)
 		}
 
 		if (scopes.length > 1) // don't remove the root scope once it's set up

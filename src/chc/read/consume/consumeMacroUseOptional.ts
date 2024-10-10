@@ -24,6 +24,8 @@ import macroDo from "./macro/macroDo"
 import type { ChiriEach } from "./macro/macroEach"
 import macroEach from "./macro/macroEach"
 import macroExport from "./macro/macroExport"
+import type { ChiriFontFace } from "./macro/macroFontFace"
+import macroFontFace from "./macro/macroFontFace"
 import type { ChiriFor } from "./macro/macroFor"
 import macroFor from "./macro/macroFor"
 import type { ChiriFunction } from "./macro/macroFunctionDeclaration"
@@ -63,6 +65,7 @@ export type MacroResult =
 	| ChiriAnimation
 	| ChiriAnimate
 	| ChiriAfter
+	| ChiriFontFace
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
 export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
@@ -97,6 +100,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroAnimation.consumeOptional(reader, ...context)
 		?? await macroAnimate.consumeOptional(reader, ...context)
 		?? await macroAfter.consumeOptional(reader, ...context)
+		?? await macroFontFace.consumeOptional(reader, ...context)
 		?? await macroInclude.consumeOptional(reader, ...context)
 		?? await consumeDeclaredUse(reader)
 		?? await consumeCompilerVariable(reader)

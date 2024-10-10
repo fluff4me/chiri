@@ -1,4 +1,4 @@
-#macro font:
+#macro font-family:
 	#string name
 	#uint weight-normal ??= 400
 	#uint weight-bold ??= 600

@@ -82,8 +82,21 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 						appendSegment(pendingNewlines + escapeChar)
 						pendingNewlines = ""
 						break
-					default:
+					default: {
+						const charCode = escapeChar.charCodeAt(0)
+						const isHex = false
+							|| (charCode >= 48 && charCode <= 57) // 0-9
+							|| (charCode >= 65 && charCode <= 70) // A-F
+							|| (charCode >= 97 && charCode <= 102) // a-f
+						if (isHex) {
+							appendSegment(pendingNewlines + char)
+							pendingNewlines = ""
+							reader.i--
+							continue
+						}
+
 						throw reader.error("Unexpected escape character")
+					}
 				}
 				break
 			}

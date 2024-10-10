@@ -53,13 +53,17 @@ export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, B
 	consumeParameters<T> (consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>
 	named (): ChiriMacroInternalFactory<"plain", BODY>
 	named (allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>
-	parameter (name: string, type: ChiriType, value?: ChiriExpressionOperand): this
+	/** Require a parameter */
+	parameter (name: string, type: ChiriType): this
+	/** Add an optional parameter */
+	parameter (name: string, type: ChiriType, value: ChiriExpressionOperand | undefined): this
 	body<CONTEXT extends ChiriContextTypeWithoutData> (context: CONTEXT): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
 	body<CONTEXT extends ChiriContextTypeWithData> (context: CONTEXT, data: (info: ChiriMacroInternalBodyContextSupplierInfo<NAMED, EXTRA>) => ContextData[CONTEXT]): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>
 	consume<T> (consumer: (info: ChiriMacroInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriMacroInternal<T>
 }
 
 export default function (macroName: string): ChiriMacroInternalFactory {
+	const requiredParameters: ChiriCompilerVariable[] = []
 	const parameters: ChiriCompilerVariable[] = []
 	let parametersConsumer: ChiriMacroInternalParametersConsumer<any> | undefined
 	type ContextTuple = [ChiriContextType, ((info: ChiriMacroInternalBodyContextSupplierInfo<NameType, any>) => ContextData[ChiriContextType])?]
@@ -79,14 +83,14 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 			parametersConsumer = consumer
 			return this
 		},
-		parameter (name, type, value) {
-			parameters.push({
+		parameter (name, type, ...value: [] | [ChiriExpressionOperand | undefined]) {
+			(value.length ? parameters : requiredParameters).push({
 				type: "variable",
 				name: { type: "word", value: name, position: INTERNAL_POSITION },
 				valueType: type,
-				assignment: "??=",
+				assignment: !value.length ? undefined : "??=",
 				position: INTERNAL_POSITION,
-				expression: value,
+				expression: value[0],
 			})
 			return this
 		},
@@ -99,7 +103,7 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 				type: "macro:internal",
 				name: { type: "word", value: macroName, position: INTERNAL_POSITION },
 				position: INTERNAL_POSITION,
-				content: parameters,
+				content: [...requiredParameters, ...parameters],
 				async consumeOptional (reader: ChiriReader, ...contextTuple: any[]) {
 					const [useContextType, useContextData] = contextTuple as ChiriContextSpreadable
 					const useContext = !useContextType || useContextType === "inherit" ? reader.context : { type: useContextType, data: useContextData }

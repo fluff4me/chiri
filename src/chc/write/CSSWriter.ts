@@ -46,12 +46,19 @@ export interface ResolvedViewTransition {
 	position: ChiriPosition
 }
 
+export interface ResolvedFontFace {
+	family: ChiriWord
+	content: ResolvedProperty[]
+}
+
 export type CSSDocumentSection =
 	| "imports"
 	| "property-definitions"
+	| "font-faces"
 	| "root-properties"
 	| "root-styles"
 	| "default"
+	| "view-transitions"
 	| "animations"
 
 export default class CSSWriter extends Writer {
@@ -60,9 +67,11 @@ export default class CSSWriter extends Writer {
 	private queues: Record<CSSDocumentSection, QueuedWrite[]> = {
 		"imports": QueuedWrite.makeQueue(),
 		"property-definitions": QueuedWrite.makeQueue(),
+		"font-faces": QueuedWrite.makeQueue(),
 		"root-properties": QueuedWrite.makeQueue(),
 		"root-styles": QueuedWrite.makeQueue(),
 		"default": this.outputQueue,
+		"view-transitions": QueuedWrite.makeQueue(),
 		"animations": QueuedWrite.makeQueue(),
 	}
 
@@ -88,7 +97,7 @@ export default class CSSWriter extends Writer {
 		this.currentSection = oldSection
 	}
 
-	emitProperty (compiler: ChiriCompiler, property: ResolvedProperty) {
+	writeProperty (compiler: ChiriCompiler, property: ResolvedProperty) {
 		if (property.isCustomProperty) this.write("--")
 		const aliases = property.isCustomProperty ? [property.property.value] : compiler.getAlias(property.property.value)
 		for (const alias of aliases) {
@@ -100,7 +109,7 @@ export default class CSSWriter extends Writer {
 		}
 	}
 
-	emitMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
+	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
 		let i = 0
 		if (!mixin.states.length)
 			mixin.states.push(undefined)
@@ -128,38 +137,60 @@ export default class CSSWriter extends Writer {
 		this.writeSpaceOptional()
 		this.writeLineStartBlock("{")
 		for (const property of mergeProperties(mixin.content))
-			this.emitProperty(compiler, property)
+			this.writeProperty(compiler, property)
 		this.writeLineEndBlock("}")
 	}
 
-	emitAnimation (compiler: ChiriCompiler, animation: ResolvedAnimation) {
-		this.write("@keyframes ")
-		this.writeWord(animation.name)
-		this.writeSpaceOptional()
-		this.writeBlock(() => {
-			for (const keyframe of animation.content) {
-				this.write(`${keyframe.at}%`)
-				this.writeSpaceOptional()
-				this.writeBlock(() => {
-					for (const property of keyframe.content)
-						this.emitProperty(compiler, property)
-				})
-			}
+	writeAnimation (compiler: ChiriCompiler, animation: ResolvedAnimation) {
+		this.writingTo("animations", () => {
+			this.write("@keyframes ")
+			this.writeWord(animation.name)
+			this.writeSpaceOptional()
+			this.writeBlock(() => {
+				for (const keyframe of animation.content) {
+					this.write(`${keyframe.at}%`)
+					this.writeSpaceOptional()
+					this.writeBlock(() => {
+						for (const property of keyframe.content)
+							this.writeProperty(compiler, property)
+					})
+				}
+			})
 		})
 	}
 
-	emitViewTransition (compiler: ChiriCompiler, viewTransition: ResolvedViewTransition) {
-		this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position))
-		if (viewTransition.subTypes[1]) {
-			this.write(",")
-			this.writeSpaceOptional()
-			this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position))
-		}
+	writeViewTransition (compiler: ChiriCompiler, viewTransition: ResolvedViewTransition) {
+		this.writingTo("view-transitions", () => {
+			this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position))
+			if (viewTransition.subTypes[1]) {
+				this.write(",")
+				this.writeSpaceOptional()
+				this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position))
+			}
 
-		this.writeSpaceOptional()
-		this.writeBlock(() => {
-			for (const property of viewTransition.content)
-				this.emitProperty(compiler, property)
+			this.writeSpaceOptional()
+			this.writeBlock(() => {
+				for (const property of viewTransition.content)
+					this.writeProperty(compiler, property)
+			})
+		})
+	}
+
+	writeFontFace (compiler: ChiriCompiler, fontFace: ResolvedFontFace) {
+		this.writingTo("font-faces", () => {
+			this.write("@font-face")
+			this.writeSpaceOptional()
+			this.writeBlock(() => {
+				this.writeProperty(compiler, {
+					type: "property",
+					property: makeWord("font-family", fontFace.family.position),
+					value: `"${fontFace.family.value}"`,
+					position: fontFace.family.position,
+				})
+
+				for (const property of fontFace.content)
+					this.writeProperty(compiler, property)
+			})
 		})
 	}
 
@@ -171,6 +202,9 @@ export default class CSSWriter extends Writer {
 		headerQueue.push({ output: "\n" })
 
 		headerQueue.push(...this.queues["property-definitions"])
+		headerQueue.push({ output: "\n" })
+
+		headerQueue.push(...this.queues["font-faces"])
 		headerQueue.push({ output: "\n" })
 
 		headerQueue.push({ output: ":root {\n\t" })
@@ -190,6 +224,12 @@ export default class CSSWriter extends Writer {
 
 		if (this.currentSection !== "default")
 			this.currentSection = "default"
+
+		this.outputQueue.push({ output: "\n" })
+		this.outputQueue.push(...this.queues["view-transitions"])
+
+		this.outputQueue.push({ output: "\n" })
+		this.outputQueue.push(...this.queues.animations)
 
 		this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`)
 	}

@@ -53,8 +53,8 @@ export default MacroConstruct("each")
 		if (!variable2 && !isList)
 			throw reader.error("Expected variable declarations for both a key and its associated value")
 
-		if (!isList && !reader.types.isAssignable(variable1.valueType, typeString.type))
-			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(variable1.valueType)}" is not assignable to "${ChiriType.stringify(typeString.type)}"`)
+		if (!isList && !reader.types.isAssignable(typeString.type, variable1.valueType))
+			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(typeString.type)}" is not assignable to "${ChiriType.stringify(variable1.valueType)}"`)
 
 		if (!reader.types.isAssignable(iterable.valueType.generics[0], (variable2 ?? variable1).valueType))
 			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(iterable.valueType.generics[0])}" is not assignable to "${ChiriType.stringify((variable2 ?? variable1).valueType)}"`)
