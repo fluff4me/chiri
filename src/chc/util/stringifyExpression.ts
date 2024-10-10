@@ -29,5 +29,6 @@ const stringifyExpression = (compiler: ChiriCompiler, expression?: ChiriExpressi
 }
 
 resolveLiteralValue.stringifyExpression = stringifyExpression
+resolveExpression.stringifyExpression = stringifyExpression
 
 export default stringifyExpression

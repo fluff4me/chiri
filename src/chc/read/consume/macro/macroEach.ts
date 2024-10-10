@@ -1,4 +1,6 @@
 import { ChiriType } from "../../../type/ChiriType"
+import typeList from "../../../type/typeList"
+import typeRecord from "../../../type/typeRecord"
 import typeString from "../../../type/typeString"
 import typeUint from "../../../type/typeUint"
 import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
@@ -7,13 +9,14 @@ import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
 import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
-import type { ChiriWord } from "../consumeWord"
-import consumeWord from "../consumeWord"
+import type { ChiriExpressionOperand } from "../expression/consumeExpression"
+import consumeExpression from "../expression/consumeExpression"
+import consumeRangeOptional from "../expression/consumeRangeOptional"
 import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriEach {
 	type: "each"
-	iterable: ChiriWord
+	iterable: ChiriExpressionOperand
 	keyVariable?: ChiriCompilerVariable
 	variable: ChiriCompilerVariable
 	content: ChiriStatement[]
@@ -27,10 +30,8 @@ export default MacroConstruct("each")
 		reader.consumeOptional("in ")
 
 		const e = reader.i
-		const iterable = consumeWord(reader)
-		const iterableVariable = reader.getVariable(iterable.value)
-		if (!reader.types.isAssignable(iterableVariable.valueType, ChiriType.of("list", "*"), ChiriType.of("record", "*")))
-			throw reader.error(e, `Expected list or record, was ${ChiriType.stringify(iterableVariable?.valueType)}`)
+		const iterable = consumeRangeOptional(reader) ?? consumeExpression.inline(reader, typeList.type, typeRecord.type)
+		const isList = reader.types.isAssignable(iterable.valueType, typeList.type)
 
 		consumeWhiteSpace(reader)
 		reader.consume("as")
@@ -49,21 +50,21 @@ export default MacroConstruct("each")
 				throw reader.error("Expected variable declaration")
 		}
 
-		if (!variable2 && iterableVariable.valueType.name.value === "record")
+		if (!variable2 && !isList)
 			throw reader.error("Expected variable declarations for both a key and its associated value")
 
-		if (iterableVariable.valueType.name.value === "record" && !reader.types.isAssignable(variable1.valueType, typeString.type))
+		if (!isList && !reader.types.isAssignable(variable1.valueType, typeString.type))
 			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(variable1.valueType)}" is not assignable to "${ChiriType.stringify(typeString.type)}"`)
 
-		if (!reader.types.isAssignable(iterableVariable.valueType.generics[0], (variable2 ?? variable1).valueType))
-			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(iterableVariable.valueType.generics[0])}" is not assignable to "${ChiriType.stringify((variable2 ?? variable1).valueType)}"`)
+		if (!reader.types.isAssignable(iterable.valueType.generics[0], (variable2 ?? variable1).valueType))
+			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(iterable.valueType.generics[0])}" is not assignable to "${ChiriType.stringify((variable2 ?? variable1).valueType)}"`)
 
 		const keyVariable = variable2 ? variable1 : undefined
 		if (keyVariable)
-			keyVariable.valueType = iterableVariable.valueType.name.value === "list" ? typeUint.type : typeString.type
+			keyVariable.valueType = isList ? typeUint.type : typeString.type
 
 		const variable = variable2 ?? variable1
-		variable.valueType = iterableVariable.valueType.generics[0]
+		variable.valueType = iterable.valueType.generics[0]
 
 		return {
 			iterable,

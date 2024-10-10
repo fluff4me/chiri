@@ -6,6 +6,8 @@ import consumeNewBlockLineOptional from "../read/consume/consumeNewBlockLineOpti
 import consumeWhiteSpaceOptional from "../read/consume/consumeWhiteSpaceOptional"
 import type { ChiriExpressionOperand } from "../read/consume/expression/consumeExpression"
 import consumeExpression from "../read/consume/expression/consumeExpression"
+import type { ChiriLiteralRange } from "../read/consume/expression/consumeRangeOptional"
+import consumeRangeOptional from "../read/consume/expression/consumeRangeOptional"
 import { ChiriType } from "./ChiriType"
 import TypeDefinition from "./TypeDefinition"
 
@@ -23,51 +25,54 @@ export interface ChiriLiteralList {
 	position: ChiriPosition
 }
 
-const TYPE_LIST = ChiriType.of("list")
+const TYPE_LIST = ChiriType.of("list", "*")
 export default TypeDefinition({
 	type: TYPE_LIST,
 	stringable: true,
 	generics: 1,
-	consumeOptionalConstructor: (reader): ChiriLiteralList | undefined => {
-		const position = reader.getPosition()
-		if (!reader.consumeOptional("["))
-			return undefined
-
-		const expressions: (ChiriExpressionOperand | ChiriLiteralListSpread)[] = []
-		const multiline = consumeBlockStartOptional(reader)
-		if (!multiline) {
-			consumeWhiteSpaceOptional(reader)
-			do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
-			while (reader.consumeOptional(", "))
-
-		} else {
-			do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
-			while (consumeNewBlockLineOptional(reader))
-
-			consumeBlockEnd(reader)
-		}
-
-		const valueTypes = expressions.map(expr => expr.type === "list-spread" ? expr.value.valueType.generics[0] : expr.valueType)
-		const stringifiedTypes = valueTypes.map(type => ChiriType.stringify(type))
-		if (new Set(stringifiedTypes).size > 1)
-			throw reader.error(`Lists can only contain a single type. This list contains: ${stringifiedTypes.join(", ")}`)
-
-		if (!multiline) {
-			consumeWhiteSpaceOptional(reader)
-			reader.consume("]")
-		}
-
-		return {
-			type: "literal",
-			subType: "list",
-			valueType: ChiriType.of("list", valueTypes[0] ?? "*"),
-			value: expressions,
-			position,
-		}
-	},
+	consumeOptionalConstructor: (reader): ChiriLiteralList | ChiriLiteralRange | undefined =>
+		consumeLiteralList(reader) ?? consumeRangeOptional(reader),
 	coerce: value => Array.isArray(value) ? value : [value],
 	is: value => Array.isArray(value),
 })
+
+function consumeLiteralList (reader: ChiriReader): ChiriLiteralList | undefined {
+	const position = reader.getPosition()
+	if (!reader.consumeOptional("["))
+		return undefined
+
+	const expressions: (ChiriExpressionOperand | ChiriLiteralListSpread)[] = []
+	const multiline = consumeBlockStartOptional(reader)
+	if (!multiline) {
+		consumeWhiteSpaceOptional(reader)
+		do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
+		while (reader.consumeOptional(", "))
+
+	} else {
+		do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
+		while (consumeNewBlockLineOptional(reader))
+
+		consumeBlockEnd(reader)
+	}
+
+	const valueTypes = expressions.map(expr => expr.type === "list-spread" ? expr.value.valueType.generics[0] : expr.valueType)
+	const stringifiedTypes = valueTypes.map(type => ChiriType.stringify(type))
+	if (new Set(stringifiedTypes).size > 1)
+		throw reader.error(`Lists can only contain a single type. This list contains: ${stringifiedTypes.join(", ")}`)
+
+	if (!multiline) {
+		consumeWhiteSpaceOptional(reader)
+		reader.consumeOptional("]")
+	}
+
+	return {
+		type: "literal",
+		subType: "list",
+		valueType: ChiriType.of("list", valueTypes[0] ?? "*"),
+		value: expressions,
+		position,
+	}
+}
 
 function consumeOptionalSpread (reader: ChiriReader): ChiriLiteralListSpread | undefined {
 	const position = reader.getPosition()

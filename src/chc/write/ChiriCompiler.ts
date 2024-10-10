@@ -1030,7 +1030,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 
 			case "each": {
-				let list = getVariable(statement.iterable.value, statement.iterable.position)
+				let list = resolveExpression(compiler, statement.iterable)
 
 				if (!Array.isArray(list) && (!ChiriRecord.is(list) || !statement.keyVariable))
 					throw error(statement.iterable.position, "Variable is not iterable")

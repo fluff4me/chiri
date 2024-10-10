@@ -2,6 +2,10 @@
 
 import { ChiriType } from "../../../type/ChiriType"
 import type { Operator } from "../../../type/ChiriTypeManager"
+import typeInt from "../../../type/typeInt"
+import typeList from "../../../type/typeList"
+import typeRecord from "../../../type/typeRecord"
+import typeString from "../../../type/typeString"
 import getFunctionParameters from "../../../util/getFunctionParameters"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
@@ -22,6 +26,8 @@ import consumeIntegerOptional from "../numeric/consumeIntegerOptional"
 import consumeUnsignedIntegerOptional from "../numeric/consumeUnsignedIntegerOptional"
 import type { ChiriFunctionCall } from "./consumeFunctionCallOptional"
 import consumeFunctionCallOptional, { consumePartialFuntionCall } from "./consumeFunctionCallOptional"
+import type { ChiriLiteralRange } from "./consumeRangeOptional"
+import consumeRangeOptional from "./consumeRangeOptional"
 import type { ChiriExpressionMatch } from "./expressionMatch"
 import expressionMatch from "./expressionMatch"
 
@@ -47,6 +53,22 @@ export interface ChiriUnaryExpression {
 export interface ChiriVariableReference {
 	type: "get"
 	name: ChiriWord
+	valueType: ChiriType
+	position: ChiriPosition
+}
+
+export interface ChiriGetByKey {
+	type: "get-by-key"
+	value: ChiriExpressionOperand
+	key: ChiriExpressionOperand
+	valueType: ChiriType
+	position: ChiriPosition
+}
+
+export interface ChiriListSlice {
+	type: "list-slice"
+	list: ChiriExpressionOperand
+	range: ChiriLiteralRange
 	valueType: ChiriType
 	position: ChiriPosition
 }
@@ -84,6 +106,8 @@ export type ChiriExpressionOperand =
 	| ChiriPipe
 	| ChiriPipeUseLeft
 	| ChiriConditional
+	| ChiriGetByKey
+	| ChiriListSlice
 
 export type ChiriExpressionResult =
 	| ChiriExpressionOperand
@@ -345,51 +369,13 @@ function consumeOperand (reader: ChiriReader): ChiriExpressionOperand {
 	throw reader.error("Unknown expression operand type")
 }
 
-function consumeInlinePipe (reader: ChiriReader): ChiriExpressionOperand {
-	let operand = consumeOperand(reader)
-
-	while (true) {
-		const restore = reader.savePosition()
-
-		consumeWhiteSpaceOptional(reader)
-		if (!reader.consumeOptional("::")) {
-			reader.restorePosition(restore)
-			return operand
-		}
-
-		const e = reader.i
-		const name = consumeWord(reader)
-		const fn = reader.getFunction(name.value, e)
-		const parameters = getFunctionParameters(fn)
-		const firstParameter = parameters.shift()!
-		const paren = reader.peek("(")
-		if (!paren && reader.types.isAssignable(operand.valueType, firstParameter.valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
-			// value \n -> function-name \n
-			operand = {
-				type: "function-call",
-				name,
-				assignments: {
-					[firstParameter.name.value]: operand,
-				},
-				valueType: fn.returnType,
-				position: name.position,
-			}
-			continue
-		}
-
-		const fnCall = consumePartialFuntionCall(reader, name.position, name, fn, parameters)
-		fnCall.assignments[firstParameter.name.value] = operand
-		operand = fnCall
-	}
-}
-
 function consumeUnaryExpression (reader: ChiriReader): ChiriUnaryExpression | ChiriExpressionOperand {
 	const position = reader.getPosition()
 	const e = reader.i
 	const unaryOperators = reader.types.unaryOperators
 	const operator = consumeOperatorOptional(reader, unaryOperators)
 
-	const operand = consumeInlinePipe(reader)
+	const operand = consumeInlineChain(reader)
 	if (!operator)
 		return operand
 
@@ -406,6 +392,78 @@ function consumeUnaryExpression (reader: ChiriReader): ChiriUnaryExpression | Ch
 		operand,
 		operator,
 		valueType: ChiriType.of(returnType),
+		position,
+	}
+}
+
+function consumeInlineChain (reader: ChiriReader): ChiriExpressionOperand {
+	let operand = consumeOperand(reader)
+
+	while (true) {
+		const newOperand = consumeGetByKeyOrListSlice(reader, operand) ?? consumeInlinePipe(reader, operand)
+		if (!newOperand)
+			return operand
+
+		operand = newOperand
+	}
+}
+
+function consumeInlinePipe (reader: ChiriReader, operand: ChiriExpressionOperand): ChiriFunctionCall | undefined {
+	if (!reader.consumeOptional("::"))
+		return undefined
+
+	const e = reader.i
+	const name = consumeWord(reader)
+	const fn = reader.getFunction(name.value, e)
+	const parameters = getFunctionParameters(fn)
+	const firstParameter = parameters.shift()!
+	const paren = reader.peek("(")
+	if (!paren && reader.types.isAssignable(operand.valueType, firstParameter.valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
+		// value \n -> function-name \n
+		return {
+			type: "function-call",
+			name,
+			assignments: {
+				[firstParameter.name.value]: operand,
+			},
+			valueType: fn.returnType,
+			position: name.position,
+		}
+	}
+
+	const fnCall = consumePartialFuntionCall(reader, name.position, name, fn, parameters)
+	fnCall.assignments[firstParameter.name.value] = operand
+	return fnCall
+}
+
+function consumeGetByKeyOrListSlice (reader: ChiriReader, operand: ChiriExpressionOperand): ChiriGetByKey | ChiriListSlice | undefined {
+	const isListOperand = reader.types.isAssignable(operand.valueType, typeList.type)
+	if (!isListOperand && !reader.types.isAssignable(operand.valueType, typeRecord.type))
+		return undefined
+
+	if (!reader.consumeOptional("["))
+		return undefined
+
+	const position = reader.getPosition(reader.i - 1)
+	const range = !isListOperand ? undefined : consumeRangeOptional(reader, true)
+	if (range) {
+		reader.consume("]")
+		return {
+			type: "list-slice",
+			list: operand,
+			range: range,
+			valueType: operand.valueType,
+			position,
+		}
+	}
+
+	const expr = consumeExpression.inline(reader, isListOperand ? typeInt.type : typeString.type)
+	reader.consume("]")
+	return {
+		type: "get-by-key",
+		value: operand,
+		key: expr,
+		valueType: operand.valueType.generics[0],
 		position,
 	}
 }

@@ -1,6 +1,8 @@
 import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression"
+import makeLiteralInt from "../read/factory/makeLiteralInt"
 import type ChiriCompiler from "../write/ChiriCompiler"
-import resolveLiteralValue from "./resolveLiteralValue"
+import resolveLiteralValue, { resolveLiteralRange } from "./resolveLiteralValue"
+import type { default as stringifyExpressionType } from "./stringifyExpression"
 import type { default as stringifyTextType } from "./stringifyText"
 
 export const SYMBOL_IS_RECORD = Symbol("IS_RECORD")
@@ -30,6 +32,44 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 
 		case "function-call":
 			return compiler.callFunction(expression)
+
+		case "get-by-key": {
+			const obj = resolveExpression(compiler, expression.value)
+			let key = resolveExpression.stringifyExpression(compiler, expression.key)
+			if (!Record.is(obj) && !Array.isArray(obj))
+				throw compiler.error(`Cannot access value in "${key}" of "${resolveExpression.stringifyExpression(compiler, expression.value)}"`)
+
+			if (Array.isArray(obj)) {
+				let index = +key
+				index = index < 0 ? obj.length + index : index
+				key = `${index}`
+			}
+
+			return obj[key as keyof typeof obj] as Value
+		}
+
+		case "list-slice": {
+			const list = resolveExpression(compiler, expression.list)
+			if (!Array.isArray(list))
+				throw compiler.error("Cannot create list slice, invalid list")
+
+			expression.range.end ??= makeLiteralInt(list.length)
+
+			const range = resolveLiteralRange(compiler, expression.range, list)
+			if (!Array.isArray(range))
+				throw compiler.error("Cannot create list slice, invalid range")
+
+			const result: Value[] = []
+			for (let index of range) {
+				if (typeof index !== "number")
+					throw compiler.error("Cannot create list slice, provided index is not an integer")
+
+				index = index < 0 ? range.length + index : index
+				result.push(list[Math.max(0, Math.min(index, list.length - 1))])
+			}
+
+			return result
+		}
 
 		case "match": {
 			const value = resolveExpression(compiler, expression.value)
@@ -146,6 +186,7 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 
 namespace resolveExpression {
 	export let stringifyText: typeof stringifyTextType
+	export let stringifyExpression: typeof stringifyExpressionType
 }
 
 resolveLiteralValue.resolveExpression = resolveExpression

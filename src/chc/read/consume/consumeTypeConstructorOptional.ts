@@ -5,6 +5,7 @@ import type { ChiriLiteralRecord } from "../../type/typeRecord"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriLiteralString } from "./consumeStringOptional"
+import type { ChiriLiteralRange } from "./expression/consumeRangeOptional"
 import type { ChiriLiteralNumeric } from "./numeric/Numeric"
 
 export interface ChiriLiteralBool {
@@ -28,6 +29,7 @@ export type ChiriLiteralValue =
 	| ChiriLiteralBool
 	| ChiriLiteralUndefined
 	| ChiriLiteralList
+	| ChiriLiteralRange
 	| ChiriLiteralRecord
 
 type VerifyChiriStatement = ChiriLiteralValue["position"]

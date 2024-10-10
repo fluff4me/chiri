@@ -24,7 +24,7 @@ export interface ChiriLiteralRecord {
 	position: ChiriPosition
 }
 
-const TYPE_RECORD = ChiriType.of("record")
+const TYPE_RECORD = ChiriType.of("record", "*")
 export default TypeDefinition({
 	type: TYPE_RECORD,
 	stringable: true,
@@ -55,7 +55,7 @@ export default TypeDefinition({
 
 		if (!multiline) {
 			consumeWhiteSpaceOptional(reader)
-			reader.consume("}")
+			reader.consumeOptional("}")
 		}
 
 		return {
