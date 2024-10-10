@@ -585,10 +585,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						css.writeSpaceOptional()
 						css.writeLine("false;")
 
-						css.write("initial-value:")
-						css.writeSpaceOptional()
-						css.write(compileStatements(statement.value, undefined, compileText).join(""))
-						css.writeLine(";")
+						const initialValue = compileStatements(statement.value, undefined, compileText).join("").trim()
+						if (initialValue) {
+							css.write("initial-value:")
+							css.writeSpaceOptional()
+							css.write(initialValue)
+							css.writeLine(";")
+						}
 					})
 				})
 				return true
