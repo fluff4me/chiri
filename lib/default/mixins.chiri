@@ -14,14 +14,24 @@
 
 %box-sizing-border-box: box-sizing: border-box
 
-#each in 1...6 as var i:
-	%font-#{i}:
-		font-size: $font-#{i}
-		$font-scaling: $font-scaling-#{i}
+#do:
+	#list!dec font-sizes = [
+		0.8
+		1.0
+		1.2
+		1.5
+		2.0
+		3.0
+
+	#each in font-sizes as var i, var font-size:
+		%font-#{i + 1}:
+			$font-size: calc(#{font-size}rem / $font-scale-factor)
+			$font-scaling: #{font-size}
+			font-size: $font-size
 
 %font-inherit:
-	font-size: inherit
 	$font-scaling: inherit
+	font-size: inherit
 
 $$border-colour!colour: currentcolor
 %borderless: border: none
@@ -274,6 +284,14 @@ $$border-colour!colour: currentcolor
 %justify-self-first-baseline: justify-self: first-baseline
 %justify-self-last-baseline: justify-self: last-baseline
 
+#each in 1...9 as var start:
+	%column-#{start}: grid-column: #{start}
+	%row-#{start}: grid-row: #{start}
+
+	#each in 1...9 as var end:
+		%column-#{start}-#{end}: grid-column: #{start} / #{end + 1}
+		%row-#{start}-#{end}: grid-row: #{start} / #{end + 1}
+
 #do:
 	#var cursor-values=[
 		"auto
@@ -320,6 +338,9 @@ $$border-colour!colour: currentcolor
 %user-select-none: user-select: none
 %no-pointer-events: pointer-events: none
 %pointer-events-none: pointer-events: none
+%pointer-events: pointer-events: all
+%all-pointer-events: pointer-events: all
+%pointer-events-all: pointer-events: all
 
 #do:
 	#list!string units = ["em", "lh"]
@@ -360,6 +381,7 @@ $$border-colour!colour: currentcolor
 %transparency-0: opacity: 1
 
 %z-index-0: z-index: 0
+%z-index-fg: z-index: 1
 %z-index-bg: z-index: -1
 
 %outline:

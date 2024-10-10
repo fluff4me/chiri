@@ -1,22 +1,4 @@
 $font-scale-factor: 1
-#do:
-	#list!dec font-sizes = [
-		0.8
-		1.0
-		1.2
-		1.5
-		2.0
-		3.0
-
-	#each in font-sizes as var i, var font-size:
-		$font-#{i + 1}: calc(#{font-size}rem / $font-scale-factor)
-		$font-scaling-#{i + 1}: #{font-size}
-
-$font-2: calc(1rem / $font-scale-factor)
-$font-3: calc(1.2rem / $font-scale-factor)
-$font-4: calc(1.5rem / $font-scale-factor)
-$font-5: calc(2rem / $font-scale-factor)
-$font-6: calc(3rem / $font-scale-factor)
 
 #each in 1...9 as var weight:
 	$weight-#{weight}: #{weight * 100}

@@ -338,10 +338,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         writer.writeDocumentation(statement);
                     return true;
                 case "mixin": {
+                    const name = resolveWord(statement.name);
                     const properties = compileStatements(statement.content, undefined, compileMixinContent);
                     setMixin({
                         ...statement,
-                        name: resolveWord(statement.name),
+                        name,
                         states: [undefined],
                         pseudos: [undefined],
                         content: properties,
@@ -417,10 +418,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             css.write("inherits:");
                             css.writeSpaceOptional();
                             css.writeLine("false;");
-                            css.write("initial-value:");
-                            css.writeSpaceOptional();
-                            css.write(compileStatements(statement.value, undefined, compileText).join(""));
-                            css.writeLine(";");
+                            const initialValue = compileStatements(statement.value, undefined, compileText).join("").trim();
+                            if (initialValue) {
+                                css.write("initial-value:");
+                                css.writeSpaceOptional();
+                                css.write(initialValue);
+                                css.writeLine(";");
+                            }
                         });
                     });
                     return true;

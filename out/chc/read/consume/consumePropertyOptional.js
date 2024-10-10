@@ -19,6 +19,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     // https://developer.mozilla.org/en-US/docs/Web/CSS/@property
     const customPropertyDefinitionTypes = {
+        "*": {
+            syntax: "*",
+            initialValue: "",
+        },
         "length-percentage": {
             syntax: "<length-percentage>",
             initialValue: "0px",
