@@ -30,13 +30,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../../../util/getFunctionParameters", "../consumeBlockEnd", "../consumeBlockStartOptional", "../consumeNewBlockLineOptional", "../consumeStringOptional", "../consumeTypeConstructorOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "../consumeWordOptional", "../numeric/consumeDecimalOptional", "../numeric/consumeIntegerOptional", "../numeric/consumeUnsignedIntegerOptional", "./consumeFunctionCallOptional", "./expressionMatch"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeInt", "../../../type/typeList", "../../../type/typeRecord", "../../../type/typeString", "../../../util/getFunctionParameters", "../consumeBlockEnd", "../consumeBlockStartOptional", "../consumeNewBlockLineOptional", "../consumeStringOptional", "../consumeTypeConstructorOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "../consumeWordOptional", "../numeric/consumeDecimalOptional", "../numeric/consumeIntegerOptional", "../numeric/consumeUnsignedIntegerOptional", "./consumeFunctionCallOptional", "./consumeRangeOptional", "./expressionMatch"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.consumeOperatorOptional = consumeOperatorOptional;
     const ChiriType_1 = require("../../../type/ChiriType");
+    const typeInt_1 = __importDefault(require("../../../type/typeInt"));
+    const typeList_1 = __importDefault(require("../../../type/typeList"));
+    const typeRecord_1 = __importDefault(require("../../../type/typeRecord"));
+    const typeString_1 = __importDefault(require("../../../type/typeString"));
     const getFunctionParameters_1 = __importDefault(require("../../../util/getFunctionParameters"));
     const consumeBlockEnd_1 = __importDefault(require("../consumeBlockEnd"));
     const consumeBlockStartOptional_1 = __importDefault(require("../consumeBlockStartOptional"));
@@ -51,6 +55,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeIntegerOptional_1 = __importDefault(require("../numeric/consumeIntegerOptional"));
     const consumeUnsignedIntegerOptional_1 = __importDefault(require("../numeric/consumeUnsignedIntegerOptional"));
     const consumeFunctionCallOptional_1 = __importStar(require("./consumeFunctionCallOptional"));
+    const consumeRangeOptional_1 = __importDefault(require("./consumeRangeOptional"));
     const expressionMatch_1 = __importDefault(require("./expressionMatch"));
     const empy = {};
     async function consumeExpression(reader, ...expectedTypes) {
@@ -254,45 +259,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         throw reader.error("Unknown expression operand type");
     }
-    function consumeInlinePipe(reader) {
-        let operand = consumeOperand(reader);
-        while (true) {
-            const restore = reader.savePosition();
-            (0, consumeWhiteSpaceOptional_1.default)(reader);
-            if (!reader.consumeOptional("::")) {
-                reader.restorePosition(restore);
-                return operand;
-            }
-            const e = reader.i;
-            const name = (0, consumeWord_1.default)(reader);
-            const fn = reader.getFunction(name.value, e);
-            const parameters = (0, getFunctionParameters_1.default)(fn);
-            const firstParameter = parameters.shift();
-            const paren = reader.peek("(");
-            if (!paren && reader.types.isAssignable(operand.valueType, firstParameter.valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
-                // value \n -> function-name \n
-                operand = {
-                    type: "function-call",
-                    name,
-                    assignments: {
-                        [firstParameter.name.value]: operand,
-                    },
-                    valueType: fn.returnType,
-                    position: name.position,
-                };
-                continue;
-            }
-            const fnCall = (0, consumeFunctionCallOptional_1.consumePartialFuntionCall)(reader, name.position, name, fn, parameters);
-            fnCall.assignments[firstParameter.name.value] = operand;
-            operand = fnCall;
-        }
-    }
     function consumeUnaryExpression(reader) {
         const position = reader.getPosition();
         const e = reader.i;
         const unaryOperators = reader.types.unaryOperators;
         const operator = consumeOperatorOptional(reader, unaryOperators);
-        const operand = consumeInlinePipe(reader);
+        const operand = consumeInlineChain(reader);
         if (!operator)
             return operand;
         const resultsByType = unaryOperators[operator] ?? empy;
@@ -306,6 +278,68 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             operand,
             operator,
             valueType: ChiriType_1.ChiriType.of(returnType),
+            position,
+        };
+    }
+    function consumeInlineChain(reader) {
+        let operand = consumeOperand(reader);
+        while (true) {
+            const newOperand = consumeGetByKeyOrListSlice(reader, operand) ?? consumeInlinePipe(reader, operand);
+            if (!newOperand)
+                return operand;
+            operand = newOperand;
+        }
+    }
+    function consumeInlinePipe(reader, operand) {
+        if (!reader.consumeOptional("::"))
+            return undefined;
+        const e = reader.i;
+        const name = (0, consumeWord_1.default)(reader);
+        const fn = reader.getFunction(name.value, e);
+        const parameters = (0, getFunctionParameters_1.default)(fn);
+        const firstParameter = parameters.shift();
+        const paren = reader.peek("(");
+        if (!paren && reader.types.isAssignable(operand.valueType, firstParameter.valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
+            // value \n -> function-name \n
+            return {
+                type: "function-call",
+                name,
+                assignments: {
+                    [firstParameter.name.value]: operand,
+                },
+                valueType: fn.returnType,
+                position: name.position,
+            };
+        }
+        const fnCall = (0, consumeFunctionCallOptional_1.consumePartialFuntionCall)(reader, name.position, name, fn, parameters);
+        fnCall.assignments[firstParameter.name.value] = operand;
+        return fnCall;
+    }
+    function consumeGetByKeyOrListSlice(reader, operand) {
+        const isListOperand = reader.types.isAssignable(operand.valueType, typeList_1.default.type);
+        if (!isListOperand && !reader.types.isAssignable(operand.valueType, typeRecord_1.default.type))
+            return undefined;
+        if (!reader.consumeOptional("["))
+            return undefined;
+        const position = reader.getPosition(reader.i - 1);
+        const range = !isListOperand ? undefined : (0, consumeRangeOptional_1.default)(reader, true);
+        if (range) {
+            reader.consume("]");
+            return {
+                type: "list-slice",
+                list: operand,
+                range: range,
+                valueType: operand.valueType,
+                position,
+            };
+        }
+        const expr = consumeExpression.inline(reader, isListOperand ? typeInt_1.default.type : typeString_1.default.type);
+        reader.consume("]");
+        return {
+            type: "get-by-key",
+            value: operand,
+            key: expr,
+            valueType: operand.valueType.generics[0],
             position,
         };
     }

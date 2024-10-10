@@ -20,6 +20,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     function default_1(macroName) {
+        const requiredParameters = [];
         const parameters = [];
         let parametersConsumer;
         let bodyContext;
@@ -38,14 +39,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 parametersConsumer = consumer;
                 return this;
             },
-            parameter(name, type, value) {
-                parameters.push({
+            parameter(name, type, ...value) {
+                (value.length ? parameters : requiredParameters).push({
                     type: "variable",
                     name: { type: "word", value: name, position: constants_1.INTERNAL_POSITION },
                     valueType: type,
-                    assignment: "??=",
+                    assignment: !value.length ? undefined : "??=",
                     position: constants_1.INTERNAL_POSITION,
-                    expression: value,
+                    expression: value[0],
                 });
                 return this;
             },
@@ -58,7 +59,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "macro:internal",
                     name: { type: "word", value: macroName, position: constants_1.INTERNAL_POSITION },
                     position: constants_1.INTERNAL_POSITION,
-                    content: parameters,
+                    content: [...requiredParameters, ...parameters],
                     async consumeOptional(reader, ...contextTuple) {
                         const [useContextType, useContextData] = contextTuple;
                         const useContext = !useContextType || useContextType === "inherit" ? reader.context : { type: useContextType, data: useContextData };

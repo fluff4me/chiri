@@ -39,7 +39,10 @@ export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, B
     consumeParameters<T>(consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>;
     named(): ChiriMacroInternalFactory<"plain", BODY>;
     named(allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>;
-    parameter(name: string, type: ChiriType, value?: ChiriExpressionOperand): this;
+    /** Require a parameter */
+    parameter(name: string, type: ChiriType): this;
+    /** Add an optional parameter */
+    parameter(name: string, type: ChiriType, value: ChiriExpressionOperand | undefined): this;
     body<CONTEXT extends ChiriContextTypeWithoutData>(context: CONTEXT): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>;
     body<CONTEXT extends ChiriContextTypeWithData>(context: CONTEXT, data: (info: ChiriMacroInternalBodyContextSupplierInfo<NAMED, EXTRA>) => ContextData[CONTEXT]): ChiriMacroInternalFactory<NAMED, ContextStatement<CONTEXT>, EXTRA>;
     consume<T>(consumer: (info: ChiriMacroInternalConsumerInfo<NAMED, BODY, EXTRA>) => T | undefined | Promise<T | undefined>): ChiriMacroInternal<T>;

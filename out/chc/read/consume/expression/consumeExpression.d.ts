@@ -6,6 +6,7 @@ import type { ChiriLiteralValue } from "../consumeTypeConstructorOptional";
 import type { ChiriValueText } from "../consumeValueText";
 import type { ChiriWord } from "../consumeWord";
 import type { ChiriFunctionCall } from "./consumeFunctionCallOptional";
+import type { ChiriLiteralRange } from "./consumeRangeOptional";
 import type { ChiriExpressionMatch } from "./expressionMatch";
 export interface ChiriBinaryExpression {
     type: "expression";
@@ -30,6 +31,20 @@ export interface ChiriVariableReference {
     valueType: ChiriType;
     position: ChiriPosition;
 }
+export interface ChiriGetByKey {
+    type: "get-by-key";
+    value: ChiriExpressionOperand;
+    key: ChiriExpressionOperand;
+    valueType: ChiriType;
+    position: ChiriPosition;
+}
+export interface ChiriListSlice {
+    type: "list-slice";
+    list: ChiriExpressionOperand;
+    range: ChiriLiteralRange;
+    valueType: ChiriType;
+    position: ChiriPosition;
+}
 export interface ChiriPipe {
     type: "pipe";
     left: ChiriExpressionOperand;
@@ -50,7 +65,7 @@ export interface ChiriConditional {
     valueType: ChiriType;
     position: ChiriPosition;
 }
-export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText | ChiriFunctionCall | ChiriPipe | ChiriPipeUseLeft | ChiriConditional;
+export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriValueText | ChiriFunctionCall | ChiriPipe | ChiriPipeUseLeft | ChiriConditional | ChiriGetByKey | ChiriListSlice;
 export type ChiriExpressionResult = ChiriExpressionOperand | ChiriExpressionMatch;
 export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand;
 declare function consumeExpression(reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult>;

@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const resolveExpression_1 = require("../util/resolveExpression");
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
-    const TYPE_RECORD = ChiriType_1.ChiriType.of("record");
+    const TYPE_RECORD = ChiriType_1.ChiriType.of("record", "*");
     exports.default = (0, TypeDefinition_1.default)({
         type: TYPE_RECORD,
         stringable: true,
@@ -51,7 +51,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 throw reader.error(`Records can only contain a single type. This record contains: ${stringifiedTypes.join(", ")}`);
             if (!multiline) {
                 (0, consumeWhiteSpaceOptional_1.default)(reader);
-                reader.consume("}");
+                reader.consumeOptional("}");
             }
             return {
                 type: "literal",

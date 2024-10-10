@@ -32,6 +32,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.resolveLiteralRange = resolveLiteralRange;
     const ChiriType_1 = require("../type/ChiriType");
     const resolveExpression_1 = __importStar(require("./resolveExpression"));
     function resolveLiteralValue(compiler, expression) {
@@ -49,6 +50,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
                 return expression.segments
                     .map(segment => typeof segment === "string" ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
                     .join("");
+            case "range":
+                return resolveLiteralRange(compiler, expression);
             case "list":
                 return expression.value
                     .flatMap(content => {
@@ -60,7 +63,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
                     return value;
                 });
             case "record":
-                return Object.fromEntries(expression.value
+                return Object.assign(Object.fromEntries(expression.value
                     .flatMap(content => {
                     if (Array.isArray(content)) {
                         const [key, value] = content;
@@ -70,12 +73,46 @@ var __importStar = (this && this.__importStar) || function (mod) {
                     if (!resolveExpression_1.Record.is(value))
                         throw compiler.error(content.position, `Unable to spread a value of type "${ChiriType_1.ChiriType.stringify(content.valueType)}"`);
                     return Object.entries(value);
-                }));
+                })), { [resolveExpression_1.SYMBOL_IS_RECORD]: true });
             default: {
                 const e2 = expression;
                 throw compiler.error(e2.position, `Unable to resolve literal value type ${e2.subType}`);
             }
         }
+    }
+    function resolveLiteralRange(compiler, range, list) {
+        const startRaw = resolveLiteralValue.resolveExpression(compiler, range.start) ?? 0;
+        const endRaw = resolveLiteralValue.resolveExpression(compiler, range.end) ?? list?.length;
+        if (!Number.isInteger(startRaw))
+            throw compiler.error(range.position, "Invalid value for range start bound");
+        if (!Number.isInteger(endRaw))
+            throw compiler.error(range.position, "Invalid value for range end bound");
+        const listLength = list?.length ?? 0;
+        let start = startRaw;
+        start = start < 0 ? listLength + start : start;
+        start = !list ? start : Math.max(0, Math.min(start, listLength - 1));
+        let end = endRaw;
+        end = end < 0 ? listLength + end : end;
+        end = !list ? end : Math.max(0, Math.min(end, listLength - 1));
+        const result = [];
+        if (Math.abs(start - end) <= 1)
+            return result;
+        if (range.inclusive)
+            if (start < end)
+                for (let i = start; i <= end; i++)
+                    result.push(i);
+            else
+                for (let i = start; i >= end; i--)
+                    result.push(i);
+        else {
+            if (start < end)
+                for (let i = start; i < end; i++)
+                    result.push(i);
+            else
+                for (let i = start; i > end; i--)
+                    result.push(i);
+        }
+        return result;
     }
     (function (resolveLiteralValue) {
     })(resolveLiteralValue || (resolveLiteralValue = {}));

@@ -7,29 +7,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeString", "../../../type/typeUint", "../consumeBody", "../consumeCompilerVariableOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "./MacroConstruct"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeList", "../../../type/typeRecord", "../../../type/typeString", "../../../type/typeUint", "../consumeBody", "../consumeCompilerVariableOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../expression/consumeExpression", "../expression/consumeRangeOptional", "./MacroConstruct"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const ChiriType_1 = require("../../../type/ChiriType");
+    const typeList_1 = __importDefault(require("../../../type/typeList"));
+    const typeRecord_1 = __importDefault(require("../../../type/typeRecord"));
     const typeString_1 = __importDefault(require("../../../type/typeString"));
     const typeUint_1 = __importDefault(require("../../../type/typeUint"));
     const consumeBody_1 = __importDefault(require("../consumeBody"));
     const consumeCompilerVariableOptional_1 = __importDefault(require("../consumeCompilerVariableOptional"));
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
-    const consumeWord_1 = __importDefault(require("../consumeWord"));
+    const consumeExpression_1 = __importDefault(require("../expression/consumeExpression"));
+    const consumeRangeOptional_1 = __importDefault(require("../expression/consumeRangeOptional"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
     exports.default = (0, MacroConstruct_1.default)("each")
         .consumeParameters(async (reader) => {
         (0, consumeWhiteSpace_1.default)(reader);
         reader.consumeOptional("in ");
         const e = reader.i;
-        const iterable = (0, consumeWord_1.default)(reader);
-        const iterableVariable = reader.getVariable(iterable.value);
-        if (!reader.types.isAssignable(iterableVariable.valueType, ChiriType_1.ChiriType.of("list", "*"), ChiriType_1.ChiriType.of("record", "*")))
-            throw reader.error(e, `Expected list or record, was ${ChiriType_1.ChiriType.stringify(iterableVariable?.valueType)}`);
+        const iterable = (0, consumeRangeOptional_1.default)(reader) ?? consumeExpression_1.default.inline(reader, typeList_1.default.type, typeRecord_1.default.type);
+        const isList = reader.types.isAssignable(iterable.valueType, typeList_1.default.type);
         (0, consumeWhiteSpace_1.default)(reader);
         reader.consume("as");
         (0, consumeWhiteSpace_1.default)(reader);
@@ -43,17 +44,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!variable2)
                 throw reader.error("Expected variable declaration");
         }
-        if (!variable2 && iterableVariable.valueType.name.value === "record")
+        if (!variable2 && !isList)
             throw reader.error("Expected variable declarations for both a key and its associated value");
-        if (iterableVariable.valueType.name.value === "record" && !reader.types.isAssignable(variable1.valueType, typeString_1.default.type))
-            throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(variable1.valueType)}" is not assignable to "${ChiriType_1.ChiriType.stringify(typeString_1.default.type)}"`);
-        if (!reader.types.isAssignable(iterableVariable.valueType.generics[0], (variable2 ?? variable1).valueType))
-            throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(iterableVariable.valueType.generics[0])}" is not assignable to "${ChiriType_1.ChiriType.stringify((variable2 ?? variable1).valueType)}"`);
+        if (!isList && !reader.types.isAssignable(typeString_1.default.type, variable1.valueType))
+            throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(typeString_1.default.type)}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable1.valueType)}"`);
+        if (!reader.types.isAssignable(iterable.valueType.generics[0], (variable2 ?? variable1).valueType))
+            throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(iterable.valueType.generics[0])}" is not assignable to "${ChiriType_1.ChiriType.stringify((variable2 ?? variable1).valueType)}"`);
         const keyVariable = variable2 ? variable1 : undefined;
         if (keyVariable)
-            keyVariable.valueType = iterableVariable.valueType.name.value === "list" ? typeUint_1.default.type : typeString_1.default.type;
+            keyVariable.valueType = isList ? typeUint_1.default.type : typeString_1.default.type;
         const variable = variable2 ?? variable1;
-        variable.valueType = iterableVariable.valueType.generics[0];
+        variable.valueType = iterable.valueType.generics[0];
         return {
             iterable,
             keyVariable,

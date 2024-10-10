@@ -1,3 +1,26 @@
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,13 +30,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./resolveLiteralValue"], factory);
+        define(["require", "exports", "../read/factory/makeLiteralInt", "./resolveLiteralValue"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Record = exports.SYMBOL_IS_RECORD = void 0;
-    const resolveLiteralValue_1 = __importDefault(require("./resolveLiteralValue"));
+    const makeLiteralInt_1 = __importDefault(require("../read/factory/makeLiteralInt"));
+    const resolveLiteralValue_1 = __importStar(require("./resolveLiteralValue"));
     exports.SYMBOL_IS_RECORD = Symbol("IS_RECORD");
     var Record;
     (function (Record) {
@@ -34,6 +58,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return compiler.getVariable(expression.name.value, expression.name.position);
             case "function-call":
                 return compiler.callFunction(expression);
+            case "get-by-key": {
+                const obj = resolveExpression(compiler, expression.value);
+                let key = resolveExpression.stringifyExpression(compiler, expression.key);
+                if (!Record.is(obj) && !Array.isArray(obj))
+                    throw compiler.error(`Cannot access value in "${key}" of "${resolveExpression.stringifyExpression(compiler, expression.value)}"`);
+                if (Array.isArray(obj)) {
+                    let index = +key;
+                    index = index < 0 ? obj.length + index : index;
+                    key = `${index}`;
+                }
+                return obj[key];
+            }
+            case "list-slice": {
+                const list = resolveExpression(compiler, expression.list);
+                if (!Array.isArray(list))
+                    throw compiler.error("Cannot create list slice, invalid list");
+                expression.range.end ??= (0, makeLiteralInt_1.default)(list.length);
+                const range = (0, resolveLiteralValue_1.resolveLiteralRange)(compiler, expression.range, list);
+                if (!Array.isArray(range))
+                    throw compiler.error("Cannot create list slice, invalid range");
+                const result = [];
+                for (let index of range) {
+                    if (typeof index !== "number")
+                        throw compiler.error("Cannot create list slice, provided index is not an integer");
+                    index = index < 0 ? range.length + index : index;
+                    result.push(list[Math.max(0, Math.min(index, list.length - 1))]);
+                }
+                return result;
+            }
             case "match": {
                 const value = resolveExpression(compiler, expression.value);
                 for (const matchCase of expression.cases)

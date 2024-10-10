@@ -45,9 +45,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         queues = {
             "imports": Writer_1.QueuedWrite.makeQueue(),
             "property-definitions": Writer_1.QueuedWrite.makeQueue(),
+            "font-faces": Writer_1.QueuedWrite.makeQueue(),
             "root-properties": Writer_1.QueuedWrite.makeQueue(),
             "root-styles": Writer_1.QueuedWrite.makeQueue(),
             "default": this.outputQueue,
+            "view-transitions": Writer_1.QueuedWrite.makeQueue(),
             "animations": Writer_1.QueuedWrite.makeQueue(),
         };
         get queue() {
@@ -67,7 +69,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             dowhile();
             this.currentSection = oldSection;
         }
-        emitProperty(compiler, property) {
+        writeProperty(compiler, property) {
             if (property.isCustomProperty)
                 this.write("--");
             const aliases = property.isCustomProperty ? [property.property.value] : compiler.getAlias(property.property.value);
@@ -79,7 +81,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.writeLine(";");
             }
         }
-        emitMixin(compiler, mixin) {
+        writeMixin(compiler, mixin) {
             let i = 0;
             if (!mixin.states.length)
                 mixin.states.push(undefined);
@@ -103,35 +105,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.writeSpaceOptional();
             this.writeLineStartBlock("{");
             for (const property of mergeProperties(mixin.content))
-                this.emitProperty(compiler, property);
+                this.writeProperty(compiler, property);
             this.writeLineEndBlock("}");
         }
-        emitAnimation(compiler, animation) {
-            this.write("@keyframes ");
-            this.writeWord(animation.name);
-            this.writeSpaceOptional();
-            this.writeBlock(() => {
-                for (const keyframe of animation.content) {
-                    this.write(`${keyframe.at}%`);
-                    this.writeSpaceOptional();
-                    this.writeBlock(() => {
-                        for (const property of keyframe.content)
-                            this.emitProperty(compiler, property);
-                    });
-                }
+        writeAnimation(compiler, animation) {
+            this.writingTo("animations", () => {
+                this.write("@keyframes ");
+                this.writeWord(animation.name);
+                this.writeSpaceOptional();
+                this.writeBlock(() => {
+                    for (const keyframe of animation.content) {
+                        this.write(`${keyframe.at}%`);
+                        this.writeSpaceOptional();
+                        this.writeBlock(() => {
+                            for (const property of keyframe.content)
+                                this.writeProperty(compiler, property);
+                        });
+                    }
+                });
             });
         }
-        emitViewTransition(compiler, viewTransition) {
-            this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position));
-            if (viewTransition.subTypes[1]) {
-                this.write(",");
+        writeViewTransition(compiler, viewTransition) {
+            this.writingTo("view-transitions", () => {
+                this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position));
+                if (viewTransition.subTypes[1]) {
+                    this.write(",");
+                    this.writeSpaceOptional();
+                    this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position));
+                }
                 this.writeSpaceOptional();
-                this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position));
-            }
-            this.writeSpaceOptional();
-            this.writeBlock(() => {
-                for (const property of viewTransition.content)
-                    this.emitProperty(compiler, property);
+                this.writeBlock(() => {
+                    for (const property of viewTransition.content)
+                        this.writeProperty(compiler, property);
+                });
+            });
+        }
+        writeFontFace(compiler, fontFace) {
+            this.writingTo("font-faces", () => {
+                this.write("@font-face");
+                this.writeSpaceOptional();
+                this.writeBlock(() => {
+                    this.writeProperty(compiler, {
+                        type: "property",
+                        property: (0, makeWord_1.default)("font-family", fontFace.family.position),
+                        value: `"${fontFace.family.value}"`,
+                        position: fontFace.family.position,
+                    });
+                    for (const property of fontFace.content)
+                        this.writeProperty(compiler, property);
+                });
             });
         }
         onCompileEnd(compiler) {
@@ -139,6 +161,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             headerQueue.push(...this.queues.imports);
             headerQueue.push({ output: "\n" });
             headerQueue.push(...this.queues["property-definitions"]);
+            headerQueue.push({ output: "\n" });
+            headerQueue.push(...this.queues["font-faces"]);
             headerQueue.push({ output: "\n" });
             headerQueue.push({ output: ":root {\n\t" });
             headerQueue.push(...this.queues["root-properties"]
@@ -152,6 +176,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.outputQueue.unshift(...headerQueue);
             if (this.currentSection !== "default")
                 this.currentSection = "default";
+            this.outputQueue.push({ output: "\n" });
+            this.outputQueue.push(...this.queues["view-transitions"]);
+            this.outputQueue.push({ output: "\n" });
+            this.outputQueue.push(...this.queues.animations);
             this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`);
         }
     }

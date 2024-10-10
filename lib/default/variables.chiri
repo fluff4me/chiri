@@ -18,7 +18,7 @@ $font-4: calc(1.5rem / $font-scale-factor)
 $font-5: calc(2rem / $font-scale-factor)
 $font-6: calc(3rem / $font-scale-factor)
 
-#for var weight = 1, weight <= 9, set weight++:
+#each in 1...9 as var weight:
 	$weight-#{weight}: #{weight * 100}
 
 $weight-normal: 400
@@ -36,15 +36,15 @@ $space-25: round(25%, 1px)
 $space-50: round(50%, 1px)
 $space-100: 100%
 
-#for var i = 0, i <= 5, set i++:
+#each in 0...5 as var i:
 	#string hex = hex(i)
 	$dark-#{i}: ##{hex x 3}
 
-#for var i = 0, i <= 5, set i++:
+#each in 0...5 as var i:
 	#string hex = hex(15 - i)
 	$light-#{i}: ##{hex x 3}
 
-#for var i = 0, i <= 5, set i++:
+#each in 0...5 as var i:
 	$background-#{i}: light-dark($light-#{i}, $dark-#{i})
 	$background-interact-#{i}: light-dark($light-#{5 - i}, $dark-#{i})
 	$color-#{i}: light-dark($dark-#{i}, $light-#{i})

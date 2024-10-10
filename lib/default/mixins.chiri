@@ -14,7 +14,7 @@
 
 %box-sizing-border-box: box-sizing: border-box
 
-#for var i = 1, i <= 6, set i++:
+#each in 1...6 as var i:
 	%font-#{i}:
 		font-size: $font-#{i}
 		$font-scaling: $font-scaling-#{i}
@@ -125,7 +125,7 @@ $$border-colour!colour: currentcolor
 		%translate-y-0: $translate-y: $space-0
 		%translate-x-0: $translate-x: $space-0
 
-		#for var j = 1, j <= 5, set j++:
+		#each in 1...5 as var j:
 			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 
@@ -137,7 +137,7 @@ $$border-colour!colour: currentcolor
 %margin-top-auto: margin-top: auto
 %margin-bottom-auto: margin-bottom: auto
 
-#for var i = 0, i <= 5, set i++:
+#each in 0...5 as var i:
 	#list!string background-properties = [
 		"background
 		"border-color
@@ -364,7 +364,7 @@ $$border-colour!colour: currentcolor
 
 %outline:
 	text-shadow:
-		#for var i = 0, i < 16, set i++:
+		#each in 0..16 as var i:
 			#string angle = "#{i} * pi * 2 / 16
 			#string width = ${outline-width: 0.1em}
 			#string colour = ${outline-colour: ${outline-color: #000}}

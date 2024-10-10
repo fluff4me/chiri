@@ -19,6 +19,7 @@ import type { ChiriAnimate } from "./consume/macro/macroAnimate";
 import type { ChiriAnimation } from "./consume/macro/macroAnimation";
 import type { ChiriDo } from "./consume/macro/macroDo";
 import type { ChiriEach } from "./consume/macro/macroEach";
+import type { ChiriFontFace } from "./consume/macro/macroFontFace";
 import type { ChiriFor } from "./consume/macro/macroFor";
 import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration";
 import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf";
@@ -35,7 +36,7 @@ export interface ChiriPosition {
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriAnimation | ChiriAnimate | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriComponentCustomState | ChiriComponentState | ChiriComponentPseudo | ChiriComponentViewTransition | ChiriAfter | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriKeyframe | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriAnimation | ChiriAnimate | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriFontFace | ChiriComponentCustomState | ChiriComponentState | ChiriComponentPseudo | ChiriComponentViewTransition | ChiriAfter | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriKeyframe | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];

@@ -109,13 +109,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             try {
                 for (const writer of writers)
                     writer.onCompileStart(compiler);
-                compileStatements(ast.statements, undefined, statement => compileRoot(statement));
+                compileStatements(ast.statements, undefined, compileRoot);
                 for (const mixin of Object.values(usedMixins))
-                    css.emitMixin(compiler, mixin);
-                for (const animation of Object.values(root().animations ?? {}))
-                    css.emitAnimation(compiler, animation);
+                    css.writeMixin(compiler, mixin);
                 for (const viewTransition of viewTransitions)
-                    css.emitViewTransition(compiler, viewTransition);
+                    css.writeViewTransition(compiler, viewTransition);
+                for (const animation of Object.values(root().animations ?? {}))
+                    css.writeAnimation(compiler, animation);
                 for (const component of Object.values(components))
                     es.emitComponent(compiler, component);
                 for (const writer of writers)
@@ -396,7 +396,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const mixin = getMixin(statement.name.value, statement.name.position);
                     for (const property of mixin.content) {
                         css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
-                            css.emitProperty(compiler, property);
+                            css.writeProperty(compiler, property);
                         });
                     }
                     return true;
@@ -426,7 +426,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return true;
                 case "property":
                     css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
-                        css.emitProperty(compiler, {
+                        css.writeProperty(compiler, {
                             ...statement,
                             property: resolveWord(statement.property),
                             value: compileStatements(statement.value, undefined, compileText).join(""),
@@ -438,6 +438,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         for (const imp of statement.imports) {
                             css.writeLine(`@import ${(0, stringifyText_1.default)(compiler, imp)};`);
                         }
+                    });
+                    return true;
+                }
+                case "font-face": {
+                    css.writeFontFace(compiler, {
+                        family: (0, makeWord_1.default)((0, stringifyExpression_1.default)(compiler, statement.family), statement.family.position),
+                        content: compileStatements(statement.content, undefined, compileMixinContent),
                     });
                     return true;
                 }
@@ -770,7 +777,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return result;
                 }
                 case "each": {
-                    let list = getVariable(statement.iterable.value, statement.iterable.position);
+                    let list = (0, resolveExpression_1.default)(compiler, statement.iterable);
                     if (!Array.isArray(list) && (!resolveExpression_1.Record.is(list) || !statement.keyVariable))
                         throw error(statement.iterable.position, "Variable is not iterable");
                     list = !statement.keyVariable ? list
@@ -971,7 +978,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (ended)
                     break;
                 if (result === undefined)
-                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name ?? "unknown"}"`);
+                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`);
             }
             if (scopes.length > 1) // don't remove the root scope once it's set up
                 scopes.pop();

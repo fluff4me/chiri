@@ -57,6 +57,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         throw compiler.error(undefined, `Expression resolved to unstringifiable type "${typeof resolved}"`);
     };
     resolveLiteralValue_1.default.stringifyExpression = stringifyExpression;
+    resolveExpression_1.default.stringifyExpression = stringifyExpression;
     exports.default = stringifyExpression;
 });
 //# sourceMappingURL=stringifyExpression.js.map

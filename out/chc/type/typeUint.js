@@ -18,7 +18,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (0, TypeDefinition_1.default)({
         type: ChiriType_1.ChiriType.of("uint"),
         stringable: true,
-        consumeOptionalConstructor: reader => (0, consumeUnsignedIntegerOptional_1.default)(reader),
+        consumeOptionalConstructor: reader => {
+            const restore = reader.savePosition();
+            const uint = (0, consumeUnsignedIntegerOptional_1.default)(reader);
+            if (!uint)
+                return undefined;
+            if (reader.peek(".")) {
+                reader.restorePosition(restore);
+                return undefined;
+            }
+            return uint;
+        },
         coerce: (value, error) => {
             if (typeof value === "boolean")
                 return value ? 1 : 0;

@@ -36,7 +36,11 @@ export interface ResolvedViewTransition {
     content: ResolvedProperty[];
     position: ChiriPosition;
 }
-export type CSSDocumentSection = "imports" | "property-definitions" | "root-properties" | "root-styles" | "default" | "animations";
+export interface ResolvedFontFace {
+    family: ChiriWord;
+    content: ResolvedProperty[];
+}
+export type CSSDocumentSection = "imports" | "property-definitions" | "font-faces" | "root-properties" | "root-styles" | "default" | "view-transitions" | "animations";
 export default class CSSWriter extends Writer {
     private currentSection;
     private queues;
@@ -44,9 +48,10 @@ export default class CSSWriter extends Writer {
     constructor(ast: ChiriAST, dest: string, config?: ChiriWriteConfig);
     createDestPath(outFile: string): string;
     writingTo(section: CSSDocumentSection, dowhile: () => any): void;
-    emitProperty(compiler: ChiriCompiler, property: ResolvedProperty): void;
-    emitMixin(compiler: ChiriCompiler, mixin: ResolvedMixin): void;
-    emitAnimation(compiler: ChiriCompiler, animation: ResolvedAnimation): void;
-    emitViewTransition(compiler: ChiriCompiler, viewTransition: ResolvedViewTransition): void;
+    writeProperty(compiler: ChiriCompiler, property: ResolvedProperty): void;
+    writeMixin(compiler: ChiriCompiler, mixin: ResolvedMixin): void;
+    writeAnimation(compiler: ChiriCompiler, animation: ResolvedAnimation): void;
+    writeViewTransition(compiler: ChiriCompiler, viewTransition: ResolvedViewTransition): void;
+    writeFontFace(compiler: ChiriCompiler, fontFace: ResolvedFontFace): void;
     onCompileEnd(compiler: ChiriCompiler): void;
 }
