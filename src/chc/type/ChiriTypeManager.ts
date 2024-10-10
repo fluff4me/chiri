@@ -13,6 +13,7 @@ import type TypeDefinition from "./TypeDefinition"
 import typeInt from "./typeInt"
 import typeList from "./typeList"
 import typeRaw from "./typeRaw"
+import typeRecord from "./typeRecord"
 import typeString from "./typeString"
 import typeUint from "./typeUint"
 
@@ -22,6 +23,7 @@ const typesList = [
 	typeInt,
 	typeUint,
 	typeList,
+	typeRecord,
 	typeBody,
 	typeBool,
 	typeRaw,

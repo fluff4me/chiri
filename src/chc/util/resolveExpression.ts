@@ -3,8 +3,17 @@ import type ChiriCompiler from "../write/ChiriCompiler"
 import resolveLiteralValue from "./resolveLiteralValue"
 import type { default as stringifyTextType } from "./stringifyText"
 
+export const SYMBOL_IS_RECORD = Symbol("IS_RECORD")
 export type Literal = undefined | number | boolean | string
-export type Value = Literal | Value[]
+export type Record = { [KEY in string]: Literal | Literal[] } & { [SYMBOL_IS_RECORD]: true }
+export type Value = Literal | Value[] | Record
+
+export namespace Record {
+	export function is (value: unknown): value is Record {
+		return typeof value === "object" && !!value && (value as Record)[SYMBOL_IS_RECORD]
+	}
+}
+
 function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressionResult): Value {
 	if (!expression)
 		return undefined

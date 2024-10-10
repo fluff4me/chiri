@@ -18,7 +18,7 @@ import typeString from "../type/typeString"
 import { type ComponentState } from "../util/componentStates"
 import relToCwd from "../util/relToCwd"
 import type { Value } from "../util/resolveExpression"
-import resolveExpression from "../util/resolveExpression"
+import resolveExpression, { Record as ChiriRecord } from "../util/resolveExpression"
 import stringifyExpression from "../util/stringifyExpression"
 import stringifyText from "../util/stringifyText"
 import Strings from "../util/Strings"
@@ -1030,14 +1030,28 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 
 			case "each": {
-				const list = getVariable(statement.iterable.value, statement.iterable.position)
-				if (!Array.isArray(list))
+				let list = getVariable(statement.iterable.value, statement.iterable.position)
+
+				if (!Array.isArray(list) && (!ChiriRecord.is(list) || !statement.keyVariable))
 					throw error(statement.iterable.position, "Variable is not iterable")
 
+				list = !statement.keyVariable ? list as Value[]
+					: !Array.isArray(list) ? Object.entries(list)
+						: Object.values(list).map((v, i) => [i, v] as const)
+
 				const result: T[] = []
-				for (const value of list) {
+				for (const entry of list as any[]) {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+					const key: string | number = statement.keyVariable ? entry[0] : undefined
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+					const value: Value = statement.keyVariable ? entry[1] : entry
 					result.push(...compileStatements(statement.content,
-						Scope.variables({ [statement.variable.name.value]: { type: statement.variable.valueType, value } }),
+						Scope.variables({
+							[statement.variable.name.value]: { type: statement.variable.valueType, value },
+							...statement.keyVariable && {
+								[statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
+							},
+						}),
 						contextConsumer, end))
 				}
 

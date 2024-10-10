@@ -3,10 +3,10 @@
 	#string separator ??= "
 
 	#string result = "
-	#for var i = 0, i < values::length, set i++:
+	#each values as var i, var value:
 		#if i > 0:
 			#set result .= separator
 
-		#set result .= values::at(i)
+		#set result .= "#{value}
 
 	#return result

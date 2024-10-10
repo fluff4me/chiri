@@ -1,6 +1,7 @@
 import type { ChiriType } from "../../type/ChiriType"
 import type TypeDefinition from "../../type/TypeDefinition"
 import type { ChiriLiteralList } from "../../type/typeList"
+import type { ChiriLiteralRecord } from "../../type/typeRecord"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriLiteralString } from "./consumeStringOptional"
@@ -27,6 +28,7 @@ export type ChiriLiteralValue =
 	| ChiriLiteralBool
 	| ChiriLiteralUndefined
 	| ChiriLiteralList
+	| ChiriLiteralRecord
 
 type VerifyChiriStatement = ChiriLiteralValue["position"]
 
