@@ -292,6 +292,9 @@ $$border-colour!colour: currentcolor
 		%column-#{start}-#{end}: grid-column: #{start} / #{end + 1}
 		%row-#{start}-#{end}: grid-row: #{start} / #{end + 1}
 
+%columns-subgrid: grid-template-columns: subgrid
+%rows-subgrid: grid-template-rows: subgrid
+
 #do:
 	#var cursor-values=[
 		"auto
