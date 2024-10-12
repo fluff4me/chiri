@@ -127,11 +127,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         writeViewTransition(compiler, viewTransition) {
             this.writingTo("view-transitions", () => {
-                this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position));
+                const selector = viewTransition.type === "view-transition" ? viewTransition.name.value
+                    : `*.${viewTransition.name.value}`;
+                this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[0]}(${selector})`, viewTransition.position));
                 if (viewTransition.subTypes[1]) {
                     this.write(",");
                     this.writeSpaceOptional();
-                    this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position));
+                    this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[1]}(${selector})`, viewTransition.position));
                 }
                 this.writeSpaceOptional();
                 this.writeBlock(() => {

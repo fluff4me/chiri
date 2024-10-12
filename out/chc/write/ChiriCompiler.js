@@ -486,7 +486,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 results.unshift(component);
                 return results;
             }
-            if (statement.subType === "view-transition") {
+            if (statement.subType === "view-transition" || statement.subType === "view-transition-class") {
                 const viewTransitionName = !containingSelector ? "root" : [
                     containingSelector.class.map(word => word.value).join("_"),
                     getStatesNameAffix(containingSelector.pseudo),
@@ -516,7 +516,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                 }
                 viewTransitions.push({
-                    type: "view-transition",
+                    type: statement.subType,
                     subTypes: statement.pseudos.map(w => w.value.slice(-3)),
                     name: (0, makeWord_1.default)(viewTransitionName, statement.position),
                     content: properties,
@@ -524,7 +524,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 });
                 return [{
                         type: "property",
-                        property: (0, makeWord_1.default)("view-transition-name", statement.position),
+                        property: (0, makeWord_1.default)(statement.subType === "view-transition-class" ? "view-transition-class" : "view-transition-name", statement.position),
                         value: viewTransitionName,
                         position: statement.position,
                     }];
