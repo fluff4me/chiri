@@ -1,3 +1,13 @@
+#function invert returns string:
+	#raw colour
+	#return "hsl(from #{colour} 0 0% calc(100 - l))"
+
 #function contrast returns string:
 	#raw colour
 	#return "hsl(from #{colour} 0 0% clamp(0, (l - 30) * -1000 + (h / 360) * (s * 700), 100))"
+
+#function clamptrast returns string:
+	#int min ??= 0
+	#int max ??= 100
+	#raw colour
+	#return "hsl(from #{colour} 0 0% clamp(#{min}, (l - 10) * -1000 + (h / 360) * (s * 700), #{max}))"
