@@ -428,18 +428,26 @@ $$gradient-mask-height!length-percentage
 	mask-image: linear-gradient(to bottom, transparent 0%, black $gradient-mask-height, black calc(100% - $gradient-mask-height), transparent 100%)
 
 %overflow-hidden: overflow: hidden
-%overflow-auto: overflow: auto
-%overflow-scroll: overflow: scroll
+%overflow-auto:
+	scroll-behaviour: smooth
+	overflow: auto
+%overflow-scroll:
+	scroll-behaviour: smooth
+	overflow: scroll
 %overflow-auto-y:
+	scroll-behaviour: smooth
 	overflow-x: hidden
 	overflow-y: auto
 %overflow-scroll-y:
+	scroll-behaviour: smooth
 	overflow-x: hidden
 	overflow-y: scroll
 %overflow-auto-x:
+	scroll-behaviour: smooth
 	overflow-x: auto
 	overflow-y: hidden
 %overflow-scroll-x:
+	scroll-behaviour: smooth
 	overflow-x: scroll
 	overflow-y: hidden
 

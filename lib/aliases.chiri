@@ -25,3 +25,5 @@
 
 	#each properties as var property:
 		#alias #{property}-colour: #{property}-color
+
+#alias scroll-behaviour: scroll-behavior
