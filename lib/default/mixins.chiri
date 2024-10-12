@@ -78,6 +78,8 @@ $$border-colour!colour: currentcolor
 	%relative
 	top: ${font-vertical-align: 0em}
 
+$$translate-x!length
+$$translate-y!length
 %translate: translate: ${translate-x: 0px} ${translate-y: 0px}
 
 #do:
@@ -140,6 +142,9 @@ $$border-colour!colour: currentcolor
 		#each in 0...5 as var j:
 			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
+
+%top-auto: top: auto
+%left-auto: left: auto
 
 %margin-auto: margin: auto
 %margin-block-auto: margin-block: auto
