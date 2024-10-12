@@ -11,7 +11,7 @@ export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	const negative = reader.consumeOptional("-") ?? ""
 
 	const int = consumeUnsignedIntegerOptional(reader)
-	if (int === undefined) {
+	if (int === undefined && !reader.peek(".")) {
 		reader.i = e
 		return undefined
 	}
@@ -31,7 +31,7 @@ export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 		type: "literal",
 		subType: "dec",
 		valueType: ChiriType.of("dec"),
-		value: `${negative}${int.value}.${dec.value}`,
+		value: `${negative}${int?.value || 0}.${dec.value}`,
 		position,
 	}
 }
