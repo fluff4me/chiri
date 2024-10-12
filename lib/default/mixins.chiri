@@ -20,8 +20,8 @@
 		1.0
 		1.2
 		1.5
-		2.0
-		3.0
+		1.8
+		2.4
 
 	#each in font-sizes as var i, var font-size:
 		%font-#{i + 1}:
@@ -135,7 +135,8 @@ $$border-colour!colour: currentcolor
 		%translate-y-0: $translate-y: $space-0
 		%translate-x-0: $translate-x: $space-0
 
-		#each in 1...5 as var j:
+	#each in 0...5 as var i:
+		#each in 0...5 as var j:
 			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 
