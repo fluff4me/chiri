@@ -33,3 +33,8 @@ export interface ChiriComponentViewTransition extends ChiriComponentBase {
 	subType: "view-transition"
 	pseudos: ChiriWord<"view-transition!old" | "view-transition!new">[]
 }
+
+export interface ChiriComponentViewTransitionClass extends ChiriComponentBase {
+	subType: "view-transition-class"
+	pseudos: ChiriWord<"view-transition-class!old" | "view-transition-class!new">[]
+}

@@ -3,15 +3,16 @@ import consumeBody from "../consumeBody"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
 import consumeWordOptional from "../consumeWordOptional"
-import type { ChiriComponentPseudo, ChiriComponentViewTransition } from "./Rule"
+import type { ChiriComponentPseudo, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./Rule"
 
-export default async (reader: ChiriReader): Promise<ChiriComponentPseudo | ChiriComponentViewTransition | undefined> => {
+export default async (reader: ChiriReader): Promise<ChiriComponentPseudo | ChiriComponentViewTransition | ChiriComponentViewTransitionClass | undefined> => {
 	const position = reader.getPosition()
 	const e = reader.i
 
 	const result = undefined
 		?? consumePseudoType(reader, "pseudo", "before", "after")
 		?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new")
+		?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new")
 	if (!result)
 		return undefined
 

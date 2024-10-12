@@ -39,7 +39,7 @@ export interface ResolvedAnimationKeyframe extends Omit<ChiriKeyframe, "at" | "c
 }
 
 export interface ResolvedViewTransition {
-	type: "view-transition"
+	type: "view-transition" | "view-transition-class"
 	subTypes: ("old" | "new")[]
 	name: ChiriWord
 	content: ResolvedProperty[]
@@ -161,11 +161,13 @@ export default class CSSWriter extends Writer {
 
 	writeViewTransition (compiler: ChiriCompiler, viewTransition: ResolvedViewTransition) {
 		this.writingTo("view-transitions", () => {
-			this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[0]}(${viewTransition.name.value})`, viewTransition.position))
+			const selector = viewTransition.type === "view-transition" ? viewTransition.name.value
+				: `*.${viewTransition.name.value}`
+			this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[0]}(${selector})`, viewTransition.position))
 			if (viewTransition.subTypes[1]) {
 				this.write(",")
 				this.writeSpaceOptional()
-				this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[1]}(${viewTransition.name.value})`, viewTransition.position))
+				this.writeWord(makeWord(`::view-transition-${viewTransition.subTypes[1]}(${selector})`, viewTransition.position))
 			}
 
 			this.writeSpaceOptional()

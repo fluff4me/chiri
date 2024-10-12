@@ -687,7 +687,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			return results
 		}
 
-		if (statement.subType === "view-transition") {
+		if (statement.subType === "view-transition" || statement.subType === "view-transition-class") {
 			const viewTransitionName = !containingSelector ? "root" : [
 				containingSelector.class.map(word => word.value).join("_"),
 				getStatesNameAffix(containingSelector.pseudo),
@@ -721,7 +721,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 
 			viewTransitions.push({
-				type: "view-transition",
+				type: statement.subType,
 				subTypes: statement.pseudos.map(w => w.value.slice(-3)) as ("old" | "new")[],
 				name: makeWord(viewTransitionName, statement.position),
 				content: properties,
@@ -729,7 +729,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			})
 			return [{
 				type: "property",
-				property: makeWord("view-transition-name", statement.position),
+				property: makeWord(statement.subType === "view-transition-class" ? "view-transition-class" : "view-transition-name", statement.position),
 				value: viewTransitionName,
 				position: statement.position,
 			}]
