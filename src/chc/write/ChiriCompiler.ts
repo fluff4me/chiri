@@ -722,7 +722,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			viewTransitions.push({
 				type: statement.subType,
-				subTypes: statement.pseudos.map(w => w.value.slice(-3)) as ("old" | "new")[],
+				subTypes: statement.pseudos.map(w => w.value.slice(w.value.lastIndexOf("!") + 1)) as ("old" | "new" | "group")[],
 				name: makeWord(viewTransitionName, statement.position),
 				content: properties,
 				position: statement.position,

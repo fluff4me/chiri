@@ -40,7 +40,7 @@ export interface ResolvedAnimationKeyframe extends Omit<ChiriKeyframe, "at" | "c
 
 export interface ResolvedViewTransition {
 	type: "view-transition" | "view-transition-class"
-	subTypes: ("old" | "new")[]
+	subTypes: ("old" | "new" | "group")[]
 	name: ChiriWord
 	content: ResolvedProperty[]
 	position: ChiriPosition
