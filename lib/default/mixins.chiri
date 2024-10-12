@@ -30,6 +30,7 @@
 			$font-scaling: #{font-size}
 			font-size: $font-size
 
+%font-family-inherit: font-family: inherit
 %font-inherit:
 	$font-scaling: inherit
 	font-size: inherit
@@ -444,3 +445,5 @@ $$gradient-mask-height!length-percentage
 
 %color-dodge: mix-blend-mode: color-dodge
 %colour-dodge: mix-blend-mode: color-dodge
+
+%background-unclip: background-clip: padding-box
