@@ -517,7 +517,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 viewTransitions.push({
                     type: statement.subType,
-                    subTypes: statement.pseudos.map(w => w.value.slice(-3)),
+                    subTypes: statement.pseudos.map(w => w.value.slice(w.value.lastIndexOf("!") + 1)),
                     name: (0, makeWord_1.default)(viewTransitionName, statement.position),
                     content: properties,
                     position: statement.position,

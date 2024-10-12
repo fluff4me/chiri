@@ -21,7 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const result = undefined
             ?? consumePseudoType(reader, "pseudo", "before", "after")
             ?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new")
-            ?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new");
+            ?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group");
         if (!result)
             return undefined;
         const duplicates = new Set(result.pseudos.map(e => e.value));

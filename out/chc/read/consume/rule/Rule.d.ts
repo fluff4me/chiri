@@ -29,5 +29,5 @@ export interface ChiriComponentViewTransition extends ChiriComponentBase {
 }
 export interface ChiriComponentViewTransitionClass extends ChiriComponentBase {
     subType: "view-transition-class";
-    pseudos: ChiriWord<"view-transition-class!old" | "view-transition-class!new">[];
+    pseudos: ChiriWord<"view-transition-class!old" | "view-transition-class!new" | "view-transition-class!group">[];
 }

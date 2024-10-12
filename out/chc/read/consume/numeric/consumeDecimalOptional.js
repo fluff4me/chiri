@@ -19,7 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const position = reader.getPosition();
         const negative = reader.consumeOptional("-") ?? "";
         const int = (0, consumeUnsignedIntegerOptional_1.default)(reader);
-        if (int === undefined) {
+        if (int === undefined && !reader.peek(".")) {
             reader.i = e;
             return undefined;
         }
@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             type: "literal",
             subType: "dec",
             valueType: ChiriType_1.ChiriType.of("dec"),
-            value: `${negative}${int.value}.${dec.value}`,
+            value: `${negative}${int?.value || 0}.${dec.value}`,
             position,
         };
     };
