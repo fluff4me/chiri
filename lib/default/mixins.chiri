@@ -13,7 +13,7 @@
 %fixed: position: fixed
 %sticky: position: sticky
 
-%box-sizing-border-box: box-sizing: border-box
+%border-box: box-sizing: border-box
 
 #do:
 	#list!dec font-sizes = [
