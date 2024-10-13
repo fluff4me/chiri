@@ -79,8 +79,8 @@ $$border-colour!colour: currentcolor
 	%relative
 	top: ${font-vertical-align: 0em}
 
-$$translate-x!length
-$$translate-y!length
+$$translate-x!length-percentage
+$$translate-y!length-percentage
 %translate: translate: ${translate-x: 0px} ${translate-y: 0px}
 
 #do:
