@@ -82,6 +82,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         writeMixin(compiler, mixin) {
+            if (mixin.specialState) {
+                this.write(componentStates_1.STATE_MAP_SPECIAL[mixin.specialState]);
+                this.writeSpaceOptional();
+                this.writeLineStartBlock("{");
+            }
             let i = 0;
             if (!mixin.states.length)
                 mixin.states.push(undefined);
@@ -107,6 +112,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             for (const property of mergeProperties(mixin.content))
                 this.writeProperty(compiler, property);
             this.writeLineEndBlock("}");
+            if (mixin.specialState)
+                this.writeLineEndBlock("}");
         }
         writeAnimation(compiler, animation) {
             this.writingTo("animations", () => {

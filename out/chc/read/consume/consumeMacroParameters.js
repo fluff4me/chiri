@@ -46,7 +46,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (assignments[word.value])
                 throw reader.error(`Already assigned ${word.value} for ${fnTypeSymbol}${fn.name.value}`);
             const expectedType = parameter.valueType;
+            const restore = reader.savePosition();
+            (0, consumeWhiteSpaceOptional_1.default)(reader);
             if (!reader.consumeOptional("=")) {
+                reader.restorePosition(restore);
                 const variableInScope = reader.getVariableOptional(word.value);
                 if (variableInScope) {
                     if (variableInScope?.valueType.name.value === "body")
@@ -73,11 +76,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 };
                 return;
             }
+            (0, consumeWhiteSpaceOptional_1.default)(reader);
             assignments[word.value] = consumeExpression_1.default.inline(reader, expectedType);
         }
         const multiline = (0, consumeBlockStartOptional_1.default)(reader);
-        if (!multiline)
-            (0, consumeWhiteSpaceOptional_1.default)(reader);
+        if (!multiline) {
+            if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
+                return assignments;
+        }
         const consumeParameterSeparatorOptional = multiline ? consumeNewBlockLineOptional_1.default : consumeWhiteSpaceOptional_1.default;
         do
             consumeParameterAssignment();

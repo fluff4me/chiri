@@ -537,6 +537,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         state: mergeWords(containingSelector?.state, ":", statement.states),
                     });
                     break;
+                case "state-special":
+                    selector = createSelector(containingSelector, {
+                        class: mergeWords(containingSelector?.class, "_", [getStatesNameAffix([statement.state])]),
+                        specialState: statement.state,
+                    });
+                    break;
                 case "pseudo":
                     selector = createSelector(containingSelector, {
                         class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
@@ -549,6 +555,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-");
                 result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position });
             }
+            // if (statement.subType === "state-special")
+            // 	throw error("stop here!")
             return result;
         }
         function getStatesNameAffix(states) {
@@ -564,6 +572,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function compileSelector(selector, content, allowComponents = false) {
             selectorStack.push(selector);
             const compiledContent = compileStatements(content, undefined, compileComponentContent);
+            // console.log(compiledContent)
             const results = [];
             let propertyGroup;
             let groupIndex = 0;
@@ -640,12 +649,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const selector = selectorStack.at(-1);
                     if (!selector)
                         throw error(name.position, "Unable to use mixin here, no selector");
-                    if (!selector.state.length && !selector.pseudo.length)
+                    if (!selector.state.length && !selector.pseudo.length && !selector.specialState)
                         return name;
                     if (selector.state.length)
                         name = {
                             type: "word",
                             value: `${name.value}_${getStatesNameAffix(selector.state)}`,
+                            position: name.position,
+                        };
+                    if (selector.specialState)
+                        name = {
+                            type: "word",
+                            value: `${name.value}_${getStatesNameAffix([selector.specialState])}`,
                             position: name.position,
                         };
                     if (selector.pseudo.length)
@@ -661,6 +676,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             name,
                             states: selector.state.map(state => state?.value),
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
+                            specialState: selector.specialState?.value,
                         });
                     return name;
                 }
@@ -698,6 +714,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 class: (assignFrom.class ?? selector?.class),
                 state: assignFrom.state ?? selector?.state ?? [],
                 pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
+                specialState: assignFrom.specialState ?? selector?.specialState,
             };
         }
         //#endregion
