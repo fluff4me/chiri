@@ -27,3 +27,4 @@
 		#alias #{property}-colour: #{property}-color
 
 #alias scroll-behaviour: scroll-behavior
+#alias transition-behaviour: transition-behavior

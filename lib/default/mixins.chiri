@@ -455,3 +455,10 @@ $$gradient-mask-height!length-percentage
 %colour-dodge: mix-blend-mode: color-dodge
 
 %background-unclip: background-clip: padding-box
+%backdrop-blur: backdrop-filter: blur($space-2)
+
+%scheme-light: colour-scheme: light
+%scheme-dark: colour-scheme: dark
+%scheme-light-dark: colour-scheme: light dark
+
+%transition-discrete: transition-behaviour: allow-discrete

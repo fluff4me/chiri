@@ -48,13 +48,3 @@
 
 #border-shorthand of="border-block-start"
 #border-shorthand of="border-block-end"
-
-#shorthand background:
-	background-attachment
-	background-clip
-	background-color
-	background-image
-	background-origin
-	background-position
-	background-repeat
-	background-size
