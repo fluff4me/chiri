@@ -7,6 +7,7 @@ import consumeWord from "../consumeWord"
 import type { ChiriComponentState } from "./Rule"
 
 export default async (reader: ChiriReader): Promise<ChiriComponentState | undefined> => {
+	const restore = reader.savePosition()
 	const position = reader.getPosition()
 	const states: ChiriWord[] = []
 	do {
@@ -17,8 +18,10 @@ export default async (reader: ChiriReader): Promise<ChiriComponentState | undefi
 		states.push(consumeWord(reader, ...STATES))
 	} while (reader.consumeOptional(",") && (consumeWhiteSpaceOptional(reader) || true))
 
-	if (!states.length)
+	if (!states.length) {
+		reader.restorePosition(restore)
 		return undefined
+	}
 
 	reader.consume(":")
 

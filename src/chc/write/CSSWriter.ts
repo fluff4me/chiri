@@ -7,8 +7,8 @@ import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriAnimation } from "../read/consume/macro/macroAnimation"
 import makeWord from "../read/factory/makeWord"
-import type { ComponentState } from "../util/componentStates"
-import { STATE_MAP } from "../util/componentStates"
+import type { ComponentState, ComponentStateSpecial } from "../util/componentStates"
+import { STATE_MAP, STATE_MAP_SPECIAL } from "../util/componentStates"
 import type ChiriCompiler from "./ChiriCompiler"
 import type { ChiriWriteConfig } from "./Writer"
 import Writer, { QueuedWrite } from "./Writer"
@@ -21,6 +21,7 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
 
 export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	states: (ComponentState | undefined)[]
+	specialState?: ComponentStateSpecial
 	pseudos: ("before" | "after" | undefined)[]
 	name: ChiriWord
 	content: ResolvedProperty[]
@@ -110,6 +111,12 @@ export default class CSSWriter extends Writer {
 	}
 
 	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
+		if (mixin.specialState) {
+			this.write(STATE_MAP_SPECIAL[mixin.specialState])
+			this.writeSpaceOptional()
+			this.writeLineStartBlock("{")
+		}
+
 		let i = 0
 		if (!mixin.states.length)
 			mixin.states.push(undefined)
@@ -139,6 +146,9 @@ export default class CSSWriter extends Writer {
 		for (const property of mergeProperties(mixin.content))
 			this.writeProperty(compiler, property)
 		this.writeLineEndBlock("}")
+
+		if (mixin.specialState)
+			this.writeLineEndBlock("}")
 	}
 
 	writeAnimation (compiler: ChiriCompiler, animation: ResolvedAnimation) {

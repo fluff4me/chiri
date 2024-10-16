@@ -3,6 +3,7 @@ export const STATE_MAP = {
 	"active": ":active:not(:has(:active))",
 	"focus": ":focus-visible",
 	"focus-any": ":focus",
+	"popover": ":popover-open",
 	":hover": ":hover",
 	":active": ":active",
 	":focus": ":where(:focus-visible, :has(:focus-visible))",
@@ -12,3 +13,11 @@ export const STATE_MAP = {
 export type ComponentState = keyof typeof STATE_MAP
 
 export const STATES = Object.keys(STATE_MAP) as ComponentState[]
+
+export const STATE_MAP_SPECIAL = {
+	"start": "@starting-style",
+}
+
+export type ComponentStateSpecial = keyof typeof STATE_MAP_SPECIAL
+
+export const STATES_SPECIAL = Object.keys(STATE_MAP_SPECIAL) as ComponentStateSpecial[]

@@ -15,6 +15,7 @@ import { ChiriType } from "../type/ChiriType"
 import ChiriTypeManager from "../type/ChiriTypeManager"
 import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
 import typeString from "../type/typeString"
+import type { ComponentStateSpecial } from "../util/componentStates"
 import { type ComponentState } from "../util/componentStates"
 import relToCwd from "../util/relToCwd"
 import type { Value } from "../util/resolveExpression"
@@ -78,6 +79,7 @@ interface ChiriSelector {
 	class: ChiriWord[]
 	state: ChiriWord[]
 	pseudo: ChiriWord[]
+	specialState?: ChiriWord
 }
 
 interface ErrorPositioned extends Error {
@@ -745,6 +747,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				})
 				break
 
+			case "state-special":
+				selector = createSelector(containingSelector, {
+					class: mergeWords(containingSelector?.class, "_", [getStatesNameAffix([statement.state])]),
+					specialState: statement.state,
+				})
+				break
+
 			case "pseudo":
 				selector = createSelector(containingSelector, {
 					class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
@@ -759,6 +768,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-")
 			result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position })
 		}
+
+		// if (statement.subType === "state-special")
+		// 	throw error("stop here!")
 
 		return result
 	}
@@ -780,6 +792,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function compileSelector (selector: ChiriSelector, content: ChiriStatement[], allowComponents = false) {
 		selectorStack.push(selector)
 		const compiledContent = compileStatements(content, undefined, compileComponentContent)
+		// console.log(compiledContent)
 
 		const results: (ChiriWord | ResolvedAfter | Component)[] = []
 		let propertyGroup: ResolvedProperty[] | undefined
@@ -872,13 +885,20 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				if (!selector)
 					throw error(name.position, "Unable to use mixin here, no selector")
 
-				if (!selector.state.length && !selector.pseudo.length)
+				if (!selector.state.length && !selector.pseudo.length && !selector.specialState)
 					return name
 
 				if (selector.state.length)
 					name = {
 						type: "word",
 						value: `${name.value}_${getStatesNameAffix(selector.state)}`,
+						position: name.position,
+					}
+
+				if (selector.specialState)
+					name = {
+						type: "word",
+						value: `${name.value}_${getStatesNameAffix([selector.specialState])}`,
 						position: name.position,
 					}
 
@@ -896,6 +916,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						name,
 						states: selector.state.map(state => state?.value as ComponentState | undefined),
 						pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
+						specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
 					})
 
 				return name
@@ -940,6 +961,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			class: (assignFrom.class ?? selector?.class)!,
 			state: assignFrom.state ?? selector?.state ?? [],
 			pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
+			specialState: assignFrom.specialState ?? selector?.specialState,
 		}
 	}
 

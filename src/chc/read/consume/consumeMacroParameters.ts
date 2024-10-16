@@ -42,7 +42,11 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 
 		const expectedType = parameter.valueType
 
+		const restore = reader.savePosition()
+		consumeWhiteSpaceOptional(reader)
 		if (!reader.consumeOptional("=")) {
+			reader.restorePosition(restore)
+
 			const variableInScope = reader.getVariableOptional(word.value)
 			if (variableInScope) {
 				if (variableInScope?.valueType.name.value === "body")
@@ -74,11 +78,15 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 			return
 		}
 
+		consumeWhiteSpaceOptional(reader)
 		assignments[word.value] = consumeExpression.inline(reader, expectedType)
 	}
 
 	const multiline = consumeBlockStartOptional(reader)
-	if (!multiline) consumeWhiteSpaceOptional(reader)
+	if (!multiline) {
+		if (!consumeWhiteSpaceOptional(reader))
+			return assignments
+	}
 
 	const consumeParameterSeparatorOptional = multiline ? consumeNewBlockLineOptional : consumeWhiteSpaceOptional
 

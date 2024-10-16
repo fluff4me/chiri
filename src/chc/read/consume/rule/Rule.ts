@@ -24,6 +24,11 @@ export interface ChiriComponentState extends ChiriComponentBase {
 	states: ChiriWord[]
 }
 
+export interface ChiriComponentStateSpecial extends ChiriComponentBase {
+	subType: "state-special"
+	state: ChiriWord
+}
+
 export interface ChiriComponentPseudo extends ChiriComponentBase {
 	subType: "pseudo"
 	pseudos: ChiriWord<"before" | "after">[]
