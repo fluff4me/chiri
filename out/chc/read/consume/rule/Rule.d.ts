@@ -1,4 +1,5 @@
 import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
+import type { ChiriValueText } from "../consumeValueText";
 import type { ChiriWord } from "../consumeWord";
 import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
 export interface ChiriComponentBase {
@@ -22,6 +23,10 @@ export interface ChiriComponentState extends ChiriComponentBase {
 export interface ChiriComponentStateSpecial extends ChiriComponentBase {
     subType: "state-special";
     state: ChiriWord;
+}
+export interface ChiriComponentStateContainer extends ChiriComponentBase {
+    subType: "container";
+    query: ChiriValueText;
 }
 export interface ChiriComponentPseudo extends ChiriComponentBase {
     subType: "pseudo";
