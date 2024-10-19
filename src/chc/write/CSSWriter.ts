@@ -23,6 +23,7 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	states: (ComponentState | undefined)[]
 	specialState?: ComponentStateSpecial
 	pseudos: ("before" | "after" | undefined)[]
+	containerQueries?: string[]
 	name: ChiriWord
 	content: ResolvedProperty[]
 	affects: string[]
@@ -111,6 +112,12 @@ export default class CSSWriter extends Writer {
 	}
 
 	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
+		for (const query of mixin.containerQueries ?? []) {
+			this.write(`@container ${query}`)
+			this.writeSpaceOptional()
+			this.writeLineStartBlock("{")
+		}
+
 		if (mixin.specialState) {
 			this.write(STATE_MAP_SPECIAL[mixin.specialState])
 			this.writeSpaceOptional()
@@ -148,6 +155,9 @@ export default class CSSWriter extends Writer {
 		this.writeLineEndBlock("}")
 
 		if (mixin.specialState)
+			this.writeLineEndBlock("}")
+
+		for (const query of mixin.containerQueries ?? [])
 			this.writeLineEndBlock("}")
 	}
 

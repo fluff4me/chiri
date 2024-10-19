@@ -80,6 +80,7 @@ interface ChiriSelector {
 	state: ChiriWord[]
 	pseudo: ChiriWord[]
 	specialState?: ChiriWord
+	containerQueries: string[]
 }
 
 interface ErrorPositioned extends Error {
@@ -754,6 +755,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				})
 				break
 
+			case "container": {
+				const query = stringifyText(compiler, statement.query)
+				selector = createSelector(containingSelector, {
+					containerQueries: [query],
+				})
+				break
+			}
+
 			case "pseudo":
 				selector = createSelector(containingSelector, {
 					class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
@@ -843,6 +852,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						position,
 						content: propertyGroup,
 						affects: propertyGroup.flatMap(getPropertyAffects),
+						containerQueries: selector.containerQueries,
 					})
 					results.push(name)
 
@@ -884,6 +894,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				const selector = selectorStack.at(-1)
 				if (!selector)
 					throw error(name.position, "Unable to use mixin here, no selector")
+
+				if (selector.containerQueries.length) {
+					const mixin = getMixin(name.value, name.position)
+					return mixin.content
+				}
 
 				if (!selector.state.length && !selector.pseudo.length && !selector.specialState)
 					return name
@@ -962,6 +977,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			state: assignFrom.state ?? selector?.state ?? [],
 			pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
 			specialState: assignFrom.specialState ?? selector?.specialState,
+			containerQueries: assignFrom.containerQueries ?? selector?.containerQueries ?? [],
 		}
 	}
 

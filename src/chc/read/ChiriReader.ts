@@ -47,9 +47,10 @@ import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
+import consumeRuleStateContainerOptional from "./consume/rule/consumeRuleStateContainerOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import consumeRuleStateSpecialOptional from "./consume/rule/consumeRuleStateSpecialOptional"
-import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
 
 export interface ChiriPosition {
 	file: string
@@ -89,6 +90,7 @@ export type ChiriStatement =
 	| ChiriComponentCustomState
 	| ChiriComponentState
 	| ChiriComponentStateSpecial
+	| ChiriComponentStateContainer
 	| ChiriComponentPseudo
 	| ChiriComponentViewTransition
 	| ChiriComponentViewTransitionClass
@@ -422,10 +424,12 @@ export default class ChiriReader {
 			return property
 
 		const rule = this.context.type === "keyframe" ? undefined : (undefined
+			?? await consumeRuleStateContainerOptional(this)
 			?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await consumeRuleMainOptional(this))
 			?? await consumeRuleStateSpecialOptional(this)
 			?? (this.context.type === "pseudo" ? undefined : await consumeRuleStateOptional(this))
-			?? await consumeRulePseudoOptional(this))
+			?? await consumeRulePseudoOptional(this)
+		)
 		if (rule)
 			return rule
 
