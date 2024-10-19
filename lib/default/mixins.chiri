@@ -439,6 +439,7 @@ $$gradient-mask-height!length-percentage
 %gradient-mask:
 	mask-image: linear-gradient(to bottom, transparent 0%, black $gradient-mask-height, black calc(100% - $gradient-mask-height), transparent 100%)
 
+%overflow-visible: overflow: visible
 %overflow-hidden: overflow: hidden
 %overflow-auto:
 	scroll-behaviour: smooth
@@ -462,6 +463,10 @@ $$gradient-mask-height!length-percentage
 	scroll-behaviour: smooth
 	overflow-x: scroll
 	overflow-y: hidden
+
+%gutter-auto: scrollbar-gutter: auto
+%gutter-stable: scrollbar-gutter: stable
+%gutter-both: scrollbar-gutter: stable both-edges
 
 %color-dodge: mix-blend-mode: color-dodge
 %colour-dodge: mix-blend-mode: color-dodge
