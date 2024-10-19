@@ -48,15 +48,27 @@ $$border-colour!colour: currentcolor
 		"border-bottom
 
 	#each border-properties as var property:
+		%#{property}-0: #{property}-width: 0
+		%#{property}-none: #{property}: none
 		%#{property}-1: #{property}: 1px solid $border-colour
 		%#{property}-2: #{property}: 2px solid $border-colour
 
 #string box-shadow-inset-border-1 = "inset 0 0 0 1px $border-colour
 #string box-shadow-inset-border-2 = "inset 0 0 0 2px $border-colour
+#string box-shadow-inset-border-top-1 = "inset 0 1px 0 0 $border-colour
 #string box-shadow-inset-border-bottom-1 = "inset 0 -1px 0 0 $border-colour
+#string box-shadow-inset-border-left-1 = "inset -1px 0 0 0 $border-colour
+#string box-shadow-inset-border-right-1 = "inset 1px 0 0 0 $border-colour
+#string box-shadow-inset-border-block-1 = "#{box-shadow-inset-border-top-1}, #{box-shadow-inset-border-bottom-1}
+#string box-shadow-inset-border-inline-1 = "#{box-shadow-inset-border-left-1}, #{box-shadow-inset-border-right-1}
 %inset-border-1: box-shadow: #{box-shadow-inset-border-1}
 %inset-border-2: box-shadow: #{box-shadow-inset-border-2}
 %inset-border-bottom-1: box-shadow: #{box-shadow-inset-border-bottom-1}
+%inset-border-top-1: box-shadow: #{box-shadow-inset-border-top-1}
+%inset-border-left-1: box-shadow: #{box-shadow-inset-border-left-1}
+%inset-border-right-1: box-shadow: #{box-shadow-inset-border-right-1}
+%inset-border-inline-1: box-shadow: #{box-shadow-inset-border-inline-1}
+%inset-border-block-1: box-shadow: #{box-shadow-inset-border-block-1}
 
 %box-shadow-none: box-shadow: none
 %box-shadow-0: box-shadow: none
