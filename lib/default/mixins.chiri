@@ -410,28 +410,28 @@ $$translate-y!length-percentage
 %z-index-fg: z-index: 1
 %z-index-bg: z-index: -1
 
-%outline:
+%text-outline:
 	text-shadow:
 		#each in 0..16 as var i:
 			#string angle = "#{i} * pi * 2 / 16
-			#string width = ${outline-width: 0.1em}
-			#string colour = ${outline-colour: ${outline-color: #000}}
+			#string width = ${text-outline-width: 0.1em}
+			#string colour = ${text-outline-colour: ${text-outline-color: #000}}
 
 			calc(#{width} * cos(#{angle})) calc(#{width} * sin(#{angle}))
 			0
 			#{colour}
 			#{if i == 15: "" else: ","}
 
-#macro outline:
+#macro text-outline:
 	#string width?
 	#string colour?
 
 	#if width != _:
-		$outline-width: #{width}
+		$text-outline-width: #{width}
 	#if colour != _:
-		$outline-colour: #{colour}
+		$text-outline-colour: #{colour}
 
-	%outline
+	%text-outline
 
 %text-shadow: text-shadow: 0 calc($space-1 * ($font-scaling / 3)) calc(($space-1 / 2) * ($font-scaling / 3)) light-dark(#0003, #0008)
 
@@ -479,3 +479,5 @@ $$gradient-mask-height!length-percentage
 %scheme-light-dark: colour-scheme: light dark
 
 %transition-discrete: transition-behaviour: allow-discrete
+
+%no-outline: outline: none
