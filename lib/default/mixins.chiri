@@ -14,6 +14,7 @@
 %sticky: position: sticky
 
 %border-box: box-sizing: border-box
+%content-box: box-sizing: content-box
 
 #do:
 	#list!dec font-sizes = [
@@ -99,10 +100,10 @@ $$translate-y!length-percentage
 	#list!int spaces = [0, 1, 2, 3, 4, 5, 20, 25, 50, 100]
 	#each spaces as var i:
 		%border-radius-#{i}: border-radius: $space-#{i}
-		%border-top-left-radius: border-top-left-radius: $space-#{i}
-		%border-top-right-radius: border-top-right-radius: $space-#{i}
-		%border-bottom-left-radius: border-bottom-left-radius: $space-#{i}
-		%border-bottom-right-radius: border-bottom-right-radius: $space-#{i}
+		%border-top-left-radius-#{i}: border-top-left-radius: $space-#{i}
+		%border-top-right-radius-#{i}: border-top-right-radius: $space-#{i}
+		%border-bottom-left-radius-#{i}: border-bottom-left-radius: $space-#{i}
+		%border-bottom-right-radius-#{i}: border-bottom-right-radius: $space-#{i}
 		%border-top-radius-#{i}:
 			border-top-left-radius: $space-#{i}
 			border-top-right-radius: $space-#{i}
@@ -119,6 +120,8 @@ $$translate-y!length-percentage
 		%gap-#{i}: gap: $space-#{i}
 
 		%inset-#{i}: inset: $space-#{i}
+		%inset-inline-#{i}: inset-inline: $space-#{i}
+		%inset-block-#{i}: inset-block: $space-#{i}
 		%left-#{i}: left: $space-#{i}
 		%right-#{i}: right: $space-#{i}
 		%top-#{i}: top: $space-#{i}
@@ -513,3 +516,5 @@ $$gradient-mask-height!length-percentage
 %text-align-centre: text-align: center
 %text-align-center: text-align: center
 %text-align-justify: text-align: justify
+
+%vertical-align-middle: vertical-align: middle
