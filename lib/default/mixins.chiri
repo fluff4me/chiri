@@ -99,6 +99,23 @@ $$translate-y!length-percentage
 	#list!int spaces = [0, 1, 2, 3, 4, 5, 20, 25, 50, 100]
 	#each spaces as var i:
 		%border-radius-#{i}: border-radius: $space-#{i}
+		%border-top-left-radius: border-top-left-radius: $space-#{i}
+		%border-top-right-radius: border-top-right-radius: $space-#{i}
+		%border-bottom-left-radius: border-bottom-left-radius: $space-#{i}
+		%border-bottom-right-radius: border-bottom-right-radius: $space-#{i}
+		%border-top-radius-#{i}:
+			border-top-left-radius: $space-#{i}
+			border-top-right-radius: $space-#{i}
+		%border-bottom-radius-#{i}:
+			border-bottom-left-radius: $space-#{i}
+			border-bottom-right-radius: $space-#{i}
+		%border-left-radius-#{i}:
+			border-top-left-radius: $space-#{i}
+			border-bottom-left-radius: $space-#{i}
+		%border-right-radius-#{i}:
+			border-top-right-radius: $space-#{i}
+			border-bottom-right-radius: $space-#{i}
+
 		%gap-#{i}: gap: $space-#{i}
 
 		%inset-#{i}: inset: $space-#{i}
@@ -155,6 +172,7 @@ $$translate-y!length-percentage
 		#each in 0...5 as var j:
 			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
+			%unmargin-#{i}-#{j}: margin: calc($space-#{i} * -1) calc($space-#{j} * -1)
 
 %top-auto: top: auto
 %left-auto: left: auto
@@ -389,6 +407,12 @@ $$translate-y!length-percentage
 			width: #{size}-content
 			height: #{size}-content
 
+%width-auto: width: auto
+%height-auto: width: auto
+%size-auto:
+	width: auto
+	height: auto
+
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
@@ -481,3 +505,11 @@ $$gradient-mask-height!length-percentage
 %transition-discrete: transition-behaviour: allow-discrete
 
 %no-outline: outline: none
+
+%aspect-ratio-1: aspect-ratio: 1/1
+
+%text-align-left: text-align: left
+%text-align-right: text-align: right
+%text-align-centre: text-align: center
+%text-align-center: text-align: center
+%text-align-justify: text-align: justify
