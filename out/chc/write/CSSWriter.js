@@ -82,6 +82,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         writeMixin(compiler, mixin) {
+            ////////////////////////////////////
+            //#region Rule Start
             for (const query of mixin.containerQueries ?? []) {
                 this.write(`@container ${query}`);
                 this.writeSpaceOptional();
@@ -97,30 +99,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 mixin.states.push(undefined);
             if (!mixin.pseudos.length)
                 mixin.pseudos.push(undefined);
-            for (const state of mixin.states) {
-                for (const pseudo of mixin.pseudos) {
-                    if (i) {
-                        this.write(",");
-                        this.writeSpaceOptional();
+            if (!mixin.elementTypes.length)
+                mixin.elementTypes.push(undefined);
+            for (const elementType of mixin.elementTypes) {
+                for (const state of mixin.states) {
+                    for (const pseudo of mixin.pseudos) {
+                        if (i) {
+                            this.write(",");
+                            this.writeSpaceOptional();
+                        }
+                        this.write(".");
+                        this.writeWord(mixin.name);
+                        if (elementType)
+                            this.write(` ${elementType}`);
+                        if (state)
+                            this.write(componentStates_1.STATE_MAP[state]);
+                        if (pseudo)
+                            this.write(`::${pseudo}`);
+                        i++;
                     }
-                    this.write(".");
-                    this.writeWord(mixin.name);
-                    if (state)
-                        this.write(componentStates_1.STATE_MAP[state]);
-                    if (pseudo)
-                        this.write(`::${pseudo}`);
-                    i++;
                 }
             }
+            //#endregion
+            ////////////////////////////////////
             this.writeSpaceOptional();
             this.writeLineStartBlock("{");
             for (const property of mergeProperties(mixin.content))
                 this.writeProperty(compiler, property);
             this.writeLineEndBlock("}");
+            ////////////////////////////////////
+            //#region Rule End
             if (mixin.specialState)
                 this.writeLineEndBlock("}");
             for (const query of mixin.containerQueries ?? [])
                 this.writeLineEndBlock("}");
+            //#endregion
+            ////////////////////////////////////
         }
         writeAnimation(compiler, animation) {
             this.writingTo("animations", () => {

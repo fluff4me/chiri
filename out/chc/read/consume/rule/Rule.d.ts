@@ -16,6 +16,10 @@ export interface ChiriComponentCustomState extends ChiriComponentBase {
     subType: "custom-state";
     names: ChiriWordInterpolated[];
 }
+export interface ChiriComponentDescendantElement extends ChiriComponentBase {
+    subType: "element";
+    names: ChiriWordInterpolated[];
+}
 export interface ChiriComponentState extends ChiriComponentBase {
     subType: "state";
     states: ChiriWord[];

@@ -345,6 +345,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         name,
                         states: [undefined],
                         pseudos: [undefined],
+                        elementTypes: [undefined],
                         content: properties,
                         affects: properties.flatMap(getPropertyAffects),
                     });
@@ -550,6 +551,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     });
                     break;
                 }
+                case "element": {
+                    selector = createSelector(containingSelector, {
+                        elementTypes: statement.names.map(resolveWord),
+                    });
+                    break;
+                }
                 case "pseudo":
                     selector = createSelector(containingSelector, {
                         class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
@@ -620,10 +627,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             name,
                             states: selector.state.map(state => state?.value),
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
+                            containerQueries: selector.containerQueries,
+                            elementTypes: selector.elementTypes.map(t => t.value),
                             position,
                             content: propertyGroup,
                             affects: propertyGroup.flatMap(getPropertyAffects),
-                            containerQueries: selector.containerQueries,
                         });
                         results.push(name);
                         propertyGroup = undefined;
@@ -657,7 +665,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const selector = selectorStack.at(-1);
                     if (!selector)
                         throw error(name.position, "Unable to use mixin here, no selector");
-                    if (selector.containerQueries.length) {
+                    if (selector.containerQueries.length || selector.elementTypes.length) {
                         const mixin = getMixin(name.value, name.position);
                         return mixin.content;
                     }
@@ -728,6 +736,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
                 specialState: assignFrom.specialState ?? selector?.specialState,
                 containerQueries: assignFrom.containerQueries ?? selector?.containerQueries ?? [],
+                elementTypes: assignFrom.elementTypes ?? selector?.elementTypes ?? [],
             };
         }
         //#endregion
@@ -956,6 +965,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "mixin",
                     pseudos: ["before"],
                     states: [undefined],
+                    elementTypes: [undefined],
                     content: [blankContent],
                     affects: ["content"],
                     name: { type: "word", value: "before", position: constants_1.INTERNAL_POSITION },
@@ -965,6 +975,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "mixin",
                     pseudos: ["after"],
                     states: [undefined],
+                    elementTypes: [undefined],
                     content: [blankContent],
                     affects: ["content"],
                     name: { type: "word", value: "after", position: constants_1.INTERNAL_POSITION },
@@ -974,6 +985,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     type: "mixin",
                     pseudos: ["before", "after"],
                     states: [undefined],
+                    elementTypes: [undefined],
                     content: [blankContent],
                     affects: ["content"],
                     name: { type: "word", value: "before-after", position: constants_1.INTERNAL_POSITION },

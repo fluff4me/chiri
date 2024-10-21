@@ -18,6 +18,7 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
     specialState?: ComponentStateSpecial;
     pseudos: ("before" | "after" | undefined)[];
     containerQueries?: string[];
+    elementTypes: (string | undefined)[];
     name: ChiriWord;
     content: ResolvedProperty[];
     affects: string[];
