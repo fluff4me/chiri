@@ -50,7 +50,7 @@ import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
 import consumeRuleStateContainerOptional from "./consume/rule/consumeRuleStateContainerOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import consumeRuleStateSpecialOptional from "./consume/rule/consumeRuleStateSpecialOptional"
-import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentDescendantElement, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
 
 export interface ChiriPosition {
 	file: string
@@ -87,6 +87,7 @@ export type ChiriStatement =
 	| ChiriPropertyDefinition
 	| ChiriFontFace
 	// component/mixin
+	| ChiriComponentDescendantElement
 	| ChiriComponentCustomState
 	| ChiriComponentState
 	| ChiriComponentStateSpecial

@@ -24,6 +24,7 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	specialState?: ComponentStateSpecial
 	pseudos: ("before" | "after" | undefined)[]
 	containerQueries?: string[]
+	elementTypes: (string | undefined)[]
 	name: ChiriWord
 	content: ResolvedProperty[]
 	affects: string[]
@@ -112,6 +113,9 @@ export default class CSSWriter extends Writer {
 	}
 
 	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
+		////////////////////////////////////
+		//#region Rule Start
+
 		for (const query of mixin.containerQueries ?? []) {
 			this.write(`@container ${query}`)
 			this.writeSpaceOptional()
@@ -129,24 +133,34 @@ export default class CSSWriter extends Writer {
 			mixin.states.push(undefined)
 		if (!mixin.pseudos.length)
 			mixin.pseudos.push(undefined)
+		if (!mixin.elementTypes.length)
+			mixin.elementTypes.push(undefined)
 
-		for (const state of mixin.states) {
-			for (const pseudo of mixin.pseudos) {
-				if (i) {
-					this.write(",")
-					this.writeSpaceOptional()
+		for (const elementType of mixin.elementTypes) {
+			for (const state of mixin.states) {
+				for (const pseudo of mixin.pseudos) {
+					if (i) {
+						this.write(",")
+						this.writeSpaceOptional()
+					}
+
+					this.write(".")
+					this.writeWord(mixin.name)
+
+					if (elementType)
+						this.write(` ${elementType}`)
+					if (state)
+						this.write(STATE_MAP[state])
+					if (pseudo)
+						this.write(`::${pseudo}`)
+
+					i++
 				}
-
-				this.write(".")
-				this.writeWord(mixin.name)
-				if (state)
-					this.write(STATE_MAP[state])
-				if (pseudo)
-					this.write(`::${pseudo}`)
-
-				i++
 			}
 		}
+
+		//#endregion
+		////////////////////////////////////
 
 		this.writeSpaceOptional()
 		this.writeLineStartBlock("{")
@@ -154,11 +168,17 @@ export default class CSSWriter extends Writer {
 			this.writeProperty(compiler, property)
 		this.writeLineEndBlock("}")
 
+		////////////////////////////////////
+		//#region Rule End
+
 		if (mixin.specialState)
 			this.writeLineEndBlock("}")
 
 		for (const query of mixin.containerQueries ?? [])
 			this.writeLineEndBlock("}")
+
+		//#endregion
+		////////////////////////////////////
 	}
 
 	writeAnimation (compiler: ChiriCompiler, animation: ResolvedAnimation) {
