@@ -1,13 +1,13 @@
 export const STATE_MAP = {
-	"hover": ":hover:not(:has(:hover))",
-	"active": ":active:not(:has(:active))",
-	"focus": ":focus-visible",
-	"focus-any": ":focus",
-	"popover": ":popover-open",
-	":hover": ":hover",
-	":active": ":active",
+	"hover": ":where(:hover:not(:has(:hover)))",
+	"active": ":where(:active:not(:has(:active)))",
+	"focus": ":where(:focus-visible)",
+	"focus-any": ":where(:focus)",
+	"popover": ":where(:popover-open)",
+	":hover": ":where(:hover)",
+	":active": ":where(:active)",
 	":focus": ":where(:focus-visible, :has(:focus-visible))",
-	":focus-any": ":focus-within",
+	":focus-any": ":where(:focus-within)",
 }
 
 export type ComponentState = keyof typeof STATE_MAP
