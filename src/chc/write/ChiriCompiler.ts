@@ -352,16 +352,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			const bumpMixinName: ChiriWord = { type: "word", value: bumpMixinNameString, position: baseMixin.name.position }
 			mixin = {
-				...baseMixin,
+				...preRegisteredMixin,
+				index: ++usedMixinIndex,
 				name: bumpMixinName,
 			}
 			break
 		}
 
-		const registered = mixin
-		registered.index = ++usedMixinIndex
-
-		return usedMixins[registered.name.value] = registered
+		return usedMixins[mixin.name.value] = mixin
 	}
 
 	//#endregion
