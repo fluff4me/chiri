@@ -1368,7 +1368,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function getPropertyAffects (property: ResolvedProperty): string[] {
-		return getShorthand(property.property.value)
+		return property.isCustomProperty ? [property.value] : getShorthand(property.property.value)
 	}
 
 	function debugStatementString (statement: ChiriStatement) {
