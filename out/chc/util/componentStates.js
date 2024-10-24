@@ -16,6 +16,8 @@
         "focus": ":where(:focus-visible)",
         "focus-any": ":where(:focus)",
         "popover": ":where(:popover-open)",
+        "first": ":where(:first-child)",
+        "last": ":where(:last-child)",
         ":hover": ":where(:hover)",
         ":active": ":where(:active)",
         ":focus": ":where(:focus-visible, :has(:focus-visible))",

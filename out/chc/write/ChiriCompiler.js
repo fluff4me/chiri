@@ -236,14 +236,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     continue;
                 const bumpMixinName = { type: "word", value: bumpMixinNameString, position: baseMixin.name.position };
                 mixin = {
-                    ...baseMixin,
+                    ...preRegisteredMixin,
+                    index: ++usedMixinIndex,
                     name: bumpMixinName,
                 };
                 break;
             }
-            const registered = mixin;
-            registered.index = ++usedMixinIndex;
-            return usedMixins[registered.name.value] = registered;
+            return usedMixins[mixin.name.value] = mixin;
         }
         //#endregion
         ////////////////////////////////////
@@ -1040,7 +1039,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return result[0]?.value;
         }
         function getPropertyAffects(property) {
-            return getShorthand(property.property.value);
+            return property.isCustomProperty ? [property.value] : getShorthand(property.property.value);
         }
         function debugStatementString(statement) {
             const name = "name" in statement ? ` "${(0, stringifyText_1.default)(compiler, statement.name)}"` : "";

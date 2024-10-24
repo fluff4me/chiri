@@ -95,6 +95,7 @@ $$border-colour!colour: currentcolor
 $$translate-x!length-percentage
 $$translate-y!length-percentage
 %translate: translate: ${translate-x: 0px} ${translate-y: 0px}
+%translate-none: translate: none
 
 #do:
 	#list!int spaces = [0, 1, 2, 3, 4, 5, 20, 25, 50, 100]
@@ -122,10 +123,17 @@ $$translate-y!length-percentage
 		%inset-#{i}: inset: $space-#{i}
 		%inset-inline-#{i}: inset-inline: $space-#{i}
 		%inset-block-#{i}: inset-block: $space-#{i}
+		%uninset-#{i}: inset: calc($space-#{i} * -1)
+		%uninset-inline-#{i}: inset-inline: calc($space-#{i} * -1)
+		%uninset-block-#{i}: inset-block: calc($space-#{i} * -1)
 		%left-#{i}: left: $space-#{i}
 		%right-#{i}: right: $space-#{i}
 		%top-#{i}: top: $space-#{i}
 		%bottom-#{i}: bottom: $space-#{i}
+		%unleft-#{i}: left: calc($space-#{i} * -1)
+		%unright-#{i}: right: calc($space-#{i} * -1)
+		%untop-#{i}: top: calc($space-#{i} * -1)
+		%unbottom-#{i}: bottom: calc($space-#{i} * -1)
 
 		%padding-#{i}: padding: $space-#{i}
 		%padding-inline-#{i}: padding-inline: $space-#{i}
@@ -156,6 +164,8 @@ $$translate-y!length-percentage
 			width: $space-#{i}
 			height: $space-#{i}
 
+		%translate-y-0: $translate-y: $space-0
+		%translate-x-0: $translate-x: $space-0
 		%translate-up-#{i}:
 			%translate
 			$translate-y: calc($space-#{i} * -1)
@@ -168,8 +178,6 @@ $$translate-y!length-percentage
 		%translate-right-#{i}:
 			%translate
 			$translate-x: $space-#{i}
-		%translate-y-0: $translate-y: $space-0
-		%translate-x-0: $translate-x: $space-0
 
 	#each in 0...5 as var i:
 		#each in 0...5 as var j:
@@ -499,7 +507,25 @@ $$gradient-mask-height!length-percentage
 %colour-dodge: mix-blend-mode: color-dodge
 
 %background-unclip: background-clip: padding-box
+%backdrop-filter-none: backdrop-filter: none
 %backdrop-blur: backdrop-filter: blur($space-2)
+
+#macro backdrop-blur-before:
+	#body!component content
+	@before:
+		%block
+		%absolute
+		%inset-0
+		%backdrop-blur
+		#include content
+#macro backdrop-blur-after:
+	#body!component content
+	@after:
+		%block
+		%absolute
+		%inset-0
+		%backdrop-blur
+		#include content
 
 %scheme-light: colour-scheme: light
 %scheme-dark: colour-scheme: dark
@@ -507,6 +533,7 @@ $$gradient-mask-height!length-percentage
 
 %transition-discrete: transition-behaviour: allow-discrete
 
+%outline-none: outline: none
 %no-outline: outline: none
 
 %aspect-ratio-1: aspect-ratio: 1/1

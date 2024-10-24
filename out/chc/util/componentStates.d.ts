@@ -4,6 +4,8 @@ export declare const STATE_MAP: {
     focus: string;
     "focus-any": string;
     popover: string;
+    first: string;
+    last: string;
     ":hover": string;
     ":active": string;
     ":focus": string;
