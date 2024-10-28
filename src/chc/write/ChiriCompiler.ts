@@ -497,7 +497,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 
 			case "mixin": {
-				const name = resolveWord(statement.name)
+				const name = resolveWordLowercase(statement.name)
 
 				const properties = compileStatements(statement.content, undefined, compileMixinContent)
 				setMixin({
@@ -575,7 +575,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			case "property-definition":
 				css.writingTo("property-definitions", () => {
 					css.write("@property ")
-					const name = resolveWord(statement.property)
+					const name = resolveWordLowercase(statement.property)
 					name.value = `--${name.value}`
 					css.writeWord(name)
 					css.writeSpaceOptional()
@@ -605,7 +605,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
 					css.writeProperty(compiler, {
 						...statement,
-						property: resolveWord(statement.property),
+						property: resolveWordLowercase(statement.property),
 						value: compileStatements(statement.value, undefined, compileText).join(""),
 					})
 				})
@@ -765,7 +765,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			case "element": {
 				selector = createSelector(containingSelector, {
-					elementTypes: statement.names.map(resolveWord),
+					elementTypes: statement.names.map(resolveWordLowercase),
 				})
 				break
 			}
@@ -886,13 +886,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			case "after":
 				return {
 					type: "compiled-after",
-					selectors: statement.content.map(resolveWord),
+					selectors: statement.content.map(resolveWordLowercase),
 				}
 
 			case "property":
 				return {
 					...statement,
-					property: resolveWord(statement.property),
+					property: resolveWordLowercase(statement.property),
 					value: compileStatements(statement.value, undefined, compileText).join(" "),
 				}
 
@@ -1010,7 +1010,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function compileProperty (property: ChiriProperty): ResolvedProperty {
 		return {
 			...property,
-			property: resolveWord(property.property),
+			property: resolveWordLowercase(property.property),
 			value: compileStatements(property.value, undefined, compileText).join(" "),
 		}
 	}
@@ -1179,7 +1179,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 
 			case "animation": {
-				const name = resolveWord(statement.name)
+				const name = resolveWordLowercase(statement.name)
 				const keyframes = compileStatements(statement.content, undefined, compileKeyframes)
 				setAnimation({
 					...statement,
@@ -1380,7 +1380,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				[name, { type: expr.valueType, value: resolveExpression(compiler, expr) }])))
 	}
 
-	function resolveWord (word: ChiriWordInterpolated | ChiriWord | string): ChiriWord {
+	function resolveWordLowercase (word: ChiriWordInterpolated | ChiriWord | string): ChiriWord {
 		return typeof word === "object" && word.type === "word" ? word : {
 			type: "word",
 			value: typeof word === "string" ? word : stringifyText(compiler, word).replace(/[^\w-]+/g, "-").toLowerCase(),
@@ -1388,8 +1388,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		}
 	}
 
+	function resolveWordPreserve (word: ChiriWordInterpolated | ChiriWord | string): ChiriWord {
+		return typeof word === "object" && word.type === "word" ? word : {
+			type: "word",
+			value: typeof word === "string" ? word : stringifyText(compiler, word).replace(/[^\w-]+/g, "-"),
+			position: typeof word === "string" ? INTERNAL_POSITION : word.position,
+		}
+	}
+
 	function mergeWords (words: ChiriWord[] | undefined, separator: string, newSegment: (ChiriWordInterpolated | ChiriWord | string)[]): ChiriWord[] {
-		return !words?.length ? newSegment.map(resolveWord) : words.flatMap(selector => newSegment.map((newSegment): ChiriWord => resolveWord({
+		return !words?.length ? newSegment.map(resolveWordPreserve) : words.flatMap(selector => newSegment.map((newSegment): ChiriWord => resolveWordPreserve({
 			type: "text",
 			valueType: ChiriType.of("string"),
 			content: [

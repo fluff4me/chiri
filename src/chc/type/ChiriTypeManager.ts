@@ -49,7 +49,8 @@ const unaryBitwiseOperators = ["~"] as const
 const binaryBooleanOperators = ["||", "&&", "==", "!="] as const
 const unaryBooleanOperators = ["!"] as const
 const binaryStringOperators = [".", "x", "==", "!="] as const
-const otherOperators = ["is"] as const
+const binaryOtherOperators = ["is"] as const
+const unaryOtherOperators = ["exists"] as const
 
 export type Operator =
 	| (typeof binaryNumericOperators)[number]
@@ -59,7 +60,8 @@ export type Operator =
 	| (typeof binaryBooleanOperators)[number]
 	| (typeof unaryBooleanOperators)[number]
 	| (typeof binaryStringOperators)[number]
-	| (typeof otherOperators)[number]
+	| (typeof unaryOtherOperators)[number]
+	| (typeof binaryOtherOperators)[number]
 
 const minNumericPrecision2 = (typeA: string, typeB: string): "uint" | "int" | "dec" => (typeA === "dec" || typeB === "dec") ? "dec"
 	: (typeA === "int" || typeB === "int") ? "int"
@@ -93,6 +95,7 @@ const operatorResults: Record<Operator, string | ((typeA: string, typeB?: string
 	".": "string",
 	"x": "string",
 	"is": "bool",
+	"exists": "bool",
 }
 
 const operatorPrecedence = [
@@ -112,6 +115,7 @@ const operatorPrecedence = [
 	["**"],
 	["!"],
 	["~"],
+	["exists"],
 ] satisfies Operator[][]
 
 type VerifyHasAllOperators = { [KEY in (typeof operatorPrecedence)[number][number]]: true }[Operator]
@@ -266,6 +270,7 @@ export default class ChiriTypeManager {
 			this.registerBinaryOperator(type, "is", "string", "bool")
 			this.registerBinaryOperator(type, "==", "undefined", "bool")
 			this.registerBinaryOperator(type, "!=", "undefined", "bool")
+			this.registerUnaryOperator("exists", type, "bool")
 		}
 	}
 

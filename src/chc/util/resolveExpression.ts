@@ -112,6 +112,8 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 							return -operand
 						case "~":
 							return ~operand
+						case "exists":
+							return operand !== undefined
 						default:
 							throw compiler.error(undefined, `Unable to resolve unary operator "${expression.operator}"`)
 					}

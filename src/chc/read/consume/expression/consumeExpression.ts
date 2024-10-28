@@ -374,6 +374,8 @@ function consumeUnaryExpression (reader: ChiriReader): ChiriUnaryExpression | Ch
 	const e = reader.i
 	const unaryOperators = reader.types.unaryOperators
 	const operator = consumeOperatorOptional(reader, unaryOperators)
+	if (operator)
+		consumeWhiteSpaceOptional(reader)
 
 	const operand = consumeInlineChain(reader)
 	if (!operator)
