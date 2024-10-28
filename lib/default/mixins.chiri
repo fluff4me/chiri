@@ -552,3 +552,8 @@ $$gradient-mask-height!length-percentage
 %text-align-justify: text-align: justify
 
 %vertical-align-middle: vertical-align: middle
+
+%white-space-inherit: white-space: inherit
+%white-space-normal: white-space: normal
+%white-space-pre-wrap: white-space: pre-wrap
+%white-space-pre: white-space: pre
