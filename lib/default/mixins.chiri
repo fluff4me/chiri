@@ -239,6 +239,8 @@ $$translate-y!length-percentage
 %flex-wrap-reverse: flex-wrap: reverse
 %flex-grow: flex-grow: 1
 %flex-shrink: flex-shrink: 1
+%grow: flex-grow: 1
+%shrink: flex-shrink: 1
 
 %align-content-normal: align-content: normal
 %align-content-start: align-content: start
@@ -502,6 +504,11 @@ $$gradient-mask-height!length-percentage
 %gutter-auto: scrollbar-gutter: auto
 %gutter-stable: scrollbar-gutter: stable
 %gutter-both: scrollbar-gutter: stable both-edges
+
+%scrollbar-none: scrollbar-width: none
+%scrollbar-thin: scrollbar-width: thin
+%scrollbar-thick: scrollbar-width: thick
+%scrollbar-auto: scrollbar-width: auto
 
 %color-dodge: mix-blend-mode: color-dodge
 %colour-dodge: mix-blend-mode: color-dodge

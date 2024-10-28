@@ -337,7 +337,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         writer.writeDocumentation(statement);
                     return true;
                 case "mixin": {
-                    const name = resolveWord(statement.name);
+                    const name = resolveWordLowercase(statement.name);
                     const properties = compileStatements(statement.content, undefined, compileMixinContent);
                     setMixin({
                         ...statement,
@@ -405,7 +405,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "property-definition":
                     css.writingTo("property-definitions", () => {
                         css.write("@property ");
-                        const name = resolveWord(statement.property);
+                        const name = resolveWordLowercase(statement.property);
                         name.value = `--${name.value}`;
                         css.writeWord(name);
                         css.writeSpaceOptional();
@@ -432,7 +432,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
                         css.writeProperty(compiler, {
                             ...statement,
-                            property: resolveWord(statement.property),
+                            property: resolveWordLowercase(statement.property),
                             value: compileStatements(statement.value, undefined, compileText).join(""),
                         });
                     });
@@ -552,7 +552,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 case "element": {
                     selector = createSelector(containingSelector, {
-                        elementTypes: statement.names.map(resolveWord),
+                        elementTypes: statement.names.map(resolveWordLowercase),
                     });
                     break;
                 }
@@ -651,12 +651,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "after":
                     return {
                         type: "compiled-after",
-                        selectors: statement.content.map(resolveWord),
+                        selectors: statement.content.map(resolveWordLowercase),
                     };
                 case "property":
                     return {
                         ...statement,
-                        property: resolveWord(statement.property),
+                        property: resolveWordLowercase(statement.property),
                         value: compileStatements(statement.value, undefined, compileText).join(" "),
                     };
                 case "mixin-use": {
@@ -755,7 +755,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function compileProperty(property) {
             return {
                 ...property,
-                property: resolveWord(property.property),
+                property: resolveWordLowercase(property.property),
                 value: compileStatements(property.value, undefined, compileText).join(" "),
             };
         }
@@ -887,7 +887,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return compileStatements(statements, undefined, getContextConsumer(bodyType));
                 }
                 case "animation": {
-                    const name = resolveWord(statement.name);
+                    const name = resolveWordLowercase(statement.name);
                     const keyframes = compileStatements(statement.content, undefined, compileKeyframes);
                     setAnimation({
                         ...statement,
@@ -1049,15 +1049,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return Scope.variables(Object.fromEntries(Object.entries(assignments)
                 .map(([name, expr]) => [name, { type: expr.valueType, value: (0, resolveExpression_1.default)(compiler, expr) }])));
         }
-        function resolveWord(word) {
+        function resolveWordLowercase(word) {
             return typeof word === "object" && word.type === "word" ? word : {
                 type: "word",
                 value: typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word).replace(/[^\w-]+/g, "-").toLowerCase(),
                 position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
             };
         }
+        function resolveWordPreserve(word) {
+            return typeof word === "object" && word.type === "word" ? word : {
+                type: "word",
+                value: typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word).replace(/[^\w-]+/g, "-"),
+                position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
+            };
+        }
         function mergeWords(words, separator, newSegment) {
-            return !words?.length ? newSegment.map(resolveWord) : words.flatMap(selector => newSegment.map((newSegment) => resolveWord({
+            return !words?.length ? newSegment.map(resolveWordPreserve) : words.flatMap(selector => newSegment.map((newSegment) => resolveWordPreserve({
                 type: "text",
                 valueType: ChiriType_1.ChiriType.of("string"),
                 content: [

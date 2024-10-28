@@ -1,15 +1,26 @@
 export declare const STATE_MAP: {
     hover: string;
+    "not:hover": string;
     active: string;
+    "not:active": string;
     focus: string;
+    "not:focus": string;
     "focus-any": string;
+    "not:focus-any": string;
     popover: string;
+    "not:popover": string;
     first: string;
+    "not:first": string;
     last: string;
+    "not:last": string;
     ":hover": string;
+    "not::hover": string;
     ":active": string;
+    "not::active": string;
     ":focus": string;
+    "not::focus": string;
     ":focus-any": string;
+    "not::focus-any": string;
 };
 export type ComponentState = keyof typeof STATE_MAP;
 export declare const STATES: ComponentState[];

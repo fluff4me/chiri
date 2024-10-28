@@ -264,6 +264,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const e = reader.i;
         const unaryOperators = reader.types.unaryOperators;
         const operator = consumeOperatorOptional(reader, unaryOperators);
+        if (operator)
+            (0, consumeWhiteSpaceOptional_1.default)(reader);
         const operand = consumeInlineChain(reader);
         if (!operator)
             return operand;

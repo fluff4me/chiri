@@ -44,7 +44,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const binaryBooleanOperators = ["||", "&&", "==", "!="];
     const unaryBooleanOperators = ["!"];
     const binaryStringOperators = [".", "x", "==", "!="];
-    const otherOperators = ["is"];
+    const binaryOtherOperators = ["is"];
+    const unaryOtherOperators = ["exists"];
     const minNumericPrecision2 = (typeA, typeB) => (typeA === "dec" || typeB === "dec") ? "dec"
         : (typeA === "int" || typeB === "int") ? "int"
             : "uint";
@@ -75,6 +76,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ".": "string",
         "x": "string",
         "is": "bool",
+        "exists": "bool",
     };
     const operatorPrecedence = [
         ["||"],
@@ -93,6 +95,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ["**"],
         ["!"],
         ["~"],
+        ["exists"],
     ];
     const binaryOperatorOperandCoercion = {
         ".": "string",
@@ -213,6 +216,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.registerBinaryOperator(type, "is", "string", "bool");
                 this.registerBinaryOperator(type, "==", "undefined", "bool");
                 this.registerBinaryOperator(type, "!=", "undefined", "bool");
+                this.registerUnaryOperator("exists", type, "bool");
             }
         }
         registerGenerics(...generics) {
