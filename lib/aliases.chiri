@@ -6,6 +6,12 @@
 #alias size:
 	width
 	height
+#alias min-size:
+	min-width
+	min-height
+#alias max-size:
+	max-width
+	max-height
 
 #alias mask-image:
 	mask-image

@@ -426,6 +426,10 @@ $$translate-y!length-percentage
 	width: auto
 	height: auto
 
+%min-size-0: min-size: 0
+%min-size-none: min-size: 0
+%max-size-none: max-size: none
+
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder

@@ -38,9 +38,9 @@ export interface ChiriComponentPseudo extends ChiriComponentBase {
 }
 export interface ChiriComponentViewTransition extends ChiriComponentBase {
     subType: "view-transition";
-    pseudos: ChiriWord<"view-transition!old" | "view-transition!new">[];
+    pseudos: ChiriWord<"view-transition!old" | "view-transition!new" | "view-transition!image-pair">[];
 }
 export interface ChiriComponentViewTransitionClass extends ChiriComponentBase {
     subType: "view-transition-class";
-    pseudos: ChiriWord<"view-transition-class!old" | "view-transition-class!new" | "view-transition-class!group">[];
+    pseudos: ChiriWord<"view-transition-class!old" | "view-transition-class!new" | "view-transition-class!group" | "view-transition-class!image-pair">[];
 }
