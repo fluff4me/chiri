@@ -185,8 +185,22 @@ $$translate-y!length-percentage
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 			%unmargin-#{i}-#{j}: margin: calc($space-#{i} * -1) calc($space-#{j} * -1)
 
-%top-auto: top: auto
-%left-auto: left: auto
+#do:
+	#list!string properties = [
+		"top
+		"left
+		"right
+		"bottom
+		"inset
+		"inset-block
+		"inset-block-start
+		"inset-block-end
+		"inset-inline
+		"inset-inline-start
+		"inset-inline-end
+
+	#each properties as var property:
+		%#{property}-auto: #{property}: auto
 
 %margin-auto: margin: auto
 %margin-block-auto: margin-block: auto
@@ -434,8 +448,10 @@ $$translate-y!length-percentage
 %weight-bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
 
-%rotate-45: rotate: 45deg
-%rotate-135: rotate: 135deg
+#each in 0..72 as var raw:
+	#int angle = raw * 5
+	%rotate-#{angle}: rotate: #{angle}deg
+	%unrotate-#{angle}: rotate: -#{angle}deg
 
 %transparent: opacity: 0
 %opaque: opacity: 1
