@@ -16,7 +16,6 @@ import ChiriTypeManager from "../type/ChiriTypeManager"
 import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
 import typeString from "../type/typeString"
 import type { ComponentStateSpecial } from "../util/componentStates"
-import { type ComponentState } from "../util/componentStates"
 import relToCwd from "../util/relToCwd"
 import type { Value } from "../util/resolveExpression"
 import resolveExpression, { Record as ChiriRecord } from "../util/resolveExpression"
@@ -854,7 +853,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					setMixin({
 						type: "mixin",
 						name,
-						states: selector.state.map(state => state?.value as ComponentState | undefined),
+						states: selector.state.map(state => state?.value),
 						pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
 						containerQueries: selector.containerQueries,
 						elementTypes: selector.elementTypes.map(t => t.value),
@@ -937,7 +936,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					setMixin({
 						...getMixin(statement.name.value, statement.name.position),
 						name,
-						states: selector.state.map(state => state?.value as ComponentState | undefined),
+						states: selector.state.map(state => state?.value),
 						pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
 						specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
 					})

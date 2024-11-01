@@ -7,8 +7,8 @@ import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriAnimation } from "../read/consume/macro/macroAnimation"
 import makeWord from "../read/factory/makeWord"
-import type { ComponentState, ComponentStateSpecial } from "../util/componentStates"
-import { STATE_MAP, STATE_MAP_SPECIAL } from "../util/componentStates"
+import type { ComponentStateSpecial } from "../util/componentStates"
+import { STATE_MAP_SPECIAL } from "../util/componentStates"
 import type ChiriCompiler from "./ChiriCompiler"
 import type { ChiriWriteConfig } from "./Writer"
 import Writer, { QueuedWrite } from "./Writer"
@@ -20,7 +20,7 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
 }
 
 export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
-	states: (ComponentState | undefined)[]
+	states: (string | undefined)[]
 	specialState?: ComponentStateSpecial
 	pseudos: ("before" | "after" | undefined)[]
 	containerQueries?: string[]
@@ -150,7 +150,7 @@ export default class CSSWriter extends Writer {
 					if (elementType)
 						this.write(` ${elementType}`)
 					if (state)
-						this.write(STATE_MAP[state])
+						this.write(`:where(${state})`)
 					if (pseudo)
 						this.write(`::${pseudo}`)
 

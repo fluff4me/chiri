@@ -1,4 +1,5 @@
-import { STATES } from "../../../util/componentStates"
+import type { ComponentState } from "../../../util/componentStates"
+import { STATE_MAP, STATES } from "../../../util/componentStates"
 import type ChiriReader from "../../ChiriReader"
 import consumeBody from "../consumeBody"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
@@ -15,7 +16,21 @@ export default async (reader: ChiriReader): Promise<ChiriComponentState | undefi
 		if (!prefix)
 			break
 
-		states.push(consumeWord(reader, ...STATES))
+		const state: ChiriWord = consumeWord(reader, ...STATES, "not")
+		if (state.value === "not") {
+			while (consumeWhiteSpaceOptional(reader)) {
+				reader.consume(":")
+				const substate = reader.consume(...STATES)
+				state.value += ` ${STATE_MAP[substate]}`
+			}
+
+			state.value = `:not(${state.value.slice(4).replaceAll(" ", ",")})`
+		} else {
+			state.value = STATE_MAP[state.value as ComponentState].replaceAll(" ", ",")
+		}
+
+		states.push(state)
+
 	} while (reader.consumeOptional(",") && (consumeWhiteSpaceOptional(reader) || true))
 
 	if (!states.length) {
