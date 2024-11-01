@@ -4,7 +4,7 @@ import type { ChiriMixin } from "../read/consume/consumeMixinOptional";
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional";
 import type { ChiriWord } from "../read/consume/consumeWord";
 import type { ChiriAnimation } from "../read/consume/macro/macroAnimation";
-import type { ComponentState, ComponentStateSpecial } from "../util/componentStates";
+import type { ComponentStateSpecial } from "../util/componentStates";
 import type ChiriCompiler from "./ChiriCompiler";
 import type { ChiriWriteConfig } from "./Writer";
 import Writer, { QueuedWrite } from "./Writer";
@@ -14,7 +14,7 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
     merge?: true;
 }
 export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
-    states: (ComponentState | undefined)[];
+    states: (string | undefined)[];
     specialState?: ComponentStateSpecial;
     pseudos: ("before" | "after" | undefined)[];
     containerQueries?: string[];

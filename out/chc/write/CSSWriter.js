@@ -113,7 +113,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (elementType)
                             this.write(` ${elementType}`);
                         if (state)
-                            this.write(componentStates_1.STATE_MAP[state]);
+                            this.write(`:where(${state})`);
                         if (pseudo)
                             this.write(`::${pseudo}`);
                         i++;
