@@ -792,7 +792,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function getStatesNameAffix (states: ChiriWord[]) {
 		return !states.length ? "" : "_" + states
-			.map(state => state.value.startsWith(":") ? `${state.value.slice(1)}-any` : state.value)
+			.map(state => state.value.replace(/[:)]/g, "").replace(/[^\w-]+/g, "-"))
 			.join("_")
 	}
 
