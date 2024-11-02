@@ -577,3 +577,5 @@ $$gradient-mask-height!length-percentage
 %white-space-normal: white-space: normal
 %white-space-pre-wrap: white-space: pre-wrap
 %white-space-pre: white-space: pre
+
+%content: content: ""
