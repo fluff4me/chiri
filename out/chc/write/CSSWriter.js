@@ -49,6 +49,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             "root-properties": Writer_1.QueuedWrite.makeQueue(),
             "root-styles": Writer_1.QueuedWrite.makeQueue(),
             "default": this.outputQueue,
+            "selects": Writer_1.QueuedWrite.makeQueue(),
             "view-transitions": Writer_1.QueuedWrite.makeQueue(),
             "animations": Writer_1.QueuedWrite.makeQueue(),
         };
@@ -136,6 +137,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             //#endregion
             ////////////////////////////////////
         }
+        writeSelect(compiler, select) {
+            this.writingTo("selects", () => {
+                this.writeWord((0, makeWord_1.default)(select.selector, select.position));
+                this.writeSpaceOptional();
+                this.writeLineStartBlock("{");
+                for (const property of mergeProperties(select.content))
+                    this.writeProperty(compiler, property);
+                this.writeLineEndBlock("}");
+            });
+        }
         writeAnimation(compiler, animation) {
             this.writingTo("animations", () => {
                 this.write("@keyframes ");
@@ -206,6 +217,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.outputQueue.unshift(...headerQueue);
             if (this.currentSection !== "default")
                 this.currentSection = "default";
+            this.outputQueue.push({ output: "\n" });
+            this.outputQueue.push(...this.queues["selects"]);
             this.outputQueue.push({ output: "\n" });
             this.outputQueue.push(...this.queues["view-transitions"]);
             this.outputQueue.push({ output: "\n" });

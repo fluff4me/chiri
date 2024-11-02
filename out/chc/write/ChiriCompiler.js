@@ -452,6 +452,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     });
                     return true;
                 }
+                case "select": {
+                    css.writeSelect(compiler, {
+                        type: "select",
+                        selector: (0, stringifyExpression_1.default)(compiler, statement.selector),
+                        content: compileStatements(statement.content, undefined, compileMixinContent),
+                        position: statement.position,
+                    });
+                    return true;
+                }
             }
         }
         function compileComponent(statement) {

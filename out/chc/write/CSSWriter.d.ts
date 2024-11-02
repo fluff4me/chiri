@@ -43,7 +43,13 @@ export interface ResolvedFontFace {
     family: ChiriWord;
     content: ResolvedProperty[];
 }
-export type CSSDocumentSection = "imports" | "property-definitions" | "font-faces" | "root-properties" | "root-styles" | "default" | "view-transitions" | "animations";
+export interface ResolvedSelect {
+    type: "select";
+    selector: string;
+    content: ResolvedProperty[];
+    position: ChiriPosition;
+}
+export type CSSDocumentSection = "imports" | "property-definitions" | "font-faces" | "root-properties" | "root-styles" | "default" | "selects" | "view-transitions" | "animations";
 export default class CSSWriter extends Writer {
     private currentSection;
     private queues;
@@ -53,6 +59,7 @@ export default class CSSWriter extends Writer {
     writingTo(section: CSSDocumentSection, dowhile: () => any): void;
     writeProperty(compiler: ChiriCompiler, property: ResolvedProperty): void;
     writeMixin(compiler: ChiriCompiler, mixin: ResolvedMixin): void;
+    writeSelect(compiler: ChiriCompiler, select: ResolvedSelect): void;
     writeAnimation(compiler: ChiriCompiler, animation: ResolvedAnimation): void;
     writeViewTransition(compiler: ChiriCompiler, viewTransition: ResolvedViewTransition): void;
     writeFontFace(compiler: ChiriCompiler, fontFace: ResolvedFontFace): void;

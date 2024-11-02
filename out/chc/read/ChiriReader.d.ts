@@ -27,6 +27,7 @@ import type { ChiriCSSImport, ChiriImport } from "./consume/macro/macroImport";
 import type { ChiriInclude } from "./consume/macro/macroInclude";
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration";
 import type { ChiriReturn } from "./consume/macro/macroReturn";
+import type { ChiriSelect } from "./consume/macro/macroSelect";
 import type { ChiriAssignment } from "./consume/macro/macroSet";
 import type { ChiriShorthand } from "./consume/macro/macroShorthand";
 import type { ChiriWhile } from "./consume/macro/macroWhile";
@@ -36,7 +37,7 @@ export interface ChiriPosition {
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriAnimation | ChiriAnimate | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriFontFace | ChiriComponentDescendantElement | ChiriComponentCustomState | ChiriComponentState | ChiriComponentStateSpecial | ChiriComponentStateContainer | ChiriComponentPseudo | ChiriComponentViewTransition | ChiriComponentViewTransitionClass | ChiriAfter | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriKeyframe | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriAnimation | ChiriAnimate | ChiriSelect | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriFontFace | ChiriComponentDescendantElement | ChiriComponentCustomState | ChiriComponentState | ChiriComponentStateSpecial | ChiriComponentStateContainer | ChiriComponentPseudo | ChiriComponentViewTransition | ChiriComponentViewTransitionClass | ChiriAfter | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriKeyframe | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];
