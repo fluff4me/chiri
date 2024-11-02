@@ -626,6 +626,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				})
 				return true
 			}
+
+			case "select": {
+				css.writeSelect(compiler, {
+					type: "select",
+					selector: stringifyExpression(compiler, statement.selector),
+					content: compileStatements(statement.content, undefined, compileMixinContent),
+					position: statement.position,
+				})
+				return true
+			}
 		}
 	}
 

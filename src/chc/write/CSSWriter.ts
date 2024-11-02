@@ -54,6 +54,13 @@ export interface ResolvedFontFace {
 	content: ResolvedProperty[]
 }
 
+export interface ResolvedSelect {
+	type: "select"
+	selector: string
+	content: ResolvedProperty[]
+	position: ChiriPosition
+}
+
 export type CSSDocumentSection =
 	| "imports"
 	| "property-definitions"
@@ -61,6 +68,7 @@ export type CSSDocumentSection =
 	| "root-properties"
 	| "root-styles"
 	| "default"
+	| "selects"
 	| "view-transitions"
 	| "animations"
 
@@ -74,6 +82,7 @@ export default class CSSWriter extends Writer {
 		"root-properties": QueuedWrite.makeQueue(),
 		"root-styles": QueuedWrite.makeQueue(),
 		"default": this.outputQueue,
+		"selects": QueuedWrite.makeQueue(),
 		"view-transitions": QueuedWrite.makeQueue(),
 		"animations": QueuedWrite.makeQueue(),
 	}
@@ -181,6 +190,17 @@ export default class CSSWriter extends Writer {
 		////////////////////////////////////
 	}
 
+	writeSelect (compiler: ChiriCompiler, select: ResolvedSelect) {
+		this.writingTo("selects", () => {
+			this.writeWord(makeWord(select.selector, select.position))
+			this.writeSpaceOptional()
+			this.writeLineStartBlock("{")
+			for (const property of mergeProperties(select.content))
+				this.writeProperty(compiler, property)
+			this.writeLineEndBlock("}")
+		})
+	}
+
 	writeAnimation (compiler: ChiriCompiler, animation: ResolvedAnimation) {
 		this.writingTo("animations", () => {
 			this.write("@keyframes ")
@@ -266,6 +286,9 @@ export default class CSSWriter extends Writer {
 
 		if (this.currentSection !== "default")
 			this.currentSection = "default"
+
+		this.outputQueue.push({ output: "\n" })
+		this.outputQueue.push(...this.queues["selects"])
 
 		this.outputQueue.push({ output: "\n" })
 		this.outputQueue.push(...this.queues["view-transitions"])

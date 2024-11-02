@@ -42,6 +42,7 @@ import type { ChiriCSSImport, ChiriImport } from "./consume/macro/macroImport"
 import type { ChiriInclude } from "./consume/macro/macroInclude"
 import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
 import type { ChiriReturn } from "./consume/macro/macroReturn"
+import type { ChiriSelect } from "./consume/macro/macroSelect"
 import type { ChiriAssignment } from "./consume/macro/macroSet"
 import type { ChiriShorthand } from "./consume/macro/macroShorthand"
 import type { ChiriWhile } from "./consume/macro/macroWhile"
@@ -79,6 +80,7 @@ export type ChiriStatement =
 	| ChiriImport
 	| ChiriAnimation
 	| ChiriAnimate
+	| ChiriSelect
 	// root
 	| ChiriComponent
 	| ChiriMixin
