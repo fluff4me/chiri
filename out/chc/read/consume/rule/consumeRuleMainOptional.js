@@ -20,7 +20,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
         const position = reader.getPosition();
         const names = [];
-        let validPrefixes = reader.context.type === "component" ? ["&--", "&-", "& "] : ["."];
+        let validPrefixes = reader.context.type === "component" ? ["&--", "&-", "& ", "&& "] : ["."];
         do {
             const prefix = reader.consumeOptional(...validPrefixes);
             if (!prefix)
@@ -31,7 +31,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         reader.consume(":");
         return {
             type: "component",
-            subType: validPrefixes[0] === "& " ? "element" : validPrefixes[0] === "&--" ? "custom-state" : "component",
+            subType: validPrefixes[0].endsWith("& ") ? "element" : validPrefixes[0] === "&--" ? "custom-state" : "component",
+            spread: validPrefixes[0] === "&& " ? true : undefined,
             names,
             ...await (0, consumeBody_1.default)(reader, "component"),
             position,

@@ -1,5 +1,5 @@
 import type { ChiriTypeGeneric } from "../../../type/ChiriType";
-declare const Contexts: ("function" | "keyframe" | "text" | "component" | "mixin" | "state" | "pseudo" | "inherit" | "root" | "generic" | "paths" | "property-name" | "keyframes" | "selectors")[];
+declare const Contexts: ("function" | "text" | "component" | "state" | "pseudo" | "keyframe" | "mixin" | "inherit" | "root" | "generic" | "paths" | "property-name" | "keyframes" | "selectors")[];
 export default Contexts;
 export type ChiriContextType = (typeof Contexts)[number];
 export interface ChiriFunctionBodyContext {

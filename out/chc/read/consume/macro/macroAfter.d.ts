@@ -1,8 +1,7 @@
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
+import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
 export interface ChiriAfter {
     type: "after";
-    content: ChiriWordInterpolated[];
+    content: ChiriStatement[];
     position: ChiriPosition;
 }
 declare const _default: import("./MacroConstruct").ChiriMacroInternal<ChiriAfter>;

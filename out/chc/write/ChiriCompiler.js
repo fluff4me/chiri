@@ -210,38 +210,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 throw error(position, `Mixin ${name} is not defined`);
         }
         function setMixin(mixin) {
-            root().mixins ??= {};
-            if (root())
-                for (let i = scopes.length - 1; i >= 0; i--) {
-                    const mixins = scopes[i].mixins;
-                    if (mixins && mixin.name.value in mixins)
-                        if (mixin.name.value in usedMixins)
-                            throw error(mixin.position, `%${mixin.name.value} cannot be redefined after being used`);
+            const mixins = root().mixins ??= {};
+            let baseMixin = mixins[mixin.name.value];
+            if (mixin.spread && !baseMixin) {
+                baseMixin = mixins[mixin.name.value] = {
+                    type: "mixin",
+                    name: mixin.name,
+                    content: [],
+                    pseudos: [undefined],
+                    states: [undefined],
+                    elementTypes: [undefined],
+                    affects: [],
+                    position: mixin.position,
+                };
+            }
+            if (baseMixin) {
+                if (mixin.spread) {
+                    const baseMixin = mixins[mixin.name.value];
+                    baseMixin.children ??= [];
+                    baseMixin.children.push(mixin);
+                    return mixin;
                 }
-            return root().mixins[mixin.name.value] = mixin;
+                else if (mixin.name.value in usedMixins)
+                    throw error(mixin.position, `%${mixin.name.value} cannot be redefined after being used`);
+            }
+            return mixins[mixin.name.value] = mixin;
         }
         function useMixin(preRegisteredMixin, after) {
+            if (preRegisteredMixin.used)
+                return usedMixins[preRegisteredMixin.name.value];
+            preRegisteredMixin.used = true;
             const baseMixin = usedMixins[preRegisteredMixin.name.value];
-            if (!baseMixin)
-                // never used yet, so guaranteed to be after all the other mixins!
-                return usedMixins[preRegisteredMixin.name.value] = { ...preRegisteredMixin, index: ++usedMixinIndex };
-            const intersectingMixinIndex = after.findLast(mixin => mixin.affects.some(affect => baseMixin.affects.includes(affect)))?.index ?? -1;
-            let bump = 1;
             let mixin = baseMixin;
-            while (intersectingMixinIndex > mixin.index) {
-                bump++;
-                const bumpMixinNameString = `${preRegisteredMixin.name.value}__${bump}`;
-                mixin = usedMixins[bumpMixinNameString];
-                if (mixin)
-                    continue;
-                const bumpMixinName = { type: "word", value: bumpMixinNameString, position: baseMixin.name.position };
-                mixin = {
-                    ...preRegisteredMixin,
-                    index: ++usedMixinIndex,
-                    name: bumpMixinName,
-                };
-                break;
+            if (!baseMixin) {
+                // never used yet, so guaranteed to be after all the other mixins!
+                mixin = { ...preRegisteredMixin, index: ++usedMixinIndex };
             }
+            else {
+                const intersectingMixinIndex = after.findLast(mixin => mixin.affects.some(affect => baseMixin.affects.includes(affect)))?.index ?? -1;
+                let bump = 1;
+                while (intersectingMixinIndex > mixin.index) {
+                    bump++;
+                    const bumpMixinNameString = `${preRegisteredMixin.name.value}__${bump}`;
+                    mixin = usedMixins[bumpMixinNameString];
+                    if (mixin)
+                        continue;
+                    const bumpMixinName = { type: "word", value: bumpMixinNameString, position: baseMixin.name.position };
+                    mixin = {
+                        ...preRegisteredMixin,
+                        index: ++usedMixinIndex,
+                        name: bumpMixinName,
+                    };
+                    break;
+                }
+            }
+            const children = preRegisteredMixin.children;
+            if (children)
+                for (let i = 0; i < children.length; i++)
+                    usedMixins[children[i].name.value + `:${i}`] = {
+                        ...children[i],
+                        index: ++usedMixinIndex,
+                    };
             return usedMixins[mixin.name.value] = mixin;
         }
         //#endregion
@@ -394,7 +423,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return true;
                 }
                 case "mixin-use": {
-                    const mixin = getMixin(statement.name.value, statement.name.position);
+                    const mixin = getMixin((0, stringifyText_1.default)(compiler, statement.name), statement.name.position);
                     for (const property of mixin.content) {
                         css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
                             css.writeProperty(compiler, property);
@@ -499,10 +528,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const viewTransitionName = !containingSelector ? "root" : [
                     containingSelector.class.map(word => word.value).join("_"),
                     getStatesNameAffix(containingSelector.pseudo),
-                    getPseudosNameAffix(containingSelector.pseudo),
+                    getWordsAffix(containingSelector.pseudo),
                 ].filter(s => s).join("_");
                 const selector = createSelector(containingSelector, {
-                    class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
+                    class: mergeWords(containingSelector?.class, "_", [getWordsAffix(statement.pseudos)]),
                 });
                 selectorStack.push(selector);
                 const content = compileStatements(statement.content, undefined, compileComponentContent);
@@ -542,14 +571,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             switch (statement.subType) {
                 case "state":
                     selector = createSelector(containingSelector, {
-                        class: mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
                         state: mergeWords(containingSelector?.state, ":", statement.states),
+                        spread: statement.spread || undefined,
                     });
                     break;
                 case "state-special":
                     selector = createSelector(containingSelector, {
-                        class: mergeWords(containingSelector?.class, "_", [getStatesNameAffix([statement.state])]),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix([statement.state])]),
                         specialState: statement.state,
+                        spread: statement.spread || undefined,
                     });
                     break;
                 case "container": {
@@ -560,15 +591,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     break;
                 }
                 case "element": {
+                    const names = statement.names.map(resolveWordLowercase);
                     selector = createSelector(containingSelector, {
-                        elementTypes: statement.names.map(resolveWordLowercase),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getWordsAffix(names)]),
+                        elementTypes: names,
+                        spread: statement.spread || undefined,
                     });
                     break;
                 }
                 case "pseudo":
                     selector = createSelector(containingSelector, {
-                        class: mergeWords(containingSelector?.class, "_", [getPseudosNameAffix(statement.pseudos)]),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getWordsAffix(statement.pseudos)]),
                         pseudo: mergeWords(containingSelector?.pseudo, "::", statement.pseudos),
+                        spread: statement.spread || undefined,
                     });
                     break;
             }
@@ -579,15 +614,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             // if (statement.subType === "state-special")
             // 	throw error("stop here!")
-            return result;
+            return result.map(name => ({
+                ...name,
+                pseudo: selector.pseudo,
+                state: selector.state,
+            }));
         }
         function getStatesNameAffix(states) {
             return !states.length ? "" : "_" + states
                 .map(state => state.value.replace(/[:)]/g, "").replace(/[^\w-]+/g, "-"))
                 .join("_");
         }
-        function getPseudosNameAffix(pseudos) {
-            return !pseudos.length ? "" : "_" + pseudos
+        function getWordsAffix(words) {
+            return !words.length ? "" : "_" + words
                 .map(pseudo => pseudo.value)
                 .join("-");
         }
@@ -596,9 +635,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const compiledContent = compileStatements(content, undefined, compileComponentContent);
             // console.log(compiledContent)
             const results = [];
+            const affects = [];
             let propertyGroup;
             let groupIndex = 0;
-            const getDedupedClassName = () => `${selector.class.map(cls => cls.value).join("_")}${groupIndex === 1 ? "" : `_${groupIndex}`}`;
+            const className = selector.class.map(cls => cls.value).join("_");
+            const getDedupedClassName = () => `${className}${groupIndex <= 1 ? "" : `_${groupIndex}`}`;
             for (const item of [...compiledContent, { type: "end" }]) {
                 switch (item.type) {
                     case "compiled-after":
@@ -608,7 +649,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (!allowComponents)
                             throw internalError(item.selector[0].position, "Unexpected component in this context");
                         results.push(item);
-                        break; // irrelevant for this mixin generation
+                        break;
                     case "property": {
                         // a CSS property assignment rather than a mixin usage — add it to a group that will be made into a dynamic mixin
                         propertyGroup ??= [];
@@ -620,15 +661,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         // mixin use — end the dynamic mixin CSS property group, if it exists
                         if (!propertyGroup?.length) {
                             if (item.type === "word")
-                                results.push(item);
+                                addWord(item);
                             break;
                         }
                         const position = propertyGroup[0].position;
                         let nameString;
                         do {
-                            groupIndex++;
+                            if (!selector.spread)
+                                groupIndex++;
                             nameString = getDedupedClassName();
-                        } while (getMixin(nameString, position, true));
+                        } while (!selector.spread && getMixin(nameString, position, true));
                         const name = { type: "word", value: nameString, position };
                         setMixin({
                             type: "mixin",
@@ -640,17 +682,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             position,
                             content: propertyGroup,
                             affects: propertyGroup.flatMap(getPropertyAffects),
+                            spread: selector.spread,
                         });
                         results.push(name);
                         propertyGroup = undefined;
-                        groupIndex++;
+                        if (!selector.spread)
+                            groupIndex++;
                         if (item.type === "word")
-                            results.push(item);
+                            addWord(item);
                     }
+                }
+            }
+            if (affects.length) {
+                const mixin = getMixin(className, selector.class[0].position, true);
+                const mixinAffects = [...new Set([...mixin?.affects ?? [], ...affects])];
+                if (mixin) {
+                    mixin.affects = mixinAffects;
+                }
+                else {
+                    const name = (0, makeWord_1.default)(className, selector.class[0].position);
+                    setMixin({
+                        type: "mixin",
+                        name,
+                        affects: mixinAffects,
+                        content: [],
+                        position: selector.class[0].position,
+                        states: [],
+                        pseudos: [],
+                        containerQueries: [],
+                        elementTypes: [],
+                        skip: true,
+                    });
+                    results.push(name);
                 }
             }
             selectorStack.pop();
             return results;
+            function addWord(item) {
+                results.push(item);
+                if (item.pseudo?.length || item.state?.length) {
+                    const affix = false
+                        || (item.pseudo && getWordsAffix(item.pseudo))
+                        || (item.state && getStatesNameAffix(item.state));
+                    const mixin = getMixin(item.value, item.position);
+                    affects.push(...mixin.affects.map(property => `${affix}:${property}`));
+                }
+            }
         }
         function compileComponentContent(statement) {
             const componentResults = compileComponent(statement, true);
@@ -660,7 +737,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "after":
                     return {
                         type: "compiled-after",
-                        selectors: statement.content.map(resolveWordLowercase),
+                        selectors: compileStatements(statement.content, undefined, statement => {
+                            if (statement.type === "text" && statement.subType === "word-interpolated")
+                                return resolveWordLowercase(statement);
+                        }),
                     };
                 case "property":
                     return {
@@ -669,11 +749,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         value: compileStatements(statement.value, undefined, compileText).join(" "),
                     };
                 case "mixin-use": {
-                    let name = statement.name;
+                    let name = resolveWordLowercase(statement.name);
+                    const baseName = name.value;
                     const selector = selectorStack.at(-1);
                     if (!selector)
                         throw error(name.position, "Unable to use mixin here, no selector");
-                    if (selector.containerQueries.length || selector.elementTypes.length) {
+                    if (selector.containerQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
                         const mixin = getMixin(name.value, name.position);
                         return mixin.content;
                     }
@@ -694,17 +775,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     if (selector.pseudo.length)
                         name = {
                             type: "word",
-                            value: `${name.value}_${getPseudosNameAffix(selector.pseudo)}`,
+                            value: `${name.value}_${getWordsAffix(selector.pseudo)}`,
                             position: name.position,
                         };
                     const existingMixin = getMixin(name.value, name.position, true);
                     if (!existingMixin)
                         setMixin({
-                            ...getMixin(statement.name.value, statement.name.position),
+                            ...getMixin(baseName, statement.name.position),
                             name,
                             states: selector.state.map(state => state?.value),
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
                             specialState: selector.specialState?.value,
+                            used: undefined,
+                            spread: selector.spread,
                         });
                     return name;
                 }
@@ -715,7 +798,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const baseAnimationName = [
                         selector.class.map(word => word.value).join("_"),
                         getStatesNameAffix(selector.pseudo),
-                        getPseudosNameAffix(selector.pseudo),
+                        getWordsAffix(selector.pseudo),
                     ].filter(s => s).join("_");
                     const keyframes = compileStatements(statement.content, undefined, compileKeyframes);
                     const dedupedName = setAnimation({
@@ -745,6 +828,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 specialState: assignFrom.specialState ?? selector?.specialState,
                 containerQueries: assignFrom.containerQueries ?? selector?.containerQueries ?? [],
                 elementTypes: assignFrom.elementTypes ?? selector?.elementTypes ?? [],
+                spread: assignFrom.spread ?? selector?.spread,
             };
         }
         //#endregion
@@ -756,7 +840,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "property":
                     return compileProperty(statement);
                 case "mixin-use": {
-                    const mixin = getMixin(statement.name.value, statement.name.position);
+                    const mixin = getMixin((0, stringifyText_1.default)(compiler, statement.name), statement.name.position);
                     return mixin.content;
                 }
             }
@@ -1048,7 +1132,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return result[0]?.value;
         }
         function getPropertyAffects(property) {
-            return property.isCustomProperty ? [property.value] : getShorthand(property.property.value);
+            return property.isCustomProperty ? [`--${property.property.value}`] : getShorthand(property.property.value);
         }
         function debugStatementString(statement) {
             const name = "name" in statement ? ` "${(0, stringifyText_1.default)(compiler, statement.name)}"` : "";
@@ -1075,6 +1159,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function mergeWords(words, separator, newSegment) {
             return !words?.length ? newSegment.map(resolveWordPreserve) : words.flatMap(selector => newSegment.map((newSegment) => resolveWordPreserve({
                 type: "text",
+                subType: "word-interpolated",
                 valueType: ChiriType_1.ChiriType.of("string"),
                 content: [
                     selector.value,
@@ -1087,6 +1172,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function mergeText(position, ...texts) {
             return {
                 type: "text",
+                subType: "text",
                 valueType: ChiriType_1.ChiriType.of("string"),
                 content: texts.flatMap(text => text.content),
                 position,

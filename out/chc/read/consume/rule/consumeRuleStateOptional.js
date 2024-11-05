@@ -20,10 +20,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const restore = reader.savePosition();
         const position = reader.getPosition();
         const states = [];
+        let prefix;
         do {
-            const prefix = reader.consumeOptional(":");
-            if (!prefix)
+            const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional(":", "&:");
+            if (!thisPrefix)
                 break;
+            prefix = thisPrefix;
             const state = (0, consumeWord_1.default)(reader, ...componentStates_1.STATES, "not");
             if (state.value === "not") {
                 while ((0, consumeWhiteSpaceOptional_1.default)(reader)) {
@@ -46,6 +48,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return {
             type: "component",
             subType: "state",
+            spread: prefix === "&:",
             states,
             ...await (0, consumeBody_1.default)(reader, "state"),
             position,

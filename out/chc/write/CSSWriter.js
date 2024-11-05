@@ -83,6 +83,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         writeMixin(compiler, mixin) {
+            if (mixin.skip || !mixin.content.length)
+                return;
             ////////////////////////////////////
             //#region Rule Start
             for (const query of mixin.containerQueries ?? []) {

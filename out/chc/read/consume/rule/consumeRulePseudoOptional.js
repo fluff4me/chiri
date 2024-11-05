@@ -31,6 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return {
             type: "component",
             subType: result.type,
+            spread: result.spread,
             pseudos: result.pseudos,
             ...await (0, consumeBody_1.default)(reader, "pseudo"),
             position,
@@ -38,11 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     };
     function consumePseudoType(reader, type, ...pseudos) {
         const restore = reader.savePosition();
+        let prefix;
         const results = [];
         do {
-            const prefix = reader.consumeOptional("@");
-            if (!prefix)
+            const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional("@", "&@");
+            if (!thisPrefix)
                 break;
+            prefix = thisPrefix;
             const word = (0, consumeWordOptional_1.default)(reader, ...pseudos);
             if (!word) {
                 reader.restorePosition(restore);
@@ -56,6 +59,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         return {
             type,
+            spread: prefix === "&@",
             pseudos: results,
         };
     }

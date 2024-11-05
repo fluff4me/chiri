@@ -1,7 +1,7 @@
 import { SourceMapGenerator } from "source-map";
 import type { ChiriAST, ChiriPosition } from "../read/ChiriReader";
 import type { ChiriDocumentation } from "../read/consume/consumeDocumentationOptional";
-import type { ChiriValueText } from "../read/consume/consumeValueText";
+import type { ChiriBaseText } from "../read/consume/consumeValueText";
 import type { ChiriWord } from "../read/consume/consumeWord";
 import type ChiriCompiler from "./ChiriCompiler";
 export interface QueuedWrite {
@@ -33,7 +33,7 @@ export default class Writer {
     writeLine(text: string): void;
     writeLineStartBlock(text: string): void;
     writeLineEndBlock(text: string): void;
-    writeTextInterpolated(compiler: ChiriCompiler, source: ChiriValueText): void;
+    writeTextInterpolated(compiler: ChiriCompiler, source: ChiriBaseText): void;
     writeWord(source: ChiriWord): void;
     writeNewLine(): void;
     getNewLineOptional(): string;

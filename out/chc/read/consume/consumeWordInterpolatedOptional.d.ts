@@ -1,7 +1,8 @@
 import type ChiriReader from "../ChiriReader";
-import type { ChiriInterpolationVariable, ChiriTextRaw, ChiriValueText } from "./consumeValueText";
+import type { ChiriBaseText, ChiriInterpolationVariable, ChiriTextRaw } from "./consumeValueText";
 import { type ChiriExpressionOperand } from "./expression/consumeExpression";
-export interface ChiriWordInterpolated extends ChiriValueText {
+export interface ChiriWordInterpolated extends ChiriBaseText {
+    subType: "word-interpolated";
     content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[];
 }
 declare const _default: (reader: ChiriReader, skipStartRequirements?: boolean) => ChiriWordInterpolated | undefined;

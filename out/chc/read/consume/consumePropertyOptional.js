@@ -85,6 +85,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!consumeValue) {
             value = [{
                     type: "text",
+                    subType: "text",
                     content: [type.initialValue],
                     position: constants_1.INTERNAL_POSITION,
                     valueType: ChiriType_1.ChiriType.of("string"),

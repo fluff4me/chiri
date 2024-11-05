@@ -11,6 +11,9 @@ import DTSWriter from "./DTSWriter";
 import ESWriter from "./ESWriter";
 import type Writer from "./Writer";
 interface PreRegisteredMixin extends Omit<ResolvedMixin, "index"> {
+    spread?: true;
+    children?: PreRegisteredMixin[];
+    used?: true;
 }
 interface ErrorPositioned extends Error {
     position?: ChiriPosition;

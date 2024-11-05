@@ -49,6 +49,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             });
         return {
             type: "text",
+            subType: "word-interpolated",
             valueType: ChiriType_1.ChiriType.of("string"),
             content,
             position: start,

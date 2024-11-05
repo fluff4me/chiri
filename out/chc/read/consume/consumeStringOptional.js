@@ -33,6 +33,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 segments: [
                     {
                         type: "text",
+                        subType: "text",
                         valueType: ChiriType_1.ChiriType.of("string"),
                         content: [
                             (0, consumeCustomPropertyInterpolation_1.default)(reader, varType),
@@ -106,6 +107,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         segments: [
                             {
                                 type: "text",
+                                subType: "text",
                                 valueType: ChiriType_1.ChiriType.of("string"),
                                 content: [
                                     (0, consumeCustomPropertyInterpolation_1.default)(reader, varType),

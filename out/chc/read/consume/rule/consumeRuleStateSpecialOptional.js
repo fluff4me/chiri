@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     exports.default = async (reader) => {
         const restore = reader.savePosition();
-        const prefix = reader.consumeOptional(":");
+        const prefix = reader.consumeOptional(":", "&:");
         if (!prefix)
             return;
         const position = reader.getPosition();
@@ -30,6 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return {
             type: "component",
             subType: "state-special",
+            spread: prefix === "&:",
             state,
             ...await (0, consumeBody_1.default)(reader, "state"),
             position,
