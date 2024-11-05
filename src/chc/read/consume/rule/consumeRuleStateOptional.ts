@@ -11,10 +11,13 @@ export default async (reader: ChiriReader): Promise<ChiriComponentState | undefi
 	const restore = reader.savePosition()
 	const position = reader.getPosition()
 	const states: ChiriWord[] = []
+	let prefix: ":" | "&:" | undefined
 	do {
-		const prefix = reader.consumeOptional(":")
-		if (!prefix)
+		const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional(":", "&:")
+		if (!thisPrefix)
 			break
+
+		prefix = thisPrefix
 
 		const state: ChiriWord = consumeWord(reader, ...STATES, "not")
 		if (state.value === "not") {
@@ -43,6 +46,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponentState | undefi
 	return {
 		type: "component",
 		subType: "state",
+		spread: prefix === "&:",
 		states,
 		...await consumeBody(reader, "state"),
 		position,

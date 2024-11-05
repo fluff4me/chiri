@@ -13,7 +13,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponent | ChiriCompon
 
 	const names: ChiriWordInterpolated[] = []
 
-	let validPrefixes: ("&--" | "&-" | "& " | ".")[] = reader.context.type === "component" ? ["&--", "&-", "& "] : ["."]
+	let validPrefixes: ("&--" | "&-" | "& " | "&& " | ".")[] = reader.context.type === "component" ? ["&--", "&-", "& ", "&& "] : ["."]
 	do {
 		const prefix = reader.consumeOptional(...validPrefixes)
 		if (!prefix)
@@ -27,9 +27,10 @@ export default async (reader: ChiriReader): Promise<ChiriComponent | ChiriCompon
 
 	return {
 		type: "component",
-		subType: validPrefixes[0] === "& " ? "element" : validPrefixes[0] === "&--" ? "custom-state" : "component",
+		subType: validPrefixes[0].endsWith("& ") ? "element" : validPrefixes[0] === "&--" ? "custom-state" : "component",
+		spread: validPrefixes[0] === "&& " ? true : undefined,
 		names,
 		...await consumeBody(reader, "component"),
 		position,
-	}
+	} as ChiriComponent
 }

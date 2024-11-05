@@ -31,6 +31,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 			segments: [
 				{
 					type: "text",
+					subType: "text",
 					valueType: ChiriType.of("string"),
 					content: [
 						consumeCustomPropertyInterpolation(reader, varType),
@@ -114,6 +115,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 					segments: [
 						{
 							type: "text",
+							subType: "text",
 							valueType: ChiriType.of("string"),
 							content: [
 								consumeCustomPropertyInterpolation(reader, varType),

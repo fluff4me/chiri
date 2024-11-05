@@ -15,7 +15,7 @@ import consumeNewBlockLineOptional from "../consumeNewBlockLineOptional"
 import consumeStringOptional from "../consumeStringOptional"
 import type { ChiriLiteralValue } from "../consumeTypeConstructorOptional"
 import consumeTypeConstructorOptional from "../consumeTypeConstructorOptional"
-import type { ChiriValueText } from "../consumeValueText"
+import type { ChiriBaseText } from "../consumeValueText"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriWord } from "../consumeWord"
@@ -101,7 +101,7 @@ export type ChiriExpressionOperand =
 	| ChiriUnaryExpression
 	| ChiriLiteralValue
 	| ChiriVariableReference
-	| ChiriValueText
+	| ChiriBaseText
 	| ChiriFunctionCall
 	| ChiriPipe
 	| ChiriPipeUseLeft

@@ -109,6 +109,7 @@ export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropert
 	if (!consumeValue) {
 		value = [{
 			type: "text",
+			subType: "text",
 			content: [type!.initialValue],
 			position: INTERNAL_POSITION,
 			valueType: ChiriType.of("string"),

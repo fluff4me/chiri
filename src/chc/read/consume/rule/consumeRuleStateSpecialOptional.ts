@@ -6,7 +6,7 @@ import type { ChiriComponentStateSpecial } from "./Rule"
 
 export default async (reader: ChiriReader): Promise<ChiriComponentStateSpecial | undefined> => {
 	const restore = reader.savePosition()
-	const prefix = reader.consumeOptional(":")
+	const prefix = reader.consumeOptional(":", "&:")
 	if (!prefix)
 		return
 
@@ -22,6 +22,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponentStateSpecial |
 	return {
 		type: "component",
 		subType: "state-special",
+		spread: prefix === "&:",
 		state,
 		...await consumeBody(reader, "state"),
 		position,

@@ -5,7 +5,7 @@ import ansi from "../../ansi"
 import args from "../../args"
 import type { ChiriAST, ChiriPosition } from "../read/ChiriReader"
 import type { ChiriDocumentation } from "../read/consume/consumeDocumentationOptional"
-import type { ChiriValueText } from "../read/consume/consumeValueText"
+import type { ChiriBaseText } from "../read/consume/consumeValueText"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import relToCwd from "../util/relToCwd"
 import stringifyText from "../util/stringifyText"
@@ -120,7 +120,7 @@ export default class Writer {
 		this.writeNewLine()
 	}
 
-	writeTextInterpolated (compiler: ChiriCompiler, source: ChiriValueText) {
+	writeTextInterpolated (compiler: ChiriCompiler, source: ChiriBaseText) {
 		this.addMapping(stringifyText(compiler, source), source.position)
 	}
 

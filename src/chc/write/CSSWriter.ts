@@ -29,6 +29,7 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	content: ResolvedProperty[]
 	affects: string[]
 	index: number
+	skip?: true
 }
 
 export interface ResolvedAnimation extends Omit<ChiriAnimation, "content" | "name"> {
@@ -122,6 +123,9 @@ export default class CSSWriter extends Writer {
 	}
 
 	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
+		if (mixin.skip || !mixin.content.length)
+			return
+
 		////////////////////////////////////
 		//#region Rule Start
 

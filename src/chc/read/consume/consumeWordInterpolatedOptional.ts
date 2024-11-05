@@ -2,10 +2,11 @@
 
 import { ChiriType } from "../../type/ChiriType"
 import type ChiriReader from "../ChiriReader"
-import type { ChiriInterpolationVariable, ChiriTextRaw, ChiriValueText } from "./consumeValueText"
+import type { ChiriBaseText, ChiriInterpolationVariable, ChiriTextRaw } from "./consumeValueText"
 import consumeExpression, { type ChiriExpressionOperand } from "./expression/consumeExpression"
 
-export interface ChiriWordInterpolated extends ChiriValueText {
+export interface ChiriWordInterpolated extends ChiriBaseText {
+	subType: "word-interpolated"
 	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriExpressionOperand | string)[]
 }
 
@@ -53,6 +54,7 @@ export default (reader: ChiriReader, skipStartRequirements = false): ChiriWordIn
 
 	return {
 		type: "text",
+		subType: "word-interpolated",
 		valueType: ChiriType.of("string"),
 		content,
 		position: start,

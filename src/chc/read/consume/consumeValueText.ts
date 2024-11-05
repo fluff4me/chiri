@@ -19,11 +19,16 @@ export interface ChiriTextRaw {
 	position: ChiriPosition
 }
 
-export interface ChiriValueText {
+export interface ChiriBaseText {
 	type: "text"
+	subType: string
 	valueType: ChiriType
 	content: (ChiriTextRaw | ChiriInterpolationVariable | ChiriInterpolationProperty | ChiriInterpolationPropertyName | ChiriExpressionOperand | string)[]
 	position: ChiriPosition
+}
+
+export interface ChiriValueText extends ChiriBaseText {
+	subType: "text"
 }
 
 export default function consumeValueText (reader: ChiriReader, multiline: boolean, until?: () => boolean): ChiriValueText {
@@ -95,6 +100,7 @@ export default function consumeValueText (reader: ChiriReader, multiline: boolea
 
 	return {
 		type: "text",
+		subType: "text",
 		valueType: ChiriType.of("string"),
 		content,
 		position: start,

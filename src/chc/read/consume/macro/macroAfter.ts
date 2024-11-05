@@ -1,10 +1,9 @@
-import type { ChiriPosition } from "../../ChiriReader"
-import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional"
+import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import MacroConstruct from "./MacroConstruct"
 
 export interface ChiriAfter {
 	type: "after"
-	content: ChiriWordInterpolated[]
+	content: ChiriStatement[]
 	position: ChiriPosition
 }
 

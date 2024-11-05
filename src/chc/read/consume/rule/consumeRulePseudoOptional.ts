@@ -25,20 +25,24 @@ export default async (reader: ChiriReader): Promise<ChiriComponentPseudo | Chiri
 	return {
 		type: "component",
 		subType: result.type,
+		spread: result.spread,
 		pseudos: result.pseudos as ChiriWord<any>[],
 		...await consumeBody(reader, "pseudo"),
 		position,
 	}
 }
 
-function consumePseudoType<TYPE extends string, PSEUDOS extends string[]> (reader: ChiriReader, type: TYPE, ...pseudos: PSEUDOS): { type: TYPE, pseudos: ChiriWord<PSEUDOS[number]>[] } | undefined {
+function consumePseudoType<TYPE extends string, PSEUDOS extends string[]> (reader: ChiriReader, type: TYPE, ...pseudos: PSEUDOS): { type: TYPE, pseudos: ChiriWord<PSEUDOS[number]>[], spread: boolean } | undefined {
 	const restore = reader.savePosition()
 
+	let prefix: "@" | "&@" | undefined
 	const results: ChiriWord<PSEUDOS[number]>[] = []
 	do {
-		const prefix = reader.consumeOptional("@")
-		if (!prefix)
+		const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional("@", "&@")
+		if (!thisPrefix)
 			break
+
+		prefix = thisPrefix
 
 		const word = consumeWordOptional(reader, ...pseudos)
 		if (!word) {
@@ -56,6 +60,7 @@ function consumePseudoType<TYPE extends string, PSEUDOS extends string[]> (reade
 
 	return {
 		type,
+		spread: prefix === "&@",
 		pseudos: results,
 	}
 }
