@@ -355,10 +355,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function useMixin (preRegisteredMixin: PreRegisteredMixin, after: ResolvedMixin[]): ResolvedMixin {
-		if (preRegisteredMixin.used)
-			return usedMixins[preRegisteredMixin.name.value]
+		// if (preRegisteredMixin.used)
+		// 	return usedMixins[preRegisteredMixin.name.value]
 
-		preRegisteredMixin.used = true
+		// preRegisteredMixin.used = true
 
 		const baseMixin: ResolvedMixin | undefined = usedMixins[preRegisteredMixin.name.value]
 		let mixin: ResolvedMixin | undefined = baseMixin
