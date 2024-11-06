@@ -52,6 +52,9 @@ export default function consumeValueText (reader: ChiriReader, multiline: boolea
 
 		const varType = reader.consumeOptional("#{", "$$", "$")
 		if (!varType) {
+			if (!stringChar && !paren && until?.())
+				break
+
 			const char = reader.input[reader.i]
 			if (char === stringChar) {
 				stringChar = undefined
@@ -62,9 +65,6 @@ export default function consumeValueText (reader: ChiriReader, multiline: boolea
 			} else if (!stringChar && paren && char === ")") {
 				paren--
 			}
-
-			if (!stringChar && !paren && until?.())
-				break
 
 			text += char
 			reader.i++
