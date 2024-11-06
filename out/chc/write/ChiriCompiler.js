@@ -237,9 +237,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return mixins[mixin.name.value] = mixin;
         }
         function useMixin(preRegisteredMixin, after) {
-            if (preRegisteredMixin.used)
-                return usedMixins[preRegisteredMixin.name.value];
-            preRegisteredMixin.used = true;
+            // if (preRegisteredMixin.used)
+            // 	return usedMixins[preRegisteredMixin.name.value]
+            // preRegisteredMixin.used = true
             const baseMixin = usedMixins[preRegisteredMixin.name.value];
             let mixin = baseMixin;
             if (!baseMixin) {

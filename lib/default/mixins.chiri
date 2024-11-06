@@ -58,8 +58,8 @@ $$border-colour!colour: currentcolor
 #string box-shadow-inset-border-2 = "inset 0 0 0 2px $border-colour
 #string box-shadow-inset-border-top-1 = "inset 0 1px 0 0 $border-colour
 #string box-shadow-inset-border-bottom-1 = "inset 0 -1px 0 0 $border-colour
-#string box-shadow-inset-border-left-1 = "inset -1px 0 0 0 $border-colour
-#string box-shadow-inset-border-right-1 = "inset 1px 0 0 0 $border-colour
+#string box-shadow-inset-border-left-1 = "inset 1px 0 0 0 $border-colour
+#string box-shadow-inset-border-right-1 = "inset -1px 0 0 0 $border-colour
 #string box-shadow-inset-border-block-1 = "#{box-shadow-inset-border-top-1}, #{box-shadow-inset-border-bottom-1}
 #string box-shadow-inset-border-inline-1 = "#{box-shadow-inset-border-left-1}, #{box-shadow-inset-border-right-1}
 %inset-border-1: box-shadow: #{box-shadow-inset-border-1}
@@ -70,16 +70,23 @@ $$border-colour!colour: currentcolor
 %inset-border-right-1: box-shadow: #{box-shadow-inset-border-right-1}
 %inset-border-inline-1: box-shadow: #{box-shadow-inset-border-inline-1}
 %inset-border-block-1: box-shadow: #{box-shadow-inset-border-block-1}
+%inset-border-not-bottom-1: box-shadow: #{box-shadow-inset-border-top-1}, #{box-shadow-inset-border-inline-1}
+%inset-border-not-top-1: box-shadow: #{box-shadow-inset-border-bottom-1}, #{box-shadow-inset-border-inline-1}
+%inset-border-not-left-1: box-shadow: #{box-shadow-inset-border-right-1}, #{box-shadow-inset-border-block-1}
+%inset-border-not-right-1: box-shadow: #{box-shadow-inset-border-left-1}, #{box-shadow-inset-border-block-1}
 
 %box-shadow-none: box-shadow: none
 %box-shadow-0: box-shadow: none
 #string box-shadow-1 = "0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
-#string box-shadow-2 = "0 $space-2 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
+#string box-shadow-2 = "0 $space-2 $space-2 calc($space-1 * -1) light-dark(#0003, #0004)
 #string box-shadow-inset-1 = "inset 0 $space-1 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
 #string box-shadow-inset-bottom-1 = "inset 0 calc($space-1 * -1) $space-1 calc($space-1 * -1) light-dark(#000a, #000)
 #string box-shadow-right-1 = "$space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
-#string box-shadow-right-2 = "$space-2 0 $space-2 calc($space-1 * -1) light-dark(#0003, #0005)
+#string box-shadow-right-2 = "$space-2 0 $space-2 calc($space-1 * -1) light-dark(#0003, #0002)
 #string box-shadow-right-inset-1 = "inset $space-1 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-left-1 = "calc($space-1 * -1) 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
+#string box-shadow-left-2 = "calc($space-2 * -1) 0 $space-2 calc($space-1 * -1) light-dark(#0003, #0002)
+#string box-shadow-left-inset-1 = "inset calc($space-1 * -1) 0 $space-1 calc($space-1 * -1) light-dark(#000a, #000)
 %box-shadow-1: box-shadow: #{box-shadow-1}
 %box-shadow-2: box-shadow: #{box-shadow-2}
 %box-shadow-inset-1: box-shadow: #{box-shadow-inset-1}
@@ -87,6 +94,9 @@ $$border-colour!colour: currentcolor
 %box-shadow-right-1: box-shadow: #{box-shadow-right-1}
 %box-shadow-right-2: box-shadow: #{box-shadow-right-2}
 %box-shadow-right-inset-1: box-shadow: #{box-shadow-right-inset-1}
+%box-shadow-left-1: box-shadow: #{box-shadow-left-1}
+%box-shadow-left-2: box-shadow: #{box-shadow-left-2}
+%box-shadow-left-inset-1: box-shadow: #{box-shadow-left-inset-1}
 
 %font-vertical-align:
 	%relative

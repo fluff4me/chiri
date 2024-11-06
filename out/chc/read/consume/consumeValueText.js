@@ -33,6 +33,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             const varType = reader.consumeOptional("#{", "$$", "$");
             if (!varType) {
+                if (!stringChar && !paren && until?.())
+                    break;
                 const char = reader.input[reader.i];
                 if (char === stringChar) {
                     stringChar = undefined;
@@ -46,8 +48,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 else if (!stringChar && paren && char === ")") {
                     paren--;
                 }
-                if (!stringChar && !paren && until?.())
-                    break;
                 text += char;
                 reader.i++;
                 continue;
