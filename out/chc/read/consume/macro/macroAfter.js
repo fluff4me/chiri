@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         .consume(({ body, position }) => {
         return {
             type: "after",
-            content: body,
+            content: body.flat(),
             position,
         };
     });
