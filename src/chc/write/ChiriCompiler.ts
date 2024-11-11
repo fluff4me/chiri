@@ -574,6 +574,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				for (const component of results) {
 					const registeredMixins: ResolvedMixin[] = []
 					const visited: ResolvedMixin[] = component.after
+						.flatMap(selector => {
+							const afterComponent = components[selector.value]
+							if (!afterComponent)
+								throw error(selector.position, `Component .${selector.value} has not been defined`)
+
+							return afterComponent.mixins
+						})
 					for (let i = 0; i < component.mixins.length; i++) {
 						const mixin = useMixin(getMixin(component.mixins[i].value, component.mixins[i].position), visited)
 						component.mixins[i] = mixin.name
@@ -686,7 +693,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		type: "compiled-component"
 		selector: ChiriWord[]
 		mixins: ChiriWord[]
-		after: ResolvedMixin[]
+		after: ChiriWord[]
 	}
 
 	interface ResolvedAfter {
@@ -718,14 +725,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				selector: selector.class,
 				mixins: content.filter(item => item.type === "word"),
 				after: content.filter(item => item.type === "compiled-after")
-					.flatMap(after => after.selectors)
-					.flatMap(selector => {
-						const afterComponent = components[selector.value]
-						if (!afterComponent)
-							throw error(selector.position, `Component .${selector.value} has not been defined`)
-
-						return afterComponent.mixins
-					}),
+					.flatMap(after => after.selectors),
 			}
 
 			if ((component.mixins.some(m => m.value === "before") && component.mixins.some(m => m.value === "after")) || component.mixins.some(m => m.value === "before-after")) {

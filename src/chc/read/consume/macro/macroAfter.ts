@@ -12,7 +12,7 @@ export default MacroConstruct("after")
 	.consume(({ body, position }): ChiriAfter => {
 		return {
 			type: "after",
-			content: body,
+			content: body.flat(),
 			position,
 		}
 	})
