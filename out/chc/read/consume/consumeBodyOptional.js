@@ -15,8 +15,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = default_1;
     const consumeBody_1 = __importDefault(require("./consumeBody"));
     async function default_1(reader, ...args) {
-        if (!reader.consumeOptional(":"))
+        const punctuation = reader.consumeOptional(":", "..");
+        if (!punctuation)
             return undefined;
+        if (punctuation === "..")
+            reader.indent--;
         const body = await (0, consumeBody_1.default)(reader, ...args);
         return body.content;
     }

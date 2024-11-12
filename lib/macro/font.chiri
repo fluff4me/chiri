@@ -9,6 +9,8 @@
 	;; in em unit
 	#dec letter-spacing ??= 0
 
+	#body!component body?
+
 	%font-#{name}:
 		$weight-normal: #{weight-normal}
 		$weight-bold: #{weight-bold}
@@ -19,4 +21,4 @@
 		font-family: "#{name}"
 		font-weight: $weight-normal
 		letter-spacing: $font-letter-spacing
-
+		#include body

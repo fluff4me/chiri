@@ -247,7 +247,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 mixin = { ...preRegisteredMixin, index: ++usedMixinIndex };
             }
             else {
-                const intersectingMixinIndex = after.findLast(mixin => mixin.affects.some(affect => baseMixin.affects.includes(affect)))?.index ?? -1;
+                const intersectingMixin = after.sort((a, b) => b.index - a.index).find(mixin => mixin.affects.some(affect => baseMixin.affects.includes(affect)));
+                const intersectingMixinIndex = intersectingMixin?.index ?? -1;
                 let bump = 1;
                 while (intersectingMixinIndex > mixin.index) {
                     bump++;

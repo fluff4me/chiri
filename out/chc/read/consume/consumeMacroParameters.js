@@ -87,14 +87,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const consumeParameterSeparatorOptional = multiline ? consumeNewBlockLineOptional_1.default : consumeWhiteSpaceOptional_1.default;
         do
             consumeParameterAssignment();
-        while (consumeParameterSeparatorOptional(reader));
+        while (consumeParameterSeparatorOptional(reader) && !(multiline && reader.peek("..")));
         const missing = parameters.filter(parameter => !parameter.assignment && !(parameter.name.value in assignments));
         if (missing.length)
             throw reader.error(start, `Missing parameters for ${fnTypeSymbol}${fn.name.value}: ${parameters
                 .filter(param => !assignments[param.name.value])
                 .map(param => `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
                 .join(", ")}`);
-        if (multiline)
+        if (multiline && !reader.peek(".."))
             (0, consumeBlockEnd_1.default)(reader);
         return assignments;
     };
