@@ -91,7 +91,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 	const consumeParameterSeparatorOptional = multiline ? consumeNewBlockLineOptional : consumeWhiteSpaceOptional
 
 	do consumeParameterAssignment()
-	while (consumeParameterSeparatorOptional(reader))
+	while (consumeParameterSeparatorOptional(reader) && !(multiline && reader.peek("..")))
 
 	const missing = parameters.filter(parameter => !parameter.assignment && !(parameter.name.value in assignments))
 	if (missing.length)
@@ -100,7 +100,7 @@ export default (reader: ChiriReader, start: number, fn: ChiriMacroBase) => {
 			.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
 			.join(", ")}`)
 
-	if (multiline)
+	if (multiline && !reader.peek(".."))
 		consumeBlockEnd(reader)
 
 	return assignments
