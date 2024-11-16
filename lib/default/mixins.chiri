@@ -27,7 +27,7 @@
 
 	#each in font-sizes as var i, var font-size:
 		%font-#{i + 1}:
-			$font-size: calc(#{font-size}rem / $font-scale-factor)
+			$font-size: round(calc(#{font-size}rem / $font-scale-factor), 1px)
 			$font-scaling: #{font-size}
 			font-size: $font-size
 
@@ -370,6 +370,9 @@ $$translate-y!length-percentage
 %columns-subgrid: grid-template-columns: subgrid
 %rows-subgrid: grid-template-rows: subgrid
 
+%stack: grid-template-areas: "stack"
+%stack-self: grid-area: stack
+
 #do:
 	#var cursor-values=[
 		"auto
@@ -569,6 +572,7 @@ $$gradient-mask-height!length-percentage
 %scheme-light-dark: colour-scheme: light dark
 
 %transition-discrete: transition-behaviour: allow-discrete
+%no-transition: transition: none
 
 %outline-none: outline: none
 %no-outline: outline: none

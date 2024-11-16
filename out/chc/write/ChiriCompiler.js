@@ -279,7 +279,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         //#region Shorthands
         function getShorthand(property) {
-            return root().shorthands?.[property] ?? [property];
+            return (root().shorthands?.[property] ?? [property])
+                .flatMap(affect => getAlias(affect));
         }
         function setShorthand(property, affects, position) {
             const shorthands = root().shorthands ??= {};
@@ -680,6 +681,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
                             containerQueries: selector.containerQueries,
                             elementTypes: selector.elementTypes.map(t => t.value),
+                            specialState: selector.specialState?.value,
                             position,
                             content: propertyGroup,
                             affects: propertyGroup.flatMap(getPropertyAffects),
