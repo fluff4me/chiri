@@ -925,6 +925,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
 						containerQueries: selector.containerQueries,
 						elementTypes: selector.elementTypes.map(t => t.value),
+						specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
 						position,
 						content: propertyGroup,
 						affects: propertyGroup.flatMap(getPropertyAffects),
