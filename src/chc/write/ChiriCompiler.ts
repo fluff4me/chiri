@@ -406,7 +406,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	//#region Shorthands
 
 	function getShorthand (property: string): string[] {
-		return root().shorthands?.[property] ?? [property]
+		return (root().shorthands?.[property] ?? [property])
+			.flatMap(affect => getAlias(affect))
 	}
 
 	function setShorthand (property: string, affects: string[], position: ChiriPosition) {
