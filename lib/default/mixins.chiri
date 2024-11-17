@@ -220,7 +220,7 @@ $$translate-y!length-percentage
 %margin-top-auto: margin-top: auto
 %margin-bottom-auto: margin-bottom: auto
 
-#each in 0...5 as var i:
+#each in 0...15 as var i:
 	#list!string background-properties = [
 		"background
 		"border-color
@@ -459,7 +459,12 @@ $$translate-y!length-percentage
 
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
+%bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
+%bolder: font-weight: $weight-bolder
+
+%italic: font-style: italic
+%style-italic: font-style: italic
 
 #each in 0..72 as var raw:
 	#int angle = raw * 5
