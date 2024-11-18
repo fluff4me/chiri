@@ -18,6 +18,7 @@
 
 #do:
 	#list!dec font-sizes = [
+		0.6
 		0.8
 		1.0
 		1.2
@@ -26,7 +27,7 @@
 		2.4
 
 	#each in font-sizes as var i, var font-size:
-		%font-#{i + 1}:
+		%font-#{i}:
 			$font-size: round(calc(#{font-size}rem / $font-scale-factor), 1px)
 			$font-scaling: #{font-size}
 			font-size: $font-size
@@ -466,6 +467,14 @@ $$translate-y!length-percentage
 %italic: font-style: italic
 %style-italic: font-style: italic
 
+%no-decoration: text-decoration: none
+%decoration-none: text-decoration: none
+%decoration-underline: text-decoration: underline
+%decoration-strikethrough: text-decoration: strikethrough
+
+%uppercase: text-transform: uppercase
+%lowercase: text-transform: lowercase
+
 #each in 0..72 as var raw:
 	#int angle = raw * 5
 	%rotate-#{angle}: rotate: #{angle}deg
@@ -513,6 +522,10 @@ $$translate-y!length-percentage
 $$gradient-mask-height!length-percentage
 %gradient-mask:
 	mask-image: linear-gradient(to bottom, transparent 0%, black $gradient-mask-height, black calc(100% - $gradient-mask-height), transparent 100%)
+%gradient-mask-top:
+	mask-image: linear-gradient(to bottom, transparent 0%, black $gradient-mask-height)
+%gradient-mask-bottom:
+	mask-image: linear-gradient(to top, transparent 0%, black $gradient-mask-height)
 
 %overflow-visible: overflow: visible
 %overflow-hidden: overflow: hidden
