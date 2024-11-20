@@ -7,6 +7,7 @@ import consumeWordOptional from "./consumeWordOptional"
 import type { ChiriExpressionOperand } from "./expression/consumeExpression"
 import consumeExpression from "./expression/consumeExpression"
 import consumeDecimalOptional from "./numeric/consumeDecimalOptional"
+import consumeUnsignedIntegerOptional from "./numeric/consumeUnsignedIntegerOptional"
 
 export interface ChiriKeyframe {
 	type: "keyframe"
@@ -36,7 +37,7 @@ function consumeKeyframeAt (reader: ChiriReader): ChiriExpressionOperand {
 		case "to": return makeLiteralDec(100)
 	}
 
-	const dec = consumeDecimalOptional(reader)
+	const dec = consumeDecimalOptional(reader) ?? consumeUnsignedIntegerOptional(reader)
 	if (dec) {
 		reader.consume("%")
 		return dec
