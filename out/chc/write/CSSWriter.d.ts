@@ -25,6 +25,12 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
     index: number;
     skip?: true;
 }
+export interface ResolvedRootSpecial extends Omit<ResolvedMixin, "name" | "index" | "containerQueries" | "affects"> {
+    name?: undefined;
+    index?: undefined;
+    containerQueries?: undefined;
+    affects?: undefined;
+}
 export interface ResolvedAnimation extends Omit<ChiriAnimation, "content" | "name"> {
     name: ChiriWord;
     content: ResolvedAnimationKeyframe[];
@@ -59,7 +65,7 @@ export default class CSSWriter extends Writer {
     createDestPath(outFile: string): string;
     writingTo(section: CSSDocumentSection, dowhile: () => any): void;
     writeProperty(compiler: ChiriCompiler, property: ResolvedProperty): void;
-    writeMixin(compiler: ChiriCompiler, mixin: ResolvedMixin): void;
+    writeMixin(compiler: ChiriCompiler, mixin: ResolvedMixin | ResolvedRootSpecial): void;
     writeSelect(compiler: ChiriCompiler, select: ResolvedSelect): void;
     writeAnimation(compiler: ChiriCompiler, animation: ResolvedAnimation): void;
     writeViewTransition(compiler: ChiriCompiler, viewTransition: ResolvedViewTransition): void;

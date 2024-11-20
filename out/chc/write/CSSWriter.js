@@ -111,8 +111,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             this.write(",");
                             this.writeSpaceOptional();
                         }
-                        this.write(".");
-                        this.writeWord(mixin.name);
+                        if (mixin.name) {
+                            this.write(".");
+                            this.writeWord(mixin.name);
+                        }
                         if (elementType)
                             this.write(` ${elementType}`);
                         if (state)

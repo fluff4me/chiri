@@ -49,6 +49,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const CSSWriter_1 = __importDefault(require("./CSSWriter"));
     const DTSWriter_1 = __importDefault(require("./DTSWriter"));
     const ESWriter_1 = __importDefault(require("./ESWriter"));
+    const EMPTY = [];
     function Scope(data) {
         return data;
     }
@@ -68,6 +69,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const usedMixins = {};
         const components = {};
         const viewTransitions = [];
+        const rootSpecials = [];
         let usedMixinIndex = 0;
         let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
@@ -110,6 +112,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 for (const writer of writers)
                     writer.onCompileStart(compiler);
                 compileStatements(ast.statements, undefined, compileRoot);
+                for (const rootSpecial of rootSpecials)
+                    css.writeMixin(compiler, rootSpecial);
                 for (const mixin of Object.values(usedMixins))
                     css.writeMixin(compiler, mixin);
                 for (const viewTransition of viewTransitions)
@@ -500,7 +504,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
             }
         }
-        function compileComponent(statement) {
+        function compileComponent(statement, allowMixins = false) {
             if (statement.type !== "component")
                 return undefined;
             const containingSelector = selectorStack.at(-1);
@@ -610,13 +614,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     break;
             }
             const result = compileSelector(selector, statement.content);
-            if (statement.subType === "pseudo") {
+            if (statement.subType === "pseudo" && allowMixins) {
                 const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-");
                 result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position });
             }
             // if (statement.subType === "state-special")
             // 	throw error("stop here!")
-            return result.map(name => ({
+            if (!allowMixins) {
+                rootSpecials.push({
+                    type: "mixin",
+                    content: result.flatMap(name => getMixin(name.value, name.position).content),
+                    pseudos: selector.pseudo.map(pseudo => pseudo?.value),
+                    states: selector.state.map(state => state?.value),
+                    elementTypes: EMPTY,
+                    specialState: selector.specialState?.value,
+                    position: statement.position,
+                });
+                return EMPTY;
+            }
+            return result.map((name) => ({
                 ...name,
                 pseudo: selector.pseudo,
                 state: selector.state,
@@ -961,17 +977,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 case "elseif":
                     if (ifState)
-                        return [];
+                        return EMPTY;
                 // eslint-disable-next-line no-fallthrough
                 case "if": {
                     ifState = !!(0, resolveExpression_1.default)(compiler, statement.condition);
                     if (!ifState)
-                        return [];
+                        return EMPTY;
                     return compileStatements(statement.content, undefined, contextConsumer, end);
                 }
                 case "else": {
                     if (ifState)
-                        return [];
+                        return EMPTY;
                     return compileStatements(statement.content, undefined, contextConsumer, end);
                 }
                 case "do":
@@ -990,7 +1006,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         name,
                         content: keyframes,
                     });
-                    return [];
+                    return EMPTY;
                 }
             }
         }

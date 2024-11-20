@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../type/typeDec", "../factory/makeLiteralDec", "./consumeBody", "./consumeWordOptional", "./expression/consumeExpression", "./numeric/consumeDecimalOptional"], factory);
+        define(["require", "exports", "../../type/typeDec", "../factory/makeLiteralDec", "./consumeBody", "./consumeWordOptional", "./expression/consumeExpression", "./numeric/consumeDecimalOptional", "./numeric/consumeUnsignedIntegerOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -18,6 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordOptional_1 = __importDefault(require("./consumeWordOptional"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
     const consumeDecimalOptional_1 = __importDefault(require("./numeric/consumeDecimalOptional"));
+    const consumeUnsignedIntegerOptional_1 = __importDefault(require("./numeric/consumeUnsignedIntegerOptional"));
     exports.default = async (reader) => {
         const position = reader.getPosition();
         const at = consumeKeyframeAt(reader);
@@ -35,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             case "from": return (0, makeLiteralDec_1.default)(0);
             case "to": return (0, makeLiteralDec_1.default)(100);
         }
-        const dec = (0, consumeDecimalOptional_1.default)(reader);
+        const dec = (0, consumeDecimalOptional_1.default)(reader) ?? (0, consumeUnsignedIntegerOptional_1.default)(reader);
         if (dec) {
             reader.consume("%");
             return dec;

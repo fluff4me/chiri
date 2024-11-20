@@ -19,9 +19,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const position = reader.getPosition();
         const e = reader.i;
         const result = undefined
-            ?? consumePseudoType(reader, "pseudo", "before", "after")
             ?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new", "view-transition!image-pair")
-            ?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group", "view-transition-class!image-pair");
+            ?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group", "view-transition-class!image-pair")
+            ?? consumePseudoType(reader, "pseudo", "before", "after", "view-transition");
         if (!result)
             return undefined;
         const duplicates = new Set(result.pseudos.map(e => e.value));
