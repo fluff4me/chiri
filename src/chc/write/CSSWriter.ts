@@ -32,6 +32,13 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	skip?: true
 }
 
+export interface ResolvedRootSpecial extends Omit<ResolvedMixin, "name" | "index" | "containerQueries" | "affects"> {
+	name?: undefined
+	index?: undefined
+	containerQueries?: undefined
+	affects?: undefined
+}
+
 export interface ResolvedAnimation extends Omit<ChiriAnimation, "content" | "name"> {
 	name: ChiriWord
 	content: ResolvedAnimationKeyframe[]
@@ -122,7 +129,7 @@ export default class CSSWriter extends Writer {
 		}
 	}
 
-	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin) {
+	writeMixin (compiler: ChiriCompiler, mixin: ResolvedMixin | ResolvedRootSpecial) {
 		if (mixin.skip || !mixin.content.length)
 			return
 
@@ -157,8 +164,10 @@ export default class CSSWriter extends Writer {
 						this.writeSpaceOptional()
 					}
 
-					this.write(".")
-					this.writeWord(mixin.name)
+					if (mixin.name) {
+						this.write(".")
+						this.writeWord(mixin.name)
+					}
 
 					if (elementType)
 						this.write(` ${elementType}`)

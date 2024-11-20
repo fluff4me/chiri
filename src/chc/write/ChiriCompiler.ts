@@ -23,12 +23,14 @@ import stringifyExpression from "../util/stringifyExpression"
 import stringifyText from "../util/stringifyText"
 import Strings from "../util/Strings"
 import type { ArrayOr } from "../util/Type"
-import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMixin, ResolvedProperty, ResolvedViewTransition } from "./CSSWriter"
+import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMixin, ResolvedProperty, ResolvedRootSpecial, ResolvedViewTransition } from "./CSSWriter"
 import CSSWriter from "./CSSWriter"
 import DTSWriter from "./DTSWriter"
 import type { ResolvedComponent } from "./ESWriter"
 import ESWriter from "./ESWriter"
 import type Writer from "./Writer"
+
+const EMPTY: never[] = []
 
 ////////////////////////////////////
 //#region Scope
@@ -129,6 +131,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	const usedMixins: Record<string, ResolvedMixin> = {}
 	const components: Record<string, ResolvedComponent> = {}
 	const viewTransitions: ResolvedViewTransition[] = []
+	const rootSpecials: ResolvedRootSpecial[] = []
 	let usedMixinIndex = 0
 	let ifState = true
 
@@ -184,6 +187,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				writer.onCompileStart(compiler)
 
 			compileStatements(ast.statements, undefined, compileRoot)
+
+			for (const rootSpecial of rootSpecials)
+				css.writeMixin(compiler, rootSpecial)
 
 			for (const mixin of Object.values(usedMixins))
 				css.writeMixin(compiler, mixin)
@@ -710,7 +716,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function compileComponent (statement: ChiriStatement): Component[] | undefined
 	function compileComponent (statement: ChiriStatement, allowMixins: true): (Component | ResolvedMixinName | ResolvedProperty)[] | undefined
-	function compileComponent (statement: ChiriStatement): (Component | ResolvedMixinName | ResolvedProperty)[] | undefined {
+	function compileComponent (statement: ChiriStatement, allowMixins = false): (Component | ResolvedMixinName | ResolvedProperty)[] | undefined {
 		if (statement.type !== "component")
 			return undefined
 
@@ -839,7 +845,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 		const result = compileSelector(selector, statement.content)
 
-		if (statement.subType === "pseudo") {
+		if (statement.subType === "pseudo" && allowMixins) {
 			const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-")
 			result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position })
 		}
@@ -847,7 +853,20 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		// if (statement.subType === "state-special")
 		// 	throw error("stop here!")
 
-		return result.map(name => ({
+		if (!allowMixins) {
+			rootSpecials.push({
+				type: "mixin",
+				content: result.flatMap(name => getMixin(name.value, name.position).content),
+				pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
+				states: selector.state.map(state => state?.value),
+				elementTypes: EMPTY,
+				specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
+				position: statement.position,
+			})
+			return EMPTY
+		}
+
+		return result.map((name): ResolvedMixinName => ({
 			...name,
 			pseudo: selector.pseudo,
 			state: selector.state,
@@ -1263,20 +1282,20 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			case "elseif":
 				if (ifState)
-					return []
+					return EMPTY
 
 			// eslint-disable-next-line no-fallthrough
 			case "if": {
 				ifState = !!resolveExpression(compiler, statement.condition)
 				if (!ifState)
-					return []
+					return EMPTY
 
 				return compileStatements(statement.content, undefined, contextConsumer, end)
 			}
 
 			case "else": {
 				if (ifState)
-					return []
+					return EMPTY
 
 				return compileStatements(statement.content, undefined, contextConsumer, end)
 			}
@@ -1299,7 +1318,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					name,
 					content: keyframes,
 				})
-				return []
+				return EMPTY
 			}
 		}
 	}
