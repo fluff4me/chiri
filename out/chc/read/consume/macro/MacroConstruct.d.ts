@@ -23,13 +23,14 @@ export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefin
     reader: ChiriReader;
     assignments: Record<string, ChiriExpressionOperand>;
     body: (BODY extends null ? never : BODY)[];
+    optionalBody: (BODY extends null ? never : BODY)[];
     name: NAMED extends "plain" ? ChiriWord : NAMED extends "interpolated" ? ChiriWordInterpolated : undefined;
     extra: EXTRA;
     position: ChiriPosition;
     start: number;
 }
 type NameType = "plain" | "interpolated" | undefined;
-export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> = Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body">;
+export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> = Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body" | "optionalBody">;
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>;
 export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
     usability(...types: ChiriContextType[]): this;

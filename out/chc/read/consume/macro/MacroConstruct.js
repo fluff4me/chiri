@@ -91,7 +91,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         const [contextType, contextData] = bodyContext ?? [];
                         const context = !contextType ? undefined : contextType === "inherit" ? reader.context : { type: contextType, data: contextData?.(info) };
                         const body = context ? await (0, consumeBodyOptional_1.default)(reader, ...[context.type, context.data]) : [];
-                        info.body = body;
+                        Object.defineProperty(info, "body", {
+                            get: () => {
+                                if (!body)
+                                    throw reader.error(`Expected body containing ${contextType}`);
+                                return body;
+                            },
+                        });
+                        info.optionalBody = body;
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                         const result = await consumer(info);
                         if (!result)
