@@ -33,6 +33,7 @@ export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefin
 	reader: ChiriReader
 	assignments: Record<string, ChiriExpressionOperand>
 	body: (BODY extends null ? never : BODY)[]
+	optionalBody: (BODY extends null ? never : BODY)[]
 	name: NAMED extends "plain" ? ChiriWord : NAMED extends "interpolated" ? ChiriWordInterpolated : undefined
 	extra: EXTRA
 	position: ChiriPosition
@@ -41,7 +42,7 @@ export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefin
 
 type NameType = "plain" | "interpolated" | undefined
 export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> =
-	Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body">
+	Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body" | "optionalBody">
 
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>
 
@@ -142,7 +143,14 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 					const [contextType, contextData] = bodyContext ?? []
 					const context = !contextType ? undefined : contextType === "inherit" ? reader.context : { type: contextType, data: contextData?.(info) }
 					const body = context ? await consumeBodyOptional(reader, ...[context.type, context.data] as ["generic", undefined]) : []
-					info.body = body
+					Object.defineProperty(info, "body", {
+						get: () => {
+							if (!body)
+								throw reader.error(`Expected body containing ${contextType}`)
+							return body
+						},
+					})
+					info.optionalBody = body
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 					const result = await consumer(info as ChiriMacroInternalConsumerInfo<NameType, any, never>)
 
