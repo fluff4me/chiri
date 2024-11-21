@@ -378,10 +378,17 @@ $$translate-y!length-percentage
 #each in 1...9 as var start:
 	%column-#{start}: grid-column: #{start}
 	%row-#{start}: grid-row: #{start}
+	#if start > 1:
+		%span-#{start}: grid-column: span #{start}
+		%column-span-#{start}: grid-column: span #{start}
+		%row-span-#{start}: grid-row: span #{start}
 
 	#each in 1...9 as var end:
 		%column-#{start}-#{end}: grid-column: #{start} / #{end + 1}
 		%row-#{start}-#{end}: grid-row: #{start} / #{end + 1}
+		#if end > 1:
+			%column-#{start}-span-#{end}: grid-column: #{start} / span #{end}
+			%row-#{start}-span-#{end}: grid-row: #{start} / span #{end}
 
 %columns-subgrid: grid-template-columns: subgrid
 %rows-subgrid: grid-template-rows: subgrid
