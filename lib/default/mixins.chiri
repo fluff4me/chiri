@@ -38,6 +38,9 @@
 	$font-scaling: inherit
 	font-size: inherit
 
+%color-inherit: colour: inherit
+%colour-inherit: colour: inherit
+
 $$border-colour!colour: currentcolor
 %borderless: border: none
 #do:
