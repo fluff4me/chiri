@@ -484,6 +484,7 @@ $$translate-y!length-percentage
 %min-size-none: min-size: 0
 %max-size-none: max-size: none
 
+%weight-inherit: font-weight: inherit
 %weight-normal: font-weight: $weight-normal
 %weight-bold: font-weight: $weight-bold
 %bold: font-weight: $weight-bold
