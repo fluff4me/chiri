@@ -616,7 +616,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const result = compileSelector(selector, statement.content);
             if (statement.subType === "pseudo" && allowMixins) {
                 const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-");
-                result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position });
+                if (pseudoClassName === "before" || pseudoClassName === "after")
+                    result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position });
             }
             // if (statement.subType === "state-special")
             // 	throw error("stop here!")
