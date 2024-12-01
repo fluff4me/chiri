@@ -47,10 +47,14 @@ export interface ChiriComponentStateContainer extends ChiriComponentBase {
 	query: ChiriBaseText
 }
 
+export type PseudoName =
+	| "before" | "after"
+	| "backdrop"
+
 export interface ChiriComponentPseudo extends ChiriComponentBase {
 	subType: "pseudo"
 	spread: boolean
-	pseudos: ChiriWord<"before" | "after">[]
+	pseudos: ChiriWord<PseudoName>[]
 }
 
 export interface ChiriComponentViewTransition extends ChiriComponentBase {

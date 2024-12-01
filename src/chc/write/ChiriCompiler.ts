@@ -10,6 +10,7 @@ import type { ChiriExpressionResult } from "../read/consume/expression/consumeEx
 import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional"
 import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
+import type { PseudoName } from "../read/consume/rule/Rule"
 import makeWord from "../read/factory/makeWord"
 import { ChiriType } from "../type/ChiriType"
 import ChiriTypeManager from "../type/ChiriTypeManager"
@@ -847,7 +848,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 		if (statement.subType === "pseudo" && allowMixins) {
 			const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-")
-			result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position })
+			if (pseudoClassName === "before" || pseudoClassName === "after")
+				result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position })
 		}
 
 		// if (statement.subType === "state-special")
@@ -857,7 +859,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			rootSpecials.push({
 				type: "mixin",
 				content: result.flatMap(name => getMixin(name.value, name.position).content),
-				pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
+				pseudos: selector.pseudo.map(pseudo => pseudo?.value as PseudoName | undefined),
 				states: selector.state.map(state => state?.value),
 				elementTypes: EMPTY,
 				specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
@@ -941,7 +943,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						type: "mixin",
 						name,
 						states: selector.state.map(state => state?.value),
-						pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
+						pseudos: selector.pseudo.map(pseudo => pseudo?.value as PseudoName | undefined),
 						containerQueries: selector.containerQueries,
 						elementTypes: selector.elementTypes.map(t => t.value),
 						specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
@@ -1067,7 +1069,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						...getMixin(baseName, statement.name.position),
 						name,
 						states: selector.state.map(state => state?.value),
-						pseudos: selector.pseudo.map(pseudo => pseudo?.value as "before" | "after" | undefined),
+						pseudos: selector.pseudo.map(pseudo => pseudo?.value as PseudoName | undefined),
 						specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
 						used: undefined,
 						spread: selector.spread,

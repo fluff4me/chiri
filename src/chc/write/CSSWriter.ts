@@ -6,6 +6,7 @@ import type { ChiriMixin } from "../read/consume/consumeMixinOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriAnimation } from "../read/consume/macro/macroAnimation"
+import type { PseudoName } from "../read/consume/rule/Rule"
 import makeWord from "../read/factory/makeWord"
 import type { ComponentStateSpecial } from "../util/componentStates"
 import { STATE_MAP_SPECIAL } from "../util/componentStates"
@@ -22,7 +23,7 @@ export interface ResolvedProperty extends Omit<ChiriProperty, "property" | "valu
 export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	states: (string | undefined)[]
 	specialState?: ComponentStateSpecial
-	pseudos: ("before" | "after" | undefined)[]
+	pseudos: (PseudoName | undefined)[]
 	containerQueries?: string[]
 	elementTypes: (string | undefined)[]
 	name: ChiriWord
