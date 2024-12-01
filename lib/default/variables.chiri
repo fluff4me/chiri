@@ -7,26 +7,20 @@ $weight-normal: 400
 $weight-bold: 600
 $weight-bolder: 800
 
-#string space-0 = "0rem
-#string space-1 = "round(0.2rem, 1px)
-#string space-2 = "round(0.4rem, 1px)
-#string space-3 = "round(0.8rem, 1px)
-#string space-4 = "round(1.6rem, 1px)
-#string space-5 = "round(3.2rem, 1px)
-#string space-20 = "round(20%, 1px)
-#string space-25 = "round(25%, 1px)
-#string space-50 = "round(50%, 1px)
-#string space-100 = "100%
-$space-0: #{space-0}
-$space-1: #{space-1}
-$space-2: #{space-2}
-$space-3: #{space-3}
-$space-4: #{space-4}
-$space-5: #{space-5}
-$space-20: #{space-20}
-$space-25: #{space-25}
-$space-50: #{space-50}
-$space-100: #{space-100}
+#record!string space = {
+	0: "0rem
+	1: "round(0.2rem, 1px)
+	2: "round(0.4rem, 1px)
+	3: "round(0.8rem, 1px)
+	4: "round(1.6rem, 1px)
+	5: "round(3.2rem, 1px)
+	20: "round(20%, 1px)
+	25: "round(25%, 1px)
+	50: "round(50%, 1px)
+	100: "100%
+#each in space as var id, var space:
+	$space-#{id}: #{space}
+	$unspace-#{id}: calc(#{space} * -1)
 
 #each in 0...15 as var i:
 	#string hex = hex(i)
