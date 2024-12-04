@@ -1,0 +1,10 @@
+#each in ["padding", "padding-block", "padding-inline"] as var property:
+	#shorthand #{property}:
+		padding-top
+		padding-left
+		padding-right
+		padding-bottom
+		padding-inline-start
+		padding-inline-end
+		padding-block-start
+		padding-block-end
