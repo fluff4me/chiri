@@ -2,3 +2,5 @@
 	shorthand/border
 	shorthand/background
 	shorthand/transition
+	shorthand/padding
+	shorthand/margin

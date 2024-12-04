@@ -1,0 +1,10 @@
+#each in ["margin", "margin-block", "margin-inline"] as var property:
+	#shorthand #{property}:
+		margin-top
+		margin-left
+		margin-right
+		margin-bottom
+		margin-inline-start
+		margin-inline-end
+		margin-block-start
+		margin-block-end
