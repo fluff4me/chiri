@@ -638,4 +638,7 @@ $$gradient-mask-height!length-percentage
 %white-space-pre-wrap: white-space: pre-wrap
 %white-space-pre: white-space: pre
 
+%wrap-anywhere: overflow-wrap: anywhere
+%wrap-words: overflow-wrap: break-word
+
 %content: content: ""
