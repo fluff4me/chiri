@@ -2,6 +2,7 @@
 import { INTERNAL_POSITION } from "../../../../constants"
 import { ChiriType } from "../../../type/ChiriType"
 import type { Operator } from "../../../type/ChiriTypeManager"
+import _ from "../../../util/_"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
 import consumeWhiteSpace from "../consumeWhiteSpace"
@@ -44,7 +45,7 @@ const consumeAssignmentData = async (reader: ChiriReader, skipInitialWhitespace 
 	const binaryOperators = reader.types.binaryOperators
 	const type = variable.valueType
 	const operatorsForType = binaryOperators[type.name.value] ?? empy
-	let operator = undefined
+	let operator = _
 		?? reader.consumeOptional("??")
 		?? reader.consumeOptional("++")
 		?? reader.consumeOptional("--")

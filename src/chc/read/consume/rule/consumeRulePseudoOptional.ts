@@ -1,3 +1,4 @@
+import _ from "../../../util/_"
 import type ChiriReader from "../../ChiriReader"
 import consumeBody from "../consumeBody"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
@@ -9,7 +10,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponentPseudo | Chiri
 	const position = reader.getPosition()
 	const e = reader.i
 
-	const result = undefined
+	const result = _
 		?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new", "view-transition!image-pair")
 		?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group", "view-transition-class!image-pair")
 		?? consumePseudoType(reader, "pseudo", "before", "after", "view-transition", "backdrop")

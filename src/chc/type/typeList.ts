@@ -44,9 +44,11 @@ function consumeLiteralList (reader: ChiriReader): ChiriLiteralList | undefined 
 	const expressions: (ChiriExpressionOperand | ChiriLiteralListSpread)[] = []
 	const multiline = consumeBlockStartOptional(reader)
 	if (!multiline) {
-		consumeWhiteSpaceOptional(reader)
-		do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
-		while (reader.consumeOptional(", "))
+		if (!reader.peek("\r\n", "\n")) {
+			consumeWhiteSpaceOptional(reader)
+			do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
+			while (reader.consumeOptional(", "))
+		}
 
 	} else {
 		do expressions.push(consumeOptionalSpread(reader) ?? consumeExpression.inline(reader))
@@ -57,8 +59,8 @@ function consumeLiteralList (reader: ChiriReader): ChiriLiteralList | undefined 
 
 	const valueTypes = expressions.map(expr => expr.type === "list-spread" ? expr.value.valueType.generics[0] : expr.valueType)
 	const stringifiedTypes = valueTypes.map(type => ChiriType.stringify(type))
-	if (new Set(stringifiedTypes).size > 1)
-		throw reader.error(`Lists can only contain a single type. This list contains: ${stringifiedTypes.join(", ")}`)
+	if (new Set(stringifiedTypes).size > 1 && !reader.types.isEveryType(valueTypes))
+		throw reader.error(`Lists can only contain a single type. This list contains:\n  - ${stringifiedTypes.join("\n  - ")}`)
 
 	if (!multiline) {
 		consumeWhiteSpaceOptional(reader)

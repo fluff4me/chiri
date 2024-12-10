@@ -21,7 +21,10 @@ export namespace ChiriType {
 		}
 	}
 
-	export function stringify (type: ChiriType, stack = false): string {
+	export function stringify (type?: ChiriType, stack = false): string {
+		if (!type)
+			return "(no type)"
+
 		if (type.isGeneric)
 			return type.generics.map(type => stringify(type, true)).join(" ")
 

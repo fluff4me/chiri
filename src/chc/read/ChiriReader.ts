@@ -7,6 +7,7 @@ import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
 import { ChiriType } from "../type/ChiriType"
 import ChiriTypeManager from "../type/ChiriTypeManager"
 import type TypeDefinition from "../type/TypeDefinition"
+import _ from "../util/_"
 import Arrays from "../util/Arrays"
 import Errors from "../util/Errors"
 import relToCwd from "../util/relToCwd"
@@ -231,7 +232,7 @@ export default class ChiriReader {
 	}
 
 	getVariableOptional (name: string) {
-		return undefined
+		return _
 			?? this.#statements.findLast((statement): statement is ChiriCompilerVariable =>
 				statement.type === "variable" && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriCompilerVariable =>
@@ -247,7 +248,7 @@ export default class ChiriReader {
 	}
 
 	getFunctionOptional (name: string) {
-		return undefined
+		return _
 			?? this.#statements.findLast((statement): statement is ChiriFunction =>
 				statement.type === "function" && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriFunction =>
@@ -263,7 +264,7 @@ export default class ChiriReader {
 	}
 
 	getMacroOptional (name: string) {
-		return undefined
+		return _
 			?? this.#statements.findLast((statement): statement is ChiriMacro =>
 				statement.type === "macro" && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriMacro =>
@@ -426,7 +427,7 @@ export default class ChiriReader {
 		if (property)
 			return property
 
-		const rule = this.context.type === "keyframe" ? undefined : (undefined
+		const rule = this.context.type === "keyframe" ? undefined : (_
 			?? await consumeRuleStateContainerOptional(this)
 			?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await consumeRuleMainOptional(this))
 			?? await consumeRuleStateSpecialOptional(this)

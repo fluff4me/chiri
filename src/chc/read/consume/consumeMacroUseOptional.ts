@@ -1,3 +1,4 @@
+import _ from "../../util/_"
 import getFunctionParameters from "../../util/getFunctionParameters"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition, ChiriStatement } from "../ChiriReader"
@@ -84,7 +85,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 	if (await macroExport.consumeOptional(reader, ...context))
 		return undefined
 
-	const result = undefined
+	const result = _
 		?? await macroImportCSS.consumeOptional(reader, ...context)
 		?? await macroImport.consumeOptional(reader, ...context)
 		?? await macroDebug.consumeOptional(reader, ...context)

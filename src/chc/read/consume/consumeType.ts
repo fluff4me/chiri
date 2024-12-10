@@ -17,10 +17,10 @@ export function consumeType (reader: ChiriReader, genericDeclaration?: true) {
 	return type
 }
 
-export function consumeTypeOptional (reader: ChiriReader): ChiriType | undefined
-export function consumeTypeOptional (reader: ChiriReader, genericDeclaration: true): ChiriTypeGeneric | undefined
-export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: true): ChiriType | undefined {
-	const typeName = consumeTypeNameOptional(reader, genericDeclaration)
+export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: false, throwOnInvalidName?: true): ChiriType | undefined
+export function consumeTypeOptional (reader: ChiriReader, genericDeclaration: true, throwOnInvalidName?: true): ChiriTypeGeneric | undefined
+export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: boolean, throwOnInvalidName?: true): ChiriType | undefined {
+	const typeName = consumeTypeNameOptional(reader, genericDeclaration, throwOnInvalidName)
 	if (!typeName)
 		return undefined
 
@@ -40,7 +40,7 @@ export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: t
 	if (definition?.generics)
 		type.generics = consumeGenerics(reader, definition.generics === true ? undefined : definition.generics)
 	else if (genericDeclaration)
-		type.generics = consumeGenerics(reader, undefined, true)
+		type.generics = consumeGenerics(reader, undefined)
 
 	if (genericDeclaration)
 		type.isGeneric = true
@@ -48,7 +48,7 @@ export function consumeTypeOptional (reader: ChiriReader, genericDeclaration?: t
 	return type
 }
 
-const consumeGenerics = (reader: ChiriReader, generics?: number | string[][], genericDeclaration = false) => {
+const consumeGenerics = (reader: ChiriReader, generics?: number | string[][]) => {
 	const result: ChiriType[] = []
 	if (typeof generics === "number") {
 		for (let g = 0; g < generics; g++) {
@@ -79,7 +79,7 @@ const consumeGenerics = (reader: ChiriReader, generics?: number | string[][], ge
 
 			const parenthesised = reader.consumeOptional("(")
 
-			while (genericDeclaration) {
+			while (true) {
 				if (result.length)
 					if (!consumeWhiteSpaceOptional(reader))
 						break
@@ -96,7 +96,7 @@ const consumeGenerics = (reader: ChiriReader, generics?: number | string[][], ge
 					}
 				}
 
-				const type = consumeTypeOptional(reader)
+				const type = consumeTypeOptional(reader, undefined, true)
 				if (!type)
 					break
 

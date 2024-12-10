@@ -25,36 +25,37 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 
 	const e = reader.i
 	const name = consumeWordOptional(reader)
-	const fn = name && reader.getFunctionOptional(name.value)
+	const fn = name && resolveFunctionFromName(reader, name)
 	if (!fn) {
 		reader.restorePosition(restore)
 		return undefined
 	}
 
-	const parameters = getFunctionParameters(fn)
+	const parameters = resolveFunctionParameters(reader, fn)
 
 	const variableSharingName = reader.getVariableOptional(name.value)
-	if (variableSharingName && parameters.length && !reader.consumeOptional("(")) {
+	if (variableSharingName && variableSharingName.valueType.name.value !== "function" && parameters.length && !reader.consumeOptional("(")) {
 		reader.restorePosition(restore)
 		return undefined
 	}
 
 	if (!parameters.length && !reader.peek("("))
-		throw reader.error(e, `Ambiguous usage of name "${name.value}" — could be #${ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType.stringify(fn.returnType)}`)
+		throw reader.error(e, `Ambiguous usage of name "${name.value}" — could be #${ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType.stringify(resolveFunctionReturnType(reader, fn))}`)
 
 	return consumePartialFuntionCall(reader, position, name, fn, parameters, ...expectedTypes)
 }
 
-export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction, parameters: ChiriCompilerVariable[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
+export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
 	const assignments: Record<string, ChiriExpressionOperand> = {}
 	if (parameters.length) {
 		reader.consume("(")
 		for (let i = 0; i < parameters.length; i++) {
 			const parameter = parameters[i]
 			if (i > 0) {
-				if (!reader.consumeOptional(",") && parameter.assignment !== "??=") {
+				if (!reader.consumeOptional(",") && (parameter.type === "type" || parameter.assignment !== "??=")) {
 					const missingParameters = parameters.slice(i)
-						.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
+						.map(param => param.type === "type" ? ChiriType.stringify(param)
+							: `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
 						.join(", ")
 					throw reader.error(`Missing parameters for #function ${fn.name.value}: ${missingParameters}`)
 				}
@@ -64,8 +65,9 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 
 			if (reader.peek(")")) {
 				const missingParameters = parameters.slice(i)
-					.filter(param => !param.assignment)
-					.map(param => `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
+					.filter(param => param.type === "type" || !param.assignment)
+					.map(param => param.type === "type" ? ChiriType.stringify(param)
+						: `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
 					.join(", ")
 
 				if (missingParameters)
@@ -74,12 +76,13 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 				break
 			}
 
-			const expectedType = [parameter.valueType]
-			if (parameter.assignment === "??=")
+			const paramType = parameter.type === "type" ? parameter : parameter.valueType
+			const expectedType = [paramType]
+			if (parameter.type === "variable" && parameter.assignment === "??=")
 				expectedType.push(ChiriType.of("undefined"))
 
-			assignments[parameter.name.value] =
-				parameter.valueType.name.value !== "raw" ? consumeExpression.inline(reader, ...expectedType)
+			assignments[parameter.type === "type" ? i : parameter.name.value] =
+				paramType.name.value !== "raw" ? consumeExpression.inline(reader, ...expectedType)
 					: consumeValueText(reader, false, () => !!reader.peek(")"))
 		}
 
@@ -89,9 +92,9 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 		reader.consumeOptional(")")
 	}
 
-	const returnType = resolveReturnType(reader, fn, assignments)
+	const returnType = computeFunctionReturnType(reader, fn, assignments)
 	if (!reader.types.isAssignable(returnType, ...expectedTypes))
-		throw reader.error(`Expected ${expectedTypes.map(type => `"${ChiriType.stringify(type)}"`).join(", ")}, but #${fn.name.value} will return "${ChiriType.stringify(returnType)}"`)
+		throw reader.error(`Expected ${expectedTypes.map(type => `"${ChiriType.stringify(type)}"`).join(", ")}, but #function ${fn.name.value} will return "${ChiriType.stringify(returnType)}"`)
 
 	return {
 		type: "function-call",
@@ -102,10 +105,47 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 	}
 }
 
-function resolveReturnType (reader: ChiriReader, fn: ChiriFunction, assignments: Record<string, ChiriExpressionOperand>): ChiriType {
-	if (!fn.returnType.isGeneric)
+function resolveFunctionFromName (reader: ChiriReader, name: ChiriWord): ChiriFunction | ChiriCompilerVariable | undefined {
+	const variable = reader.getVariableOptional(name.value)
+	if (variable && variable.valueType.name.value === "function")
+		return variable
+	else if (variable)
+		return undefined
+
+	return reader.getFunctionOptional(name.value)
+}
+
+function resolveFunctionParameters (reader: ChiriReader, fn: ChiriFunction | ChiriCompilerVariable) {
+	if (fn.type === "function")
+		return getFunctionParameters(fn)
+
+	return fn.valueType.generics.slice(0, -1) // params are every type up to the last (which is the return type)
+}
+
+function resolveFunctionReturnType (reader: ChiriReader, fn: ChiriFunction | ChiriCompilerVariable) {
+	if (fn.type === "function")
 		return fn.returnType
 
-	const parametersOfType = fn.content.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable" && !!statement.valueType.isGeneric && statement.valueType.name.value === fn.returnType.name.value)
-	return reader.types.intersection(...parametersOfType.map(parameter => assignments[parameter.name.value].valueType))
+	return fn.valueType.generics.at(-1)! // last = return type
+}
+
+function computeFunctionReturnType (reader: ChiriReader, fn: ChiriFunction | ChiriCompilerVariable, assignments: Record<string, ChiriExpressionOperand>): ChiriType {
+	const returnType = resolveFunctionReturnType(reader, fn)
+	if (!returnType.isGeneric)
+		return returnType
+
+	if (fn.type === "function") {
+		const parametersOfType = fn.content.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable" && !!statement.valueType.isGeneric && statement.valueType.name.value === fn.returnType.name.value)
+		return reader.types.intersection(...parametersOfType.map(parameter => assignments[parameter.name.value].valueType))
+	}
+
+	const parameters = resolveFunctionParameters(reader, fn) as ChiriType[]
+	const parametersOfType = parameters
+		.map((type, i) => [i, type] as const)
+		.filter(([, type]) => !!type.isGeneric && type.name.value === returnType.name.value)
+
+	if (!parametersOfType.length)
+		return returnType
+
+	return reader.types.intersection(...parametersOfType.map(([i]) => assignments[i].valueType))
 }

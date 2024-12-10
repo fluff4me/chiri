@@ -2,10 +2,12 @@
 
 import { ChiriType } from "../../../type/ChiriType"
 import type { Operator } from "../../../type/ChiriTypeManager"
+import type { ChiriLiteralFunctionReference } from "../../../type/typeFunction"
 import typeInt from "../../../type/typeInt"
 import typeList from "../../../type/typeList"
 import typeRecord from "../../../type/typeRecord"
 import typeString from "../../../type/typeString"
+import _ from "../../../util/_"
 import getFunctionParameters from "../../../util/getFunctionParameters"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
@@ -101,6 +103,7 @@ export type ChiriExpressionOperand =
 	| ChiriUnaryExpression
 	| ChiriLiteralValue
 	| ChiriVariableReference
+	| ChiriLiteralFunctionReference
 	| ChiriBaseText
 	| ChiriFunctionCall
 	| ChiriPipe
@@ -120,7 +123,7 @@ export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: 
 const empy = {} as never
 
 async function consumeExpression (reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult> {
-	return undefined
+	return _
 		?? await expressionMatch.consumeOptional(reader, consumeExpression, ...expectedTypes)
 		?? await consumeExpressionValidatedPipe(reader, ...expectedTypes)
 }
@@ -341,12 +344,12 @@ function consumeOperand (reader: ChiriReader): ChiriExpressionOperand {
 	if (reader.consumeOptional("_"))
 		return { type: "literal", subType: "undefined", valueType: ChiriType.of("undefined"), position: reader.getPosition(e) }
 
-	const constructedType = consumeTypeConstructorOptional(reader)
-	if (constructedType) return constructedType
-
 	const fnCall = consumeFunctionCallOptional(reader)
 	if (fnCall)
 		return fnCall
+
+	const constructedType = consumeTypeConstructorOptional(reader)
+	if (constructedType) return constructedType
 
 	e = reader.i
 	const word = consumeWordOptional(reader)

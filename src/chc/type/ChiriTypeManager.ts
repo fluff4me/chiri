@@ -10,6 +10,7 @@ import typeBody from "./typeBody"
 import typeBool from "./typeBool"
 import typeDec from "./typeDec"
 import type TypeDefinition from "./TypeDefinition"
+import typeFunction from "./typeFunction"
 import typeInt from "./typeInt"
 import typeList from "./typeList"
 import typeRaw from "./typeRaw"
@@ -27,6 +28,7 @@ const typesList = [
 	typeBody,
 	typeBool,
 	typeRaw,
+	typeFunction,
 ]
 
 type TypeRegistry =
@@ -416,8 +418,12 @@ export default class ChiriTypeManager {
 			// handle the case of generic assignability into generics
 			return true
 
-		if (toTypes.length > 1)
+		if (toTypes.length > 1) {
+			if (this.isEveryType(toTypes))
+				return true
+
 			return toTypes.some(toType => this.isAssignable(type, toType))
+		}
 
 		const [toType] = toTypes
 		if (toType.name.value === "*")
@@ -433,7 +439,18 @@ export default class ChiriTypeManager {
 			return true // minNumericPrecision(type.name.value, toType.name.value) === toType.name.value
 
 		return type.name.value === toType.name.value
-			&& type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i]))
+			&& (false
+				// allow it if this is an "every" type
+				|| this.isEveryType(type.generics)
+				// otherwise check if the generics are assignable
+				|| type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i])))
+	}
+
+	isEveryType (types: ChiriType[]) {
+		if (types.some(type => type.name.value === "*"))
+			return true
+
+		return typesList.every(a => types.some(b => this.isAssignable(b, a.type)))
 	}
 
 	dedupe (...types: ChiriType[]) {

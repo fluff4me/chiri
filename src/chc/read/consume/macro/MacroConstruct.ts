@@ -120,6 +120,11 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 
 					let name: ChiriWord | undefined
 					if (named) {
+						if (reader.peek("!")) {
+							reader.restorePosition(savedPosition)
+							return undefined
+						}
+
 						if (!consumeWhiteSpaceOptional(reader))
 							throw reader.error("Expected declaration name")
 
