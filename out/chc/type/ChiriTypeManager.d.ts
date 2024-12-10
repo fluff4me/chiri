@@ -35,6 +35,7 @@ export default class ChiriTypeManager {
     coerce(value: Value, type: ChiriType, fromType?: ChiriType): Value;
     canCoerceOperandB(operandAType: string, operator: string, operandBType: string): boolean;
     isAssignable(type: ChiriType, ...toTypes: ChiriType[]): boolean;
+    isEveryType(types: ChiriType[]): boolean;
     dedupe(...types: ChiriType[]): ChiriType<string>[];
     intersection(...types: ChiriType[]): ChiriType<string>;
     with(...generics: ChiriTypeGeneric[]): {

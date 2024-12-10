@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "./ChiriType", "./typeBody", "./typeBool", "./typeDec", "./typeInt", "./typeList", "./typeRaw", "./typeRecord", "./typeString", "./typeUint"], factory);
+        define(["require", "exports", "../../ansi", "./ChiriType", "./typeBody", "./typeBool", "./typeDec", "./typeFunction", "./typeInt", "./typeList", "./typeRaw", "./typeRecord", "./typeString", "./typeUint"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -17,6 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const typeBody_1 = __importDefault(require("./typeBody"));
     const typeBool_1 = __importDefault(require("./typeBool"));
     const typeDec_1 = __importDefault(require("./typeDec"));
+    const typeFunction_1 = __importDefault(require("./typeFunction"));
     const typeInt_1 = __importDefault(require("./typeInt"));
     const typeList_1 = __importDefault(require("./typeList"));
     const typeRaw_1 = __importDefault(require("./typeRaw"));
@@ -33,6 +34,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         typeBody_1.default,
         typeBool_1.default,
         typeRaw_1.default,
+        typeFunction_1.default,
     ];
     const types = Object.fromEntries(typesList.map(typedef => [typedef.type.name.value, typedef]));
     const numericTypes = ["uint", "int", "dec"];
@@ -333,8 +335,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (type.isGeneric && type.generics.every(type => toTypes.some(toType => this.isAssignable(type, toType))))
                 // handle the case of generic assignability into generics
                 return true;
-            if (toTypes.length > 1)
+            if (toTypes.length > 1) {
+                if (this.isEveryType(toTypes))
+                    return true;
                 return toTypes.some(toType => this.isAssignable(type, toType));
+            }
             const [toType] = toTypes;
             if (toType.name.value === "*")
                 return true;
@@ -346,7 +351,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 // they'll be clamped to what's valid(truncation for int, clamp to >= 0 for uint)
                 return true; // minNumericPrecision(type.name.value, toType.name.value) === toType.name.value
             return type.name.value === toType.name.value
-                && type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i]));
+                && (false
+                    // allow it if this is an "every" type
+                    || this.isEveryType(type.generics)
+                    // otherwise check if the generics are assignable
+                    || type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i])));
+        }
+        isEveryType(types) {
+            if (types.some(type => type.name.value === "*"))
+                return true;
+            return typesList.every(a => types.some(b => this.isAssignable(b, a.type)));
         }
         dedupe(...types) {
             const result = [];

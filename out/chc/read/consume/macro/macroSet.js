@@ -30,7 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../../constants", "../../../type/ChiriType", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "../expression/consumeExpression", "./MacroConstruct"], factory);
+        define(["require", "exports", "../../../../constants", "../../../type/ChiriType", "../../../util/_", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "../expression/consumeExpression", "./MacroConstruct"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -38,6 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.consumeAssignmentOptional = void 0;
     const constants_1 = require("../../../../constants");
     const ChiriType_1 = require("../../../type/ChiriType");
+    const _1 = __importDefault(require("../../../util/_"));
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWord_1 = __importDefault(require("../consumeWord"));
@@ -56,7 +57,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const binaryOperators = reader.types.binaryOperators;
         const type = variable.valueType;
         const operatorsForType = binaryOperators[type.name.value] ?? empy;
-        let operator = undefined
+        let operator = _1.default
             ?? reader.consumeOptional("??")
             ?? reader.consumeOptional("++")
             ?? reader.consumeOptional("--")

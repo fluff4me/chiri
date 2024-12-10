@@ -25,8 +25,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             throw reader.error(e, "Expected type");
         return type;
     }
-    function consumeTypeOptional(reader, genericDeclaration) {
-        const typeName = (0, consumeTypeNameOptional_1.default)(reader, genericDeclaration);
+    function consumeTypeOptional(reader, genericDeclaration, throwOnInvalidName) {
+        const typeName = (0, consumeTypeNameOptional_1.default)(reader, genericDeclaration, throwOnInvalidName);
         if (!typeName)
             return undefined;
         const type = {
@@ -42,12 +42,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (definition?.generics)
             type.generics = consumeGenerics(reader, definition.generics === true ? undefined : definition.generics);
         else if (genericDeclaration)
-            type.generics = consumeGenerics(reader, undefined, true);
+            type.generics = consumeGenerics(reader, undefined);
         if (genericDeclaration)
             type.isGeneric = true;
         return type;
     }
-    const consumeGenerics = (reader, generics, genericDeclaration = false) => {
+    const consumeGenerics = (reader, generics) => {
         const result = [];
         if (typeof generics === "number") {
             for (let g = 0; g < generics; g++) {
@@ -77,7 +77,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (!reader.consumeOptional("!"))
                     break;
                 const parenthesised = reader.consumeOptional("(");
-                while (genericDeclaration) {
+                while (true) {
                     if (result.length)
                         if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
                             break;
@@ -92,7 +92,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             break;
                         }
                     }
-                    const type = consumeTypeOptional(reader);
+                    const type = consumeTypeOptional(reader, undefined, true);
                     if (!type)
                         break;
                     result.push(type);

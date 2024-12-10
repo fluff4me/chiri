@@ -36,10 +36,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const expressions = [];
         const multiline = (0, consumeBlockStartOptional_1.default)(reader);
         if (!multiline) {
-            (0, consumeWhiteSpaceOptional_1.default)(reader);
-            do
-                expressions.push(consumeOptionalSpread(reader) ?? consumeExpression_1.default.inline(reader));
-            while (reader.consumeOptional(", "));
+            if (!reader.peek("\r\n", "\n")) {
+                (0, consumeWhiteSpaceOptional_1.default)(reader);
+                do
+                    expressions.push(consumeOptionalSpread(reader) ?? consumeExpression_1.default.inline(reader));
+                while (reader.consumeOptional(", "));
+            }
         }
         else {
             do
@@ -49,8 +51,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         const valueTypes = expressions.map(expr => expr.type === "list-spread" ? expr.value.valueType.generics[0] : expr.valueType);
         const stringifiedTypes = valueTypes.map(type => ChiriType_1.ChiriType.stringify(type));
-        if (new Set(stringifiedTypes).size > 1)
-            throw reader.error(`Lists can only contain a single type. This list contains: ${stringifiedTypes.join(", ")}`);
+        if (new Set(stringifiedTypes).size > 1 && !reader.types.isEveryType(valueTypes))
+            throw reader.error(`Lists can only contain a single type. This list contains:\n  - ${stringifiedTypes.join("\n  - ")}`);
         if (!multiline) {
             (0, consumeWhiteSpaceOptional_1.default)(reader);
             reader.consumeOptional("]");

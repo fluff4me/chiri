@@ -72,6 +72,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             throw reader.error(`#${useContextType} cannot be used in "${useContext.type}" context`);
                         let name;
                         if (named) {
+                            if (reader.peek("!")) {
+                                reader.restorePosition(savedPosition);
+                                return undefined;
+                            }
                             if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
                                 throw reader.error("Expected declaration name");
                             name = (0, consumeWordOptional_1.default)(reader);

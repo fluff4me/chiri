@@ -56,6 +56,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return resolveExpression.stringifyText(compiler, expression);
             case "get":
                 return compiler.getVariable(expression.name.value, expression.name.position);
+            case "function":
+                return compiler.getFunction(expression.name.value, expression.name.position);
             case "function-call":
                 return compiler.callFunction(expression);
             case "get-by-key": {

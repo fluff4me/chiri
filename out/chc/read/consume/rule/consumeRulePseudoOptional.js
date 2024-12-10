@@ -7,18 +7,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../consumeBody", "../consumeWhiteSpaceOptional", "../consumeWordOptional"], factory);
+        define(["require", "exports", "../../../util/_", "../consumeBody", "../consumeWhiteSpaceOptional", "../consumeWordOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const _1 = __importDefault(require("../../../util/_"));
     const consumeBody_1 = __importDefault(require("../consumeBody"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     exports.default = async (reader) => {
         const position = reader.getPosition();
         const e = reader.i;
-        const result = undefined
+        const result = _1.default
             ?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new", "view-transition!image-pair")
             ?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group", "view-transition-class!image-pair")
             ?? consumePseudoType(reader, "pseudo", "before", "after", "view-transition", "backdrop");

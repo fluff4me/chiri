@@ -7,14 +7,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../macro/macroReturn", "./BodyConsumer"], factory);
+        define(["require", "exports", "../../../util/_", "../macro/macroReturn", "./BodyConsumer"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const _1 = __importDefault(require("../../../util/_"));
     const macroReturn_1 = __importDefault(require("../macro/macroReturn"));
     const BodyConsumer_1 = __importDefault(require("./BodyConsumer"));
-    exports.default = (0, BodyConsumer_1.default)("function", async (reader) => undefined
+    exports.default = (0, BodyConsumer_1.default)("function", async (reader) => _1.default
         ?? await macroReturn_1.default.consumeOptional(reader)
         ?? undefined);
 });

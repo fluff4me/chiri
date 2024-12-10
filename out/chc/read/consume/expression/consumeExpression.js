@@ -30,7 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeInt", "../../../type/typeList", "../../../type/typeRecord", "../../../type/typeString", "../../../util/getFunctionParameters", "../consumeBlockEnd", "../consumeBlockStartOptional", "../consumeNewBlockLineOptional", "../consumeStringOptional", "../consumeTypeConstructorOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "../consumeWordOptional", "../numeric/consumeDecimalOptional", "../numeric/consumeIntegerOptional", "../numeric/consumeUnsignedIntegerOptional", "./consumeFunctionCallOptional", "./consumeRangeOptional", "./expressionMatch"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeInt", "../../../type/typeList", "../../../type/typeRecord", "../../../type/typeString", "../../../util/_", "../../../util/getFunctionParameters", "../consumeBlockEnd", "../consumeBlockStartOptional", "../consumeNewBlockLineOptional", "../consumeStringOptional", "../consumeTypeConstructorOptional", "../consumeWhiteSpace", "../consumeWhiteSpaceOptional", "../consumeWord", "../consumeWordOptional", "../numeric/consumeDecimalOptional", "../numeric/consumeIntegerOptional", "../numeric/consumeUnsignedIntegerOptional", "./consumeFunctionCallOptional", "./consumeRangeOptional", "./expressionMatch"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const typeList_1 = __importDefault(require("../../../type/typeList"));
     const typeRecord_1 = __importDefault(require("../../../type/typeRecord"));
     const typeString_1 = __importDefault(require("../../../type/typeString"));
+    const _1 = __importDefault(require("../../../util/_"));
     const getFunctionParameters_1 = __importDefault(require("../../../util/getFunctionParameters"));
     const consumeBlockEnd_1 = __importDefault(require("../consumeBlockEnd"));
     const consumeBlockStartOptional_1 = __importDefault(require("../consumeBlockStartOptional"));
@@ -59,7 +60,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const expressionMatch_1 = __importDefault(require("./expressionMatch"));
     const empy = {};
     async function consumeExpression(reader, ...expectedTypes) {
-        return undefined
+        return _1.default
             ?? await expressionMatch_1.default.consumeOptional(reader, consumeExpression, ...expectedTypes)
             ?? await consumeExpressionValidatedPipe(reader, ...expectedTypes);
     }
@@ -236,12 +237,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         e = reader.i;
         if (reader.consumeOptional("_"))
             return { type: "literal", subType: "undefined", valueType: ChiriType_1.ChiriType.of("undefined"), position: reader.getPosition(e) };
-        const constructedType = (0, consumeTypeConstructorOptional_1.default)(reader);
-        if (constructedType)
-            return constructedType;
         const fnCall = (0, consumeFunctionCallOptional_1.default)(reader);
         if (fnCall)
             return fnCall;
+        const constructedType = (0, consumeTypeConstructorOptional_1.default)(reader);
+        if (constructedType)
+            return constructedType;
         e = reader.i;
         const word = (0, consumeWordOptional_1.default)(reader);
         if (word) {

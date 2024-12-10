@@ -1,5 +1,6 @@
 import { ChiriType } from "../../../type/ChiriType";
 import type { Operator } from "../../../type/ChiriTypeManager";
+import type { ChiriFunctionReference } from "../../../type/typeFunction";
 import type ChiriReader from "../../ChiriReader";
 import type { ChiriPosition } from "../../ChiriReader";
 import type { ChiriLiteralValue } from "../consumeTypeConstructorOptional";
@@ -65,7 +66,7 @@ export interface ChiriConditional {
     valueType: ChiriType;
     position: ChiriPosition;
 }
-export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriBaseText | ChiriFunctionCall | ChiriPipe | ChiriPipeUseLeft | ChiriConditional | ChiriGetByKey | ChiriListSlice;
+export type ChiriExpressionOperand = ChiriBinaryExpression | ChiriUnaryExpression | ChiriLiteralValue | ChiriVariableReference | ChiriFunctionReference | ChiriBaseText | ChiriFunctionCall | ChiriPipe | ChiriPipeUseLeft | ChiriConditional | ChiriGetByKey | ChiriListSlice;
 export type ChiriExpressionResult = ChiriExpressionOperand | ChiriExpressionMatch;
 export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand;
 declare function consumeExpression(reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult>;

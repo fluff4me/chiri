@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRulePseudoOptional", "./consume/rule/consumeRuleStateContainerOptional", "./consume/rule/consumeRuleStateOptional", "./consume/rule/consumeRuleStateSpecialOptional"], factory);
+        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/_", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRulePseudoOptional", "./consume/rule/consumeRuleStateContainerOptional", "./consume/rule/consumeRuleStateOptional", "./consume/rule/consumeRuleStateSpecialOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -18,6 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const constants_1 = require("../../constants");
     const ChiriType_1 = require("../type/ChiriType");
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
+    const _1 = __importDefault(require("../util/_"));
     const Arrays_1 = __importDefault(require("../util/Arrays"));
     const Errors_1 = __importDefault(require("../util/Errors"));
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
@@ -128,7 +129,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 .filter((statement) => statement.type === "variable");
         }
         getVariableOptional(name) {
-            return undefined
+            return _1.default
                 ?? this.#statements.findLast((statement) => statement.type === "variable" && statement.name.value === name)
                 ?? this.#outerStatements.findLast((statement) => statement.type === "variable" && statement.name.value === name);
         }
@@ -139,7 +140,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return variable;
         }
         getFunctionOptional(name) {
-            return undefined
+            return _1.default
                 ?? this.#statements.findLast((statement) => statement.type === "function" && statement.name.value === name)
                 ?? this.#outerStatements.findLast((statement) => statement.type === "function" && statement.name.value === name);
         }
@@ -150,7 +151,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return fn;
         }
         getMacroOptional(name) {
-            return undefined
+            return _1.default
                 ?? this.#statements.findLast((statement) => statement.type === "macro" && statement.name.value === name)
                 ?? this.#outerStatements.findLast((statement) => statement.type === "macro" && statement.name.value === name);
         }
@@ -280,7 +281,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const property = await (0, consumePropertyOptional_1.default)(this);
             if (property)
                 return property;
-            const rule = this.context.type === "keyframe" ? undefined : (undefined
+            const rule = this.context.type === "keyframe" ? undefined : (_1.default
                 ?? await (0, consumeRuleStateContainerOptional_1.default)(this)
                 ?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await (0, consumeRuleMainOptional_1.default)(this))
                 ?? await (0, consumeRuleStateSpecialOptional_1.default)(this)

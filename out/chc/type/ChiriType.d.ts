@@ -10,5 +10,5 @@ export interface ChiriTypeGeneric extends ChiriType {
 }
 export declare namespace ChiriType {
     function of<TYPE extends string = string>(name: TYPE, ...generics: (string | ChiriType)[]): ChiriType<TYPE>;
-    function stringify(type: ChiriType, stack?: boolean): string;
+    function stringify(type?: ChiriType, stack?: boolean): string;
 }

@@ -22,6 +22,8 @@
         }
         ChiriType.of = of;
         function stringify(type, stack = false) {
+            if (!type)
+                return "(no type)";
             if (type.isGeneric)
                 return type.generics.map(type => stringify(type, true)).join(" ");
             const stringified = `${type.name.value}${type.generics.map(generic => `!${stringify(generic, true)}`).join("")}`;

@@ -30,12 +30,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../util/getFunctionParameters", "./body/Contexts", "./consumeBodyOptional", "./consumeCompilerVariableOptional", "./consumeMacroParameters", "./consumeWordOptional", "./macro/macroAfter", "./macro/macroAlias", "./macro/macroAnimate", "./macro/macroAnimation", "./macro/macroDebug", "./macro/macroDo", "./macro/macroEach", "./macro/macroExport", "./macro/macroFontFace", "./macro/macroFor", "./macro/macroFunctionDeclaration", "./macro/macroIf", "./macro/macroImport", "./macro/macroInclude", "./macro/macroMacroDeclaration", "./macro/macroSelect", "./macro/macroSet", "./macro/macroShorthand", "./macro/macroWhile"], factory);
+        define(["require", "exports", "../../util/_", "../../util/getFunctionParameters", "./body/Contexts", "./consumeBodyOptional", "./consumeCompilerVariableOptional", "./consumeMacroParameters", "./consumeWordOptional", "./macro/macroAfter", "./macro/macroAlias", "./macro/macroAnimate", "./macro/macroAnimation", "./macro/macroDebug", "./macro/macroDo", "./macro/macroEach", "./macro/macroExport", "./macro/macroFontFace", "./macro/macroFor", "./macro/macroFunctionDeclaration", "./macro/macroIf", "./macro/macroImport", "./macro/macroInclude", "./macro/macroMacroDeclaration", "./macro/macroSelect", "./macro/macroSet", "./macro/macroShorthand", "./macro/macroWhile"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = default_1;
+    const _1 = __importDefault(require("../../util/_"));
     const getFunctionParameters_1 = __importDefault(require("../../util/getFunctionParameters"));
     const Contexts_1 = __importDefault(require("./body/Contexts"));
     const consumeBodyOptional_1 = __importDefault(require("./consumeBodyOptional"));
@@ -69,7 +70,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const context = args;
         if (await macroExport_1.default.consumeOptional(reader, ...context))
             return undefined;
-        const result = undefined
+        const result = _1.default
             ?? await macroImport_1.macroImportCSS.consumeOptional(reader, ...context)
             ?? await macroImport_1.default.consumeOptional(reader, ...context)
             ?? await macroDebug_1.default.consumeOptional(reader, ...context)
