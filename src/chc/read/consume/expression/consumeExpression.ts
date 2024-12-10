@@ -2,7 +2,7 @@
 
 import { ChiriType } from "../../../type/ChiriType"
 import type { Operator } from "../../../type/ChiriTypeManager"
-import type { ChiriLiteralFunctionReference } from "../../../type/typeFunction"
+import type { ChiriFunctionReference } from "../../../type/typeFunction"
 import typeInt from "../../../type/typeInt"
 import typeList from "../../../type/typeList"
 import typeRecord from "../../../type/typeRecord"
@@ -103,7 +103,7 @@ export type ChiriExpressionOperand =
 	| ChiriUnaryExpression
 	| ChiriLiteralValue
 	| ChiriVariableReference
-	| ChiriLiteralFunctionReference
+	| ChiriFunctionReference
 	| ChiriBaseText
 	| ChiriFunctionCall
 	| ChiriPipe

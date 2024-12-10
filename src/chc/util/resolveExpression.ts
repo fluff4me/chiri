@@ -30,6 +30,9 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 		case "get":
 			return compiler.getVariable(expression.name.value, expression.name.position)
 
+		case "function":
+			return compiler.getFunction(expression.name.value, expression.name.position) as any
+
 		case "function-call":
 			return compiler.callFunction(expression)
 

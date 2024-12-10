@@ -9,11 +9,10 @@ import TypeDefinition from "./TypeDefinition"
 
 export type ChiriLiteralRecordKeyValueTuple = [key: ChiriLiteralString | ChiriWordInterpolated, value: ChiriExpressionOperand]
 
-export interface ChiriLiteralFunctionReference {
-	type: "literal"
-	subType: "function"
+export interface ChiriFunctionReference {
+	type: "function"
 	valueType: ChiriType
-	value: ChiriWord
+	name: ChiriWord
 	position: ChiriPosition
 }
 
@@ -22,7 +21,7 @@ export default TypeDefinition({
 	type: TYPE_FUNCTION,
 	stringable: true,
 	generics: true,
-	consumeOptionalConstructor: (reader): ChiriLiteralFunctionReference | undefined => {
+	consumeOptionalConstructor: (reader): ChiriFunctionReference | undefined => {
 		const i = reader.i
 		const name = consumeWordOptional(reader)
 		if (!name || !reader.getFunctionOptional(name.value) || reader.getVariableOptional(name.value)) {
@@ -31,10 +30,9 @@ export default TypeDefinition({
 		}
 
 		return {
-			type: "literal",
-			subType: "function",
+			type: "function",
 			valueType: TYPE_FUNCTION,
-			value: name,
+			name: name,
 			position: name.position,
 		}
 	},
