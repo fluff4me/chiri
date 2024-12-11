@@ -436,13 +436,13 @@ function consumeInlinePipe (reader: ChiriReader, operand: ChiriExpressionOperand
 		}
 	}
 
-	const fnCall = consumePartialFuntionCall(reader, name.position, name, fn, parameters)
+	const fnCall = consumePartialFuntionCall(reader, name.position, name, fn, operand, parameters)
 	fnCall.assignments[firstParameter.name.value] = operand
 	return fnCall
 }
 
 function consumeGetByKeyOrListSlice (reader: ChiriReader, operand: ChiriExpressionOperand): ChiriGetByKey | ChiriListSlice | undefined {
-	const isListOperand = reader.types.isAssignable(operand.valueType, typeList.type)
+	const isListOperand = reader.types.isAssignable(operand.valueType, typeList.type, typeString.type)
 	if (!isListOperand && !reader.types.isAssignable(operand.valueType, typeRecord.type))
 		return undefined
 
@@ -468,7 +468,7 @@ function consumeGetByKeyOrListSlice (reader: ChiriReader, operand: ChiriExpressi
 		type: "get-by-key",
 		value: operand,
 		key: expr,
-		valueType: operand.valueType.generics[0],
+		valueType: reader.types.isAssignable(operand.valueType, typeString.type) ? typeString.type : operand.valueType.generics[0],
 		position,
 	}
 }

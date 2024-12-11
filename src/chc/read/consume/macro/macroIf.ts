@@ -4,16 +4,17 @@ import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 import consumeExpression from "../expression/consumeExpression"
+import type { ChiriMacroBlock } from "./MacroConstruct"
 import MacroConstruct from "./MacroConstruct"
 
-export interface ChiriIf {
+export interface ChiriIf extends ChiriMacroBlock {
 	type: "if" | "elseif"
 	condition: ChiriExpressionOperand
 	content: ChiriStatement[]
 	position: ChiriPosition
 }
 
-export interface ChiriElse {
+export interface ChiriElse extends ChiriMacroBlock {
 	type: "else"
 	content: ChiriStatement[]
 	position: ChiriPosition
@@ -25,6 +26,7 @@ export default MacroConstruct("if")
 	.consume(({ extra: condition, body: content, position }): ChiriIf => {
 		return {
 			type: "if",
+			isBlock: true,
 			condition,
 			content,
 			position,
@@ -38,6 +40,7 @@ export const macroIfElse = MacroConstruct("else if")
 		verifyFollowingIf(reader, start, "else if")
 		return {
 			type: "elseif",
+			isBlock: true,
 			condition,
 			content,
 			position,
@@ -50,6 +53,7 @@ export const macroElse = MacroConstruct("else")
 		verifyFollowingIf(reader, start, "else")
 		return {
 			type: "else",
+			isBlock: true,
 			content,
 			position,
 		}

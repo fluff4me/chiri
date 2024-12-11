@@ -7,6 +7,7 @@ import Contexts from "./body/Contexts"
 import consumeBodyOptional from "./consumeBodyOptional"
 import type { ChiriCompilerVariable } from "./consumeCompilerVariableOptional"
 import consumeCompilerVariable from "./consumeCompilerVariableOptional"
+import consumeMacroBlockUseOptional from "./consumeMacroBlockUseOptional"
 import consumeMacroParameters from "./consumeMacroParameters"
 import type { ChiriWord } from "./consumeWord"
 import consumeWordOptional from "./consumeWordOptional"
@@ -19,20 +20,20 @@ import type { ChiriAnimate } from "./macro/macroAnimate"
 import macroAnimate from "./macro/macroAnimate"
 import type { ChiriAnimation } from "./macro/macroAnimation"
 import macroAnimation from "./macro/macroAnimation"
+import type { ChiriBreak } from "./macro/macroBreak"
+import macroBreak from "./macro/macroBreak"
+import type { ChiriContinue } from "./macro/macroContinue"
+import macroContinue from "./macro/macroContinue"
 import macroDebug from "./macro/macroDebug"
 import type { ChiriDo } from "./macro/macroDo"
-import macroDo from "./macro/macroDo"
 import type { ChiriEach } from "./macro/macroEach"
-import macroEach from "./macro/macroEach"
 import macroExport from "./macro/macroExport"
 import type { ChiriFontFace } from "./macro/macroFontFace"
 import macroFontFace from "./macro/macroFontFace"
 import type { ChiriFor } from "./macro/macroFor"
-import macroFor from "./macro/macroFor"
 import type { ChiriFunction } from "./macro/macroFunctionDeclaration"
 import macroFunctionDeclaration from "./macro/macroFunctionDeclaration"
 import type { ChiriElse, ChiriIf } from "./macro/macroIf"
-import macroIf, { macroElse, macroIfElse } from "./macro/macroIf"
 import type { ChiriCSSImport, ChiriImport } from "./macro/macroImport"
 import macroImport, { macroImportCSS } from "./macro/macroImport"
 import type { ChiriInclude } from "./macro/macroInclude"
@@ -46,7 +47,6 @@ import macroSet from "./macro/macroSet"
 import type { ChiriShorthand } from "./macro/macroShorthand"
 import macroShorthand from "./macro/macroShorthand"
 import type { ChiriWhile } from "./macro/macroWhile"
-import macroWhile from "./macro/macroWhile"
 
 export type MacroResult =
 	| ChiriCompilerVariable
@@ -70,6 +70,10 @@ export type MacroResult =
 	| ChiriAfter
 	| ChiriFontFace
 	| ChiriSelect
+	| ChiriBreak
+	| ChiriContinue
+
+export type ChiriMacroUseContext = [context: ChiriContextType, ...data: ResolveContextDataTuple<ChiriContextType>]
 
 export default async function (reader: ChiriReader): Promise<MacroResult | undefined>
 export default async function <CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<MacroResult | undefined>
@@ -81,7 +85,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 	if (reader.peek("#return "))
 		return undefined
 
-	const context = args as [ChiriContextType, ResolveContextDataTuple<ChiriContextType>[0]]
+	const context = args as ChiriMacroUseContext
 	if (await macroExport.consumeOptional(reader, ...context))
 		return undefined
 
@@ -93,14 +97,10 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroFunctionDeclaration.consumeOptional(reader, ...context)
 		?? await macroShorthand.consumeOptional(reader, ...context)
 		?? await macroAlias.consumeOptional(reader, ...context)
-		?? await macroEach.consumeOptional(reader, ...context)
-		?? await macroDo.consumeOptional(reader, ...context)
 		?? await macroSet.consumeOptional(reader, ...context)
-		?? await macroFor.consumeOptional(reader, ...context)
-		?? await macroWhile.consumeOptional(reader, ...context)
-		?? await macroIf.consumeOptional(reader, ...context)
-		?? await macroIfElse.consumeOptional(reader, ...context)
-		?? await macroElse.consumeOptional(reader, ...context)
+		?? await macroBreak.consumeOptional(reader, ...context)
+		?? await macroContinue.consumeOptional(reader, ...context)
+		?? await consumeMacroBlockUseOptional(reader, context)
 		?? await macroAnimation.consumeOptional(reader, ...context)
 		?? await macroAnimate.consumeOptional(reader, ...context)
 		?? await macroAfter.consumeOptional(reader, ...context)

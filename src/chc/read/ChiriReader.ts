@@ -28,11 +28,14 @@ import type { ChiriPropertyDefinition } from "./consume/consumePropertyOptional"
 import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePropertyOptional"
 import type { ChiriValueText } from "./consume/consumeValueText"
 import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
+import type { ChiriWord } from "./consume/consumeWord"
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
 import type { ChiriAfter } from "./consume/macro/macroAfter"
 import type { ChiriAlias } from "./consume/macro/macroAlias"
 import type { ChiriAnimate } from "./consume/macro/macroAnimate"
 import type { ChiriAnimation } from "./consume/macro/macroAnimation"
+import type { ChiriBreak } from "./consume/macro/macroBreak"
+import type { ChiriContinue } from "./consume/macro/macroContinue"
 import type { ChiriDo } from "./consume/macro/macroDo"
 import type { ChiriEach } from "./consume/macro/macroEach"
 import type { ChiriFontFace } from "./consume/macro/macroFontFace"
@@ -82,6 +85,8 @@ export type ChiriStatement =
 	| ChiriAnimation
 	| ChiriAnimate
 	| ChiriSelect
+	| ChiriBreak
+	| ChiriContinue
 	// root
 	| ChiriComponent
 	| ChiriMixin
@@ -123,6 +128,10 @@ export interface ChiriPositionState {
 
 export type ChiriBodyConsumer<T> = (reader: ChiriReader) => PromiseOr<ArrayOr<T | undefined>>
 
+export interface ChiriBlock {
+	label?: ChiriWord
+}
+
 export default class ChiriReader {
 
 	static async load (filename: string, reader?: ChiriReader) {
@@ -146,6 +155,7 @@ export default class ChiriReader {
 
 	#outerStatements: ChiriStatement[] = []
 	#statements: ChiriStatement[] = []
+	#blocks: ChiriBlock[] = []
 
 	#errorStart?: number
 

@@ -1,4 +1,5 @@
 import { ChiriType } from "../../../type/ChiriType"
+import typeFunction from "../../../type/typeFunction"
 import getFunctionParameters from "../../../util/getFunctionParameters"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
@@ -39,16 +40,18 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 		return undefined
 	}
 
-	if (!parameters.length && !reader.peek("("))
-		throw reader.error(e, `Ambiguous usage of name "${name.value}" — could be #${ChiriType.stringify(reader.getVariable(name.value).valueType)} ${name.value} or #function ${name.value} returns ${ChiriType.stringify(resolveFunctionReturnType(reader, fn))}`)
+	if (!reader.peek("(")) {
+		reader.restorePosition(restore)
+		return undefined
+	}
 
-	return consumePartialFuntionCall(reader, position, name, fn, parameters, ...expectedTypes)
+	return consumePartialFuntionCall(reader, position, name, fn, undefined, parameters, ...expectedTypes)
 }
 
-export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
+export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, boundFirstParam: ChiriExpressionOperand | undefined, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
 	const assignments: Record<string, ChiriExpressionOperand> = {}
+	reader.consume("(")
 	if (parameters.length) {
-		reader.consume("(")
 		for (let i = 0; i < parameters.length; i++) {
 			const parameter = parameters[i]
 			if (i > 0) {
@@ -85,14 +88,11 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 				paramType.name.value !== "raw" ? consumeExpression.inline(reader, ...expectedType)
 					: consumeValueText(reader, false, () => !!reader.peek(")"))
 		}
-
-		reader.consumeOptional(")")
-
-	} else if (reader.consumeOptional("(")) {
-		reader.consumeOptional(")")
 	}
 
-	const returnType = computeFunctionReturnType(reader, fn, assignments)
+	reader.consumeOptional(")")
+
+	const returnType = computeFunctionReturnType(reader, fn, assignments, boundFirstParam)
 	if (!reader.types.isAssignable(returnType, ...expectedTypes))
 		throw reader.error(`Expected ${expectedTypes.map(type => `"${ChiriType.stringify(type)}"`).join(", ")}, but #function ${fn.name.value} will return "${ChiriType.stringify(returnType)}"`)
 
@@ -129,23 +129,130 @@ function resolveFunctionReturnType (reader: ChiriReader, fn: ChiriFunction | Chi
 	return fn.valueType.generics.at(-1)! // last = return type
 }
 
-function computeFunctionReturnType (reader: ChiriReader, fn: ChiriFunction | ChiriCompilerVariable, assignments: Record<string, ChiriExpressionOperand>): ChiriType {
+function computeFunctionReturnType (reader: ChiriReader, fn: ChiriFunction | ChiriCompilerVariable, assignments: Record<string, ChiriExpressionOperand>, boundFirstParam?: ChiriExpressionOperand): ChiriType {
 	const returnType = resolveFunctionReturnType(reader, fn)
-	if (!returnType.isGeneric)
-		return returnType
+	if (returnType.isGeneric) {
+		const matches = getMatchingGenericTypeParameters(reader, returnType, fn, assignments, boundFirstParam)
+		if (!matches.length)
+			return returnType
 
-	if (fn.type === "function") {
-		const parametersOfType = fn.content.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable" && !!statement.valueType.isGeneric && statement.valueType.name.value === fn.returnType.name.value)
-		return reader.types.intersection(...parametersOfType.map(parameter => assignments[parameter.name.value].valueType))
+		return reader.types.intersection(...matches)
 	}
 
-	const parameters = resolveFunctionParameters(reader, fn) as ChiriType[]
-	const parametersOfType = parameters
-		.map((type, i) => [i, type] as const)
-		.filter(([, type]) => !!type.isGeneric && type.name.value === returnType.name.value)
-
-	if (!parametersOfType.length)
+	if (!returnType.generics.some(type => type.isGeneric))
 		return returnType
 
-	return reader.types.intersection(...parametersOfType.map(([i]) => assignments[i].valueType))
+	const mappedGenerics = returnType.generics
+		.map(type => {
+			if (!type.isGeneric)
+				return type
+
+			const matches = getMatchingGenericTypeParameters(reader, type, fn, assignments, boundFirstParam)
+			// console.log(Strings.debug({
+			// 	fnType: fn.type,
+			// 	type,
+			// 	assignments,
+			// 	boundFirstParam,
+			// 	matches,
+			// }))
+			if (!matches.length)
+				return type
+
+			return reader.types.intersection(...matches)
+		})
+	return ChiriType.of(returnType.name.value, ...mappedGenerics)
+}
+
+function getMatchingGenericTypeParameters (reader: ChiriReader, matching: ChiriType, fn: ChiriFunction | ChiriCompilerVariable, assignments: Record<string, ChiriExpressionOperand>, boundFirstParam?: ChiriExpressionOperand): ChiriType[] {
+	if (fn.type === "function") {
+		const matches: ChiriType[] = []
+		let firstParam = true
+		for (const statement of fn.content) {
+			if (statement.type !== "variable")
+				continue
+
+			let assignment: ChiriExpressionOperand | undefined
+			if (firstParam) {
+				firstParam = false
+				assignment = boundFirstParam
+				// console.log("first param", Strings.debug({
+				// 	boundFirstParam,
+				// 	varType: statement.valueType,
+				// }))
+			}
+
+			assignment ??= assignments[statement.name.value]
+			if (!assignment)
+				continue
+
+			if (!!statement.valueType.isGeneric && statement.valueType.name.value === matching.name.value) {
+				if (assignment)
+					matches.push(assignment.valueType)
+				continue
+			}
+
+			if (statement.valueType.name.value === typeFunction.type.name.value)
+				pushMatchingFunctionGenericTypeParameters(reader, matches, matching, statement.valueType.generics, assignment.valueType.generics)
+			else
+				pushMatchingNonFunctionGenericTypeParameters(reader, matches, matching, statement.valueType.generics, assignment.valueType.generics)
+		}
+
+		return matches
+	}
+
+	const matches: ChiriType[] = []
+	const parameters = resolveFunctionParameters(reader, fn) as ChiriType[]
+	for (let i = 0; i < parameters.length; i++) {
+		let assignment: ChiriExpressionOperand | undefined
+		if (i === 0)
+			assignment = boundFirstParam ?? assignments[0]
+
+		assignment ??= assignments[i]
+		if (!assignment)
+			continue
+
+		const parameter = parameters[i]
+		if (!!parameter.isGeneric && parameter.name.value === matching.name.value) {
+			matches.push(assignment.valueType)
+			continue
+		}
+
+		if (parameter.name.value === typeFunction.type.name.value)
+			pushMatchingFunctionGenericTypeParameters(reader, matches, matching, parameter.generics, assignment.valueType.generics)
+		else
+			pushMatchingNonFunctionGenericTypeParameters(reader, matches, matching, parameter.generics, assignment.valueType.generics)
+	}
+
+	return matches
+}
+
+function pushMatchingNonFunctionGenericTypeParameters (reader: ChiriReader, pushTo: ChiriType[], matching: ChiriType, generics: ChiriType[], assignments: ChiriType[]) {
+	if (!generics.length)
+		return
+
+	for (let j = 0; j < generics.length; j++) {
+		const generic = generics[j]
+		if (!!generic.isGeneric && generic.name.value === matching.name.value) {
+			pushTo.push(assignments[j])
+			continue
+		}
+	}
+}
+
+function pushMatchingFunctionGenericTypeParameters (reader: ChiriReader, pushTo: ChiriType[], matching: ChiriType, generics: ChiriType[], assignments: ChiriType[]) {
+	if (!generics.length)
+		return
+
+	const returnType = generics[generics.length - 1]
+	if (!!returnType.isGeneric && returnType.name.value === matching.name.value)
+		pushTo.push(assignments[assignments.length - 1])
+
+	const length = Math.max(generics.length - 1, assignments.length - 1)
+	for (let j = 0; j < length; j++) {
+		const generic = generics[j]
+		if (!!generic.isGeneric && generic.name.value === matching.name.value) {
+			pushTo.push(assignments[j])
+			continue
+		}
+	}
 }

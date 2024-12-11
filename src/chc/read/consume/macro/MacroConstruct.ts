@@ -22,6 +22,11 @@ export interface ChiriMacroBase {
 	position: ChiriPosition
 }
 
+export interface ChiriMacroBlock {
+	isBlock: true
+	label?: ChiriWord
+}
+
 export interface ChiriMacroInternal<T> extends ChiriMacroBase {
 	type: "macro:internal"
 	consumeOptional (reader: ChiriReader): Promise<T | undefined>

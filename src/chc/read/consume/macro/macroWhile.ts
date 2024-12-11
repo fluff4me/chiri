@@ -3,9 +3,10 @@ import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
 import consumeWhiteSpace from "../consumeWhiteSpace"
 import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 import consumeExpression from "../expression/consumeExpression"
+import type { ChiriMacroBlock } from "./MacroConstruct"
 import MacroConstruct from "./MacroConstruct"
 
-export interface ChiriWhile {
+export interface ChiriWhile extends ChiriMacroBlock {
 	type: "while"
 	condition: ChiriExpressionOperand
 	content: ChiriStatement[]
@@ -18,6 +19,7 @@ export default MacroConstruct("while")
 	.consume(({ extra: condition, body: content, position }): ChiriWhile => {
 		return {
 			type: "while",
+			isBlock: true,
 			condition,
 			content,
 			position,

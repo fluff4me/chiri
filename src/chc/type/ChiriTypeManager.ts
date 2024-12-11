@@ -140,7 +140,7 @@ export default class ChiriTypeManager {
 
 	precedence: Operator[][] = operatorPrecedence.map(a => a.slice())
 
-	types: Record<string, TypeDefinition> = { ...types }
+	types: Record<string, TypeDefinition | undefined> = { ...types }
 
 	binaryOperators: BinaryOperationData<string> = {}
 	unaryOperators: UnaryOperationData<string> = {}
@@ -279,7 +279,7 @@ export default class ChiriTypeManager {
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
 		for (const type of generics) {
 			if (this.types[type.name.value]) {
-				if (this.types[type.name.value].type === type)
+				if (this.types[type.name.value]?.type === type)
 					// reregistering due to sub reader
 					continue
 
@@ -288,8 +288,8 @@ export default class ChiriTypeManager {
 
 			if (type.generics.length === 1 && type.generics[0].name.value === "*")
 				type.generics = Object.values(this.types)
-					.map(typeDef => typeDef.type)
-					.filter(type => type.name.value !== "body")
+					.map(typeDef => typeDef?.type)
+					.filter((type): type is ChiriType => !!type && type.name.value !== "body")
 
 			const componentTypeDefinitions = type.generics.map(component => {
 				const typeDef = this.types[component.name.value]
@@ -425,6 +425,7 @@ export default class ChiriTypeManager {
 			return toTypes.some(toType => this.isAssignable(type, toType))
 		}
 
+		// only 1 toType
 		const [toType] = toTypes
 		if (toType.name.value === "*")
 			return true
@@ -432,6 +433,11 @@ export default class ChiriTypeManager {
 		if (type.name.value === "*")
 			// this should never happen
 			throw new Error(`* is not a statically known type and therefore cannot be assigned to ${ChiriType.stringify(toType)}`)
+
+		const typeDef = this.types[type.name.value]
+		if (type.name.value === toType.name.value && type.generics && toType.generics && typeDef?.isAssignable)
+			return typeDef.isAssignable(this, type, toType)
+
 
 		if (isNumeric(type.name.value) && isNumeric(toType.name.value))
 			// explicitly allow putting any numbers in contexts that expect specific types
@@ -463,6 +469,9 @@ export default class ChiriTypeManager {
 	}
 
 	intersection (...types: ChiriType[]) {
+		if (!types.length)
+			throw this.host.error("Cannot form an intersection")
+
 		types = this.dedupe(...types)
 		if (types.length === 1)
 			return types[0]

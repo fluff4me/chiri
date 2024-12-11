@@ -12,9 +12,10 @@ import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 import consumeExpression from "../expression/consumeExpression"
 import consumeRangeOptional from "../expression/consumeRangeOptional"
+import type { ChiriMacroBlock } from "./MacroConstruct"
 import MacroConstruct from "./MacroConstruct"
 
-export interface ChiriEach {
+export interface ChiriEach extends ChiriMacroBlock {
 	type: "each"
 	iterable: ChiriExpressionOperand
 	keyVariable?: ChiriCompilerVariable
@@ -30,8 +31,9 @@ export default MacroConstruct("each")
 		reader.consumeOptional("in ")
 
 		const e = reader.i
-		const iterable = consumeRangeOptional(reader) ?? consumeExpression.inline(reader, typeList.type, typeRecord.type)
-		const isList = reader.types.isAssignable(iterable.valueType, typeList.type)
+		const iterable = consumeRangeOptional(reader) ?? consumeExpression.inline(reader, typeList.type, typeRecord.type, typeString.type)
+		const isRecord = reader.types.isAssignable(iterable.valueType, typeRecord.type)
+		const isString = reader.types.isAssignable(iterable.valueType, typeString.type)
 
 		consumeWhiteSpace(reader)
 		reader.consume("as")
@@ -50,21 +52,22 @@ export default MacroConstruct("each")
 				throw reader.error("Expected variable declaration")
 		}
 
-		if (!variable2 && !isList)
+		if (!variable2 && isRecord)
 			throw reader.error("Expected variable declarations for both a key and its associated value")
 
-		if (!isList && !reader.types.isAssignable(typeString.type, variable1.valueType))
+		if (isRecord && !reader.types.isAssignable(typeString.type, variable1.valueType))
 			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(typeString.type)}" is not assignable to "${ChiriType.stringify(variable1.valueType)}"`)
 
-		if (!reader.types.isAssignable(iterable.valueType.generics[0], (variable2 ?? variable1).valueType))
-			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(iterable.valueType.generics[0])}" is not assignable to "${ChiriType.stringify((variable2 ?? variable1).valueType)}"`)
+		const valueType = isString ? typeString.type : iterable.valueType.generics[0]
+		if (!reader.types.isAssignable(valueType, (variable2 ?? variable1).valueType))
+			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(valueType)}" is not assignable to "${ChiriType.stringify((variable2 ?? variable1).valueType)}"`)
 
 		const keyVariable = variable2 ? variable1 : undefined
 		if (keyVariable)
-			keyVariable.valueType = isList ? typeUint.type : typeString.type
+			keyVariable.valueType = isRecord ? typeString.type : typeUint.type
 
 		const variable = variable2 ?? variable1
-		variable.valueType = iterable.valueType.generics[0]
+		variable.valueType = valueType
 
 		return {
 			iterable,
@@ -81,6 +84,7 @@ export default MacroConstruct("each")
 		})
 		return {
 			type: "each",
+			isBlock: true,
 			iterable,
 			keyVariable,
 			variable,

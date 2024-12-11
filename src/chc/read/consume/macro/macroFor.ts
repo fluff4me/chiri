@@ -7,9 +7,10 @@ import consumeWhiteSpace from "../consumeWhiteSpace"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
 import type { ChiriExpressionOperand } from "../expression/consumeExpression"
 import consumeExpression from "../expression/consumeExpression"
+import type { ChiriMacroBlock } from "./MacroConstruct"
 import MacroConstruct from "./MacroConstruct"
 
-export interface ChiriFor {
+export interface ChiriFor extends ChiriMacroBlock {
 	type: "for"
 	variable: ChiriCompilerVariable
 	condition: ChiriExpressionOperand
@@ -52,6 +53,7 @@ export default MacroConstruct("for")
 		const body = await consumeBody(reader, "inherit", sub => sub.addOuterStatement(variable))
 		return {
 			type: "for",
+			isBlock: true,
 			variable,
 			condition,
 			update,

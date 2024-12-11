@@ -1,3 +1,4 @@
+import { inspect } from "util"
 import ansi from "../../ansi"
 
 namespace Strings {
@@ -7,6 +8,10 @@ namespace Strings {
 			.replace(/\n/g, ansi.whitespace + "\u240A" + ansi.reset)
 			.replace(/ /g, ansi.whitespace + "\u00B7" + ansi.reset)
 			.replace(/\t/g, ansi.whitespace + "\u2192" + ansi.reset)
+	}
+
+	export function debug (value: unknown) {
+		return inspect(value, undefined, Infinity, true)
 	}
 }
 

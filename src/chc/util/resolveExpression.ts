@@ -22,6 +22,9 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 
 	switch (expression.type) {
 		case "literal":
+			if (expression.subType === "function")
+				return compiler.getFunction(expression.name.value, expression.name.position) as any
+
 			return resolveLiteralValue(compiler, expression)
 
 		case "text":
@@ -29,9 +32,6 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 
 		case "get":
 			return compiler.getVariable(expression.name.value, expression.name.position)
-
-		case "function":
-			return compiler.getFunction(expression.name.value, expression.name.position) as any
 
 		case "function-call":
 			return compiler.callFunction(expression)
