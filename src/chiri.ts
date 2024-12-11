@@ -22,6 +22,10 @@ if (process.env.CHIRI_ENV === "dev")
 	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 	(require("source-map-support") as typeof import("source-map-support")).install()
 
+if (process.env.CHIRI_INSPECT)
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+	require("inspector").open(+process.env.CHIRI_INSPECT_PORT! || undefined, process.env.CHIRI_INSPECT_HOST)
+
 if (args.v) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 	console.log(require(path.join(PACKAGE_ROOT, "package.json")).version)
