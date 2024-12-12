@@ -17,6 +17,7 @@ import ChiriTypeManager from "../type/ChiriTypeManager"
 import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
 import typeString from "../type/typeString"
 import type { ComponentStateSpecial } from "../util/componentStates"
+import getFunctionParameters from "../util/getFunctionParameters"
 import relToCwd from "../util/relToCwd"
 import type { Value } from "../util/resolveExpression"
 import resolveExpression, { Record as ChiriRecord } from "../util/resolveExpression"
@@ -303,6 +304,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		}
 
 		throw error(position, `Function ${name} is not defined`)
+	}
+
+	function isFunction (fn: unknown): fn is ChiriFunction {
+		return (fn as ChiriFunction)?.type === "function"
 	}
 
 	function setFunction (fn: ChiriFunction) {
@@ -1226,11 +1231,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			case "each": {
 				let list = resolveExpression(compiler, statement.iterable)
 
-				if (!Array.isArray(list) && (!ChiriRecord.is(list) || !statement.keyVariable))
+				if (typeof list !== "string" && !Array.isArray(list) && (!ChiriRecord.is(list) || !statement.keyVariable))
 					throw error(statement.iterable.position, "Variable is not iterable")
 
 				list = !statement.keyVariable ? list as Value[]
-					: !Array.isArray(list) ? Object.entries(list)
+					: typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
 						: Object.values(list).map((v, i) => [i, v] as const)
 
 				const result: T[] = []
@@ -1488,8 +1493,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function callFunction (call: ChiriFunctionCall) {
-		const fn = getFunction(call.name.value, call.position)
-		const result = compileStatements(fn.content, resolveAssignments(call.assignments), compileFunction)
+		const fnVar = getVariable(call.name.value, call.position, true)
+		const fn = isFunction(fnVar) ? fnVar : getFunction(call.name.value, call.position)
+		const assignments = resolveAssignments(call.assignments, call.indexedAssignments ? getFunctionParameters(fn).map(p => p.name.value) : undefined)
+		const result = compileStatements(fn.content, assignments, compileFunction)
 		if (result.length > 1)
 			throw internalError(call.position, "Function call returned multiple values")
 
@@ -1508,10 +1515,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return statement.type + name
 	}
 
-	function resolveAssignments (assignments: Record<string, ChiriExpressionResult>): Partial<Scope> {
+	function resolveAssignments (assignments: Record<string, ChiriExpressionResult>, indicesIntoParams?: string[]): Partial<Scope> {
 		return Scope.variables(Object.fromEntries(Object.entries(assignments)
 			.map(([name, expr]) =>
-				[name, { type: expr.valueType, value: resolveExpression(compiler, expr) }])))
+				[indicesIntoParams?.[+name] ?? name, { type: expr.valueType, value: resolveExpression(compiler, expr) }])))
 	}
 
 	function resolveWordLowercase (word: ChiriWordInterpolated | ChiriWord | string): ChiriWord {

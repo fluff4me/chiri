@@ -60,7 +60,7 @@ function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralV
 	}
 }
 
-export function resolveLiteralRange (compiler: ChiriCompiler, range: ChiriLiteralRange, list?: any[]) {
+export function resolveLiteralRange (compiler: ChiriCompiler, range: ChiriLiteralRange, list?: string | any[]) {
 	const startRaw = resolveLiteralValue.resolveExpression(compiler, range.start) ?? 0
 	const endRaw = resolveLiteralValue.resolveExpression(compiler, range.end) ?? list?.length
 	if (!Number.isInteger(startRaw))
@@ -79,9 +79,6 @@ export function resolveLiteralRange (compiler: ChiriCompiler, range: ChiriLitera
 	end = !list ? end : Math.max(0, Math.min(end, listLength - 1))
 
 	const result: number[] = []
-	if (Math.abs(start - end) <= 1)
-		return result
-
 	if (range.inclusive)
 		if (start < end)
 			for (let i = start; i <= end; i++)
@@ -90,14 +87,13 @@ export function resolveLiteralRange (compiler: ChiriCompiler, range: ChiriLitera
 			for (let i = start; i >= end; i--)
 				result.push(i)
 
-	else {
+	else
 		if (start < end)
 			for (let i = start; i < end; i++)
 				result.push(i)
 		else
 			for (let i = start; i > end; i--)
 				result.push(i)
-	}
 
 	return result
 }

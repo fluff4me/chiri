@@ -15,6 +15,7 @@ import consumeExpression from "./consumeExpression"
 export interface ChiriFunctionCall {
 	type: "function-call"
 	name: ChiriWord
+	indexedAssignments: boolean
 	assignments: Record<string, ChiriExpressionResult>
 	valueType: ChiriType
 	position: ChiriPosition
@@ -99,6 +100,7 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 	return {
 		type: "function-call",
 		name,
+		indexedAssignments: fn.type !== "function",
 		assignments,
 		valueType: returnType,
 		position,

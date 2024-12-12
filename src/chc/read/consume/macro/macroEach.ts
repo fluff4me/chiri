@@ -39,7 +39,7 @@ export default MacroConstruct("each")
 		reader.consume("as")
 		consumeWhiteSpace(reader)
 
-		const variable1 = await consumeCompilerVariableOptional(reader, false)
+		const variable1 = await consumeCompilerVariableOptional(reader, false, true)
 		if (!variable1)
 			throw reader.error("Expected variable declaration")
 
@@ -47,7 +47,7 @@ export default MacroConstruct("each")
 		if (reader.consumeOptional(",")) {
 			consumeWhiteSpaceOptional(reader)
 
-			variable2 = await consumeCompilerVariableOptional(reader, false)
+			variable2 = await consumeCompilerVariableOptional(reader, false, true)
 			if (!variable2)
 				throw reader.error("Expected variable declaration")
 		}

@@ -39,10 +39,10 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 		case "get-by-key": {
 			const obj = resolveExpression(compiler, expression.value)
 			let key = resolveExpression.stringifyExpression(compiler, expression.key)
-			if (!Record.is(obj) && !Array.isArray(obj))
+			if (typeof obj !== "string" && !Record.is(obj) && !Array.isArray(obj))
 				throw compiler.error(`Cannot access value in "${key}" of "${resolveExpression.stringifyExpression(compiler, expression.value)}"`)
 
-			if (Array.isArray(obj)) {
+			if (typeof obj === "string" || Array.isArray(obj)) {
 				let index = +key
 				index = index < 0 ? obj.length + index : index
 				key = `${index}`
@@ -53,7 +53,7 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 
 		case "list-slice": {
 			const list = resolveExpression(compiler, expression.list)
-			if (!Array.isArray(list))
+			if (typeof list !== "string" && !Array.isArray(list))
 				throw compiler.error("Cannot create list slice, invalid list")
 
 			expression.range.end ??= makeLiteralInt(list.length)
@@ -62,16 +62,22 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 			if (!Array.isArray(range))
 				throw compiler.error("Cannot create list slice, invalid range")
 
-			const result: Value[] = []
+			let result: Value[] | string = typeof list === "string" ? "" : []
 			for (let index of range) {
 				if (typeof index !== "number")
 					throw compiler.error("Cannot create list slice, provided index is not an integer")
 
 				index = index < 0 ? range.length + index : index
-				result.push(list[Math.max(0, Math.min(index, list.length - 1))])
+				index = Math.max(0, Math.min(index, list.length - 1))
+				const value = list[index]
+				if (typeof result === "string")
+					result += value as string
+				else
+					result.push(value)
 			}
 
 			return result
+
 		}
 
 		case "match": {
@@ -175,7 +181,7 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 						case ">>>":
 							return operandA >>> operandB
 						case "is":
-							return compiler.types.types[operandB as string].is?.(operandA as Value) ?? false
+							return compiler.types.types[operandB as string]?.is?.(operandA as Value) ?? false
 						default:
 							throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`)
 					}
