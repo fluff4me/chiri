@@ -81,19 +81,25 @@ var __importStar = (this && this.__importStar) || function (mod) {
         }
     }
     function resolveLiteralRange(compiler, range, list) {
-        const startRaw = resolveLiteralValue.resolveExpression(compiler, range.start) ?? 0;
-        const endRaw = resolveLiteralValue.resolveExpression(compiler, range.end) ?? list?.length;
-        if (!Number.isInteger(startRaw))
+        let startRaw = resolveLiteralValue.resolveExpression(compiler, range.start);
+        if (startRaw !== undefined && !Number.isInteger(startRaw))
             throw compiler.error(range.position, "Invalid value for range start bound");
-        if (!Number.isInteger(endRaw))
+        let endRaw = resolveLiteralValue.resolveExpression(compiler, range.end);
+        if (endRaw !== undefined && !Number.isInteger(endRaw))
             throw compiler.error(range.position, "Invalid value for range end bound");
+        if (endRaw < 0 || list && startRaw >= list.length)
+            return [];
+        startRaw ??= 0;
+        endRaw ??= list?.length;
         const listLength = list?.length ?? 0;
         let start = startRaw;
         start = start < 0 ? listLength + start : start;
         start = !list ? start : Math.max(0, Math.min(start, listLength - 1));
         let end = endRaw;
         end = end < 0 ? listLength + end : end;
-        end = !list ? end : Math.max(0, Math.min(end, listLength - 1));
+        end = !list ? end
+            : range.inclusive ? Math.max(0, Math.min(end, listLength - 1))
+                : Math.max(-1, Math.min(end, listLength));
         const result = [];
         if (range.inclusive)
             if (start < end)

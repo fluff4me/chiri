@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeFunction", "../../../util/getFunctionParameters", "../consumeValueText", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "./consumeExpression"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeFunction", "../../../util/getFunctionParameters", "../consumeBlockEnd", "../consumeBlockStartOptional", "../consumeValueText", "../consumeWhiteSpaceOptional", "../consumeWordOptional", "./consumeExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -16,6 +16,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("../../../type/ChiriType");
     const typeFunction_1 = __importDefault(require("../../../type/typeFunction"));
     const getFunctionParameters_1 = __importDefault(require("../../../util/getFunctionParameters"));
+    const consumeBlockEnd_1 = __importDefault(require("../consumeBlockEnd"));
+    const consumeBlockStartOptional_1 = __importDefault(require("../consumeBlockStartOptional"));
     const consumeValueText_1 = __importDefault(require("../consumeValueText"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
@@ -72,9 +74,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const expectedType = [paramType];
                 if (parameter.type === "variable" && parameter.assignment === "??=")
                     expectedType.push(ChiriType_1.ChiriType.of("undefined"));
-                assignments[parameter.type === "type" ? i : parameter.name.value] =
-                    paramType.name.value !== "raw" ? consumeExpression_1.default.inline(reader, ...expectedType)
-                        : (0, consumeValueText_1.default)(reader, false, () => !!reader.peek(")"));
+                const key = parameter.type === "type" ? i : parameter.name.value;
+                if (paramType.name.value !== "raw")
+                    assignments[key] = consumeExpression_1.default.inline(reader, ...expectedType);
+                else {
+                    const multiline = (0, consumeBlockStartOptional_1.default)(reader);
+                    assignments[key] = (0, consumeValueText_1.default)(reader, multiline, () => !!reader.peek(")"));
+                    if (multiline)
+                        (0, consumeBlockEnd_1.default)(reader);
+                }
             }
         }
         reader.consumeOptional(")");
