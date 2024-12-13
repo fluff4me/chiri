@@ -210,7 +210,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (!consumed)
                             throw this.error(e, `Expected ${this.context.type} content`);
                         this.#statements.push(...Arrays_1.default.resolve(consumed).filter(Arrays_1.default.filterNullish));
-                    } while ((0, consumeNewBlockLineOptional_1.default)(this));
+                    } while ((0, consumeNewBlockLineOptional_1.default)(this, this.context.type === "text"));
                     if (this.i < this.input.length)
                         (0, consumeBlockEnd_1.default)(this);
                 }
