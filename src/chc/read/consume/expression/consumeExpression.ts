@@ -182,6 +182,7 @@ async function consumeExpressionPipe (reader: ChiriReader) {
 				operand = {
 					type: "function-call",
 					name,
+					indexedAssignments: false,
 					assignments: {
 						[parameters[0].name.value]: operand,
 					},
@@ -428,6 +429,7 @@ function consumeInlinePipe (reader: ChiriReader, operand: ChiriExpressionOperand
 		return {
 			type: "function-call",
 			name,
+			indexedAssignments: false,
 			assignments: {
 				[firstParameter.name.value]: operand,
 			},

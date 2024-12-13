@@ -39,7 +39,7 @@ export default (reader: ChiriReader, type?: ChiriType): ChiriLiteralValue | unde
 		return consumeTypeConstructorOptional(reader, type.name.value, reader.getType(type.name.value))
 
 	for (const [typename, type] of Object.entries(reader.types.types)) {
-		const result = consumeTypeConstructorOptional(reader, typename, type)
+		const result = consumeTypeConstructorOptional(reader, typename, type!)
 		if (result) return result
 	}
 
