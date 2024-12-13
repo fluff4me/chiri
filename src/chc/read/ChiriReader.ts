@@ -348,7 +348,7 @@ export default class ChiriReader {
 						throw this.error(e, `Expected ${this.context.type} content`)
 
 					this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish))
-				} while (consumeNewBlockLineOptional(this))
+				} while (consumeNewBlockLineOptional(this, this.context.type === "text"))
 
 				if (this.i < this.input.length)
 					consumeBlockEnd(this)
