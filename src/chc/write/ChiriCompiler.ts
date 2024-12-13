@@ -2,12 +2,14 @@ import ansi from "../../ansi"
 import { INTERNAL_POSITION, PACKAGE_ROOT } from "../../constants"
 import type { ChiriAST, ChiriPosition, ChiriStatement } from "../read/ChiriReader"
 import type { ChiriCompilerVariable } from "../read/consume/consumeCompilerVariableOptional"
+import type { ChiriMacroUse } from "../read/consume/consumeMacroUseOptional"
 import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
 import type { ChiriBaseText, ChiriValueText } from "../read/consume/consumeValueText"
 import type { ChiriWord } from "../read/consume/consumeWord"
 import type { ChiriWordInterpolated } from "../read/consume/consumeWordInterpolatedOptional"
 import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression"
 import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional"
+import type { ChiriMacroBlock } from "../read/consume/macro/MacroConstruct"
 import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
 import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
 import type { PseudoName } from "../read/consume/rule/Rule"
@@ -58,6 +60,10 @@ namespace Scope {
 	export function mixins (mixins: Scope["mixins"]): Scope {
 		return { mixins }
 	}
+}
+
+type Block = (Extract<ChiriStatement, ChiriMacroBlock> | ChiriFunctionCall | ChiriMacroUse) & {
+	continuing?: true
 }
 
 ////////////////////////////////////
@@ -134,6 +140,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	const components: Record<string, ResolvedComponent> = {}
 	const viewTransitions: ResolvedViewTransition[] = []
 	const rootSpecials: ResolvedRootSpecial[] = []
+	const blocks: Block[] = []
 	let usedMixinIndex = 0
 	let ifState = true
 
@@ -220,6 +227,90 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Scope
 
+
+	////////////////////////////////////
+	//#region Blocks
+
+	function pushBlock<BLOCK extends Block> (block: BLOCK): BLOCK & Block {
+		blocks.push(block)
+		return block
+	}
+
+	function popBlock (block: Block) {
+		const index = blocks.findIndex(b => b === block)
+		if (index === -1)
+			return
+
+		if (index < blocks.length - 1)
+			throw error(block.position, `This #${block.type} is not the most recent block`)
+
+		blocks.pop()
+	}
+
+	function blockBroken (block: Block) {
+		return !blocks.includes(block)
+	}
+
+	function breakBlock (position: ChiriPosition, name?: string) {
+		const blockIndex = findBlock(name)
+		if (blockIndex === undefined)
+			throw error(position, `Cannot #break ${name ? `:${name}` : ""}`)
+
+		blocks.splice(blockIndex, Infinity)
+	}
+
+	function breakFunction (position: ChiriPosition) {
+		const blockIndex = blocks.findLastIndex(block => block.type === "function-call")
+		if (blockIndex === undefined)
+			throw error(position, "Cannot #return outside of a function")
+
+		blocks.splice(blockIndex, Infinity)
+	}
+
+	function continueBlock (position: ChiriPosition, name?: string) {
+		const blockIndex = findBlock(name)
+		if (blockIndex === undefined)
+			throw error(position, `Cannot #continue ${name ? `:${name}` : ""}`)
+
+		blocks[blockIndex].continuing = true
+		blocks.splice(blockIndex + 1, Infinity)
+	}
+
+	function findBlock (name?: string) {
+		for (let i = blocks.length - 1; i >= 0; i--) {
+			const block = blocks[i]
+			switch (block.type) {
+				case "if":
+				case "else":
+				case "elseif":
+				case "do":
+					if (!name)
+						continue
+
+					if (block.label?.value !== name)
+						continue
+
+					return i
+
+				case "each":
+				case "for":
+				case "while":
+					if (!name || block.label?.value === name)
+						return i
+
+					continue
+
+				case "function-call":
+				case "macro-use":
+					return i + 1
+
+				default: { const assertNever: never = block }
+			}
+		}
+	}
+
+	//#endregion
+	////////////////////////////////////
 
 	////////////////////////////////////
 	//#region Variables
@@ -1160,7 +1251,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Context: Macros
 
-	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined, end: () => void) {
+	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement) => ArrayOr<T> | undefined) {
 		switch (statement.type) {
 			case "variable": {
 				if (!statement.assignment)
@@ -1224,7 +1315,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					}
 				}
 
-				const result = compileStatements(fn.content, assignments, contextConsumer, end)
+				blocks.push(statement)
+				const result = compileStatements(fn.content, assignments, contextConsumer)
+				popBlock(statement)
 				return result
 			}
 
@@ -1238,6 +1331,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					: typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
 						: Object.values(list).map((v, i) => [i, v] as const)
 
+				blocks.push(statement)
 				const result: T[] = []
 				for (const entry of list as any[]) {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -1251,9 +1345,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 								[statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
 							},
 						}),
-						contextConsumer, end))
+						contextConsumer))
+					if (blockBroken(statement))
+						break
 				}
 
+				popBlock(statement)
 				return result
 			}
 
@@ -1261,15 +1358,19 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				scopes.push({})
 				setVariable(statement.variable.name.value, resolveExpression(compiler, statement.variable.expression), statement.variable.valueType, true)
 
+				blocks.push(statement)
 				const result: T[] = []
 				while (resolveExpression(compiler, statement.condition)) {
 					const statements = statement.content.slice()
 					if (statement.update)
 						statements.push(statement.update)
 
-					result.push(...compileStatements(statements, undefined, contextConsumer, end))
+					result.push(...compileStatements(statements, undefined, contextConsumer))
+					if (blockBroken(statement))
+						break
 				}
 
+				popBlock(statement)
 				scopes.pop()
 				return result
 			}
@@ -1277,12 +1378,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			case "while": {
 				scopes.push({})
 
+				blocks.push(statement)
 				const result: T[] = []
 				while (resolveExpression(compiler, statement.condition)) {
 					const statements = statement.content.slice()
-					result.push(...compileStatements(statements, undefined, contextConsumer, end))
+					result.push(...compileStatements(statements, undefined, contextConsumer))
+					if (blockBroken(statement))
+						break
 				}
 
+				popBlock(statement)
 				scopes.pop()
 				return result
 			}
@@ -1297,18 +1402,50 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				if (!ifState)
 					return EMPTY
 
-				return compileStatements(statement.content, undefined, contextConsumer, end)
+				const block = pushBlock(statement)
+				const result: T[] = []
+				do {
+					block.continuing = undefined
+					result.push(...compileStatements(statement.content, undefined, contextConsumer))
+				} while (block.continuing)
+				popBlock(statement)
+				return result
 			}
 
 			case "else": {
 				if (ifState)
 					return EMPTY
 
-				return compileStatements(statement.content, undefined, contextConsumer, end)
+				const block = pushBlock(statement)
+				const result: T[] = []
+				do {
+					block.continuing = undefined
+					result.push(...compileStatements(statement.content, undefined, contextConsumer))
+				} while (block.continuing)
+				popBlock(statement)
+				return result
 			}
 
-			case "do":
-				return compileStatements(statement.content, undefined, contextConsumer, end)
+			case "do": {
+				const block = pushBlock(statement)
+				const result: T[] = []
+				do {
+					block.continuing = undefined
+					result.push(...compileStatements(statement.content, undefined, contextConsumer))
+				} while (block.continuing)
+				popBlock(statement)
+				return result
+			}
+
+			case "break": {
+				breakBlock(statement.position, statement.label?.value)
+				return EMPTY
+			}
+
+			case "continue": {
+				continueBlock(statement.position, statement.label?.value)
+				return EMPTY
+			}
 
 			case "include": {
 				const statements = getVariable(statement.name.value, statement.name.position) as any as ChiriStatement[] ?? []
@@ -1372,10 +1509,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Context: Function
 
-	function compileFunction (statement: ChiriStatement, end: () => void) {
+	function compileFunction (statement: ChiriStatement) {
 		switch (statement.type) {
 			case "return": {
-				end()
+				breakFunction(statement.position)
 				return { type: "result" as const, value: resolveExpression(compiler, statement.expression) }
 			}
 		}
@@ -1408,7 +1545,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Internals
 
-	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement, end: () => any) => ArrayOr<T> | undefined, end?: () => void): T[] {
+	function compileStatements<T> (statements: ChiriStatement[], using: Partial<Scope> | undefined, contextCompiler: (statement: ChiriStatement) => ArrayOr<T> | undefined): T[] {
 		scopes.push(using ?? {})
 
 		if (scopes.length === 1) {
@@ -1446,16 +1583,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		// console.log(inspect(scopes, undefined, 3, true))
 		// logLine(undefined, error(statements[0].position, ""))
 
-		let ended = false
-		const upperEnd = end
-		end = () => {
-			ended = true
-			upperEnd?.()
-		}
+		const blockId = blocks.length
 
 		const results: T[] = []
 		for (const statement of statements) {
-			const macroResult = compileMacros(statement, contextCompiler, end)
+			const macroResult = compileMacros(statement, contextCompiler)
 			if (macroResult) {
 				if (macroResult === true)
 					continue
@@ -1468,10 +1600,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				continue
 			}
 
-			if (ended)
+			if (blocks.length > blockId)
+				throw failedToExitBlocksError(blockId)
+
+			if (blocks.length < blockId)
 				break
 
-			const result = contextCompiler(statement, end)
+			const result = contextCompiler(statement)
 			if (result !== undefined) {
 				if (Array.isArray(result))
 					results.push(...result)
@@ -1479,7 +1614,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					results.push(result)
 			}
 
-			if (ended)
+			if (blocks.length > blockId)
+				throw failedToExitBlocksError(blockId)
+
+			if (blocks.length < blockId)
 				break
 
 			if (result === undefined)
@@ -1492,11 +1630,20 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return results
 	}
 
+	function failedToExitBlocksError (blockId: number) {
+		return error(`Failed to exit block(s): ${blocks
+			.slice(blockId)
+			.map(b => `${b.type}${(b as ChiriMacroBlock).label ? `:${(b as ChiriMacroBlock).label?.value}` : ""}`)
+			.join(", ")}`)
+	}
+
 	function callFunction (call: ChiriFunctionCall) {
 		const fnVar = getVariable(call.name.value, call.position, true)
 		const fn = isFunction(fnVar) ? fnVar : getFunction(call.name.value, call.position)
 		const assignments = resolveAssignments(call.assignments, call.indexedAssignments ? getFunctionParameters(fn).map(p => p.name.value) : undefined)
+		blocks.push(call)
 		const result = compileStatements(fn.content, assignments, compileFunction)
+		popBlock(call)
 		if (result.length > 1)
 			throw internalError(call.position, "Function call returned multiple values")
 

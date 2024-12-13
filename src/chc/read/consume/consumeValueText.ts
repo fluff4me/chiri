@@ -1,4 +1,5 @@
 import { ChiriType } from "../../type/ChiriType"
+import assertNewLine from "../assert/assertNewLine"
 import type ChiriReader from "../ChiriReader"
 import type { ChiriPosition } from "../ChiriReader"
 import type { ChiriInterpolationProperty, ChiriInterpolationPropertyName } from "./consumeCustomPropertyInterpolation"
@@ -84,7 +85,10 @@ export default function consumeValueText (reader: ChiriReader, multiline: boolea
 
 		} else {
 			content.push(consumeExpression.inline(reader))
-			reader.consume("}")
+			if (!reader.consumeOptional("}")) {
+				assertNewLine(reader)
+				text = ""
+			}
 		}
 
 		text = ""
