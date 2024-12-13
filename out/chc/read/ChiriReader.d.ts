@@ -12,11 +12,14 @@ import { type ChiriMixinUse } from "./consume/consumeMixinUseOptional";
 import type { ChiriPropertyDefinition } from "./consume/consumePropertyOptional";
 import { type ChiriProperty } from "./consume/consumePropertyOptional";
 import type { ChiriValueText } from "./consume/consumeValueText";
+import type { ChiriWord } from "./consume/consumeWord";
 import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional";
 import type { ChiriAfter } from "./consume/macro/macroAfter";
 import type { ChiriAlias } from "./consume/macro/macroAlias";
 import type { ChiriAnimate } from "./consume/macro/macroAnimate";
 import type { ChiriAnimation } from "./consume/macro/macroAnimation";
+import type { ChiriBreak } from "./consume/macro/macroBreak";
+import type { ChiriContinue } from "./consume/macro/macroContinue";
 import type { ChiriDo } from "./consume/macro/macroDo";
 import type { ChiriEach } from "./consume/macro/macroEach";
 import type { ChiriFontFace } from "./consume/macro/macroFontFace";
@@ -37,7 +40,7 @@ export interface ChiriPosition {
     line: number;
     column: number;
 }
-export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriAnimation | ChiriAnimate | ChiriSelect | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriFontFace | ChiriComponentDescendantElement | ChiriComponentCustomState | ChiriComponentState | ChiriComponentStateSpecial | ChiriComponentStateContainer | ChiriComponentPseudo | ChiriComponentViewTransition | ChiriComponentViewTransitionClass | ChiriAfter | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriKeyframe | ChiriValueText;
+export type ChiriStatement = ChiriDocumentation | ChiriCompilerVariable | ChiriMacro | ChiriMacroUse | ChiriEach | ChiriDo | ChiriAssignment | ChiriFor | ChiriFunction | ChiriReturn | ChiriWhile | ChiriIf | ChiriElse | ChiriInclude | ChiriCSSImport | ChiriImport | ChiriAnimation | ChiriAnimate | ChiriSelect | ChiriBreak | ChiriContinue | ChiriComponent | ChiriMixin | ChiriShorthand | ChiriAlias | ChiriPropertyDefinition | ChiriFontFace | ChiriComponentDescendantElement | ChiriComponentCustomState | ChiriComponentState | ChiriComponentStateSpecial | ChiriComponentStateContainer | ChiriComponentPseudo | ChiriComponentViewTransition | ChiriComponentViewTransitionClass | ChiriAfter | ChiriProperty | ChiriMixinUse | ChiriWordInterpolated | ChiriKeyframe | ChiriValueText;
 export interface ChiriAST<STATEMENT = ChiriStatement> {
     source: Record<string, string>;
     statements: STATEMENT[];
@@ -48,6 +51,9 @@ export interface ChiriPositionState {
     i: number;
 }
 export type ChiriBodyConsumer<T> = (reader: ChiriReader) => PromiseOr<ArrayOr<T | undefined>>;
+export interface ChiriBlock {
+    label?: ChiriWord;
+}
 export default class ChiriReader {
     #private;
     readonly filename: string;

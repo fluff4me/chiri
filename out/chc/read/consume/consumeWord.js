@@ -22,12 +22,15 @@
         }
         if (!reader.isLetter())
             throw reader.error("Words must start with a letter");
-        let word = reader.input[reader.i++];
+        const start = reader.i;
         for (; reader.i < reader.input.length; reader.i++)
-            if (reader.isWordChar() && (reader.input[reader.i] !== "-" || reader.input[reader.i + 1] !== ">"))
-                word += reader.input[reader.i];
-            else
+            if (!reader.isWordChar())
                 break;
+        // words can't end in dashes so that you can do the decrement operator on a variable, ie `var--`
+        let end = reader.i - 1;
+        for (; end >= 0 && reader.input[end] === "-"; end--)
+            reader.i--;
+        const word = reader.input.slice(start, end + 1);
         if (reader.input[reader.i] === "#")
             throw reader.error(e, "This word cannot contain interpolations");
         return {

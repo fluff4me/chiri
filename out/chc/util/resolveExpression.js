@@ -51,21 +51,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
         switch (expression.type) {
             case "literal":
+                if (expression.subType === "function")
+                    return compiler.getFunction(expression.name.value, expression.name.position);
                 return (0, resolveLiteralValue_1.default)(compiler, expression);
             case "text":
                 return resolveExpression.stringifyText(compiler, expression);
             case "get":
                 return compiler.getVariable(expression.name.value, expression.name.position);
-            case "function":
-                return compiler.getFunction(expression.name.value, expression.name.position);
             case "function-call":
                 return compiler.callFunction(expression);
             case "get-by-key": {
                 const obj = resolveExpression(compiler, expression.value);
                 let key = resolveExpression.stringifyExpression(compiler, expression.key);
-                if (!Record.is(obj) && !Array.isArray(obj))
+                if (typeof obj !== "string" && !Record.is(obj) && !Array.isArray(obj))
                     throw compiler.error(`Cannot access value in "${key}" of "${resolveExpression.stringifyExpression(compiler, expression.value)}"`);
-                if (Array.isArray(obj)) {
+                if (typeof obj === "string" || Array.isArray(obj)) {
                     let index = +key;
                     index = index < 0 ? obj.length + index : index;
                     key = `${index}`;
@@ -74,18 +74,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             case "list-slice": {
                 const list = resolveExpression(compiler, expression.list);
-                if (!Array.isArray(list))
+                if (typeof list !== "string" && !Array.isArray(list))
                     throw compiler.error("Cannot create list slice, invalid list");
                 expression.range.end ??= (0, makeLiteralInt_1.default)(list.length);
                 const range = (0, resolveLiteralValue_1.resolveLiteralRange)(compiler, expression.range, list);
                 if (!Array.isArray(range))
                     throw compiler.error("Cannot create list slice, invalid range");
-                const result = [];
+                let result = typeof list === "string" ? "" : [];
                 for (let index of range) {
                     if (typeof index !== "number")
                         throw compiler.error("Cannot create list slice, provided index is not an integer");
                     index = index < 0 ? range.length + index : index;
-                    result.push(list[Math.max(0, Math.min(index, list.length - 1))]);
+                    index = Math.max(0, Math.min(index, list.length - 1));
+                    const value = list[index];
+                    if (typeof result === "string")
+                        result += value;
+                    else
+                        result.push(value);
                 }
                 return result;
             }
@@ -184,7 +189,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             case ">>>":
                                 return operandA >>> operandB;
                             case "is":
-                                return compiler.types.types[operandB].is?.(operandA) ?? false;
+                                return compiler.types.types[operandB]?.is?.(operandA) ?? false;
                             default:
                                 throw compiler.error(undefined, `Unable to resolve binary operator "${expression.operator}"`);
                         }

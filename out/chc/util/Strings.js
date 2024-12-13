@@ -7,11 +7,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi"], factory);
+        define(["require", "exports", "util", "../../ansi"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const util_1 = require("util");
     const ansi_1 = __importDefault(require("../../ansi"));
     var Strings;
     (function (Strings) {
@@ -23,6 +24,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 .replace(/\t/g, ansi_1.default.whitespace + "\u2192" + ansi_1.default.reset);
         }
         Strings.symbolise = symbolise;
+        function debug(value) {
+            return (0, util_1.inspect)(value, undefined, Infinity, true);
+        }
+        Strings.debug = debug;
     })(Strings || (Strings = {}));
     exports.default = Strings;
 });

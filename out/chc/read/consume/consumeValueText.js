@@ -7,13 +7,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../type/ChiriType", "./consumeCustomPropertyInterpolation", "./consumeNewBlockLineOptional", "./expression/consumeExpression"], factory);
+        define(["require", "exports", "../../type/ChiriType", "../assert/assertNewLine", "./consumeCustomPropertyInterpolation", "./consumeNewBlockLineOptional", "./expression/consumeExpression"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = consumeValueText;
     const ChiriType_1 = require("../../type/ChiriType");
+    const assertNewLine_1 = __importDefault(require("../assert/assertNewLine"));
     const consumeCustomPropertyInterpolation_1 = __importDefault(require("./consumeCustomPropertyInterpolation"));
     const consumeNewBlockLineOptional_1 = __importDefault(require("./consumeNewBlockLineOptional"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
@@ -64,7 +65,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             else {
                 content.push(consumeExpression_1.default.inline(reader));
-                reader.consume("}");
+                if (!reader.consumeOptional("}")) {
+                    (0, assertNewLine_1.default)(reader);
+                    text = "";
+                }
             }
             text = "";
             textStart = reader.getPosition();

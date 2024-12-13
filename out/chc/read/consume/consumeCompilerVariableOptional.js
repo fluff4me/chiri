@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWord_1 = __importDefault(require("./consumeWord"));
     const consumeWordOptional_1 = __importDefault(require("./consumeWordOptional"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
-    exports.default = async (reader, prefix = true) => {
+    exports.default = async (reader, prefix = true, skipInvalidParamCheck) => {
         const save = reader.savePosition();
         const position = reader.getPosition();
         if (prefix)
@@ -44,7 +44,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (valueType)
             (0, consumeWhiteSpaceOptional_1.default)(reader);
         let assignment = reader.consumeOptional("??=", "=");
-        if (assignment === "??=" && reader.context.type === "mixin")
+        if (!skipInvalidParamCheck && assignment === "??=" && reader.context.type === "mixin")
             throw reader.error(save.i, "Mixins cannot accept parameters");
         let expression;
         if (assignment) {
@@ -57,10 +57,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             reader.i = postType;
             if (!assignment && reader.consumeOptional("?"))
                 assignment = "??=";
-            else if (reader.context.type === "mixin")
+            else if (!skipInvalidParamCheck && reader.context.type === "mixin")
                 throw reader.error(save.i, "Mixins cannot accept parameters");
         }
-        if (assignment !== "=" && reader.getStatements(true).some(statement => statement.type === "variable" && statement.valueType.name.value === "raw"))
+        if (!skipInvalidParamCheck && assignment !== "=" && reader.getStatements(true).some(statement => statement.type === "variable" && statement.valueType.name.value === "raw"))
             throw reader.error(save.i, "No further parameters can appear after a parameter of type \"raw\"");
         return {
             type: "variable",

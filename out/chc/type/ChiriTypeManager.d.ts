@@ -20,7 +20,7 @@ type UnaryOperationData<DATA> = Partial<Record<Operator, Record<string, DATA | u
 export default class ChiriTypeManager {
     private readonly host;
     precedence: Operator[][];
-    types: Record<string, TypeDefinition>;
+    types: Record<string, TypeDefinition | undefined>;
     binaryOperators: BinaryOperationData<string>;
     unaryOperators: UnaryOperationData<string>;
     binaryOperatorCoercion: BinaryOperationData<string | BinaryCoercion>;

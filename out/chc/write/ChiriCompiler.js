@@ -30,7 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "../../constants", "../read/factory/makeWord", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
+        define(["require", "exports", "../../ansi", "../../constants", "../read/factory/makeWord", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/getFunctionParameters", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("../type/ChiriType");
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const typeString_1 = __importDefault(require("../type/typeString"));
+    const getFunctionParameters_1 = __importDefault(require("../util/getFunctionParameters"));
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const resolveExpression_1 = __importStar(require("../util/resolveExpression"));
     const stringifyExpression_1 = __importDefault(require("../util/stringifyExpression"));
@@ -70,6 +71,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const components = {};
         const viewTransitions = [];
         const rootSpecials = [];
+        const blocks = [];
         let usedMixinIndex = 0;
         let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
@@ -135,6 +137,72 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         //#region Scope
         ////////////////////////////////////
+        //#region Blocks
+        function pushBlock(block) {
+            blocks.push(block);
+            return block;
+        }
+        function popBlock(block) {
+            const index = blocks.findIndex(b => b === block);
+            if (index === -1)
+                return;
+            if (index < blocks.length - 1)
+                throw error(block.position, `This #${block.type} is not the most recent block`);
+            blocks.pop();
+        }
+        function blockBroken(block) {
+            return !blocks.includes(block);
+        }
+        function breakBlock(position, name) {
+            const blockIndex = findBlock(name);
+            if (blockIndex === undefined)
+                throw error(position, `Cannot #break ${name ? `:${name}` : ""}`);
+            blocks.splice(blockIndex, Infinity);
+        }
+        function breakFunction(position) {
+            const blockIndex = blocks.findLastIndex(block => block.type === "function-call");
+            if (blockIndex === undefined)
+                throw error(position, "Cannot #return outside of a function");
+            blocks.splice(blockIndex, Infinity);
+        }
+        function continueBlock(position, name) {
+            const blockIndex = findBlock(name);
+            if (blockIndex === undefined)
+                throw error(position, `Cannot #continue ${name ? `:${name}` : ""}`);
+            blocks[blockIndex].continuing = true;
+            blocks.splice(blockIndex + 1, Infinity);
+        }
+        function findBlock(name) {
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                const block = blocks[i];
+                switch (block.type) {
+                    case "if":
+                    case "else":
+                    case "elseif":
+                    case "do":
+                        if (!name)
+                            continue;
+                        if (block.label?.value !== name)
+                            continue;
+                        return i;
+                    case "each":
+                    case "for":
+                    case "while":
+                        if (!name || block.label?.value === name)
+                            return i;
+                        continue;
+                    case "function-call":
+                    case "macro-use":
+                        return i + 1;
+                    default: {
+                        const assertNever = block;
+                    }
+                }
+            }
+        }
+        //#endregion
+        ////////////////////////////////////
+        ////////////////////////////////////
         //#region Variables
         function getVariable(name, position, optional = false) {
             for (let i = scopes.length - 1; i >= 0; i--) {
@@ -199,6 +267,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     return functions[name];
             }
             throw error(position, `Function ${name} is not defined`);
+        }
+        function isFunction(fn) {
+            return fn?.type === "function";
         }
         function setFunction(fn) {
             scope().functions ??= {};
@@ -876,7 +947,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         ////////////////////////////////////
         //#region Context: Macros
-        function compileMacros(statement, contextConsumer, end) {
+        function compileMacros(statement, contextConsumer) {
             switch (statement.type) {
                 case "variable": {
                     if (!statement.assignment)
@@ -928,16 +999,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             value: Object.assign([...statement.content], { isBody: true }),
                         };
                     }
-                    const result = compileStatements(fn.content, assignments, contextConsumer, end);
+                    blocks.push(statement);
+                    const result = compileStatements(fn.content, assignments, contextConsumer);
+                    popBlock(statement);
                     return result;
                 }
                 case "each": {
                     let list = (0, resolveExpression_1.default)(compiler, statement.iterable);
-                    if (!Array.isArray(list) && (!resolveExpression_1.Record.is(list) || !statement.keyVariable))
+                    if (typeof list !== "string" && !Array.isArray(list) && (!resolveExpression_1.Record.is(list) || !statement.keyVariable))
                         throw error(statement.iterable.position, "Variable is not iterable");
                     list = !statement.keyVariable ? list
-                        : !Array.isArray(list) ? Object.entries(list)
+                        : typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
                             : Object.values(list).map((v, i) => [i, v]);
+                    blocks.push(statement);
                     const result = [];
                     for (const entry of list) {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -949,30 +1023,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             ...statement.keyVariable && {
                                 [statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
                             },
-                        }), contextConsumer, end));
+                        }), contextConsumer));
+                        if (blockBroken(statement))
+                            break;
                     }
+                    popBlock(statement);
                     return result;
                 }
                 case "for": {
                     scopes.push({});
                     setVariable(statement.variable.name.value, (0, resolveExpression_1.default)(compiler, statement.variable.expression), statement.variable.valueType, true);
+                    blocks.push(statement);
                     const result = [];
                     while ((0, resolveExpression_1.default)(compiler, statement.condition)) {
                         const statements = statement.content.slice();
                         if (statement.update)
                             statements.push(statement.update);
-                        result.push(...compileStatements(statements, undefined, contextConsumer, end));
+                        result.push(...compileStatements(statements, undefined, contextConsumer));
+                        if (blockBroken(statement))
+                            break;
                     }
+                    popBlock(statement);
                     scopes.pop();
                     return result;
                 }
                 case "while": {
                     scopes.push({});
+                    blocks.push(statement);
                     const result = [];
                     while ((0, resolveExpression_1.default)(compiler, statement.condition)) {
                         const statements = statement.content.slice();
-                        result.push(...compileStatements(statements, undefined, contextConsumer, end));
+                        result.push(...compileStatements(statements, undefined, contextConsumer));
+                        if (blockBroken(statement))
+                            break;
                     }
+                    popBlock(statement);
                     scopes.pop();
                     return result;
                 }
@@ -984,15 +1069,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     ifState = !!(0, resolveExpression_1.default)(compiler, statement.condition);
                     if (!ifState)
                         return EMPTY;
-                    return compileStatements(statement.content, undefined, contextConsumer, end);
+                    const block = pushBlock(statement);
+                    const result = [];
+                    do {
+                        block.continuing = undefined;
+                        result.push(...compileStatements(statement.content, undefined, contextConsumer));
+                    } while (block.continuing);
+                    popBlock(statement);
+                    return result;
                 }
                 case "else": {
                     if (ifState)
                         return EMPTY;
-                    return compileStatements(statement.content, undefined, contextConsumer, end);
+                    const block = pushBlock(statement);
+                    const result = [];
+                    do {
+                        block.continuing = undefined;
+                        result.push(...compileStatements(statement.content, undefined, contextConsumer));
+                    } while (block.continuing);
+                    popBlock(statement);
+                    return result;
                 }
-                case "do":
-                    return compileStatements(statement.content, undefined, contextConsumer, end);
+                case "do": {
+                    const block = pushBlock(statement);
+                    const result = [];
+                    do {
+                        block.continuing = undefined;
+                        result.push(...compileStatements(statement.content, undefined, contextConsumer));
+                    } while (block.continuing);
+                    popBlock(statement);
+                    return result;
+                }
+                case "break": {
+                    breakBlock(statement.position, statement.label?.value);
+                    return EMPTY;
+                }
+                case "continue": {
+                    continueBlock(statement.position, statement.label?.value);
+                    return EMPTY;
+                }
                 case "include": {
                     const statements = getVariable(statement.name.value, statement.name.position) ?? [];
                     const type = getVariableType(statement.name.value, statement.name.position);
@@ -1042,10 +1157,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         ////////////////////////////////////
         //#region Context: Function
-        function compileFunction(statement, end) {
+        function compileFunction(statement) {
             switch (statement.type) {
                 case "return": {
-                    end();
+                    breakFunction(statement.position);
                     return { type: "result", value: (0, resolveExpression_1.default)(compiler, statement.expression) };
                 }
             }
@@ -1070,7 +1185,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         ////////////////////////////////////
         //#region Internals
-        function compileStatements(statements, using, contextCompiler, end) {
+        function compileStatements(statements, using, contextCompiler) {
             scopes.push(using ?? {});
             if (scopes.length === 1) {
                 setMixin({
@@ -1106,15 +1221,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             // console.log(inspect(scopes, undefined, 3, true))
             // logLine(undefined, error(statements[0].position, ""))
-            let ended = false;
-            const upperEnd = end;
-            end = () => {
-                ended = true;
-                upperEnd?.();
-            };
+            const blockId = blocks.length;
             const results = [];
             for (const statement of statements) {
-                const macroResult = compileMacros(statement, contextCompiler, end);
+                const macroResult = compileMacros(statement, contextCompiler);
                 if (macroResult) {
                     if (macroResult === true)
                         continue;
@@ -1124,16 +1234,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         results.push(macroResult);
                     continue;
                 }
-                if (ended)
+                if (blocks.length > blockId)
+                    throw failedToExitBlocksError(blockId);
+                if (blocks.length < blockId)
                     break;
-                const result = contextCompiler(statement, end);
+                const result = contextCompiler(statement);
                 if (result !== undefined) {
                     if (Array.isArray(result))
                         results.push(...result);
                     else
                         results.push(result);
                 }
-                if (ended)
+                if (blocks.length > blockId)
+                    throw failedToExitBlocksError(blockId);
+                if (blocks.length < blockId)
                     break;
                 if (result === undefined)
                     throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`);
@@ -1142,9 +1256,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 scopes.pop();
             return results;
         }
+        function failedToExitBlocksError(blockId) {
+            return error(`Failed to exit block(s): ${blocks
+                .slice(blockId)
+                .map(b => `${b.type}${b.label ? `:${b.label?.value}` : ""}`)
+                .join(", ")}`);
+        }
         function callFunction(call) {
-            const fn = getFunction(call.name.value, call.position);
-            const result = compileStatements(fn.content, resolveAssignments(call.assignments), compileFunction);
+            const fnVar = getVariable(call.name.value, call.position, true);
+            const fn = isFunction(fnVar) ? fnVar : getFunction(call.name.value, call.position);
+            const assignments = resolveAssignments(call.assignments, call.indexedAssignments ? (0, getFunctionParameters_1.default)(fn).map(p => p.name.value) : undefined);
+            blocks.push(call);
+            const result = compileStatements(fn.content, assignments, compileFunction);
+            popBlock(call);
             if (result.length > 1)
                 throw internalError(call.position, "Function call returned multiple values");
             if (result.length === 0)
@@ -1158,9 +1282,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const name = "name" in statement ? ` "${(0, stringifyText_1.default)(compiler, statement.name)}"` : "";
             return statement.type + name;
         }
-        function resolveAssignments(assignments) {
+        function resolveAssignments(assignments, indicesIntoParams) {
             return Scope.variables(Object.fromEntries(Object.entries(assignments)
-                .map(([name, expr]) => [name, { type: expr.valueType, value: (0, resolveExpression_1.default)(compiler, expr) }])));
+                .map(([name, expr]) => [indicesIntoParams?.[+name] ?? name, { type: expr.valueType, value: (0, resolveExpression_1.default)(compiler, expr) }])));
         }
         function resolveWordLowercase(word) {
             return typeof word === "object" && word.type === "word" ? word : {

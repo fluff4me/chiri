@@ -47,6 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const body = await (0, consumeBody_1.default)(reader, "inherit", sub => sub.addOuterStatement(variable));
         return {
             type: "for",
+            isBlock: true,
             variable,
             condition,
             update,

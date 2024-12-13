@@ -110,6 +110,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     operand = {
                         type: "function-call",
                         name,
+                        indexedAssignments: false,
                         assignments: {
                             [parameters[0].name.value]: operand,
                         },
@@ -307,6 +308,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return {
                 type: "function-call",
                 name,
+                indexedAssignments: false,
                 assignments: {
                     [firstParameter.name.value]: operand,
                 },
@@ -314,12 +316,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 position: name.position,
             };
         }
-        const fnCall = (0, consumeFunctionCallOptional_1.consumePartialFuntionCall)(reader, name.position, name, fn, parameters);
+        const fnCall = (0, consumeFunctionCallOptional_1.consumePartialFuntionCall)(reader, name.position, name, fn, operand, parameters);
         fnCall.assignments[firstParameter.name.value] = operand;
         return fnCall;
     }
     function consumeGetByKeyOrListSlice(reader, operand) {
-        const isListOperand = reader.types.isAssignable(operand.valueType, typeList_1.default.type);
+        const isListOperand = reader.types.isAssignable(operand.valueType, typeList_1.default.type, typeString_1.default.type);
         if (!isListOperand && !reader.types.isAssignable(operand.valueType, typeRecord_1.default.type))
             return undefined;
         if (!reader.consumeOptional("["))
@@ -342,7 +344,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             type: "get-by-key",
             value: operand,
             key: expr,
-            valueType: operand.valueType.generics[0],
+            valueType: reader.types.isAssignable(operand.valueType, typeString_1.default.type) ? typeString_1.default.type : operand.valueType.generics[0],
             position,
         };
     }

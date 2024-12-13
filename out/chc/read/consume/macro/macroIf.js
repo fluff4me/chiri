@@ -23,6 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         .consume(({ extra: condition, body: content, position }) => {
         return {
             type: "if",
+            isBlock: true,
             condition,
             content,
             position,
@@ -35,6 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         verifyFollowingIf(reader, start, "else if");
         return {
             type: "elseif",
+            isBlock: true,
             condition,
             content,
             position,
@@ -46,6 +48,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         verifyFollowingIf(reader, start, "else");
         return {
             type: "else",
+            isBlock: true,
             content,
             position,
         };

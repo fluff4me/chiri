@@ -95,8 +95,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
         end = end < 0 ? listLength + end : end;
         end = !list ? end : Math.max(0, Math.min(end, listLength - 1));
         const result = [];
-        if (Math.abs(start - end) <= 1)
-            return result;
         if (range.inclusive)
             if (start < end)
                 for (let i = start; i <= end; i++)
@@ -104,14 +102,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
             else
                 for (let i = start; i >= end; i--)
                     result.push(i);
-        else {
-            if (start < end)
-                for (let i = start; i < end; i++)
-                    result.push(i);
-            else
-                for (let i = start; i > end; i--)
-                    result.push(i);
-        }
+        else if (start < end)
+            for (let i = start; i < end; i++)
+                result.push(i);
+        else
+            for (let i = start; i > end; i--)
+                result.push(i);
         return result;
     }
     (function (resolveLiteralValue) {

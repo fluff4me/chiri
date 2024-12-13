@@ -11,5 +11,5 @@ export interface ChiriCompilerVariable {
     position: ChiriPosition;
     assignment?: "=" | "??=";
 }
-declare const _default: (reader: ChiriReader, prefix?: boolean) => Promise<ChiriCompilerVariable | undefined>;
+declare const _default: (reader: ChiriReader, prefix?: boolean, skipInvalidParamCheck?: true) => Promise<ChiriCompilerVariable | undefined>;
 export default _default;

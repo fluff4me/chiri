@@ -22,6 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         .consume(({ extra: condition, body: content, position }) => {
         return {
             type: "while",
+            isBlock: true,
             condition,
             content,
             position,

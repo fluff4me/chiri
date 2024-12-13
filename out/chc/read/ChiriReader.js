@@ -58,6 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         types = new ChiriTypeManager_1.default(this);
         #outerStatements = [];
         #statements = [];
+        #blocks = [];
         #errorStart;
         i = 0;
         indent = 0;

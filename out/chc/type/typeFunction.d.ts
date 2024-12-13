@@ -7,7 +7,8 @@ import { ChiriType } from "./ChiriType";
 import TypeDefinition from "./TypeDefinition";
 export type ChiriLiteralRecordKeyValueTuple = [key: ChiriLiteralString | ChiriWordInterpolated, value: ChiriExpressionOperand];
 export interface ChiriFunctionReference {
-    type: "function";
+    type: "literal";
+    subType: "function";
     valueType: ChiriType;
     name: ChiriWord;
     position: ChiriPosition;

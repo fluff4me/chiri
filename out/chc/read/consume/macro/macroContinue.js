@@ -7,23 +7,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../consumeBody", "./MacroConstruct"], factory);
+        define(["require", "exports", "../consumeLabelOptional", "./MacroConstruct"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const consumeBody_1 = __importDefault(require("../consumeBody"));
+    const consumeLabelOptional_1 = __importDefault(require("../consumeLabelOptional"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("do")
-        .consume(async ({ reader, position }) => {
-        reader.consume(":");
-        const body = await (0, consumeBody_1.default)(reader, "inherit");
+    exports.default = (0, MacroConstruct_1.default)("continue")
+        .consume(({ reader, position }) => {
+        const label = (0, consumeLabelOptional_1.default)(reader);
         return {
-            type: "do",
-            isBlock: true,
-            content: body.content,
+            type: "continue",
+            label,
             position,
         };
     });
 });
-//# sourceMappingURL=macroDo.js.map
+//# sourceMappingURL=macroContinue.js.map

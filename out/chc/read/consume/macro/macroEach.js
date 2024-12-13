@@ -29,32 +29,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         (0, consumeWhiteSpace_1.default)(reader);
         reader.consumeOptional("in ");
         const e = reader.i;
-        const iterable = (0, consumeRangeOptional_1.default)(reader) ?? consumeExpression_1.default.inline(reader, typeList_1.default.type, typeRecord_1.default.type);
-        const isList = reader.types.isAssignable(iterable.valueType, typeList_1.default.type);
+        const iterable = (0, consumeRangeOptional_1.default)(reader) ?? consumeExpression_1.default.inline(reader, typeList_1.default.type, typeRecord_1.default.type, typeString_1.default.type);
+        const isRecord = reader.types.isAssignable(iterable.valueType, typeRecord_1.default.type);
+        const isString = reader.types.isAssignable(iterable.valueType, typeString_1.default.type);
         (0, consumeWhiteSpace_1.default)(reader);
         reader.consume("as");
         (0, consumeWhiteSpace_1.default)(reader);
-        const variable1 = await (0, consumeCompilerVariableOptional_1.default)(reader, false);
+        const variable1 = await (0, consumeCompilerVariableOptional_1.default)(reader, false, true);
         if (!variable1)
             throw reader.error("Expected variable declaration");
         let variable2;
         if (reader.consumeOptional(",")) {
             (0, consumeWhiteSpaceOptional_1.default)(reader);
-            variable2 = await (0, consumeCompilerVariableOptional_1.default)(reader, false);
+            variable2 = await (0, consumeCompilerVariableOptional_1.default)(reader, false, true);
             if (!variable2)
                 throw reader.error("Expected variable declaration");
         }
-        if (!variable2 && !isList)
+        if (!variable2 && isRecord)
             throw reader.error("Expected variable declarations for both a key and its associated value");
-        if (!isList && !reader.types.isAssignable(typeString_1.default.type, variable1.valueType))
+        if (isRecord && !reader.types.isAssignable(typeString_1.default.type, variable1.valueType))
             throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(typeString_1.default.type)}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable1.valueType)}"`);
-        if (!reader.types.isAssignable(iterable.valueType.generics[0], (variable2 ?? variable1).valueType))
-            throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(iterable.valueType.generics[0])}" is not assignable to "${ChiriType_1.ChiriType.stringify((variable2 ?? variable1).valueType)}"`);
+        const valueType = isString ? typeString_1.default.type : iterable.valueType.generics[0];
+        if (!reader.types.isAssignable(valueType, (variable2 ?? variable1).valueType))
+            throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(valueType)}" is not assignable to "${ChiriType_1.ChiriType.stringify((variable2 ?? variable1).valueType)}"`);
         const keyVariable = variable2 ? variable1 : undefined;
         if (keyVariable)
-            keyVariable.valueType = isList ? typeUint_1.default.type : typeString_1.default.type;
+            keyVariable.valueType = isRecord ? typeString_1.default.type : typeUint_1.default.type;
         const variable = variable2 ?? variable1;
-        variable.valueType = iterable.valueType.generics[0];
+        variable.valueType = valueType;
         return {
             iterable,
             keyVariable,
@@ -70,6 +72,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         });
         return {
             type: "each",
+            isBlock: true,
             iterable,
             keyVariable,
             variable,

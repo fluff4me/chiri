@@ -7,12 +7,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../read/consume/consumeWordOptional", "./ChiriType", "./TypeDefinition"], factory);
+        define(["require", "exports", "../read/consume/consumeWordOptional", "../util/getFunctionParameters", "./ChiriType", "./TypeDefinition"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeWordOptional_1 = __importDefault(require("../read/consume/consumeWordOptional"));
+    const getFunctionParameters_1 = __importDefault(require("../util/getFunctionParameters"));
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     const TYPE_FUNCTION = ChiriType_1.ChiriType.of("function", "*");
@@ -20,16 +21,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         type: TYPE_FUNCTION,
         stringable: true,
         generics: true,
+        isAssignable(types, type, toType) {
+            if (type.name.value !== toType.name.value)
+                return false;
+            if (type.generics.length > toType.generics.length)
+                return false;
+            const parametersEnd = type.generics.length - 1;
+            for (let i = 0; i < parametersEnd; i++)
+                if (!types.isAssignable(type.generics[i], toType.generics[i]))
+                    return false;
+            return true;
+        },
         consumeOptionalConstructor: (reader) => {
             const i = reader.i;
             const name = (0, consumeWordOptional_1.default)(reader);
-            if (!name || !reader.getFunctionOptional(name.value) || reader.getVariableOptional(name.value)) {
+            if (!name)
+                return undefined;
+            const fn = reader.getFunctionOptional(name.value);
+            if (!fn || reader.getVariableOptional(name.value)) {
                 reader.i = i;
                 return undefined;
             }
+            const parameterTypes = (0, getFunctionParameters_1.default)(fn).map(param => param.valueType);
             return {
-                type: "function",
-                valueType: TYPE_FUNCTION,
+                type: "literal",
+                subType: "function",
+                valueType: ChiriType_1.ChiriType.of("function", ...parameterTypes, fn.returnType),
                 name: name,
                 position: name.position,
             };
