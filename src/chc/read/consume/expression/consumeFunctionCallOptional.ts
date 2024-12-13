@@ -3,6 +3,8 @@ import typeFunction from "../../../type/typeFunction"
 import getFunctionParameters from "../../../util/getFunctionParameters"
 import type ChiriReader from "../../ChiriReader"
 import type { ChiriPosition } from "../../ChiriReader"
+import consumeBlockEnd from "../consumeBlockEnd"
+import consumeBlockStartOptional from "../consumeBlockStartOptional"
 import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
 import consumeValueText from "../consumeValueText"
 import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
@@ -85,9 +87,14 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 			if (parameter.type === "variable" && parameter.assignment === "??=")
 				expectedType.push(ChiriType.of("undefined"))
 
-			assignments[parameter.type === "type" ? i : parameter.name.value] =
-				paramType.name.value !== "raw" ? consumeExpression.inline(reader, ...expectedType)
-					: consumeValueText(reader, false, () => !!reader.peek(")"))
+			const key = parameter.type === "type" ? i : parameter.name.value
+			if (paramType.name.value !== "raw")
+				assignments[key] = consumeExpression.inline(reader, ...expectedType)
+			else {
+				const multiline = consumeBlockStartOptional(reader)
+				assignments[key] = consumeValueText(reader, multiline, () => !!reader.peek(")"))
+				if (multiline) consumeBlockEnd(reader)
+			}
 		}
 	}
 
