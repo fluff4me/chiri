@@ -1,3 +1,4 @@
 #import:
-	list/length
+	list/size
 	list/join
+	list/map

@@ -1,0 +1,8 @@
+#function size returns uint:
+	#list!* values
+
+	#uint result = 0
+	#each values as var value:
+		#set result++
+
+	#return result

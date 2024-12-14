@@ -1,0 +1,20 @@
+#function split returns list!string:
+	#string target
+	#string separator ??= "
+	#list!string result = [
+
+	#if separator == "":
+		#each in target as string char:
+			#set result = [...result, char
+
+	#else:
+		#uint l = separator::length
+		#uint s = 0
+		#each in target as uint i, string char:
+			#uint e = i + l
+			#if target[i..e] == separator:
+				#set result = [...result, target[s..i]
+				#set s = i + l
+		#set result = [...result, target[s...]
+
+	#return result
