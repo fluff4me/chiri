@@ -1,1 +1,5 @@
-#import: string/hex
+#import:
+	string/length
+	string/hex
+	string/split
+	string/trim

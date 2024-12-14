@@ -1,0 +1,28 @@
+#function trim returns string:
+	#string input
+
+	#uint length = input::length
+	#uint start = 0
+	#uint end = input::length
+
+	#while start < length:
+		#string char = input[start]
+		#if char == " " || char == "\t" || char == "\r" || char == "\n":
+			#set start++
+			#continue
+
+		#break
+
+	#while end > start:
+		#string char = input[end - 1]
+		#if char == " " || char == "\t" || char == "\r" || char == "\n":
+			#set end--
+			#continue
+
+		#break
+
+	#string result = ""
+	#for var i = start, i < end, set i++:
+		#set result = result . input[i]
+
+	#return result

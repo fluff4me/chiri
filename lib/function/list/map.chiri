@@ -1,0 +1,9 @@
+#function map with t!* r!* returns list!r:
+	#list!t values
+	#function!(t uint list!t r) mapper
+
+	#list!r result = [
+	#each values as var i, var value:
+		#set result = [...result, mapper(value, i, values)
+
+	#return result

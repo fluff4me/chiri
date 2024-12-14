@@ -1,8 +1,8 @@
 #function length returns uint:
-	#list!* values
+	#string input
 
 	#uint result = 0
-	#each values as var value:
+	#each input as var char:
 		#set result++
 
 	#return result
