@@ -69,7 +69,7 @@ export function resolveLiteralRange (compiler: ChiriCompiler, range: ChiriLitera
 	if (endRaw !== undefined && !Number.isInteger(endRaw))
 		throw compiler.error(range.position, "Invalid value for range end bound")
 
-	if (endRaw as number < 0 || list && startRaw as number >= list.length)
+	if (list && (startRaw as number >= list.length))
 		return []
 
 	startRaw ??= 0
