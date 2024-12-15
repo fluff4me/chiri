@@ -73,7 +73,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const viewTransitions = [];
         const rootSpecials = [];
         const blocks = [];
-        const callers = [];
         let usedMixinIndex = 0;
         let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
