@@ -18,6 +18,7 @@ import { ChiriType } from "../type/ChiriType"
 import ChiriTypeManager from "../type/ChiriTypeManager"
 import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
 import typeString from "../type/typeString"
+import _ from "../util/_"
 import type { ComponentStateSpecial } from "../util/componentStates"
 import getFunctionParameters from "../util/getFunctionParameters"
 import relToCwd from "../util/relToCwd"
@@ -1300,6 +1301,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						const lines = compileStatements(statement.content, undefined, compileText)
 						logLine(statement.position, ansi.label + "debug" + (lines.length === 1 ? " - " : "") + ansi.reset + (lines.length <= 1 ? "" : "\n") + lines.join("\n"), false, false)
 						return true
+					}
+					case "error": {
+						const lines = compileStatements(statement.content, undefined, compileText)
+						const position = _
+							?? (!resolveExpression(compiler, statement.assignments.function) ? undefined : blocks.findLast(block => block.type === "function-call")?.position)
+							?? (!resolveExpression(compiler, statement.assignments.macro) ? undefined : blocks.findLast(block => block.type === "macro-use")?.position)
+							?? statement.position
+						throw error(position, (lines.length <= 1 ? "" : "\n") + lines.join("\n"))
 					}
 				}
 

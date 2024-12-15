@@ -27,6 +27,7 @@ import macroContinue from "./macro/macroContinue"
 import macroDebug from "./macro/macroDebug"
 import type { ChiriDo } from "./macro/macroDo"
 import type { ChiriEach } from "./macro/macroEach"
+import macroError from "./macro/macroError"
 import macroExport from "./macro/macroExport"
 import type { ChiriFontFace } from "./macro/macroFontFace"
 import macroFontFace from "./macro/macroFontFace"
@@ -93,6 +94,7 @@ export default async function (reader: ChiriReader, ...args: any[]): Promise<Mac
 		?? await macroImportCSS.consumeOptional(reader, ...context)
 		?? await macroImport.consumeOptional(reader, ...context)
 		?? await macroDebug.consumeOptional(reader, ...context)
+		?? await macroError.consumeOptional(reader, ...context)
 		?? await macroMacroDeclaration.consumeOptional(reader, ...context)
 		?? await macroFunctionDeclaration.consumeOptional(reader, ...context)
 		?? await macroShorthand.consumeOptional(reader, ...context)
