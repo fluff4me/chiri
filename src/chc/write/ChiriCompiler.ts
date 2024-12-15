@@ -251,6 +251,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return !blocks.includes(block)
 	}
 
+	function blockContinuing () {
+		return blocks.at(-1)?.continuing
+	}
+
 	function breakBlock (position: ChiriPosition, name?: string) {
 		const blockIndex = findBlock(name)
 		if (blockIndex === undefined)
@@ -1331,9 +1335,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					: typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
 						: Object.values(list).map((v, i) => [i, v] as const)
 
-				blocks.push(statement)
+				const block = pushBlock(statement)
 				const result: T[] = []
 				for (const entry of list as any[]) {
+					block.continuing = undefined
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 					const key: string | number = statement.keyVariable ? entry[0] : undefined
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -1358,9 +1363,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				scopes.push({})
 				setVariable(statement.variable.name.value, resolveExpression(compiler, statement.variable.expression), statement.variable.valueType, true)
 
-				blocks.push(statement)
+				const block = pushBlock(statement)
 				const result: T[] = []
 				while (resolveExpression(compiler, statement.condition)) {
+					block.continuing = undefined
 					const statements = statement.content.slice()
 					if (statement.update)
 						statements.push(statement.update)
@@ -1378,9 +1384,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			case "while": {
 				scopes.push({})
 
-				blocks.push(statement)
+				const block = pushBlock(statement)
 				const result: T[] = []
 				while (resolveExpression(compiler, statement.condition)) {
+					block.continuing = undefined
 					const statements = statement.content.slice()
 					result.push(...compileStatements(statements, undefined, contextConsumer))
 					if (blockBroken(statement))
@@ -1583,10 +1590,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		// console.log(inspect(scopes, undefined, 3, true))
 		// logLine(undefined, error(statements[0].position, ""))
 
-		const blockId = blocks.length
+		const block = blocks.at(-1)
+		const blockIndex = blocks.length - 1
 
 		const results: T[] = []
 		for (const statement of statements) {
+			if (blocks.length - 1 > blockIndex)
+				throw failedToExitBlocksError(blockIndex)
+
+			if (block && blockBroken(block) || blockContinuing())
+				break
+
 			const macroResult = compileMacros(statement, contextCompiler)
 			if (macroResult) {
 				if (macroResult === true)
@@ -1600,10 +1614,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				continue
 			}
 
-			if (blocks.length > blockId)
-				throw failedToExitBlocksError(blockId)
+			if (blocks.length - 1 > blockIndex)
+				throw failedToExitBlocksError(blockIndex)
 
-			if (blocks.length < blockId)
+			if (block && blockBroken(block) || blockContinuing())
 				break
 
 			const result = contextCompiler(statement)
@@ -1613,12 +1627,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				else
 					results.push(result)
 			}
-
-			if (blocks.length > blockId)
-				throw failedToExitBlocksError(blockId)
-
-			if (blocks.length < blockId)
-				break
 
 			if (result === undefined)
 				throw internalError((statement as { position?: ChiriPosition }).position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`)
