@@ -87,7 +87,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
         let endRaw = resolveLiteralValue.resolveExpression(compiler, range.end);
         if (endRaw !== undefined && !Number.isInteger(endRaw))
             throw compiler.error(range.position, "Invalid value for range end bound");
-        if (endRaw < 0 || list && startRaw >= list.length)
+        if (list && (startRaw >= list.length))
             return [];
         startRaw ??= 0;
         endRaw ??= list?.length;

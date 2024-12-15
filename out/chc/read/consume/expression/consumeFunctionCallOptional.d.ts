@@ -15,4 +15,4 @@ export interface ChiriFunctionCall {
 }
 declare const _default: (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriFunctionCall | undefined;
 export default _default;
-export declare function consumePartialFuntionCall(reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, boundFirstParam: ChiriExpressionOperand | undefined, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall;
+export declare function consumePartialFuntionCall(reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, requireParens: boolean, boundFirstParam: ChiriExpressionOperand | undefined, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall;

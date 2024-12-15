@@ -316,7 +316,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 position: name.position,
             };
         }
-        const fnCall = (0, consumeFunctionCallOptional_1.consumePartialFuntionCall)(reader, name.position, name, fn, operand, parameters);
+        const fnCall = (0, consumeFunctionCallOptional_1.consumePartialFuntionCall)(reader, name.position, name, fn, false, operand, parameters);
         fnCall.assignments[firstParameter.name.value] = operand;
         return fnCall;
     }

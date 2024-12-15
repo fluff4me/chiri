@@ -42,16 +42,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             reader.restorePosition(restore);
             return undefined;
         }
-        return consumePartialFuntionCall(reader, position, name, fn, undefined, parameters, ...expectedTypes);
+        return consumePartialFuntionCall(reader, position, name, fn, true, undefined, parameters, ...expectedTypes);
     };
-    function consumePartialFuntionCall(reader, position, name, fn, boundFirstParam, parameters, ...expectedTypes) {
+    function consumePartialFuntionCall(reader, position, name, fn, requireParens, boundFirstParam, parameters, ...expectedTypes) {
         const assignments = {};
-        reader.consume("(");
+        let parens = true;
+        if (requireParens)
+            reader.consume("(");
+        else
+            parens = !!reader.consumeOptional("(");
         if (parameters.length) {
             for (let i = 0; i < parameters.length; i++) {
                 const parameter = parameters[i];
                 if (i > 0) {
-                    if (!reader.consumeOptional(",") && (parameter.type === "type" || parameter.assignment !== "??=")) {
+                    if (!parens || !reader.consumeOptional(",") && (parameter.type === "type" || parameter.assignment !== "??=")) {
                         const missingParameters = parameters.slice(i)
                             .map(param => param.type === "type" ? ChiriType_1.ChiriType.stringify(param)
                             : `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
@@ -60,7 +64,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                     (0, consumeWhiteSpaceOptional_1.default)(reader);
                 }
-                if (reader.peek(")")) {
+                if (!parens || reader.peek(")")) {
                     const missingParameters = parameters.slice(i)
                         .filter(param => param.type === "type" || !param.assignment)
                         .map(param => param.type === "type" ? ChiriType_1.ChiriType.stringify(param)
