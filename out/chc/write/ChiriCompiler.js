@@ -30,7 +30,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../ansi", "../../constants", "../read/factory/makeWord", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/getFunctionParameters", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
+        define(["require", "exports", "../../ansi", "../../constants", "../read/factory/makeWord", "../type/ChiriType", "../type/ChiriTypeManager", "../type/typeString", "../util/_", "../util/getFunctionParameters", "../util/relToCwd", "../util/resolveExpression", "../util/stringifyExpression", "../util/stringifyText", "../util/Strings", "./CSSWriter", "./DTSWriter", "./ESWriter"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("../type/ChiriType");
     const ChiriTypeManager_1 = __importDefault(require("../type/ChiriTypeManager"));
     const typeString_1 = __importDefault(require("../type/typeString"));
+    const _1 = __importDefault(require("../util/_"));
     const getFunctionParameters_1 = __importDefault(require("../util/getFunctionParameters"));
     const relToCwd_1 = __importDefault(require("../util/relToCwd"));
     const resolveExpression_1 = __importStar(require("../util/resolveExpression"));
@@ -72,6 +73,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const viewTransitions = [];
         const rootSpecials = [];
         const blocks = [];
+        const callers = [];
         let usedMixinIndex = 0;
         let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
@@ -987,6 +989,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             const lines = compileStatements(statement.content, undefined, compileText);
                             logLine(statement.position, ansi_1.default.label + "debug" + (lines.length === 1 ? " - " : "") + ansi_1.default.reset + (lines.length <= 1 ? "" : "\n") + lines.join("\n"), false, false);
                             return true;
+                        }
+                        case "error": {
+                            const lines = compileStatements(statement.content, undefined, compileText);
+                            const position = _1.default
+                                ?? (!(0, resolveExpression_1.default)(compiler, statement.assignments.function) ? undefined : blocks.findLast(block => block.type === "function-call")?.position)
+                                ?? (!(0, resolveExpression_1.default)(compiler, statement.assignments.macro) ? undefined : blocks.findLast(block => block.type === "macro-use")?.position)
+                                ?? statement.position;
+                            throw error(position, (lines.length <= 1 ? "" : "\n") + lines.join("\n"));
                         }
                     }
                     const fn = getMacro(statement.name.value, statement.position);
