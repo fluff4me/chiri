@@ -438,7 +438,7 @@ function consumeInlinePipe (reader: ChiriReader, operand: ChiriExpressionOperand
 		}
 	}
 
-	const fnCall = consumePartialFuntionCall(reader, name.position, name, fn, operand, parameters)
+	const fnCall = consumePartialFuntionCall(reader, name.position, name, fn, false, operand, parameters)
 	fnCall.assignments[firstParameter.name.value] = operand
 	return fnCall
 }

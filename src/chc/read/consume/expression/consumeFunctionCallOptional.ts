@@ -48,17 +48,22 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 		return undefined
 	}
 
-	return consumePartialFuntionCall(reader, position, name, fn, undefined, parameters, ...expectedTypes)
+	return consumePartialFuntionCall(reader, position, name, fn, true, undefined, parameters, ...expectedTypes)
 }
 
-export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, boundFirstParam: ChiriExpressionOperand | undefined, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
+export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriPosition, name: ChiriWord, fn: ChiriFunction | ChiriCompilerVariable, requireParens: boolean, boundFirstParam: ChiriExpressionOperand | undefined, parameters: ChiriCompilerVariable[] | ChiriType[], ...expectedTypes: ChiriType[]): ChiriFunctionCall {
 	const assignments: Record<string, ChiriExpressionOperand> = {}
-	reader.consume("(")
+	let parens = true
+	if (requireParens)
+		reader.consume("(")
+	else
+		parens = !!reader.consumeOptional("(")
+
 	if (parameters.length) {
 		for (let i = 0; i < parameters.length; i++) {
 			const parameter = parameters[i]
 			if (i > 0) {
-				if (!reader.consumeOptional(",") && (parameter.type === "type" || parameter.assignment !== "??=")) {
+				if (!parens || !reader.consumeOptional(",") && (parameter.type === "type" || parameter.assignment !== "??=")) {
 					const missingParameters = parameters.slice(i)
 						.map(param => param.type === "type" ? ChiriType.stringify(param)
 							: `${param.expression ? "[" : ""}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
@@ -69,7 +74,7 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 				consumeWhiteSpaceOptional(reader)
 			}
 
-			if (reader.peek(")")) {
+			if (!parens || reader.peek(")")) {
 				const missingParameters = parameters.slice(i)
 					.filter(param => param.type === "type" || !param.assignment)
 					.map(param => param.type === "type" ? ChiriType.stringify(param)
