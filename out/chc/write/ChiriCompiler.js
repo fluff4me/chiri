@@ -153,6 +153,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function blockBroken(block) {
             return !blocks.includes(block);
         }
+        function blockContinuing() {
+            return blocks.at(-1)?.continuing;
+        }
         function breakBlock(position, name) {
             const blockIndex = findBlock(name);
             if (blockIndex === undefined)
@@ -1011,9 +1014,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     list = !statement.keyVariable ? list
                         : typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
                             : Object.values(list).map((v, i) => [i, v]);
-                    blocks.push(statement);
+                    const block = pushBlock(statement);
                     const result = [];
                     for (const entry of list) {
+                        block.continuing = undefined;
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                         const key = statement.keyVariable ? entry[0] : undefined;
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -1033,9 +1037,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "for": {
                     scopes.push({});
                     setVariable(statement.variable.name.value, (0, resolveExpression_1.default)(compiler, statement.variable.expression), statement.variable.valueType, true);
-                    blocks.push(statement);
+                    const block = pushBlock(statement);
                     const result = [];
                     while ((0, resolveExpression_1.default)(compiler, statement.condition)) {
+                        block.continuing = undefined;
                         const statements = statement.content.slice();
                         if (statement.update)
                             statements.push(statement.update);
@@ -1049,9 +1054,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 case "while": {
                     scopes.push({});
-                    blocks.push(statement);
+                    const block = pushBlock(statement);
                     const result = [];
                     while ((0, resolveExpression_1.default)(compiler, statement.condition)) {
+                        block.continuing = undefined;
                         const statements = statement.content.slice();
                         result.push(...compileStatements(statements, undefined, contextConsumer));
                         if (blockBroken(statement))
@@ -1221,9 +1227,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             // console.log(inspect(scopes, undefined, 3, true))
             // logLine(undefined, error(statements[0].position, ""))
-            const blockId = blocks.length;
+            const block = blocks.at(-1);
+            const blockIndex = blocks.length - 1;
             const results = [];
             for (const statement of statements) {
+                if (blocks.length - 1 > blockIndex)
+                    throw failedToExitBlocksError(blockIndex);
+                if (block && blockBroken(block) || blockContinuing())
+                    break;
                 const macroResult = compileMacros(statement, contextCompiler);
                 if (macroResult) {
                     if (macroResult === true)
@@ -1234,9 +1245,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         results.push(macroResult);
                     continue;
                 }
-                if (blocks.length > blockId)
-                    throw failedToExitBlocksError(blockId);
-                if (blocks.length < blockId)
+                if (blocks.length - 1 > blockIndex)
+                    throw failedToExitBlocksError(blockIndex);
+                if (block && blockBroken(block) || blockContinuing())
                     break;
                 const result = contextCompiler(statement);
                 if (result !== undefined) {
@@ -1245,10 +1256,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     else
                         results.push(result);
                 }
-                if (blocks.length > blockId)
-                    throw failedToExitBlocksError(blockId);
-                if (blocks.length < blockId)
-                    break;
                 if (result === undefined)
                     throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`);
             }
