@@ -2,3 +2,4 @@
 	list/size
 	list/join
 	list/map
+	list/set

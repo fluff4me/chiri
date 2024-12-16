@@ -1,0 +1,16 @@
+#function set with t!* returns list!t:
+	#list!t list
+	#int at
+	#t value
+
+	#if at < list::length * -1:
+		#error function: #{at} exceeds list bounds
+
+	#if at >= list::length:
+		#error function: #{at} exceeds list length #{list::length}
+
+	#if at == -1:
+		#return [...list[..at], value
+
+	#int after = at + 1
+	#return [...list[..at], value, ...list[after..]
