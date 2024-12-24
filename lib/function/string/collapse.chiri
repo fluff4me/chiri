@@ -1,0 +1,13 @@
+#function collapse returns string:
+	#string target
+	#string result = "
+
+	#string collapsed = "
+	#each in target as string char:
+		#if char != "\n" && char != "\t":
+			#set result = "#{result}#{collapsed}#{char}
+			#set collapsed = "
+		#else:
+			#set collapsed = " "
+
+	#return result

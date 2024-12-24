@@ -123,10 +123,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         switch (expression.operator) {
                             case "!":
                                 return !operand;
-                            case "+":
-                                return +operand;
-                            case "-":
-                                return -operand;
+                            case "+": {
+                                const number = +operand;
+                                if (isNaN(number))
+                                    throw compiler.error(expression.position, `Cannot coerce ${typeof operand} (${operand}) to dec`);
+                                return number;
+                            }
+                            case "-": {
+                                const number = -operand;
+                                if (isNaN(number))
+                                    throw compiler.error(expression.position, `Cannot coerce ${typeof operand} (${operand}) to dec`);
+                                return number;
+                            }
                             case "~":
                                 return ~operand;
                             case "exists":

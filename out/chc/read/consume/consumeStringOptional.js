@@ -52,7 +52,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         let pendingNewlines = "";
         String: for (; reader.i < reader.input.length; reader.i++) {
             if (block)
-                pendingNewlines += "\\n".repeat((0, consumeNewBlockLineOptional_1.default)(reader, true));
+                pendingNewlines += "\n".repeat((0, consumeNewBlockLineOptional_1.default)(reader, true));
             const appendSegment = (text) => segments[segments.length - 1] += text;
             const char = reader.input[reader.i];
             switch (char) {
@@ -66,10 +66,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const escapeChar = reader.input[reader.i];
                     switch (escapeChar) {
                         case "r":
+                            appendSegment(pendingNewlines + "\r");
+                            break;
                         case "n":
+                            appendSegment(pendingNewlines + "\n");
+                            break;
                         case "t":
-                        case "\\":
+                            appendSegment(pendingNewlines + "\t");
+                            break;
                         case "$":
+                            appendSegment(pendingNewlines + escapeChar);
+                            break;
+                        case "\\":
                             appendSegment(pendingNewlines + char + escapeChar);
                             pendingNewlines = "";
                             break;
@@ -147,7 +155,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "\n":
                     break String;
                 case "\t":
-                    pendingNewlines += pendingNewlines + "\\t";
+                    pendingNewlines += pendingNewlines + "\t";
                     break;
                 case "\"":
                     if (!block) {
