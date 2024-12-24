@@ -185,7 +185,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const p = reader.i;
             if (!(0, consumeWhiteSpaceOptional_1.default)(reader) /* || consumeNewBlockLineOptional(reader) */)
                 return operandA;
-            const operandATypeName = operandA.valueType.name.value;
+            const operandATypeName = operandA.valueType.isGeneric && reader.types.isEveryType(operandA.valueType.generics) ? "*" : operandA.valueType.name.value;
             const operatorsForType = binaryOperators[operandATypeName] ?? empy;
             const operator = consumeOperatorOptional(reader, operatorsForType, precedence);
             if (!operator) {
@@ -195,7 +195,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             (0, consumeWhiteSpace_1.default)(reader);
             const resultTypesByOperandB = operatorsForType[operator] ?? empy;
             const operandB = consumeExpressionInternal(reader, precedence + 1);
-            const operandBTypeName = operandB.valueType.name.value;
+            const operandBTypeName = operandB.valueType.isGeneric && reader.types.isEveryType(operandB.valueType.generics) ? "*" : operandB.valueType.name.value;
             const resultType = resultTypesByOperandB[operandBTypeName];
             if (!resultType)
                 throw reader.error(e, `Undefined operation ${operandATypeName}${operator}${operandBTypeName}`);
