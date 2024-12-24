@@ -127,6 +127,8 @@ const binaryOperatorOperandCoercion: Partial<Record<Operator, string | BinaryCoe
 	".": "string",
 }
 const unaryOperatorOperandCoercion: Partial<Record<Operator, string>> = {
+	"+": "dec",
+	"-": "dec",
 }
 
 const operatorOperandBTypes: Partial<Record<Operator, string>> = {
