@@ -279,7 +279,7 @@ function consumeExpressionInternal (reader: ChiriReader, precedence = 0): ChiriE
 		if (!consumeWhiteSpaceOptional(reader) /* || consumeNewBlockLineOptional(reader) */)
 			return operandA
 
-		const operandATypeName = operandA.valueType.name.value
+		const operandATypeName = operandA.valueType.isGeneric && reader.types.isEveryType(operandA.valueType.generics) ? "*" : operandA.valueType.name.value
 		const operatorsForType = binaryOperators[operandATypeName] ?? empy
 		const operator = consumeOperatorOptional(reader, operatorsForType, precedence)
 		if (!operator) {
@@ -293,7 +293,7 @@ function consumeExpressionInternal (reader: ChiriReader, precedence = 0): ChiriE
 
 		const operandB = consumeExpressionInternal(reader, precedence + 1)
 
-		const operandBTypeName = operandB.valueType.name.value
+		const operandBTypeName = operandB.valueType.isGeneric && reader.types.isEveryType(operandB.valueType.generics) ? "*" : operandB.valueType.name.value
 		const resultType = resultTypesByOperandB[operandBTypeName]
 		if (!resultType)
 			throw reader.error(e, `Undefined operation ${operandATypeName}${operator}${operandBTypeName}`)

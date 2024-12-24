@@ -272,8 +272,13 @@ export default class ChiriTypeManager {
 			this.registerBinaryOperator(type, "is", "string", "bool")
 			this.registerBinaryOperator(type, "==", "undefined", "bool")
 			this.registerBinaryOperator(type, "!=", "undefined", "bool")
+			this.registerBinaryOperator("*", "==", type, "bool")
+			this.registerBinaryOperator("*", "!=", type, "bool")
 			this.registerUnaryOperator("exists", type, "bool")
 		}
+
+		this.registerBinaryOperator("*", "==", "undefined", "bool")
+		this.registerBinaryOperator("*", "!=", "undefined", "bool")
 	}
 
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
@@ -456,7 +461,13 @@ export default class ChiriTypeManager {
 		if (types.some(type => type.name.value === "*"))
 			return true
 
-		return typesList.every(a => types.some(b => this.isAssignable(b, a.type)))
+		return typesList.every(a => {
+			if (a.type.name.value === "body")
+				return true // skip
+
+			const hasAssignableType = types.some(b => this.isAssignable(b, a.type))
+			return hasAssignableType
+		})
 	}
 
 	dedupe (...types: ChiriType[]) {
