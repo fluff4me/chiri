@@ -54,7 +54,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 	let pendingNewlines = ""
 	String: for (; reader.i < reader.input.length; reader.i++) {
 		if (block)
-			pendingNewlines += "\\n".repeat(consumeNewBlockLineOptional(reader, true))
+			pendingNewlines += "\n".repeat(consumeNewBlockLineOptional(reader, true))
 
 		const appendSegment = (text: string) =>
 			(segments[segments.length - 1] as string) += text
@@ -72,10 +72,18 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 				const escapeChar = reader.input[reader.i]
 				switch (escapeChar) {
 					case "r":
+						appendSegment(pendingNewlines + "\r")
+						break
 					case "n":
+						appendSegment(pendingNewlines + "\n")
+						break
 					case "t":
-					case "\\":
+						appendSegment(pendingNewlines + "\t")
+						break
 					case "$":
+						appendSegment(pendingNewlines + escapeChar)
+						break
+					case "\\":
 						appendSegment(pendingNewlines + char + escapeChar)
 						pendingNewlines = ""
 						break
@@ -158,7 +166,7 @@ export default (reader: ChiriReader): ChiriLiteralString | undefined => {
 			case "\n":
 				break String
 			case "\t":
-				pendingNewlines += pendingNewlines + "\\t"
+				pendingNewlines += pendingNewlines + "\t"
 				break
 			case "\"":
 				if (!block) {
