@@ -1,0 +1,63 @@
+#function gradient-mix returns string:
+	#raw params-string
+	#list!string params = params-string::split(",")::map(trim)::filter(length)
+	#if params[-1] == "":
+		#set params = params[0..-1]
+
+	#string colour-interpolation-method = params[0]
+	#string sample-at = params[1]
+
+	#list!string stops = params[2..]
+
+	#uint stops-count = stops::length
+	#if stops-count == 0:
+		#error function: No stops provided
+	#if stops-count == 1:
+		#error function: Don't use gradient-mix, use color-mix
+
+	; if first stop is just a colour, add 0%
+	#if stops[0][-1] != "%":
+		#set stops = ["#{stops[0]} 0%", ...stops[1..]
+
+	; if last stop is just a colour, add 100%
+	#if stops[-1][-1] != "%":
+		#set stops = [...stops[..-1], "#{stops[-1]} 100%"
+
+	; if first stop is not at 0%, add another stop with the same colour at 0%
+	#if stops[-1][-3..] != " 0%":
+		#set stops = ["#{stops[0]::split(" ")[0]} 0%", ...stops
+
+	; if last stop is not at 100%, add another stop with the same colour at 100%
+	#if stops[-1][-5..] != " 100%":
+		#set stops = [...stops, "#{stops[-1]::split(" ")[0]} 100%"
+
+	; #debug: method: `#{colour-interpolation-method}` sampling at: `#{sample-at}`
+
+	#string last-colour = "#000
+	#dec last-position = 0
+
+	#each in stops as uint i, var stop-string:
+		#list!string stop = stop-string::split(" ")::map(trim)::filter(length)
+		; #debug: stop #{i}: `#{stop}`
+
+		#if stop::length != 2 || stop[1][-1] != "%":
+			#error function: Invalid stop ##{i} "#{stop-string}". Stops must be colour and percentage pairs
+
+		#string colour = stop[0]
+		#dec position = +stop[1][..-1]
+
+		#if position < last-position:
+			#error function: Invalid stop ##{i} "#{stop-string}". Position less than previous, #{last-position}%
+
+		#set last-colour = if i == 0: colour else: "
+			color-mix(
+				#{colour-interpolation-method},
+				#{last-colour},
+				#{colour} calc((#{sample-at} * 100 - #{last-position}) / (#{position - last-position}) * 100%)
+			)
+
+		#set last-position = position
+
+	#set last-colour = last-colour::collapse
+	; #debug: #{last-colour}
+	#return last-colour

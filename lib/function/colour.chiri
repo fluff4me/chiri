@@ -1,3 +1,4 @@
 #import:
 	colour/contrast
 	colour/alpha
+	colour/gradient-mix
