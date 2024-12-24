@@ -1,0 +1,13 @@
+#function filter with t!* r!* returns list!t:
+	#list!t values
+	#function!(t uint list!t r) filter
+
+	#list!t result = [
+	#each values as var i, var value:
+		#var should-include = filter(value, i, values)
+		#if should-include == 0 || should-include == false || should-include == "" || should-include == _:
+			#continue
+
+		#set result = [...result, value
+
+	#return result
