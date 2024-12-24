@@ -102,7 +102,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const binaryOperatorOperandCoercion = {
         ".": "string",
     };
-    const unaryOperatorOperandCoercion = {};
+    const unaryOperatorOperandCoercion = {
+        "+": "dec",
+        "-": "dec",
+    };
     const operatorOperandBTypes = {
         "x": "uint",
     };
