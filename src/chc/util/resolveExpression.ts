@@ -115,10 +115,18 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 					switch (expression.operator) {
 						case "!":
 							return !operand
-						case "+":
-							return +operand
-						case "-":
-							return -operand
+						case "+": {
+							const number = +operand
+							if (isNaN(number))
+								throw compiler.error(expression.position, `Cannot coerce ${typeof operand} (${operand}) to dec`)
+							return number
+						}
+						case "-": {
+							const number = -operand
+							if (isNaN(number))
+								throw compiler.error(expression.position, `Cannot coerce ${typeof operand} (${operand}) to dec`)
+							return number
+						}
 						case "~":
 							return ~operand
 						case "exists":
