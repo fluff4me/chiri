@@ -1,5 +1,6 @@
 #import:
 	shorthand/border
+	shorthand/border-radius
 	shorthand/background
 	shorthand/transition
 	shorthand/padding

@@ -149,6 +149,8 @@ $$translate-y!length-percentage
 			border-bottom-right-radius: $space-#{i}
 
 		%gap-#{i}: gap: $space-#{i}
+		%row-gap-#{i}: row-gap: $space-#{i}
+		%column-gap-#{i}: column-gap: $space-#{i}
 
 		%inset-#{i}: inset: $space-#{i}
 		%inset-inline-#{i}: inset-inline: $space-#{i}
