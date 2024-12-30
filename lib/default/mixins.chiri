@@ -633,6 +633,7 @@ $$gradient-mask-height!length-percentage
 %text-align-center: text-align: center
 %text-align-justify: text-align: justify
 
+%vertical-align-super: vertical-align: super
 %vertical-align-middle: vertical-align: middle
 
 %white-space-inherit: white-space: inherit
