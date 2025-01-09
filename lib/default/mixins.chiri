@@ -79,6 +79,7 @@ $$border-colour!colour: currentcolor
 %inset-border-not-top-1: box-shadow: #{box-shadow-inset-border-bottom-1}, #{box-shadow-inset-border-inline-1}
 %inset-border-not-left-1: box-shadow: #{box-shadow-inset-border-right-1}, #{box-shadow-inset-border-block-1}
 %inset-border-not-right-1: box-shadow: #{box-shadow-inset-border-left-1}, #{box-shadow-inset-border-block-1}
+%box-shadow-border-outline: box-shadow: 0 0 0 2px light-dark(#000, #fff), 0 0 0 3px light-dark(#fff, #000)
 
 $$box-shadow-intensity!length-percentage: 100%
 %box-shadow-none: box-shadow: none
