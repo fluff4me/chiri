@@ -494,6 +494,7 @@ $$translate-y!length-percentage
 %weight-bolder: font-weight: $weight-bolder
 %bolder: font-weight: $weight-bolder
 
+%style-normal: font-style: normal
 %italic: font-style: italic
 %style-italic: font-style: italic
 
