@@ -6,6 +6,9 @@ export declare const STATE_MAP: {
     popover: string;
     first: string;
     last: string;
+    "after-first": string;
+    "before-last": string;
+    middle: string;
     ":hover": string;
     ":active": string;
     ":focus": string;
