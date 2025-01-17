@@ -642,6 +642,8 @@ $$gradient-mask-height!length-percentage
 %white-space-normal: white-space: normal
 %white-space-pre-wrap: white-space: pre-wrap
 %white-space-pre: white-space: pre
+%white-space-nowrap: white-space: nowrap
+%nowrap: white-space: nowrap
 
 %wrap-anywhere: overflow-wrap: anywhere
 %wrap-words: overflow-wrap: break-word
