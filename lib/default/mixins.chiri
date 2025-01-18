@@ -40,6 +40,8 @@
 
 %color-inherit: colour: inherit
 %colour-inherit: colour: inherit
+%color-transparent: colour: transparent
+%colour-transparent: colour: transparent
 
 $$border-colour!colour: currentcolor
 %borderless: border: none
