@@ -29,14 +29,17 @@
 
 	#each in font-sizes as var i, var font-size:
 		%font-#{i}:
-			$font-size: round(calc(#{font-size}rem / $font-scale-factor), 1px)
+			$font-size-base: #{font-size}rem
+			$font-size: round(calc($font-size-base / $font-scale-factor), 1px)
 			$font-scaling: #{font-size}
 			font-size: $font-size
 
 %font-family-inherit: font-family: inherit
 %font-inherit:
 	$font-scaling: inherit
-	font-size: inherit
+	$font-size-base: inherit
+	$font-size: round(calc($font-size-base / $font-scale-factor), 1px)
+	font-size: $font-size
 
 %color-inherit: colour: inherit
 %colour-inherit: colour: inherit
