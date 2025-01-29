@@ -1,0 +1,7 @@
+#function unlerp returns string:
+	#raw params-string
+	#list!string params = params-string::split(",")::map(trim)::filter(length)
+	#string from = params[0]
+	#string to = params[1]
+	#string value = params[2]
+	#return "calc((#{value} - #{from}) / (#{to} - #{from}))"
