@@ -654,3 +654,15 @@ $$gradient-mask-height!length-percentage
 %wrap-words: overflow-wrap: break-word
 
 %content: content: ""
+
+#each in 1...5 as var i:
+	%clamp-#{i}:
+		display: -webkit-box
+		-webkit-box-orient: vertical
+		-webkit-line-clamp: #{i}
+		%overflow-hidden
+	%clamp-inline-#{i}:
+		display: -webkit-inline-box
+		-webkit-box-orient: vertical
+		-webkit-line-clamp: #{i}
+		%overflow-hidden
