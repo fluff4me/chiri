@@ -545,6 +545,7 @@ $$translate-y!length-percentage
 
 %z-index-0: z-index: 0
 %z-index-fg: z-index: 1
+%z-index-fg-2: z-index: 2
 %z-index-bg: z-index: -1
 
 %text-outline:
