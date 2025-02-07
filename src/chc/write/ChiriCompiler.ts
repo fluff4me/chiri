@@ -28,7 +28,7 @@ import stringifyExpression from "../util/stringifyExpression"
 import stringifyText from "../util/stringifyText"
 import Strings from "../util/Strings"
 import type { ArrayOr } from "../util/Type"
-import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMixin, ResolvedProperty, ResolvedRootSpecial, ResolvedViewTransition } from "./CSSWriter"
+import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMediaQuery, ResolvedMixin, ResolvedProperty, ResolvedRootSpecial, ResolvedViewTransition } from "./CSSWriter"
 import CSSWriter from "./CSSWriter"
 import DTSWriter from "./DTSWriter"
 import type { ResolvedComponent } from "./ESWriter"
@@ -94,6 +94,7 @@ interface ChiriSelector {
 	pseudo: ChiriWord[]
 	specialState?: ChiriWord
 	containerQueries: string[]
+	mediaQueries: ResolvedMediaQuery[]
 	elementTypes: ChiriWord[]
 	spread?: true
 }
@@ -926,6 +927,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				break
 			}
 
+			case "scheme": {
+				selector = createSelector(containingSelector, {
+					mediaQueries: [{ scheme: statement.scheme }],
+				})
+				break
+			}
+
 			case "element": {
 				const names = statement.names.map(resolveWordLowercase)
 				selector = createSelector(containingSelector, {
@@ -1046,6 +1054,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						states: selector.state.map(state => state?.value),
 						pseudos: selector.pseudo.map(pseudo => pseudo?.value as PseudoName | undefined),
 						containerQueries: selector.containerQueries,
+						mediaQueries: selector.mediaQueries,
 						elementTypes: selector.elementTypes.map(t => t.value),
 						specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
 						position,
@@ -1081,6 +1090,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					states: [],
 					pseudos: [],
 					containerQueries: [],
+					mediaQueries: [],
 					elementTypes: [],
 					skip: true,
 				})
@@ -1135,7 +1145,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				if (!selector)
 					throw error(name.position, "Unable to use mixin here, no selector")
 
-				if (selector.containerQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
+				if (selector.containerQueries.length || selector.mediaQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
 					const mixin = getMixin(name.value, name.position)
 					return mixin.content
 				}
@@ -1220,6 +1230,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
 			specialState: assignFrom.specialState ?? selector?.specialState,
 			containerQueries: assignFrom.containerQueries ?? selector?.containerQueries ?? [],
+			mediaQueries: assignFrom.mediaQueries ?? selector?.mediaQueries ?? [],
 			elementTypes: assignFrom.elementTypes ?? selector?.elementTypes ?? [],
 			spread: assignFrom.spread ?? selector?.spread,
 		}

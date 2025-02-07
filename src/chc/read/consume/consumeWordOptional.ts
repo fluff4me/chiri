@@ -4,7 +4,7 @@ import type ChiriReader from "../ChiriReader"
 import type { ChiriWord } from "./consumeWord"
 import consumeWord from "./consumeWord"
 
-export default (reader: ChiriReader, ...expectedWords: string[]): ChiriWord | undefined => {
+export default <const WORDS extends string[]> (reader: ChiriReader, ...expectedWords: WORDS): ChiriWord<WORDS[number]> | undefined => {
 	if (expectedWords.length) {
 		const restore = reader.savePosition()
 		const e = reader.i

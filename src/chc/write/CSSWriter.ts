@@ -25,12 +25,17 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	specialState?: ComponentStateSpecial
 	pseudos: (PseudoName | undefined)[]
 	containerQueries?: string[]
+	mediaQueries?: ResolvedMediaQuery[]
 	elementTypes: (string | undefined)[]
 	name: ChiriWord
 	content: ResolvedProperty[]
 	affects: string[]
 	index: number
 	skip?: true
+}
+
+export interface ResolvedMediaQuery {
+	scheme?: "dark" | "light"
 }
 
 export interface ResolvedRootSpecial extends Omit<ResolvedMixin, "name" | "index" | "containerQueries" | "affects"> {
@@ -143,6 +148,14 @@ export default class CSSWriter extends Writer {
 			this.writeLineStartBlock("{")
 		}
 
+		for (const query of mixin.mediaQueries ?? []) {
+			if (query.scheme) {
+				this.write(`@media (prefers-color-scheme: ${query.scheme})`)
+				this.writeSpaceOptional()
+				this.writeLineStartBlock("{")
+			}
+		}
+
 		if (mixin.specialState) {
 			this.write(STATE_MAP_SPECIAL[mixin.specialState])
 			this.writeSpaceOptional()
@@ -198,6 +211,9 @@ export default class CSSWriter extends Writer {
 			this.writeLineEndBlock("}")
 
 		for (const query of mixin.containerQueries ?? [])
+			this.writeLineEndBlock("}")
+
+		for (const query of mixin.mediaQueries ?? [])
 			this.writeLineEndBlock("}")
 
 		//#endregion

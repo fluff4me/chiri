@@ -47,6 +47,12 @@ export interface ChiriComponentStateContainer extends ChiriComponentBase {
 	query: ChiriBaseText
 }
 
+export interface ChiriComponentStateScheme extends ChiriComponentBase {
+	subType: "scheme"
+	spread: boolean
+	scheme: "dark" | "light"
+}
+
 export type PseudoName =
 	| "before" | "after"
 	| "backdrop"
