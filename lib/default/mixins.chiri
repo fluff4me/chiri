@@ -202,6 +202,12 @@ $$translate-y!length-percentage
 			width: $space-#{i}
 			height: $space-#{i}
 
+		%width-100-and-unmargin-#{i}: width: calc($space-100 + $space-#{i} * 2)
+		%height-100-and-unmargin-#{i}: height: calc($space-100 + $space-#{i} * 2)
+		%size-100-and-unmargin-#{i}:
+			%width-100-and-unmargin-#{i}
+			%height-100-and-unmargin-#{i}
+
 		%translate-y-0: $translate-y: $space-0
 		%translate-x-0: $translate-x: $space-0
 		%translate-up-#{i}:
@@ -473,6 +479,17 @@ $$translate-y!length-percentage
 		%size-constrain-#{unit}:
 			max-width: round(1#{unit}, 1px)
 			max-height: round(1#{unit}, 1px)
+
+	%width-constrain-none: max-width: none
+	%max-width-none: max-width: none
+	%height-constrain-none: max-height: none
+	%max-height-none: max-height: none
+	%size-constrain-none:
+		max-width: none
+		max-height: none
+	%max-size-none:
+		max-width: none
+		max-height: none
 
 	#list!string content-sizes = ["fit", "max", "min"]
 	#each content-sizes as var size:
