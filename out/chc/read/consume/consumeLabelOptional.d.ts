@@ -1,2 +1,2 @@
 import type ChiriReader from "../ChiriReader";
-export default function (reader: ChiriReader): import("./consumeWord").ChiriWord<string> | undefined;
+export default function (reader: ChiriReader): import("./consumeWord").ChiriWord<never> | undefined;

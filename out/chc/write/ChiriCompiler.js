@@ -671,6 +671,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     });
                     break;
                 }
+                case "scheme": {
+                    selector = createSelector(containingSelector, {
+                        mediaQueries: [{ scheme: statement.scheme }],
+                    });
+                    break;
+                }
                 case "element": {
                     const names = statement.names.map(resolveWordLowercase);
                     selector = createSelector(containingSelector, {
@@ -772,6 +778,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             states: selector.state.map(state => state?.value),
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
                             containerQueries: selector.containerQueries,
+                            mediaQueries: selector.mediaQueries,
                             elementTypes: selector.elementTypes.map(t => t.value),
                             specialState: selector.specialState?.value,
                             position,
@@ -805,6 +812,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         states: [],
                         pseudos: [],
                         containerQueries: [],
+                        mediaQueries: [],
                         elementTypes: [],
                         skip: true,
                     });
@@ -849,7 +857,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     const selector = selectorStack.at(-1);
                     if (!selector)
                         throw error(name.position, "Unable to use mixin here, no selector");
-                    if (selector.containerQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
+                    if (selector.containerQueries.length || selector.mediaQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
                         const mixin = getMixin(name.value, name.position);
                         return mixin.content;
                     }
@@ -922,6 +930,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
                 specialState: assignFrom.specialState ?? selector?.specialState,
                 containerQueries: assignFrom.containerQueries ?? selector?.containerQueries ?? [],
+                mediaQueries: assignFrom.mediaQueries ?? selector?.mediaQueries ?? [],
                 elementTypes: assignFrom.elementTypes ?? selector?.elementTypes ?? [],
                 spread: assignFrom.spread ?? selector?.spread,
             };

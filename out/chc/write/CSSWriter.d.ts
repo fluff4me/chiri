@@ -19,12 +19,16 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
     specialState?: ComponentStateSpecial;
     pseudos: (PseudoName | undefined)[];
     containerQueries?: string[];
+    mediaQueries?: ResolvedMediaQuery[];
     elementTypes: (string | undefined)[];
     name: ChiriWord;
     content: ResolvedProperty[];
     affects: string[];
     index: number;
     skip?: true;
+}
+export interface ResolvedMediaQuery {
+    scheme?: "dark" | "light";
 }
 export interface ResolvedRootSpecial extends Omit<ResolvedMixin, "name" | "index" | "containerQueries" | "affects"> {
     name?: undefined;
