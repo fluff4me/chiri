@@ -43,14 +43,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         context;
         stack;
         source;
-        static async load(filename, reader) {
+        static async load(filename, reader, watcher = !reader ? undefined : reader.#watcher) {
             filename = path_1.default.resolve(filename);
             if (!filename.endsWith(".chiri"))
                 filename += ".chiri";
+            watcher?.add(filename);
             if (reader?.used.has(filename) && !reader.reusable.has(filename))
                 throw reader.error("This source file is not exported as reusable");
             const ch = await promises_1.default.readFile(filename, "utf8");
             const result = new ChiriReader(filename, ch, reader?.cwd, undefined, reader?.stack.slice(), reader?.source);
+            result.setWatcher(watcher);
             result.used = reader?.used ?? result.used;
             result.reusable = reader?.reusable ?? result.reusable;
             result.used.add(filename);
@@ -69,6 +71,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         used = new Set();
         reusable = new Set();
         importName;
+        #watcher;
         pipeValueStack = [];
         basename;
         dirname;
@@ -92,6 +95,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.source[filename] = this.input;
             this.consumeBodyDefault = this.consumeBodyDefault.bind(this);
         }
+        setWatcher(watcher) {
+            this.#watcher = watcher;
+            return this;
+        }
         setReusable() {
             this.reusable.add(this.filename);
             return true;
@@ -112,6 +119,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             reader.used = this.used;
             reader.reusable = this.reusable;
             reader.#isSubReader = true;
+            reader.setWatcher(this.#watcher);
             return reader;
         }
         addOuterStatement(statement) {

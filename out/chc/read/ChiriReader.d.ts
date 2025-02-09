@@ -1,3 +1,4 @@
+import type { FSWatcher } from "chokidar";
 import { ChiriType } from "../type/ChiriType";
 import ChiriTypeManager from "../type/ChiriTypeManager";
 import type TypeDefinition from "../type/TypeDefinition";
@@ -61,7 +62,7 @@ export default class ChiriReader {
     readonly context: ChiriContext;
     readonly stack: string[];
     readonly source: Record<string, string>;
-    static load(filename: string, reader?: ChiriReader): Promise<ChiriReader>;
+    static load(filename: string, reader?: ChiriReader, watcher?: FSWatcher | undefined): Promise<ChiriReader>;
     types: ChiriTypeManager;
     i: number;
     indent: number;
@@ -78,6 +79,7 @@ export default class ChiriReader {
     get errored(): boolean;
     get isSubReader(): boolean;
     constructor(filename: string, input: string, cwd?: string, context?: ChiriContext, stack?: string[], source?: Record<string, string>);
+    setWatcher(watcher?: FSWatcher): this;
     setReusable(): boolean;
     sub<CONTEXT extends ChiriContextType>(multiline: boolean, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): ChiriReader;
     addOuterStatement(statement: ChiriStatement): this;

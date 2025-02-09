@@ -36,7 +36,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    /* eslint-disable @typescript-eslint/no-var-requires */
     const chokidar_1 = __importDefault(require("chokidar"));
     const dotenv_1 = __importDefault(require("dotenv"));
     const path_1 = __importDefault(require("path"));
@@ -64,11 +63,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     let queuedTryCompile = false;
     async function compileAll(files, watch = false) {
         for (const file of files) {
-            await (compilationPromise = tryCompile(file));
-            compilationPromise = undefined;
+            let watcher;
             if (watch) {
                 console.log(ansi_1.default.label + "watch", ansi_1.default.path + (0, relToCwd_js_1.default)(file), ansi_1.default.reset);
-                chokidar_1.default.watch([file, `${file}.chiri`], { ignoreInitial: true })
+                watcher = chokidar_1.default.watch([], { ignoreInitial: true })
                     // eslint-disable-next-line @typescript-eslint/no-misused-promises
                     .on("all", async (event, filename) => {
                     if (queuedTryCompile)
@@ -78,16 +76,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         await compilationPromise;
                     queuedTryCompile = false;
                     console.log(ansi_1.default.label + event, ansi_1.default.path + (0, relToCwd_js_1.default)(filename), ansi_1.default.reset);
-                    await (compilationPromise = tryCompile(file));
+                    await (compilationPromise = tryCompile(file, watcher));
                     compilationPromise = undefined;
                 })
                     .on("error", console.error);
             }
+            await (compilationPromise = tryCompile(file, watcher));
+            compilationPromise = undefined;
+            watcher?.add([file, `${file}.chiri`]);
         }
     }
-    async function tryCompile(filename) {
+    async function tryCompile(filename, watcher) {
         try {
-            return compile(filename);
+            return compile(filename, watcher);
         }
         catch (e) {
             const err = e;
@@ -100,7 +101,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             console.error(ansi_1.default.err + message, ansi_1.default.reset + stack);
         }
     }
-    async function compile(filename) {
+    async function compile(filename, watcher) {
         const start = performance.now();
         for (const key of Object.keys(require.cache))
             if (key.startsWith(constants_1.CHC_ROOT))
@@ -108,11 +109,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const rerequire = (path) => require(path).default;
         const ChiriReader = rerequire("./chc/read/ChiriReader.js");
-        const reader = await ChiriReader.load(filename);
+        const reader = await ChiriReader.load(filename, undefined, watcher);
         if (!reader) {
             console.log(ansi_1.default.err + "Failed to load ChiriReader");
             return;
         }
+        reader.setWatcher(watcher);
         const ast = await reader.read();
         if (reader.errored)
             return;
