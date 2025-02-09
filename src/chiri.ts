@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 /* eslint-disable @typescript-eslint/no-var-requires */
+import type { FSWatcher } from "chokidar"
 import chokidar from "chokidar"
 import dotenv from "dotenv"
 import path from "path"
@@ -38,11 +39,10 @@ let queuedTryCompile = false
 
 async function compileAll (files: string[], watch = false) {
 	for (const file of files) {
-		await (compilationPromise = tryCompile(file))
-		compilationPromise = undefined
+		let watcher: FSWatcher | undefined
 		if (watch) {
 			console.log(ansi.label + "watch", ansi.path + relToCwd(file), ansi.reset)
-			chokidar.watch([file, `${file}.chiri`], { ignoreInitial: true })
+			watcher = chokidar.watch([], { ignoreInitial: true })
 				// eslint-disable-next-line @typescript-eslint/no-misused-promises
 				.on("all", async (event, filename) => {
 					if (queuedTryCompile)
@@ -52,17 +52,22 @@ async function compileAll (files: string[], watch = false) {
 					while (compilationPromise) await compilationPromise
 					queuedTryCompile = false
 					console.log(ansi.label + event, ansi.path + relToCwd(filename), ansi.reset)
-					await (compilationPromise = tryCompile(file))
+					await (compilationPromise = tryCompile(file, watcher))
 					compilationPromise = undefined
 				})
 				.on("error", console.error)
 		}
+
+		await (compilationPromise = tryCompile(file, watcher))
+		compilationPromise = undefined
+
+		watcher?.add([file, `${file}.chiri`])
 	}
 }
 
-async function tryCompile (filename: string) {
+async function tryCompile (filename: string, watcher?: FSWatcher) {
 	try {
-		return compile(filename)
+		return compile(filename, watcher)
 	} catch (e) {
 		const err = e as Error
 		let message = err.message
@@ -75,7 +80,7 @@ async function tryCompile (filename: string) {
 	}
 }
 
-async function compile (filename: string) {
+async function compile (filename: string, watcher?: FSWatcher) {
 	const start = performance.now()
 
 	for (const key of Object.keys(require.cache))
@@ -86,11 +91,13 @@ async function compile (filename: string) {
 	const rerequire = <T> (path: string): T => require(path).default as T
 
 	const ChiriReader = rerequire<typeof ChiriReaderType>("./chc/read/ChiriReader.js")
-	const reader = await ChiriReader.load(filename)
+	const reader = await ChiriReader.load(filename, undefined, watcher)
 	if (!reader) {
 		console.log(ansi.err + "Failed to load ChiriReader")
 		return
 	}
+
+	reader.setWatcher(watcher)
 
 	const ast = await reader.read()
 	if (reader.errored)

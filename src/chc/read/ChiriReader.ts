@@ -1,5 +1,6 @@
 
 
+import type { FSWatcher } from "chokidar"
 import fsp from "fs/promises"
 import path from "path"
 import ansi from "../../ansi"
@@ -136,17 +137,19 @@ export interface ChiriBlock {
 
 export default class ChiriReader {
 
-	static async load (filename: string, reader?: ChiriReader) {
+	static async load (filename: string, reader?: ChiriReader, watcher = !reader ? undefined : reader.#watcher) {
 		filename = path.resolve(filename)
 		if (!filename.endsWith(".chiri"))
 			filename += ".chiri"
 
+		watcher?.add(filename)
+
 		if (reader?.used.has(filename) && !reader.reusable.has(filename))
 			throw reader.error("This source file is not exported as reusable")
 
-
 		const ch = await fsp.readFile(filename, "utf8")
 		const result = new ChiriReader(filename, ch, reader?.cwd, undefined, reader?.stack.slice(), reader?.source)
+		result.setWatcher(watcher)
 		result.used = reader?.used ?? result.used
 		result.reusable = reader?.reusable ?? result.reusable
 		result.used.add(filename)
@@ -169,6 +172,7 @@ export default class ChiriReader {
 	used: Set<string> = new Set()
 	reusable: Set<string> = new Set()
 	importName?: string
+	#watcher?: FSWatcher
 
 	readonly pipeValueStack: { type: ChiriType, used: boolean }[] = []
 
@@ -200,6 +204,11 @@ export default class ChiriReader {
 		this.consumeBodyDefault = this.consumeBodyDefault.bind(this)
 	}
 
+	setWatcher (watcher?: FSWatcher) {
+		this.#watcher = watcher
+		return this
+	}
+
 	setReusable () {
 		this.reusable.add(this.filename)
 		return true
@@ -221,6 +230,7 @@ export default class ChiriReader {
 		reader.used = this.used
 		reader.reusable = this.reusable
 		reader.#isSubReader = true
+		reader.setWatcher(this.#watcher)
 		return reader
 	}
 
