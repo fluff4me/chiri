@@ -202,6 +202,18 @@ $$translate-y!length-percentage
 			width: $space-#{i}
 			height: $space-#{i}
 
+		%min-width-#{i}: min-width: $space-#{i}
+		%min-height-#{i}: min-height: $space-#{i}
+		%min-size-#{i}:
+			min-width: $space-#{i}
+			min-height: $space-#{i}
+
+		%max-width-#{i}: max-width: $space-#{i}
+		%max-height-#{i}: max-height: $space-#{i}
+		%max-size-#{i}:
+			max-width: $space-#{i}
+			max-height: $space-#{i}
+
 		%width-100-and-unmargin-#{i}: width: calc($space-100 + $space-#{i} * 2)
 		%height-100-and-unmargin-#{i}: height: calc($space-100 + $space-#{i} * 2)
 		%size-100-and-unmargin-#{i}:
