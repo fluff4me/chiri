@@ -134,7 +134,7 @@ $$translate-y!length-percentage
 %translate-none: translate: none
 
 #do:
-	#list!int spaces = [0, 1, 2, 3, 4, 5, 20, 25, 50, 100]
+	#list!int spaces = [0, 1, 2, 3, 4, 5, 6, 20, 25, 50, 100]
 	#each spaces as var i:
 		%border-radius-#{i}: border-radius: $space-#{i}
 		%border-top-left-radius-#{i}: border-top-left-radius: $space-#{i}
@@ -301,6 +301,9 @@ $$translate-y!length-percentage
 %background-currentcolor: background: currentcolor
 %background-currentcolour: background: currentcolor
 %background-none: background: none
+
+%background-size-cover: background-size: cover
+%background-size-contain: background-size: contain
 
 %flex-column: flex-direction: column
 %flex-row: flex-direction: row
