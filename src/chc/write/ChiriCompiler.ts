@@ -94,7 +94,7 @@ interface ChiriSelector {
 	pseudo: ChiriWord[]
 	specialState?: ChiriWord
 	containerQueries: string[]
-	mediaQueries: ResolvedMediaQuery[]
+	mediaQueries: (ResolvedMediaQuery | string)[]
 	elementTypes: ChiriWord[]
 	spread?: true
 }
@@ -919,6 +919,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				})
 				break
 
+			case "media": {
+				const query = stringifyText(compiler, statement.query)
+				selector = createSelector(containingSelector, {
+					mediaQueries: [query],
+				})
+				break
+			}
+
 			case "container": {
 				const query = stringifyText(compiler, statement.query)
 				selector = createSelector(containingSelector, {
@@ -972,6 +980,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				states: selector.state.map(state => state?.value),
 				elementTypes: EMPTY,
 				specialState: selector.specialState?.value as ComponentStateSpecial | undefined,
+				mediaQueries: selector.mediaQueries,
 				position: statement.position,
 			})
 			return EMPTY
@@ -1220,6 +1229,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function createSelector (selector: ChiriSelector | undefined, assignFrom: Partial<ChiriSelector>): ChiriSelector {
+		if (assignFrom.mediaQueries?.length && !selector)
+			selector = { type: "selector", class: [], state: [], pseudo: [], specialState: undefined, containerQueries: [], mediaQueries: [], elementTypes: [] }
+
 		if (!selector && !assignFrom.class?.length)
 			throw internalError("Unable to construct a selector with no class name")
 

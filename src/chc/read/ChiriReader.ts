@@ -54,10 +54,11 @@ import type { ChiriWhile } from "./consume/macro/macroWhile"
 import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
 import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
 import consumeRuleStateContainerOptional from "./consume/rule/consumeRuleStateContainerOptional"
+import consumeRuleStateMediaOptional from "./consume/rule/consumeRuleStateMediaOptional"
 import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
 import consumeRuleStateSchemeOptional from "./consume/rule/consumeRuleStateSchemeOptional"
 import consumeRuleStateSpecialOptional from "./consume/rule/consumeRuleStateSpecialOptional"
-import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentDescendantElement, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateScheme, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentDescendantElement, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateMedia, ChiriComponentStateScheme, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
 
 export interface ChiriPosition {
 	file: string
@@ -101,6 +102,7 @@ export type ChiriStatement =
 	| ChiriComponentCustomState
 	| ChiriComponentState
 	| ChiriComponentStateSpecial
+	| ChiriComponentStateMedia
 	| ChiriComponentStateContainer
 	| ChiriComponentStateScheme
 	| ChiriComponentPseudo
@@ -450,6 +452,7 @@ export default class ChiriReader {
 			return property
 
 		const rule = this.context.type === "keyframe" ? undefined : (_
+			?? await consumeRuleStateMediaOptional(this)
 			?? await consumeRuleStateContainerOptional(this)
 			?? await consumeRuleStateSchemeOptional(this)
 			?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await consumeRuleMainOptional(this))

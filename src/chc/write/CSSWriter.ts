@@ -25,7 +25,7 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
 	specialState?: ComponentStateSpecial
 	pseudos: (PseudoName | undefined)[]
 	containerQueries?: string[]
-	mediaQueries?: ResolvedMediaQuery[]
+	mediaQueries?: (ResolvedMediaQuery | string)[]
 	elementTypes: (string | undefined)[]
 	name: ChiriWord
 	content: ResolvedProperty[]
@@ -149,7 +149,12 @@ export default class CSSWriter extends Writer {
 		}
 
 		for (const query of mixin.mediaQueries ?? []) {
-			if (query.scheme) {
+			if (typeof query === "string") {
+				this.write(`@media ${query}`)
+				this.writeSpaceOptional()
+				this.writeLineStartBlock("{")
+			}
+			else if (query.scheme) {
 				this.write(`@media (prefers-color-scheme: ${query.scheme})`)
 				this.writeSpaceOptional()
 				this.writeLineStartBlock("{")
@@ -190,10 +195,15 @@ export default class CSSWriter extends Writer {
 					if (pseudo)
 						this.write(`::${pseudo}`)
 
-					i++
+
+					if (mixin.name || elementType || state || pseudo)
+						i++
 				}
 			}
 		}
+
+		if (!i)
+			this.write(":root")
 
 		//#endregion
 		////////////////////////////////////

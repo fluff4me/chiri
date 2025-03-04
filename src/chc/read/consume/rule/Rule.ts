@@ -41,6 +41,12 @@ export interface ChiriComponentStateSpecial extends ChiriComponentBase {
 	state: ChiriWord
 }
 
+export interface ChiriComponentStateMedia extends ChiriComponentBase {
+	subType: "media"
+	spread: boolean
+	query: ChiriBaseText
+}
+
 export interface ChiriComponentStateContainer extends ChiriComponentBase {
 	subType: "container"
 	spread: boolean
