@@ -19,7 +19,7 @@ export interface ResolvedMixin extends Omit<ChiriMixin, "content" | "name"> {
     specialState?: ComponentStateSpecial;
     pseudos: (PseudoName | undefined)[];
     containerQueries?: string[];
-    mediaQueries?: ResolvedMediaQuery[];
+    mediaQueries?: (ResolvedMediaQuery | string)[];
     elementTypes: (string | undefined)[];
     name: ChiriWord;
     content: ResolvedProperty[];

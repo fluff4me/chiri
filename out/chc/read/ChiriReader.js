@@ -7,7 +7,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/_", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRulePseudoOptional", "./consume/rule/consumeRuleStateContainerOptional", "./consume/rule/consumeRuleStateOptional", "./consume/rule/consumeRuleStateSchemeOptional", "./consume/rule/consumeRuleStateSpecialOptional"], factory);
+        define(["require", "exports", "fs/promises", "path", "../../ansi", "../../constants", "../type/ChiriType", "../type/ChiriTypeManager", "../util/_", "../util/Arrays", "../util/Errors", "../util/relToCwd", "../util/Strings", "./consume/consumeBlockEnd", "./consume/consumeDocumentationOptional", "./consume/consumeMacroUseOptional", "./consume/consumeMixinOptional", "./consume/consumeMixinUseOptional", "./consume/consumeNewBlockLineOptional", "./consume/consumePropertyOptional", "./consume/consumeWhiteSpaceOptional", "./consume/rule/consumeRuleMainOptional", "./consume/rule/consumeRulePseudoOptional", "./consume/rule/consumeRuleStateContainerOptional", "./consume/rule/consumeRuleStateMediaOptional", "./consume/rule/consumeRuleStateOptional", "./consume/rule/consumeRuleStateSchemeOptional", "./consume/rule/consumeRuleStateSpecialOptional"], factory);
     }
 })(function (require, exports) {
     "use strict";
@@ -34,6 +34,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeRuleMainOptional_1 = __importDefault(require("./consume/rule/consumeRuleMainOptional"));
     const consumeRulePseudoOptional_1 = __importDefault(require("./consume/rule/consumeRulePseudoOptional"));
     const consumeRuleStateContainerOptional_1 = __importDefault(require("./consume/rule/consumeRuleStateContainerOptional"));
+    const consumeRuleStateMediaOptional_1 = __importDefault(require("./consume/rule/consumeRuleStateMediaOptional"));
     const consumeRuleStateOptional_1 = __importDefault(require("./consume/rule/consumeRuleStateOptional"));
     const consumeRuleStateSchemeOptional_1 = __importDefault(require("./consume/rule/consumeRuleStateSchemeOptional"));
     const consumeRuleStateSpecialOptional_1 = __importDefault(require("./consume/rule/consumeRuleStateSpecialOptional"));
@@ -292,6 +293,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (property)
                 return property;
             const rule = this.context.type === "keyframe" ? undefined : (_1.default
+                ?? await (0, consumeRuleStateMediaOptional_1.default)(this)
                 ?? await (0, consumeRuleStateContainerOptional_1.default)(this)
                 ?? await (0, consumeRuleStateSchemeOptional_1.default)(this)
                 ?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await (0, consumeRuleMainOptional_1.default)(this))

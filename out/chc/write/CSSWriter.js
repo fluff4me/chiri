@@ -93,7 +93,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.writeLineStartBlock("{");
             }
             for (const query of mixin.mediaQueries ?? []) {
-                if (query.scheme) {
+                if (typeof query === "string") {
+                    this.write(`@media ${query}`);
+                    this.writeSpaceOptional();
+                    this.writeLineStartBlock("{");
+                }
+                else if (query.scheme) {
                     this.write(`@media (prefers-color-scheme: ${query.scheme})`);
                     this.writeSpaceOptional();
                     this.writeLineStartBlock("{");
@@ -128,10 +133,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             this.write(`:where(${state})`);
                         if (pseudo)
                             this.write(`::${pseudo}`);
-                        i++;
+                        if (mixin.name || elementType || state || pseudo)
+                            i++;
                     }
                 }
             }
+            if (!i)
+                this.write(":root");
             //#endregion
             ////////////////////////////////////
             this.writeSpaceOptional();

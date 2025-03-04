@@ -664,6 +664,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         spread: statement.spread || undefined,
                     });
                     break;
+                case "media": {
+                    const query = (0, stringifyText_1.default)(compiler, statement.query);
+                    selector = createSelector(containingSelector, {
+                        mediaQueries: [query],
+                    });
+                    break;
+                }
                 case "container": {
                     const query = (0, stringifyText_1.default)(compiler, statement.query);
                     selector = createSelector(containingSelector, {
@@ -710,6 +717,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     states: selector.state.map(state => state?.value),
                     elementTypes: EMPTY,
                     specialState: selector.specialState?.value,
+                    mediaQueries: selector.mediaQueries,
                     position: statement.position,
                 });
                 return EMPTY;
@@ -921,6 +929,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         function createSelector(selector, assignFrom) {
+            if (assignFrom.mediaQueries?.length && !selector)
+                selector = { type: "selector", class: [], state: [], pseudo: [], specialState: undefined, containerQueries: [], mediaQueries: [], elementTypes: [] };
             if (!selector && !assignFrom.class?.length)
                 throw internalError("Unable to construct a selector with no class name");
             return {
