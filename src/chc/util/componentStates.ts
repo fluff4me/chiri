@@ -13,6 +13,8 @@ export const STATE_MAP = {
 	":active": ":active",
 	":focus": ":focus-visible :has(:focus-visible)",
 	":focus-any": ":focus-within",
+	"empty": ":empty",
+	"full": ":not(:empty)",
 }
 
 export type ComponentState = keyof typeof STATE_MAP
