@@ -25,6 +25,8 @@
         ":active": ":active",
         ":focus": ":focus-visible :has(:focus-visible)",
         ":focus-any": ":focus-within",
+        "empty": ":empty",
+        "full": ":not(:empty)",
     };
     exports.STATES = Object.keys(exports.STATE_MAP);
     exports.STATE_MAP_SPECIAL = {
