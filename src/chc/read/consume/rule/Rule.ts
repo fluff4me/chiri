@@ -62,6 +62,7 @@ export interface ChiriComponentStateScheme extends ChiriComponentBase {
 export type PseudoName =
 	| "before" | "after"
 	| "backdrop"
+	| "range-thumb" | "range-track"
 
 export interface ChiriComponentPseudo extends ChiriComponentBase {
 	subType: "pseudo"

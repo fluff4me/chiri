@@ -86,6 +86,11 @@ export type CSSDocumentSection =
 	| "view-transitions"
 	| "animations"
 
+const SPLIT_PSEUDO_MAP: Partial<Record<PseudoName, string[]>> = {
+	"range-thumb": ["-webkit-slider-thumb", "-moz-range-thumb"],
+	"range-track": ["-webkit-slider-runnable-track", "-moz-range-track"],
+}
+
 export default class CSSWriter extends Writer {
 
 	private currentSection: CSSDocumentSection = "default"
@@ -167,7 +172,6 @@ export default class CSSWriter extends Writer {
 			this.writeLineStartBlock("{")
 		}
 
-		let i = 0
 		if (!mixin.states.length)
 			mixin.states.push(undefined)
 		if (!mixin.pseudos.length)
@@ -175,44 +179,55 @@ export default class CSSWriter extends Writer {
 		if (!mixin.elementTypes.length)
 			mixin.elementTypes.push(undefined)
 
-		for (const elementType of mixin.elementTypes) {
-			for (const state of mixin.states) {
-				for (const pseudo of mixin.pseudos) {
-					if (i) {
-						this.write(",")
-						this.writeSpaceOptional()
+		const splitPseudos: (string | undefined)[] = mixin.pseudos.flatMap(pseudo => SPLIT_PSEUDO_MAP[pseudo!] ?? [])
+		if (!splitPseudos.length) splitPseudos.push(undefined)
+		for (const splitPseudo of splitPseudos) {
+			const nonSplitPseudos = mixin.pseudos.filter(pseudo => !SPLIT_PSEUDO_MAP[pseudo!])
+			if (!nonSplitPseudos.length) nonSplitPseudos.push(undefined)
+
+			let i = 0
+			for (const elementType of mixin.elementTypes) {
+				for (const state of mixin.states) {
+					for (const pseudo of nonSplitPseudos) {
+						if (i) {
+							this.write(",")
+							this.writeSpaceOptional()
+						}
+
+						if (mixin.name) {
+							this.write(".")
+							this.writeWord(mixin.name)
+						}
+
+						if (elementType)
+							this.write(` ${elementType}`)
+						if (state)
+							this.write(`:where(${state})`)
+						if (pseudo)
+							this.write(`::${pseudo}`)
+						if (splitPseudo)
+							this.write(`::${splitPseudo}`)
+
+
+						if (mixin.name || elementType || state || pseudo || splitPseudo)
+							i++
 					}
-
-					if (mixin.name) {
-						this.write(".")
-						this.writeWord(mixin.name)
-					}
-
-					if (elementType)
-						this.write(` ${elementType}`)
-					if (state)
-						this.write(`:where(${state})`)
-					if (pseudo)
-						this.write(`::${pseudo}`)
-
-
-					if (mixin.name || elementType || state || pseudo)
-						i++
 				}
 			}
+
+			if (!i)
+				this.write(":root")
+
+
+			//#endregion
+			////////////////////////////////////
+
+			this.writeSpaceOptional()
+			this.writeLineStartBlock("{")
+			for (const property of mergeProperties(mixin.content))
+				this.writeProperty(compiler, property)
+			this.writeLineEndBlock("}")
 		}
-
-		if (!i)
-			this.write(":root")
-
-		//#endregion
-		////////////////////////////////////
-
-		this.writeSpaceOptional()
-		this.writeLineStartBlock("{")
-		for (const property of mergeProperties(mixin.content))
-			this.writeProperty(compiler, property)
-		this.writeLineEndBlock("}")
 
 		////////////////////////////////////
 		//#region Rule End
