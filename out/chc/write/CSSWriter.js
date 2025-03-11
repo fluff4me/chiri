@@ -40,6 +40,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const makeWord_1 = __importDefault(require("../read/factory/makeWord"));
     const componentStates_1 = require("../util/componentStates");
     const Writer_1 = __importStar(require("./Writer"));
+    const SPLIT_PSEUDO_MAP = {
+        "range-thumb": ["-webkit-slider-thumb", "-moz-range-thumb"],
+        "range-track": ["-webkit-slider-runnable-track", "-moz-range-track"],
+    };
     class CSSWriter extends Writer_1.default {
         currentSection = "default";
         queues = {
@@ -109,44 +113,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.writeSpaceOptional();
                 this.writeLineStartBlock("{");
             }
-            let i = 0;
             if (!mixin.states.length)
                 mixin.states.push(undefined);
             if (!mixin.pseudos.length)
                 mixin.pseudos.push(undefined);
             if (!mixin.elementTypes.length)
                 mixin.elementTypes.push(undefined);
-            for (const elementType of mixin.elementTypes) {
-                for (const state of mixin.states) {
-                    for (const pseudo of mixin.pseudos) {
-                        if (i) {
-                            this.write(",");
-                            this.writeSpaceOptional();
+            const splitPseudos = mixin.pseudos.flatMap(pseudo => SPLIT_PSEUDO_MAP[pseudo] ?? []);
+            if (!splitPseudos.length)
+                splitPseudos.push(undefined);
+            for (const splitPseudo of splitPseudos) {
+                const nonSplitPseudos = mixin.pseudos.filter(pseudo => !SPLIT_PSEUDO_MAP[pseudo]);
+                if (!nonSplitPseudos.length)
+                    nonSplitPseudos.push(undefined);
+                let i = 0;
+                for (const elementType of mixin.elementTypes) {
+                    for (const state of mixin.states) {
+                        for (const pseudo of nonSplitPseudos) {
+                            if (i) {
+                                this.write(",");
+                                this.writeSpaceOptional();
+                            }
+                            if (mixin.name) {
+                                this.write(".");
+                                this.writeWord(mixin.name);
+                            }
+                            if (elementType)
+                                this.write(` ${elementType}`);
+                            if (state)
+                                this.write(`:where(${state})`);
+                            if (pseudo)
+                                this.write(`::${pseudo}`);
+                            if (splitPseudo)
+                                this.write(`::${splitPseudo}`);
+                            if (mixin.name || elementType || state || pseudo || splitPseudo)
+                                i++;
                         }
-                        if (mixin.name) {
-                            this.write(".");
-                            this.writeWord(mixin.name);
-                        }
-                        if (elementType)
-                            this.write(` ${elementType}`);
-                        if (state)
-                            this.write(`:where(${state})`);
-                        if (pseudo)
-                            this.write(`::${pseudo}`);
-                        if (mixin.name || elementType || state || pseudo)
-                            i++;
                     }
                 }
+                if (!i)
+                    this.write(":root");
+                //#endregion
+                ////////////////////////////////////
+                this.writeSpaceOptional();
+                this.writeLineStartBlock("{");
+                for (const property of mergeProperties(mixin.content))
+                    this.writeProperty(compiler, property);
+                this.writeLineEndBlock("}");
             }
-            if (!i)
-                this.write(":root");
-            //#endregion
-            ////////////////////////////////////
-            this.writeSpaceOptional();
-            this.writeLineStartBlock("{");
-            for (const property of mergeProperties(mixin.content))
-                this.writeProperty(compiler, property);
-            this.writeLineEndBlock("}");
             ////////////////////////////////////
             //#region Rule End
             if (mixin.specialState)
