@@ -133,7 +133,7 @@ $$translate-y!length-percentage
 %translate-none: translate: none
 
 #do:
-	#list!int spaces = [0, 1, 2, 3, 4, 5, 6, 20, 25, 50, 100]
+	#list!int spaces = [0, 1, 2, 3, 4, 5, 6, 7, 8, 20, 25, 50, 100]
 	#each spaces as var i:
 		%border-radius-#{i}: border-radius: $space-#{i}
 		%border-top-left-radius-#{i}: border-top-left-radius: $space-#{i}
@@ -313,6 +313,7 @@ $$translate-y!length-percentage
 %flex-shrink: flex-shrink: 1
 %grow: flex-grow: 1
 %shrink: flex-shrink: 1
+%flex-basis-100: flex-basis: 100%
 
 %align-content-normal: align-content: normal
 %align-content-start: align-content: start
