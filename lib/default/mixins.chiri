@@ -554,9 +554,16 @@ $$translate-y!length-percentage
 %opacity-1: opacity: 1
 %transparency-1: opacity: 0
 %transparency-0: opacity: 1
-#each in 1..9 as var i:
+#each in 1...9 as var i:
 	%opacity-#{i * 10}: opacity: #{i / 10}
 	%transparency-#{i * 10}: opacity: #{1 - i / 10}
+
+#each in 0...9 as var i:
+	%opacity-0#{i}: opacity: 0.0#{i}
+	%transparency-0#{i}: opacity: 0.9#{9 - i}
+#each in 10...99 as var i:
+	%opacity-#{i}: opacity: #{i / 100}
+	%transparency-#{i}: opacity: #{1 - (i / 100)}
 
 %z-index-0: z-index: 0
 %z-index-fg: z-index: 1
