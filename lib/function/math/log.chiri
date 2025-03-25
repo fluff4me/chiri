@@ -1,0 +1,36 @@
+;; Returns the natural logarithm (base e) of a number
+;; @param x A number greater than 0
+#function ln returns dec:
+	#dec x
+
+	#if x <= 0:
+		#return 0
+
+	; Use Taylor series for ln(x)
+	#dec y = (x - 1) / (x + 1)
+	#dec result = 0
+	#dec term = y
+	#dec n = 1
+
+	; Sum up to 15 terms for good precision
+	#each in ..15:
+		#set result += term / n
+		#set term *= y * y
+		#set n += 2
+
+	#return 2 * result
+
+;; Returns the logarithm of a number with the specified base
+;; @param x A number greater than 0
+;; @param base The base of the logarithm (defaults to E)
+#function log returns dec:
+	#dec x
+	#dec base ??= 2.718281828459045
+
+	#if x <= 0 || base <= 0:
+		#return 0
+
+	#if base == 1:
+		#return 0
+
+	#return ln(x) / ln(base)
