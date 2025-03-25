@@ -1377,7 +1377,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					const value: Value = statement.keyVariable ? entry[1] : entry
 					result.push(...compileStatements(statement.content,
 						Scope.variables({
-							[statement.variable.name.value]: { type: statement.variable.valueType, value },
+							...statement.variable && {
+								[statement.variable.name.value]: { type: statement.variable.valueType, value },
+							},
 							...statement.keyVariable && {
 								[statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
 							},

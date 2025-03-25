@@ -19,7 +19,7 @@ export interface ChiriEach extends ChiriMacroBlock {
 	type: "each"
 	iterable: ChiriExpressionOperand
 	keyVariable?: ChiriCompilerVariable
-	variable: ChiriCompilerVariable
+	variable?: ChiriCompilerVariable
 	content: ChiriStatement[]
 	position: ChiriPosition
 }
@@ -35,31 +35,30 @@ export default MacroConstruct("each")
 		const isRecord = reader.types.isAssignable(iterable.valueType, typeRecord.type)
 		const isString = reader.types.isAssignable(iterable.valueType, typeString.type)
 
-		consumeWhiteSpace(reader)
-		reader.consume("as")
-		consumeWhiteSpace(reader)
-
-		const variable1 = await consumeCompilerVariableOptional(reader, false, true)
-		if (!variable1)
-			throw reader.error("Expected variable declaration")
-
+		let variable1: ChiriCompilerVariable | undefined
 		let variable2: ChiriCompilerVariable | undefined
-		if (reader.consumeOptional(",")) {
-			consumeWhiteSpaceOptional(reader)
-
-			variable2 = await consumeCompilerVariableOptional(reader, false, true)
-			if (!variable2)
+		if (consumeWhiteSpaceOptional(reader) && reader.consumeOptional("as") && consumeWhiteSpaceOptional(reader)) {
+			variable1 = await consumeCompilerVariableOptional(reader, false, true)
+			if (!variable1)
 				throw reader.error("Expected variable declaration")
+
+			if (reader.consumeOptional(",")) {
+				consumeWhiteSpaceOptional(reader)
+
+				variable2 = await consumeCompilerVariableOptional(reader, false, true)
+				if (!variable2)
+					throw reader.error("Expected variable declaration")
+			}
 		}
 
-		if (!variable2 && isRecord)
+		if (variable1 && !variable2 && isRecord)
 			throw reader.error("Expected variable declarations for both a key and its associated value")
 
-		if (isRecord && !reader.types.isAssignable(typeString.type, variable1.valueType))
+		if (variable1 && isRecord && !reader.types.isAssignable(typeString.type, variable1.valueType))
 			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(typeString.type)}" is not assignable to "${ChiriType.stringify(variable1.valueType)}"`)
 
 		const valueType = isString ? typeString.type : iterable.valueType.generics[0]
-		if (!reader.types.isAssignable(valueType, (variable2 ?? variable1).valueType))
+		if (variable1 && !reader.types.isAssignable(valueType, (variable2 ?? variable1).valueType))
 			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(valueType)}" is not assignable to "${ChiriType.stringify((variable2 ?? variable1).valueType)}"`)
 
 		const keyVariable = variable2 ? variable1 : undefined
@@ -67,7 +66,8 @@ export default MacroConstruct("each")
 			keyVariable.valueType = isRecord ? typeString.type : typeUint.type
 
 		const variable = variable2 ?? variable1
-		variable.valueType = valueType
+		if (variable)
+			variable.valueType = valueType
 
 		return {
 			iterable,
@@ -80,7 +80,8 @@ export default MacroConstruct("each")
 		const body = await consumeBody(reader, "inherit", sub => {
 			if (keyVariable)
 				sub.addOuterStatement(keyVariable)
-			sub.addOuterStatement(variable)
+			if (variable)
+				sub.addOuterStatement(variable)
 		})
 		return {
 			type: "each",
