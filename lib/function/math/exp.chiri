@@ -1,0 +1,5 @@
+;; Returns e (Euler's number) raised to the power of x
+;; @param x The exponent to raise e to
+#function exp returns dec:
+	#dec x
+	#return 2.718281828459045 ** x

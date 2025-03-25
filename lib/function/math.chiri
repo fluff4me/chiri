@@ -1,3 +1,6 @@
 #import:
 	math/lerp
 	math/unlerp
+	math/exp
+	math/log
+	math/curve

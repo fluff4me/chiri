@@ -1,0 +1,58 @@
+;; Curve the value t exponentially (IE, starts gentle, ends steep)
+;; @param from Rather than starting the curve at 0, start it here
+;; @param to Rather than ending the curve at 1, end it here
+;; @param t A decimal value from 0 to 1 representing how far along the curve's x axis to return the y position of
+;; @param steepness A value representing how steep the curve should be. Defaults to 4
+#function exp-lerp returns dec:
+	#dec from
+	#dec to
+	#dec t
+	#dec steepness ??= 4
+
+	#set t = (exp(steepness * t) - 1) / (exp(steepness) - 1)
+	#return from + t * (to - from)
+
+;; Curve the value t exponentially (IE, starts steep, ends gentle)
+;; @param from Rather than starting the curve at 0, start it here
+;; @param to Rather than ending the curve at 1, end it here
+;; @param t A decimal value from 0 to 1 representing how far along the curve's x axis to return the y position of
+;; @param steepness A value representing how steep the curve should be. Defaults to 50
+#function log-lerp returns dec:
+	#dec from
+	#dec to
+	#dec t
+	#dec steepness ??= 50
+
+	#dec lnBase = ln(steepness)
+	#set t = ln(1 + (steepness - 1) * t) / lnBase
+	#return from + t * (to - from)
+
+;; Curve the value t (0-1) along the second quadrant of a rounded square/circle.
+#function curve2 returns dec:
+	#dec from
+	#dec to
+	#dec t
+	#dec steepness ??= 2
+
+	#if t < 0:
+		#set t = 0
+	#if t > 1:
+		#set t = 1
+
+	#set t = (1 - (1 - t) ** steepness) ** (1 / steepness)
+	#return from + t * (to - from)
+
+;; Curve the value t (0-1) along the fourth quadrant of a rounded square/circle.
+#function curve4 returns dec:
+	#dec from
+	#dec to
+	#dec t
+	#dec steepness ??= 2
+
+	#if t < 0:
+		#set t = 0
+	#if t > 1:
+		#set t = 1
+
+	#set t = 1 - (1 - t ** steepness) ** (1 / steepness)
+	#return from + t * (to - from)

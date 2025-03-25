@@ -6,7 +6,7 @@ export interface ChiriEach extends ChiriMacroBlock {
     type: "each";
     iterable: ChiriExpressionOperand;
     keyVariable?: ChiriCompilerVariable;
-    variable: ChiriCompilerVariable;
+    variable?: ChiriCompilerVariable;
     content: ChiriStatement[];
     position: ChiriPosition;
 }

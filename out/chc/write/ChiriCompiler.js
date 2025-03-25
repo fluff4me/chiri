@@ -1051,7 +1051,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
                         const value = statement.keyVariable ? entry[1] : entry;
                         result.push(...compileStatements(statement.content, Scope.variables({
-                            [statement.variable.name.value]: { type: statement.variable.valueType, value },
+                            ...statement.variable && {
+                                [statement.variable.name.value]: { type: statement.variable.valueType, value },
+                            },
                             ...statement.keyVariable && {
                                 [statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
                             },
