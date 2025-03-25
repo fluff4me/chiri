@@ -132,6 +132,16 @@ namespace consumeExpression {
 	export function inline (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpressionOperand {
 		return consumeExpressionValidated(reader, ...expectedTypes)
 	}
+
+	export function inlineOptional (reader: ChiriReader, ...expectedType: ChiriType[]): ChiriExpressionOperand | undefined {
+		const e = reader.i
+		try {
+			return consumeExpressionValidated(reader, ...expectedType)
+		} catch {
+			reader.i = e
+			return undefined
+		}
+	}
 }
 
 export default consumeExpression
@@ -452,19 +462,26 @@ function consumeGetByKeyOrListSlice (reader: ChiriReader, operand: ChiriExpressi
 		return undefined
 
 	const position = reader.getPosition(reader.i - 1)
-	const range = !isListOperand ? undefined : consumeRangeOptional(reader, true)
-	if (range) {
-		reader.consume("]")
-		return {
-			type: "list-slice",
-			list: operand,
-			range: range,
-			valueType: operand.valueType,
-			position,
+	consumeRangeOptional.setCheckingForRange(true)
+	const expr = consumeExpression.inlineOptional(reader, isListOperand ? typeInt.type : typeString.type)
+	consumeRangeOptional.setCheckingForRange(false)
+	if (expr?.valueType.name.value !== typeString.type.name.value) {
+		const range = !isListOperand ? undefined : consumeRangeOptional(reader, true, expr)
+		if (range) {
+			reader.consume("]")
+			return {
+				type: "list-slice",
+				list: operand,
+				range: range,
+				valueType: operand.valueType,
+				position,
+			}
 		}
 	}
 
-	const expr = consumeExpression.inline(reader, isListOperand ? typeInt.type : typeString.type)
+	if (!expr)
+		throw reader.error("Expected expression")
+
 	reader.consume("]")
 	return {
 		type: "get-by-key",
@@ -474,3 +491,5 @@ function consumeGetByKeyOrListSlice (reader: ChiriReader, operand: ChiriExpressi
 		position,
 	}
 }
+
+consumeRangeOptional.setConsumeExpression(consumeExpression)
