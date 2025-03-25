@@ -1,0 +1,10 @@
+#function pad-left returns string:
+	#string string
+
+	#int length
+	#string with ??= " "
+
+	#while string::length < length:
+		#set string = "#{with}#{string}
+
+	#return string[-length..]
