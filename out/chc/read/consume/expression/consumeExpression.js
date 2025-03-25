@@ -69,6 +69,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return consumeExpressionValidated(reader, ...expectedTypes);
         }
         consumeExpression.inline = inline;
+        function inlineOptional(reader, ...expectedType) {
+            const e = reader.i;
+            try {
+                return consumeExpressionValidated(reader, ...expectedType);
+            }
+            catch {
+                reader.i = e;
+                return undefined;
+            }
+        }
+        consumeExpression.inlineOptional = inlineOptional;
     })(consumeExpression || (consumeExpression = {}));
     exports.default = consumeExpression;
     function validate(reader, e, operand, ...expectedTypes) {
@@ -327,18 +338,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!reader.consumeOptional("["))
             return undefined;
         const position = reader.getPosition(reader.i - 1);
-        const range = !isListOperand ? undefined : (0, consumeRangeOptional_1.default)(reader, true);
-        if (range) {
-            reader.consume("]");
-            return {
-                type: "list-slice",
-                list: operand,
-                range: range,
-                valueType: operand.valueType,
-                position,
-            };
+        consumeRangeOptional_1.default.setCheckingForRange(true);
+        const expr = consumeExpression.inlineOptional(reader, isListOperand ? typeInt_1.default.type : typeString_1.default.type);
+        consumeRangeOptional_1.default.setCheckingForRange(false);
+        if (expr?.valueType.name.value !== typeString_1.default.type.name.value) {
+            const range = !isListOperand ? undefined : (0, consumeRangeOptional_1.default)(reader, true, expr);
+            if (range) {
+                reader.consume("]");
+                return {
+                    type: "list-slice",
+                    list: operand,
+                    range: range,
+                    valueType: operand.valueType,
+                    position,
+                };
+            }
         }
-        const expr = consumeExpression.inline(reader, isListOperand ? typeInt_1.default.type : typeString_1.default.type);
+        if (!expr)
+            throw reader.error("Expected expression");
         reader.consume("]");
         return {
             type: "get-by-key",
@@ -348,5 +365,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             position,
         };
     }
+    consumeRangeOptional_1.default.setConsumeExpression(consumeExpression);
 });
 //# sourceMappingURL=consumeExpression.js.map

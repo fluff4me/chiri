@@ -1,0 +1,7 @@
+#function hex256 returns string:
+	#int num
+
+	#if num == 0:
+		#return "00
+
+	#return hex(num)::pad-left(2, "0")

@@ -7,22 +7,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeInt", "../consumeWordOptional", "../numeric/consumeIntegerOptional"], factory);
+        define(["require", "exports", "../../../type/ChiriType", "../../../type/typeInt"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = default_1;
     const ChiriType_1 = require("../../../type/ChiriType");
     const typeInt_1 = __importDefault(require("../../../type/typeInt"));
-    const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
-    const consumeIntegerOptional_1 = __importDefault(require("../numeric/consumeIntegerOptional"));
-    function default_1(reader, listSlice) {
+    let checkingForRange = false;
+    let consumeExpression;
+    exports.default = Object.assign(function (reader, listSlice, start) {
+        if (checkingForRange)
+            return undefined;
+        checkingForRange = true;
         const restore = reader.savePosition();
         const position = reader.getPosition();
-        const start = consumeRangeBound(reader);
+        start ??= consumeExpression.inlineOptional(reader, typeInt_1.default.type);
         const operator = reader.consumeOptional("...", "..");
-        const end = operator && consumeRangeBound(reader);
+        const end = operator && consumeExpression.inlineOptional(reader, typeInt_1.default.type);
+        checkingForRange = false;
         if (!operator || (!end && !listSlice)) {
             reader.restorePosition(restore);
             return undefined;
@@ -36,24 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             valueType: ChiriType_1.ChiriType.of("list", "int"),
             position,
         };
-    }
-    function consumeRangeBound(reader) {
-        const int = (0, consumeIntegerOptional_1.default)(reader);
-        if (int)
-            return int;
-        const varName = (0, consumeWordOptional_1.default)(reader);
-        if (!varName)
-            return undefined;
-        const position = reader.getPosition();
-        const variable = reader.getVariableOptional(varName.value);
-        if (!variable || !reader.types.isAssignable(variable.valueType, typeInt_1.default.type))
-            return undefined;
-        return {
-            type: "get",
-            name: varName,
-            valueType: variable.valueType,
-            position,
-        };
-    }
+    }, {
+        setConsumeExpression(ExpressionIn) {
+            consumeExpression = ExpressionIn;
+        },
+        setCheckingForRange(checkingForRangeIn) {
+            checkingForRange = checkingForRangeIn;
+        },
+    });
 });
 //# sourceMappingURL=consumeRangeOptional.js.map

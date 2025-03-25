@@ -4,3 +4,6 @@
 	string/split
 	string/trim
 	string/collapse
+	string/pad-left
+	string/pad-right
+	string/hex256

@@ -72,6 +72,7 @@ export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: 
 declare function consumeExpression(reader: ChiriReader, ...expectedTypes: ChiriType[]): Promise<ChiriExpressionResult>;
 declare namespace consumeExpression {
     function inline(reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriExpressionOperand;
+    function inlineOptional(reader: ChiriReader, ...expectedType: ChiriType[]): ChiriExpressionOperand | undefined;
 }
 export default consumeExpression;
 export declare function consumeOperatorOptional(reader: ChiriReader, operators: Partial<Record<Operator, Record<string, string | undefined>>>, precedence?: number): Operator | undefined;
