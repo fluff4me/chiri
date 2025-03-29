@@ -594,6 +594,7 @@ $$translate-y!length-percentage
 	%text-outline
 
 %text-shadow: text-shadow: 0 calc($space-1 * ($font-scaling / 3)) calc(($space-1 / 2) * ($font-scaling / 3)) light-dark(#0003, #0008)
+%text-shadow-none: text-shadow: none
 
 $$gradient-mask-height!length-percentage
 %gradient-mask:
