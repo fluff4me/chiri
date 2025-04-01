@@ -63,6 +63,7 @@ export type PseudoName =
 	| "before" | "after"
 	| "backdrop"
 	| "range-thumb" | "range-track"
+	| "placeholder"
 
 export interface ChiriComponentPseudo extends ChiriComponentBase {
 	subType: "pseudo"
