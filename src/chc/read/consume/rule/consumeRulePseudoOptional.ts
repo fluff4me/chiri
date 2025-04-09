@@ -13,7 +13,7 @@ export default async (reader: ChiriReader): Promise<ChiriComponentPseudo | Chiri
 	const result = _
 		?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new", "view-transition!image-pair")
 		?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group", "view-transition-class!image-pair")
-		?? consumePseudoType(reader, "pseudo", "before", "after", "view-transition", "backdrop", "range-thumb", "range-track", "placeholder")
+		?? consumePseudoType(reader, "pseudo", "before", "after", "view-transition", "backdrop", "range-thumb", "range-track", "placeholder", "details-content")
 	if (!result)
 		return undefined
 
