@@ -515,7 +515,7 @@ $$translate-y!length-percentage
 			height: #{size}-content
 
 %width-auto: width: auto
-%height-auto: width: auto
+%height-auto: height: auto
 %size-auto:
 	width: auto
 	height: auto
@@ -669,6 +669,7 @@ $$gradient-mask-height!length-percentage
 %transition-discrete: transition-behaviour: allow-discrete
 %no-transition: transition: none
 %transition-none: transition: none
+%interpolate-size: interpolate-size: allow-keywords
 
 %outline-none: outline: none
 %no-outline: outline: none
