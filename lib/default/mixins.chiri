@@ -595,6 +595,7 @@ $$translate-y!length-percentage
 
 %text-shadow: text-shadow: 0 calc($space-1 * ($font-scaling / 3)) calc(($space-1 / 2) * ($font-scaling / 3)) light-dark(#0003, #0008)
 %text-shadow-none: text-shadow: none
+%filter-shadow: filter: drop-shadow(0 calc($space-1 * ($font-scaling / 3)) calc(($space-1 / 2) * ($font-scaling / 3)) light-dark(#0003, #0008))
 
 $$gradient-mask-height!length-percentage
 %gradient-mask:
@@ -641,6 +642,9 @@ $$gradient-mask-height!length-percentage
 %color-dodge: mix-blend-mode: color-dodge
 %colour-dodge: mix-blend-mode: color-dodge
 
+%background-clip-text:
+	background-clip: text
+	color: transparent
 %background-unclip: background-clip: padding-box
 %backdrop-filter-none: backdrop-filter: none
 %backdrop-blur: backdrop-filter: ${backdrop-filter-override: blur($space-2)}
