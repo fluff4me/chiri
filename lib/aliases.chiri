@@ -17,6 +17,10 @@
 	mask-image
 	-webkit-mask-image
 
+#alias user-select:
+	user-select
+	-webkit-user-select
+
 #do:
 	#list!string properties = [
 		"border"
