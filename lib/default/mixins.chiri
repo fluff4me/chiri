@@ -480,7 +480,7 @@ $$translate-y!length-percentage
 %pointer-events-all: pointer-events: all
 
 #do:
-	#list!string units = ["em", "lh"]
+	#list!string units = ["em", "lh", "cap"]
 
 	#each units as var unit:
 		%width-#{unit}: width: round(1#{unit}, 1px)
