@@ -674,6 +674,8 @@ $$gradient-mask-height!length-percentage
 %scheme-dark: colour-scheme: dark
 %scheme-light-dark: colour-scheme: light dark
 
+%transition-blur: $transition-duration: $transition-blur
+%transition-focus: $transition-duration: $transition-focus
 %transition-discrete: transition-behaviour: allow-discrete
 %no-transition: transition: none
 %transition-none: transition: none
