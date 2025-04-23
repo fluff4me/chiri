@@ -2,7 +2,7 @@ $$transitions!*
 #macro transition:
 	#body!text transitions
 
-	$transition-duration: $transition-blur
+	%transition-blur
 	$transitions:
 		#include transitions
 	transition: $transitions
