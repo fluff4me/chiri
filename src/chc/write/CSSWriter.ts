@@ -89,6 +89,8 @@ export type CSSDocumentSection =
 const SPLIT_PSEUDO_MAP: Partial<Record<PseudoName, string[]>> = {
 	"range-thumb": ["-webkit-slider-thumb", "-moz-range-thumb"],
 	"range-track": ["-webkit-slider-runnable-track", "-moz-range-track"],
+	"swatch": ["-webkit-color-swatch", "-moz-color-swatch"],
+	"swatch-wrapper": ["-webkit-color-swatch-wrapper"],
 }
 
 export default class CSSWriter extends Writer {
