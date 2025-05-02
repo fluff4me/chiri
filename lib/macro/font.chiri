@@ -18,7 +18,7 @@
 		$font-scale-factor: #{scale-factor}
 		$font-vertical-align: #{vertical-align}em
 		$font-letter-spacing: #{letter-spacing}em
-		font-family: "#{name}"
+		font-family: "#{name}", "Segoe UI Emoji"
 		font-weight: $weight-normal
 		letter-spacing: $font-letter-spacing
 		#include body
