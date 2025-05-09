@@ -1,8 +1,11 @@
 #macro font-family:
 	#string name
+	#uint weight-light ??= 300
 	#uint weight-normal ??= 400
+	#uint weight-semibold ??= 500
 	#uint weight-bold ??= 600
-	#uint weight-bolder ??= 800
+	#uint weight-bolder ??= 700
+	#uint weight-black ??= 900
 	#dec scale-factor ??= 1
 	;; in em unit
 	#dec vertical-align ??= 0
@@ -12,9 +15,12 @@
 	#body!component body?
 
 	%font-#{name}:
+		$weight-light: #{weight-light}
 		$weight-normal: #{weight-normal}
+		$weight-semibold: #{weight-semibold}
 		$weight-bold: #{weight-bold}
 		$weight-bolder: #{weight-bolder}
+		$weight-black: #{weight-black}
 		$font-scale-factor: #{scale-factor}
 		$font-vertical-align: #{vertical-align}em
 		$font-letter-spacing: #{letter-spacing}em
