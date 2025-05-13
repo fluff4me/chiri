@@ -27,6 +27,8 @@
         ":focus-any": ":focus-within",
         "empty": ":empty",
         "full": ":not(:empty)",
+        "odd": ":nth-child(odd)",
+        "even": ":nth-child(even)",
     };
     exports.STATES = Object.keys(exports.STATE_MAP);
     exports.STATE_MAP_SPECIAL = {

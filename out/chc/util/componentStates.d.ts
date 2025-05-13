@@ -15,6 +15,8 @@ export declare const STATE_MAP: {
     ":focus-any": string;
     empty: string;
     full: string;
+    odd: string;
+    even: string;
 };
 export type ComponentState = keyof typeof STATE_MAP;
 export declare const STATES: ComponentState[];
