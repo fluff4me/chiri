@@ -15,6 +15,8 @@ export const STATE_MAP = {
 	":focus-any": ":focus-within",
 	"empty": ":empty",
 	"full": ":not(:empty)",
+	"odd": ":nth-child(odd)",
+	"even": ":nth-child(even)",
 }
 
 export type ComponentState = keyof typeof STATE_MAP
