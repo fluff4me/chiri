@@ -906,7 +906,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			case "state":
 				selector = createSelector(containingSelector, {
 					class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
-					state: mergeWords(containingSelector?.state, ":", statement.states),
+					state: mergeWords(containingSelector?.state, "):where(", statement.states, false),
 					spread: statement.spread || undefined,
 				})
 				break
@@ -1718,16 +1718,23 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		}
 	}
 
-	function resolveWordPreserve (word: ChiriWordInterpolated | ChiriWord | string): ChiriWord {
-		return typeof word === "object" && word.type === "word" ? word : {
+	function resolveWordPreserve (word: ChiriWordInterpolated | ChiriWord | string, restrictCharacters = true): ChiriWord {
+		if (typeof word === "object" && word.type === "word")
+			return word
+
+		let value = typeof word === "string" ? word : stringifyText(compiler, word)
+		if (restrictCharacters)
+			value = value.replace(/[^\w-]+/g, "-")
+
+		return {
 			type: "word",
-			value: typeof word === "string" ? word : stringifyText(compiler, word).replace(/[^\w-]+/g, "-"),
+			value,
 			position: typeof word === "string" ? INTERNAL_POSITION : word.position,
 		}
 	}
 
-	function mergeWords (words: ChiriWord[] | undefined, separator: string, newSegment: (ChiriWordInterpolated | ChiriWord | string)[]): ChiriWord[] {
-		return !words?.length ? newSegment.map(resolveWordPreserve) : words.flatMap(selector => newSegment.map((newSegment): ChiriWord => resolveWordPreserve({
+	function mergeWords (words: ChiriWord[] | undefined, separator: string, newSegment: (ChiriWordInterpolated | ChiriWord | string)[], restrictCharacters = true): ChiriWord[] {
+		return !words?.length ? newSegment.map(segment => resolveWordPreserve(segment, restrictCharacters)) : words.flatMap(selector => newSegment.map((newSegment): ChiriWord => resolveWordPreserve({
 			type: "text",
 			subType: "word-interpolated",
 			valueType: ChiriType.of("string"),
@@ -1737,7 +1744,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				...typeof newSegment === "string" ? [newSegment] : newSegment.type === "word" ? [newSegment.value] : newSegment.content,
 			],
 			position: typeof newSegment === "string" ? INTERNAL_POSITION : newSegment.position,
-		})))
+		}, restrictCharacters)))
 	}
 
 	function mergeText (position: ChiriPosition, ...texts: ChiriBaseText[]): ChiriValueText {
