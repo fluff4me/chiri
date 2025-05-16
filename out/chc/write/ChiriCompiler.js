@@ -653,7 +653,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 case "state":
                     selector = createSelector(containingSelector, {
                         class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
-                        state: mergeWords(containingSelector?.state, ":", statement.states),
+                        state: mergeWords(containingSelector?.state, "):where(", statement.states, false),
                         spread: statement.spread || undefined,
                     });
                     break;
@@ -1330,15 +1330,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
             };
         }
-        function resolveWordPreserve(word) {
-            return typeof word === "object" && word.type === "word" ? word : {
+        function resolveWordPreserve(word, restrictCharacters = true) {
+            if (typeof word === "object" && word.type === "word")
+                return word;
+            let value = typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word);
+            if (restrictCharacters)
+                value = value.replace(/[^\w-]+/g, "-");
+            return {
                 type: "word",
-                value: typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word).replace(/[^\w-]+/g, "-"),
+                value,
                 position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
             };
         }
-        function mergeWords(words, separator, newSegment) {
-            return !words?.length ? newSegment.map(resolveWordPreserve) : words.flatMap(selector => newSegment.map((newSegment) => resolveWordPreserve({
+        function mergeWords(words, separator, newSegment, restrictCharacters = true) {
+            return !words?.length ? newSegment.map(segment => resolveWordPreserve(segment, restrictCharacters)) : words.flatMap(selector => newSegment.map((newSegment) => resolveWordPreserve({
                 type: "text",
                 subType: "word-interpolated",
                 valueType: ChiriType_1.ChiriType.of("string"),
@@ -1348,7 +1353,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     ...typeof newSegment === "string" ? [newSegment] : newSegment.type === "word" ? [newSegment.value] : newSegment.content,
                 ],
                 position: typeof newSegment === "string" ? constants_1.INTERNAL_POSITION : newSegment.position,
-            })));
+            }, restrictCharacters)));
         }
         function mergeText(position, ...texts) {
             return {
