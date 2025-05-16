@@ -615,6 +615,7 @@ $$gradient-mask-height!length-percentage
 
 %overflow-visible: overflow: visible
 %overflow-hidden: overflow: hidden
+%overflow-clip: overflow: clip
 %overflow-auto:
 	scroll-behaviour: smooth
 	overflow: auto
