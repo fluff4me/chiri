@@ -74,7 +74,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const rootSpecials = [];
         const blocks = [];
         let usedMixinIndex = 0;
-        let ifState = true;
         const css = new CSSWriter_1.default(ast, dest);
         const es = new ESWriter_1.default(ast, dest);
         const dts = new DTSWriter_1.default(ast, dest);
@@ -139,7 +138,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Scope
         ////////////////////////////////////
         //#region Blocks
-        function pushBlock(block) {
+        function pushBlock(inblock) {
+            const block = inblock;
+            block.ifState = true;
             blocks.push(block);
             return block;
         }
@@ -150,6 +151,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (index < blocks.length - 1)
                 throw error(block.position, `This #${block.type} is not the most recent block`);
             blocks.pop();
+        }
+        function blockIfState() {
+            return blocks.at(-1)?.ifState ?? true;
+        }
+        function setBlockIfState(ifState) {
+            const block = blocks.at(-1);
+            if (!block)
+                return;
+            block.ifState = ifState;
         }
         function blockBroken(block) {
             return !blocks.includes(block);
@@ -1030,9 +1040,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             value: Object.assign([...statement.content], { isBody: true }),
                         };
                     }
-                    blocks.push(statement);
+                    const block = pushBlock(statement);
                     const result = compileStatements(fn.content, assignments, contextConsumer);
-                    popBlock(statement);
+                    popBlock(block);
                     return result;
                 }
                 case "each": {
@@ -1058,10 +1068,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 [statement.keyVariable.name.value]: { type: statement.keyVariable.valueType, value: key },
                             },
                         }), contextConsumer));
-                        if (blockBroken(statement))
+                        if (blockBroken(block))
                             break;
                     }
-                    popBlock(statement);
+                    popBlock(block);
                     return result;
                 }
                 case "for": {
@@ -1075,10 +1085,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (statement.update)
                             statements.push(statement.update);
                         result.push(...compileStatements(statements, undefined, contextConsumer));
-                        if (blockBroken(statement))
+                        if (blockBroken(block))
                             break;
                     }
-                    popBlock(statement);
+                    popBlock(block);
                     scopes.pop();
                     return result;
                 }
@@ -1090,20 +1100,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         block.continuing = undefined;
                         const statements = statement.content.slice();
                         result.push(...compileStatements(statements, undefined, contextConsumer));
-                        if (blockBroken(statement))
+                        if (blockBroken(block))
                             break;
                     }
-                    popBlock(statement);
+                    popBlock(block);
                     scopes.pop();
                     return result;
                 }
                 case "elseif":
-                    if (ifState)
+                    if (blockIfState())
                         return EMPTY;
                 // eslint-disable-next-line no-fallthrough
                 case "if": {
-                    ifState = !!(0, resolveExpression_1.default)(compiler, statement.condition);
-                    if (!ifState)
+                    setBlockIfState(!!(0, resolveExpression_1.default)(compiler, statement.condition));
+                    if (!blockIfState())
                         return EMPTY;
                     const block = pushBlock(statement);
                     const result = [];
@@ -1111,11 +1121,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         block.continuing = undefined;
                         result.push(...compileStatements(statement.content, undefined, contextConsumer));
                     } while (block.continuing);
-                    popBlock(statement);
+                    popBlock(block);
                     return result;
                 }
                 case "else": {
-                    if (ifState)
+                    if (blockIfState())
                         return EMPTY;
                     const block = pushBlock(statement);
                     const result = [];
@@ -1123,7 +1133,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         block.continuing = undefined;
                         result.push(...compileStatements(statement.content, undefined, contextConsumer));
                     } while (block.continuing);
-                    popBlock(statement);
+                    popBlock(block);
                     return result;
                 }
                 case "do": {
@@ -1133,7 +1143,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         block.continuing = undefined;
                         result.push(...compileStatements(statement.content, undefined, contextConsumer));
                     } while (block.continuing);
-                    popBlock(statement);
+                    popBlock(block);
                     return result;
                 }
                 case "break": {
@@ -1303,9 +1313,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const fnVar = getVariable(call.name.value, call.position, true);
             const fn = isFunction(fnVar) ? fnVar : getFunction(call.name.value, call.position);
             const assignments = resolveAssignments(call.assignments, call.indexedAssignments ? (0, getFunctionParameters_1.default)(fn).map(p => p.name.value) : undefined);
-            blocks.push(call);
+            const block = pushBlock(call);
             const result = compileStatements(fn.content, assignments, compileFunction);
-            popBlock(call);
+            popBlock(block);
             if (result.length > 1)
                 throw internalError(call.position, "Function call returned multiple values");
             if (result.length === 0)

@@ -1,10 +1,25 @@
-#each in ["padding", "padding-block", "padding-inline"] as var property:
-	#shorthand #{property}:
-		padding-top
-		padding-left
-		padding-right
-		padding-bottom
-		padding-inline-start
-		padding-inline-end
-		padding-block-start
-		padding-block-end
+#shorthand padding:
+	padding-top
+	padding-left
+	padding-right
+	padding-bottom
+	padding-inline-start
+	padding-inline-end
+	padding-block-start
+	padding-block-end
+
+#shorthand padding-block:
+	padding-top
+	padding-left
+	padding-right
+	padding-bottom
+	padding-block-start
+	padding-block-end
+
+#shorthand padding-inline:
+	padding-top
+	padding-left
+	padding-right
+	padding-bottom
+	padding-inline-start
+	padding-inline-end
