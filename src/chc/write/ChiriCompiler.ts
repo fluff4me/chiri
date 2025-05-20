@@ -65,6 +65,7 @@ namespace Scope {
 
 type Block = (Extract<ChiriStatement, ChiriMacroBlock> | ChiriFunctionCall | ChiriMacroUse) & {
 	continuing?: true
+	ifState: boolean
 }
 
 ////////////////////////////////////
@@ -144,7 +145,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	const rootSpecials: ResolvedRootSpecial[] = []
 	const blocks: Block[] = []
 	let usedMixinIndex = 0
-	let ifState = true
 
 	const css = new CSSWriter(ast, dest)
 	const es = new ESWriter(ast, dest)
@@ -233,7 +233,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Blocks
 
-	function pushBlock<BLOCK extends Block> (block: BLOCK): BLOCK & Block {
+	function pushBlock<BLOCK extends Omit<Block, "ifState">> (inblock: BLOCK): BLOCK & Block {
+		const block = inblock as any as Block
+		block.ifState = true
 		blocks.push(block)
 		return block
 	}
@@ -247,6 +249,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			throw error(block.position, `This #${block.type} is not the most recent block`)
 
 		blocks.pop()
+	}
+
+	function blockIfState () {
+		return blocks.at(-1)?.ifState ?? true
+	}
+
+	function setBlockIfState (ifState: boolean) {
+		const block = blocks.at(-1)
+		if (!block) return
+
+		block.ifState = ifState
 	}
 
 	function blockBroken (block: Block) {
@@ -1351,9 +1364,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					}
 				}
 
-				blocks.push(statement)
+				const block = pushBlock(statement)
 				const result = compileStatements(fn.content, assignments, contextConsumer)
-				popBlock(statement)
+				popBlock(block)
 				return result
 			}
 
@@ -1385,11 +1398,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 							},
 						}),
 						contextConsumer))
-					if (blockBroken(statement))
+					if (blockBroken(block))
 						break
 				}
 
-				popBlock(statement)
+				popBlock(block)
 				return result
 			}
 
@@ -1406,11 +1419,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						statements.push(statement.update)
 
 					result.push(...compileStatements(statements, undefined, contextConsumer))
-					if (blockBroken(statement))
+					if (blockBroken(block))
 						break
 				}
 
-				popBlock(statement)
+				popBlock(block)
 				scopes.pop()
 				return result
 			}
@@ -1424,23 +1437,23 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					block.continuing = undefined
 					const statements = statement.content.slice()
 					result.push(...compileStatements(statements, undefined, contextConsumer))
-					if (blockBroken(statement))
+					if (blockBroken(block))
 						break
 				}
 
-				popBlock(statement)
+				popBlock(block)
 				scopes.pop()
 				return result
 			}
 
 			case "elseif":
-				if (ifState)
+				if (blockIfState())
 					return EMPTY
 
 			// eslint-disable-next-line no-fallthrough
 			case "if": {
-				ifState = !!resolveExpression(compiler, statement.condition)
-				if (!ifState)
+				setBlockIfState(!!resolveExpression(compiler, statement.condition))
+				if (!blockIfState())
 					return EMPTY
 
 				const block = pushBlock(statement)
@@ -1449,12 +1462,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					block.continuing = undefined
 					result.push(...compileStatements(statement.content, undefined, contextConsumer))
 				} while (block.continuing)
-				popBlock(statement)
+				popBlock(block)
 				return result
 			}
 
 			case "else": {
-				if (ifState)
+				if (blockIfState())
 					return EMPTY
 
 				const block = pushBlock(statement)
@@ -1463,7 +1476,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					block.continuing = undefined
 					result.push(...compileStatements(statement.content, undefined, contextConsumer))
 				} while (block.continuing)
-				popBlock(statement)
+				popBlock(block)
 				return result
 			}
 
@@ -1474,7 +1487,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					block.continuing = undefined
 					result.push(...compileStatements(statement.content, undefined, contextConsumer))
 				} while (block.continuing)
-				popBlock(statement)
+				popBlock(block)
 				return result
 			}
 
@@ -1683,9 +1696,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		const fnVar = getVariable(call.name.value, call.position, true)
 		const fn = isFunction(fnVar) ? fnVar : getFunction(call.name.value, call.position)
 		const assignments = resolveAssignments(call.assignments, call.indexedAssignments ? getFunctionParameters(fn).map(p => p.name.value) : undefined)
-		blocks.push(call)
+		const block = pushBlock(call)
 		const result = compileStatements(fn.content, assignments, compileFunction)
-		popBlock(call)
+		popBlock(block)
 		if (result.length > 1)
 			throw internalError(call.position, "Function call returned multiple values")
 
