@@ -622,19 +622,19 @@ $$gradient-mask-height!length-percentage
 %overflow-scroll:
 	scroll-behaviour: smooth
 	overflow: scroll
-%overflow-auto-y:
+%overflow-y-auto:
 	scroll-behaviour: smooth
 	overflow-x: hidden
 	overflow-y: auto
-%overflow-scroll-y:
+%overflow-y-scroll:
 	scroll-behaviour: smooth
 	overflow-x: hidden
 	overflow-y: scroll
-%overflow-auto-x:
+%overflow-x-auto:
 	scroll-behaviour: smooth
 	overflow-x: auto
 	overflow-y: hidden
-%overflow-scroll-x:
+%overflow-x-scroll:
 	scroll-behaviour: smooth
 	overflow-x: scroll
 	overflow-y: hidden
