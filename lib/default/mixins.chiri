@@ -480,7 +480,13 @@ $$translate-y!length-percentage
 		%cursor-#{type}: cursor: #{type}
 
 %no-select: user-select: none
+%auto-select: user-select: auto
+%all-select: user-select: all
+%text-select: user-select: text
 %user-select-none: user-select: none
+%user-select-auto: user-select: auto
+%user-select-all: user-select: all
+%user-select-text: user-select: text
 %no-pointer-events: pointer-events: none
 %pointer-events-none: pointer-events: none
 %pointer-events: pointer-events: all
