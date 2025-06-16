@@ -1,0 +1,6 @@
+#function light-dark-bg returns string:
+	#raw colour
+	#return "light-dark(oklch(from #{colour} 70% 30% h), oklch(from #{colour} 40% 30% h))"
+#function light-dark-fg returns string:
+	#raw colour
+	#return "light-dark(oklch(from #{colour} 30% c h), oklch(from #{colour} 70% c h))"
