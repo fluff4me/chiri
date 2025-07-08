@@ -663,6 +663,8 @@ $$gradient-mask-height!length-percentage
 %background-unclip: background-clip: padding-box
 %backdrop-filter-none: backdrop-filter: none
 %backdrop-blur: backdrop-filter: ${backdrop-filter-override: blur($space-2)}
+%backdrop-blur-0: backdrop-filter: none
+#each in 1..9 as int i: %backdrop-blur-#{i}: backdrop-filter: blur(calc($space-2 * (#{i} / 9)))
 
 #macro backdrop-blur-before:
 	#body!component content
