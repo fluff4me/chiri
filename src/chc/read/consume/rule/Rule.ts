@@ -66,6 +66,7 @@ export type PseudoName =
 	| "placeholder"
 	| "details-content"
 	| "swatch" | "swatch-wrapper"
+	| "marker"
 
 export interface ChiriComponentPseudo extends ChiriComponentBase {
 	subType: "pseudo"
