@@ -4,6 +4,7 @@ $font-scale-factor: 1
 	$weight-#{weight}: #{weight * 100}
 
 $weight-normal: 400
+$weight-semibold: 500
 $weight-bold: 600
 $weight-bolder: 800
 

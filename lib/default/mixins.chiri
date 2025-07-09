@@ -540,6 +540,7 @@ $$translate-y!length-percentage
 
 %weight-inherit: font-weight: inherit
 %weight-normal: font-weight: $weight-normal
+%weight-semibold: font-weight: $weight-semibold
 %weight-bold: font-weight: $weight-bold
 %bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
@@ -731,3 +732,7 @@ $$gradient-mask-height!length-percentage
 		-webkit-box-orient: vertical
 		-webkit-line-clamp: #{i}
 		%overflow-hidden
+
+%appearance-none:
+	appearance: none
+	-webkit-appearance: none
