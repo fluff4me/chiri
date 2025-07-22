@@ -247,6 +247,8 @@ $$translate-y!length-percentage
 			%padding-#{i}-#{j}: padding: $space-#{i} $space-#{j}
 			%margin-#{i}-#{j}: margin: $space-#{i} $space-#{j}
 			%unmargin-#{i}-#{j}: margin: calc($space-#{i} * -1) calc($space-#{j} * -1)
+			%inset-#{i}-#{j}: inset: $space-#{i} $space-#{j}
+			%uninset-#{i}-#{j}: inset: calc($space-#{i} * -1) calc($space-#{j} * -1)
 
 #do:
 	#list!string properties = [
@@ -736,3 +738,5 @@ $$gradient-mask-height!length-percentage
 %appearance-none:
 	appearance: none
 	-webkit-appearance: none
+
+%isolate: isolation: isolate
