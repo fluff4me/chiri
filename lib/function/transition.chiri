@@ -1,28 +1,11 @@
 $$transition-duration!time
+$$transition-ease!*
 
 #function transition with duration!(string dec) delay!(string dec) returns string:
 	#string property
 	#duration duration ??= $transition-duration
-	#string ease ??= "ease-out
+	#string ease ??= ${transition-ease: ease-out}
 	#delay delay ??= 0
 	#string duration-string = if duration is "string": "#{duration}" else: "calc(#{duration} * 1s)"
 	#string delay-string = if delay is "string": "#{delay}" else: "calc(#{delay} * 1s)"
 	#return "#{property} #{duration-string} #{ease} #{delay-string}"
-
-#function transition-focus with duration!(string dec) delay!(string dec) returns string:
-	#string property
-	#string ease ??= "ease-out
-	#delay delay ??= 0
-	#return transition(property, $transition-focus, ease, delay)
-
-#function transition-blur with duration!(string dec) delay!(string dec) returns string:
-	#string property
-	#string ease ??= "ease-out
-	#delay delay ??= 0
-	#return transition(property, $transition-blur, ease, delay)
-
-#function transition-action with duration!(string dec) delay!(string dec) returns string:
-	#string property
-	#string ease ??= "ease-out
-	#delay delay ??= 0
-	#return transition(property, $transition-action, ease, delay)
