@@ -695,6 +695,10 @@ $$gradient-mask-height!length-percentage
 
 %transition-blur: $transition-duration: $transition-blur
 %transition-focus: $transition-duration: $transition-focus
+%transition-ease-out: $transition-ease: ease-out
+%transition-ease-in: $transition-ease: ease-in
+%transition-ease-in-out: $transition-ease: ease-in-out
+%transition-linear: $transition-ease: linear
 %transition-discrete: transition-behaviour: allow-discrete
 %no-transition: transition: none
 %transition-none: transition: none
