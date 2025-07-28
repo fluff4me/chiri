@@ -747,3 +747,10 @@ $$gradient-mask-height!length-percentage
 	-webkit-appearance: none
 
 %isolate: isolation: isolate
+
+%letter-spacing-0: letter-spacing: 0
+%letter-spacing-1: letter-spacing: .05em
+%letter-spacing-2: letter-spacing: .1em
+%letter-spacing-3: letter-spacing: .2em
+%letter-spacing-4: letter-spacing: .4em
+%letter-spacing-5: letter-spacing: .8em
