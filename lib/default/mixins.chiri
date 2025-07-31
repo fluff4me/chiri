@@ -554,6 +554,9 @@ $$translate-y!length-percentage
 %style-normal: font-style: normal
 %italic: font-style: italic
 %style-italic: font-style: italic
+#each in 1..10 as int i:
+	%italic-#{i}: font-style: oblique #{5 * i}deg
+	%style-italic-#{i}: font-style: oblique #{5 * i}deg
 
 %no-decoration: text-decoration: none
 %decoration-none: text-decoration: none
@@ -695,6 +698,7 @@ $$gradient-mask-height!length-percentage
 
 %transition-blur: $transition-duration: $transition-blur
 %transition-focus: $transition-duration: $transition-focus
+%transition-active: $transition-duration: $transition-active
 %transition-ease-out: $transition-ease: ease-out
 %transition-ease-in: $transition-ease: ease-in
 %transition-ease-in-out: $transition-ease: ease-in-out
@@ -748,9 +752,18 @@ $$gradient-mask-height!length-percentage
 
 %isolate: isolation: isolate
 
+%letter-spacing-inherit: letter-spacing: inherit
 %letter-spacing-0: letter-spacing: 0
 %letter-spacing-1: letter-spacing: .05em
 %letter-spacing-2: letter-spacing: .1em
 %letter-spacing-3: letter-spacing: .2em
 %letter-spacing-4: letter-spacing: .4em
 %letter-spacing-5: letter-spacing: .8em
+
+%word-spacing-inherit: word-spacing: inherit
+%word-spacing-0: word-spacing: 0
+%word-spacing-1: word-spacing: .05em
+%word-spacing-2: word-spacing: .1em
+%word-spacing-3: word-spacing: .2em
+%word-spacing-4: word-spacing: .4em
+%word-spacing-5: word-spacing: .8em
