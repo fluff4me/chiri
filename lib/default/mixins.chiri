@@ -768,3 +768,5 @@ $$gradient-mask-height!length-percentage
 %word-spacing-3: word-spacing: .2em
 %word-spacing-4: word-spacing: .4em
 %word-spacing-5: word-spacing: .8em
+
+%tabular-nums: font-variant-numeric: tabular-nums
