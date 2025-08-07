@@ -64,6 +64,7 @@ export type PseudoName =
 	| "backdrop"
 	| "range-thumb" | "range-track"
 	| "placeholder"
+	| "selection"
 	| "details-content"
 	| "swatch" | "swatch-wrapper"
 	| "marker"
