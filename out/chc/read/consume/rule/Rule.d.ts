@@ -49,7 +49,7 @@ export interface ChiriComponentStateScheme extends ChiriComponentBase {
     spread: boolean;
     scheme: "dark" | "light";
 }
-export type PseudoName = "before" | "after" | "backdrop" | "range-thumb" | "range-track" | "placeholder" | "details-content" | "swatch" | "swatch-wrapper" | "marker";
+export type PseudoName = "before" | "after" | "backdrop" | "range-thumb" | "range-track" | "placeholder" | "selection" | "details-content" | "swatch" | "swatch-wrapper" | "marker";
 export interface ChiriComponentPseudo extends ChiriComponentBase {
     subType: "pseudo";
     spread: boolean;
