@@ -550,6 +550,7 @@ $$translate-y!length-percentage
 %bold: font-weight: $weight-bold
 %weight-bolder: font-weight: $weight-bolder
 %bolder: font-weight: $weight-bolder
+%weight-black: font-weight: $weight-black
 
 %style-normal: font-style: normal
 %italic: font-style: italic
@@ -723,6 +724,7 @@ $$gradient-mask-height!length-percentage
 %vertical-align-top: vertical-align: top
 %vertical-align-super: vertical-align: super
 %vertical-align-middle: vertical-align: middle
+%vertical-align-bottom: vertical-align: bottom
 
 %white-space-inherit: white-space: inherit
 %white-space-normal: white-space: normal

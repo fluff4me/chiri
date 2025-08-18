@@ -7,6 +7,7 @@ $weight-normal: 400
 $weight-semibold: 500
 $weight-bold: 600
 $weight-bolder: 800
+$weight-black: 900
 
 #record!string space = {
 	0: "0rem
