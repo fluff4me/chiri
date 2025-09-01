@@ -562,7 +562,7 @@ $$translate-y!length-percentage
 %no-decoration: text-decoration: none
 %decoration-none: text-decoration: none
 %decoration-underline: text-decoration: underline
-%decoration-strikethrough: text-decoration: strikethrough
+%decoration-strikethrough: text-decoration: line-through
 
 %uppercase: text-transform: uppercase
 %lowercase: text-transform: lowercase
