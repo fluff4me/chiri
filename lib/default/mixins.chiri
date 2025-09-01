@@ -281,8 +281,6 @@ $$translate-y!length-percentage
 #each in 0...15 as var i:
 	#list!string background-properties = [
 		"background
-		"border-color
-		"border-colour
 		"border-block-color
 		"border-block-colour
 		"border-inline-color
@@ -300,6 +298,13 @@ $$translate-y!length-percentage
 		%#{property}-#{i}: #{property}: light-dark($light-#{i}, $dark-#{i})
 		%#{property}-dark-#{i}: #{property}: $dark-#{i}
 		%#{property}-light-#{i}: #{property}: $light-#{i}
+
+	%border-color-#{i}: $border-colour: light-dark($light-#{i}, $dark-#{i})
+	%border-color-dark-#{i}: $border-colour: $dark-#{i}
+	%border-color-light-#{i}: $border-colour: $light-#{i}
+	%border-colour-#{i}: $border-colour: light-dark($light-#{i}, $dark-#{i})
+	%border-colour-dark-#{i}: $border-colour: $dark-#{i}
+	%border-colour-light-#{i}: $border-colour: $light-#{i}
 
 	#list!string foreground-properties = [
 		"color
@@ -618,9 +623,12 @@ $$translate-y!length-percentage
 
 	%text-outline
 
-%text-shadow: text-shadow: calc(${text-shadow-em: 1em} * .02) calc(${text-shadow-em: 1em} * .1) calc(${text-shadow-em: 1em} * .05) light-dark(#0003, #0005)
+%text-shadow: text-shadow: calc(${text-shadow-em: 1em} * .02) calc(${text-shadow-em: 1em} * .1) calc(${text-shadow-em: 1em} * .05) oklch(from light-dark(#0003, #0005) l c h / calc(alpha * ${text-shadow-intensity: 1}))
 %text-shadow-none: text-shadow: none
 %filter-shadow: filter: drop-shadow(.02em .1em .05em light-dark(#0003, #0005))
+
+#each in 1...9 as var i:
+	%text-shadow-intensity-#{i}: $text-shadow-intensity: #{.1 * i}
 
 $$gradient-mask-height!length-percentage
 %gradient-mask:
