@@ -572,6 +572,8 @@ $$translate-y!length-percentage
 %uppercase: text-transform: uppercase
 %lowercase: text-transform: lowercase
 
+%line-height-normal: line-height: normal
+
 #each in 0..72 as var raw:
 	#int angle = raw * 5
 	%rotate-#{angle}: rotate: #{angle}deg
