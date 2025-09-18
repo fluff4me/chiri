@@ -426,6 +426,9 @@ $$translate-y!length-percentage
 %justify-self-first-baseline: justify-self: first-baseline
 %justify-self-last-baseline: justify-self: last-baseline
 
+%column-auto: grid-column: auto
+%row-auto: grid-row: auto
+
 #each in 1...9 as var start:
 	%column-#{start}: grid-column: #{start}
 	%row-#{start}: grid-row: #{start}
