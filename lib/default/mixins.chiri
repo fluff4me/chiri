@@ -99,8 +99,8 @@ $$box-shadow-intensity!length-percentage: 100%
 #string box-shadow-top-inset-2 = box-shadow-inset-2
 #string box-shadow-top-left-inset-1 = "inset $space-1 $space-1 $space-1 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
 #string box-shadow-top-left-inset-2 = "inset $space-2 $space-2 $space-2 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
-#string box-shadow-bottom-1 = "0 calc($space-1 * -1) $space-1 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
-#string box-shadow-bottom-2 = "0 calc($space-2 * -1) $space-2 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
+#string box-shadow-top-1 = "0 calc($space-1 * -1) $space-1 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
+#string box-shadow-top-2 = "0 calc($space-2 * -1) $space-2 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
 #string box-shadow-bottom-inset-1 = "inset 0 calc($space-1 * -1) $space-1 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
 #string box-shadow-bottom-inset-2 = "inset 0 calc($space-2 * -1) $space-2 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
 #string box-shadow-right-1 = "$space-1 0 $space-1 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
@@ -113,16 +113,16 @@ $$box-shadow-intensity!length-percentage: 100%
 #string box-shadow-left-inset-2 = "inset calc($space-2 * -1) 0 $space-2 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
 %box-shadow-1: box-shadow: #{box-shadow-1}
 %box-shadow-2: box-shadow: #{box-shadow-2}
-%box-shadow-top-1: box-shadow: #{box-shadow-1}
-%box-shadow-top-2: box-shadow: #{box-shadow-2}
+%box-shadow-bottom-1: box-shadow: #{box-shadow-1}
+%box-shadow-bottom-2: box-shadow: #{box-shadow-2}
 %box-shadow-inset-1: box-shadow: #{box-shadow-inset-1}
 %box-shadow-inset-2: box-shadow: #{box-shadow-inset-2}
 %box-shadow-top-inset-1: box-shadow: #{box-shadow-inset-1}
 %box-shadow-top-inset-2: box-shadow: #{box-shadow-inset-2}
 %box-shadow-top-left-inset-1: box-shadow: #{box-shadow-top-left-inset-1}
 %box-shadow-top-left-inset-2: box-shadow: #{box-shadow-top-left-inset-2}
-%box-shadow-bottom-1: box-shadow: #{box-shadow-bottom-1}
-%box-shadow-bottom-2: box-shadow: #{box-shadow-bottom-2}
+%box-shadow-top-1: box-shadow: #{box-shadow-top-1}
+%box-shadow-top-2: box-shadow: #{box-shadow-top-2}
 %box-shadow-bottom-inset-1: box-shadow: #{box-shadow-bottom-inset-1}
 %box-shadow-bottom-inset-2: box-shadow: #{box-shadow-bottom-inset-2}
 %box-shadow-right-1: box-shadow: #{box-shadow-right-1}
