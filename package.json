@@ -15,7 +15,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"chokidar": "3.6.0",
-		"del-cli": "^6.0.0",
+		"del-cli": "^7.0.0",
 		"source-map": "0.7.4"
 	},
 	"devDependencies": {
