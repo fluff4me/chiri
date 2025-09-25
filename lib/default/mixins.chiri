@@ -89,6 +89,9 @@ $$border-colour!colour: currentcolor
 %box-shadow-border-outline: box-shadow: 0 0 0 2px light-dark(#000, #fff), 0 0 0 3px light-dark(#fff, #000)
 
 $$box-shadow-intensity!length-percentage: 100%
+#each in 0...10 as int i:
+	%box-shadow-intensity-#{i}: $box-shadow-intensity: #{i * 10}%
+
 %box-shadow-none: box-shadow: none
 %box-shadow-0: box-shadow: none
 #string box-shadow-1 = "0 $space-1 $space-1 calc($space-1 * -1) color-mix(in lch, light-dark(#000a, #000), transparent calc(100% - $box-shadow-intensity))
