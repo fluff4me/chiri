@@ -31,6 +31,7 @@ jobs:
           rm -f .gitignore
           mkdir -p build
           rsync -av --exclude='.git' ./ build/
+          npm uninstall del-cli
        
       - name: Deploy
         uses: s0/git-publish-subdir-action@v2.5.1
