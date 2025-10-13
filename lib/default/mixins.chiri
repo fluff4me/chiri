@@ -1,4 +1,5 @@
 %block: display: block
+%inline: display: inline
 %grid: display: grid
 %flex: display: flex
 %hidden: display: none
