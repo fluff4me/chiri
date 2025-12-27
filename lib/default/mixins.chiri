@@ -607,6 +607,7 @@ $$translate-y!length-percentage
 %z-index-fg: z-index: 1
 %z-index-fg-2: z-index: 2
 %z-index-fg-3: z-index: 3
+%z-index-fg-4: z-index: 4
 %z-index-bg: z-index: -1
 
 %text-outline:
@@ -681,6 +682,18 @@ $$gradient-mask-height!length-percentage
 %scrollbar-thin: scrollbar-width: thin
 %scrollbar-thick: scrollbar-width: thick
 %scrollbar-auto: scrollbar-width: auto
+
+%overscroll-auto: overscroll-behaviour: auto
+%overscroll-contain: overscroll-behaviour: contain
+%overscroll-none: overscroll-behaviour: none
+
+%overscroll-x-auto: overscroll-behaviour-x: auto
+%overscroll-x-contain: overscroll-behaviour-x: contain
+%overscroll-x-none: overscroll-behaviour-x: none
+
+%overscroll-y-auto: overscroll-behaviour-y: auto
+%overscroll-y-contain: overscroll-behaviour-y: contain
+%overscroll-y-none: overscroll-behaviour-y: none
 
 %color-dodge: mix-blend-mode: color-dodge
 %colour-dodge: mix-blend-mode: color-dodge

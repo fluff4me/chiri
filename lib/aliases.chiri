@@ -2,6 +2,7 @@
 #alias background-colour: background-color
 #alias caret-colour: caret-color
 #alias scrollbar-colour: scrollbar-color
+#alias overscroll-behaviour: overscroll-behavior
 #alias colour-scheme: color-scheme
 #alias size:
 	width
