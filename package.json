@@ -14,21 +14,18 @@
 	"repository": "github:fluff4me/chiri",
 	"license": "MIT",
 	"dependencies": {
-		"source-map": "0.7.4",
-		"chokidar": "3.6.0"
+		"chokidar": "3.6.0",
+		"source-map": "0.7.4"
 	},
 	"devDependencies": {
-		"typescript": "5.6.2",
 		"@types/node": "20.11.30",
-		"dotenv": "16.4.5",
-		"concurrently": "9.0.0",
-		"eslint": "8.52.0",
-		"@types/eslint": "8.44.6",
-		"@typescript-eslint/eslint-plugin": "6.9.0",
-		"@typescript-eslint/parser": "6.9.0",
-		"eslint-plugin-only-warn": "1.0.3",
-		"source-map-support": "0.5.21",
 		"@types/source-map-support": "0.5.10",
+		"concurrently": "9.0.0",
+		"dotenv": "16.4.5",
+		"lint": "github:fluff4me/lint#3d03a983ff334c89bf2d9d55555453860404bfc8",
+		"source-map-support": "0.5.21",
+		"task": "github:chirivulpes/task#4743b1177d35a1fa751de5fed6362e5d4e36ce0e",
+		"typescript": "5.6.2",
 		"typescript-girlboss": "0.0.4",
 		"typescript-ignore-leftmost-nullish-literal-errors": "0.0.1"
 	}

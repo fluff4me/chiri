@@ -1,0 +1,3 @@
+overrides:
+  lint: link:../lint
+  task: link:../task/out
