@@ -19,89 +19,89 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     // https://developer.mozilla.org/en-US/docs/Web/CSS/@property
     const customPropertyDefinitionTypes = {
-        "*": {
-            syntax: "*",
-            initialValue: "",
+        '*': {
+            syntax: '*',
+            initialValue: '',
         },
-        "length-percentage": {
-            syntax: "<length-percentage>",
-            initialValue: "0px",
+        'length-percentage': {
+            syntax: '<length-percentage>',
+            initialValue: '0px',
         },
-        length: {
-            syntax: "<length>",
-            initialValue: "0px",
+        'length': {
+            syntax: '<length>',
+            initialValue: '0px',
         },
-        percentage: {
-            syntax: "<percentage>",
-            initialValue: "0%",
+        'percentage': {
+            syntax: '<percentage>',
+            initialValue: '0%',
         },
-        number: {
-            syntax: "<number>",
-            initialValue: "0",
+        'number': {
+            syntax: '<number>',
+            initialValue: '0',
         },
-        dec: {
-            syntax: "<number>",
-            initialValue: "0",
+        'dec': {
+            syntax: '<number>',
+            initialValue: '0',
         },
-        int: {
-            syntax: "<integer>",
-            initialValue: "0",
+        'int': {
+            syntax: '<integer>',
+            initialValue: '0',
         },
-        time: {
-            syntax: "<time>",
-            initialValue: "0s",
+        'time': {
+            syntax: '<time>',
+            initialValue: '0s',
         },
-        color: {
-            syntax: "<color>",
-            initialValue: "#000",
+        'color': {
+            syntax: '<color>',
+            initialValue: '#000',
         },
-        colour: {
-            syntax: "<color>",
-            initialValue: "#000",
+        'colour': {
+            syntax: '<color>',
+            initialValue: '#000',
         },
     };
     const typeNames = Object.keys(customPropertyDefinitionTypes);
     exports.default = async (reader) => {
         const e = reader.i;
-        if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#" && reader.input[reader.i] !== "-")
+        if (!reader.isLetter() && reader.input[reader.i] !== '$' && reader.input[reader.i] !== '#' && reader.input[reader.i] !== '-')
             return undefined;
-        if (reader.input[reader.i] === "#" && reader.input[reader.i + 1] !== "{")
+        if (reader.input[reader.i] === '#' && reader.input[reader.i + 1] !== '{')
             return undefined;
         const position = reader.getPosition();
-        const isCustomProperty = reader.consumeOptional("$");
-        const isCustomPropertyDefinition = isCustomProperty && reader.consumeOptional("$");
-        if (isCustomPropertyDefinition && reader.context.type !== "root")
-            throw reader.error("Custom property definitions must be in the root context");
+        const isCustomProperty = reader.consumeOptional('$');
+        const isCustomPropertyDefinition = isCustomProperty && reader.consumeOptional('$');
+        if (isCustomPropertyDefinition && reader.context.type !== 'root')
+            throw reader.error('Custom property definitions must be in the root context');
         const property = (0, consumeWordInterpolated_1.default)(reader, true);
         const typeWord = !isCustomPropertyDefinition ? undefined
-            : reader.consume("!") && (0, consumeWord_1.default)(reader, ...typeNames);
+            : reader.consume('!') && (0, consumeWord_1.default)(reader, ...typeNames);
         const type = !typeWord ? undefined : customPropertyDefinitionTypes[typeWord.value];
         let consumeValue;
         if (!isCustomPropertyDefinition || type?.initialValue === undefined)
-            consumeValue = !!reader.consume(":");
+            consumeValue = !!reader.consume(':');
         else
-            consumeValue = !!reader.consumeOptional(":");
+            consumeValue = !!reader.consumeOptional(':');
         let value;
         if (!consumeValue) {
             value = [{
-                    type: "text",
-                    subType: "text",
+                    type: 'text',
+                    subType: 'text',
                     content: [type.initialValue],
                     position: constants_1.INTERNAL_POSITION,
-                    valueType: ChiriType_1.ChiriType.of("string"),
+                    valueType: ChiriType_1.ChiriType.of('string'),
                 }];
         }
         else {
             const position = reader.getPosition();
-            const textBody = await (0, consumeBody_1.default)(reader, "text");
+            const textBody = await (0, consumeBody_1.default)(reader, 'text');
             value = textBody.content;
         }
         if (type)
             return {
-                type: "property-definition",
+                type: 'property-definition',
                 property,
                 syntax: {
-                    type: "word",
+                    type: 'word',
                     value: type.syntax,
                     position: typeWord.position,
                 },
@@ -109,7 +109,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 position,
             };
         return {
-            type: "property",
+            type: 'property',
             isCustomProperty: isCustomProperty ? true : undefined,
             position,
             property,

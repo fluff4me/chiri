@@ -19,7 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const i = reader.i;
         if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
             return undefined;
-        if (!reader.consumeOptional(":")) {
+        if (!reader.consumeOptional(':')) {
             reader.i = i;
             return undefined;
         }

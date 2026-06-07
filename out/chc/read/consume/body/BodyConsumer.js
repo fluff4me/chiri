@@ -14,7 +14,7 @@
     }
     (function (BodyConsumer) {
         function is(consumer) {
-            return !!consumer && "context" in consumer;
+            return !!consumer && 'context' in consumer;
         }
         BodyConsumer.is = is;
     })(BodyConsumer || (BodyConsumer = {}));

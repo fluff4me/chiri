@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("animation")
+    exports.default = (0, MacroConstruct_1.default)('animation')
         .named(true)
-        .body("keyframes")
+        .body('keyframes')
         .consume(({ name, body, position }) => {
         return {
-            type: "animation",
+            type: 'animation',
             name,
             content: body,
             position,

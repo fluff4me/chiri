@@ -1,9 +1,9 @@
-import type { ChiriType } from "../../../type/ChiriType";
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriExpressionOperand, ChiriExpressionResult } from "./consumeExpression";
-import ExpressionConstruct from "./ExpressionConstruct";
+import type { ChiriType } from '../../../type/ChiriType';
+import type { ChiriPosition } from '../../ChiriReader';
+import type { ChiriExpressionOperand, ChiriExpressionResult } from './consumeExpression';
+import ExpressionConstruct from './ExpressionConstruct';
 export interface ChiriExpressionMatch {
-    type: "match";
+    type: 'match';
     value: ChiriExpressionOperand;
     cases: ChiriExpressionMatchCase[];
     elseCase?: ChiriExpressionMatchElse;
@@ -11,13 +11,13 @@ export interface ChiriExpressionMatch {
     valueType: ChiriType;
 }
 export interface ChiriExpressionMatchCase {
-    type: "match-case";
+    type: 'match-case';
     condition: ChiriExpressionOperand;
     expression: ChiriExpressionResult;
     position: ChiriPosition;
 }
 export interface ChiriExpressionMatchElse {
-    type: "match-else";
+    type: 'match-else';
     expression: ChiriExpressionResult;
     position: ChiriPosition;
 }

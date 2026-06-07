@@ -1,17 +1,17 @@
-import { ChiriType } from "../../../type/ChiriType";
-import type { Operator } from "../../../type/ChiriTypeManager";
-import type { ChiriFunctionReference } from "../../../type/typeFunction";
-import type ChiriReader from "../../ChiriReader";
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriLiteralValue } from "../consumeTypeConstructorOptional";
-import type { ChiriBaseText } from "../consumeValueText";
-import type { ChiriWord } from "../consumeWord";
-import type { ChiriFunctionCall } from "./consumeFunctionCallOptional";
-import type { ChiriLiteralRange } from "./consumeRangeOptional";
-import type { ChiriExpressionMatch } from "./expressionMatch";
+import { ChiriType } from '../../../type/ChiriType';
+import type { Operator } from '../../../type/ChiriTypeManager';
+import type { ChiriFunctionReference } from '../../../type/typeFunction';
+import type ChiriReader from '../../ChiriReader';
+import type { ChiriPosition } from '../../ChiriReader';
+import type { ChiriLiteralValue } from '../consumeTypeConstructorOptional';
+import type { ChiriBaseText } from '../consumeValueText';
+import type { ChiriWord } from '../consumeWord';
+import type { ChiriFunctionCall } from './consumeFunctionCallOptional';
+import type { ChiriLiteralRange } from './consumeRangeOptional';
+import type { ChiriExpressionMatch } from './expressionMatch';
 export interface ChiriBinaryExpression {
-    type: "expression";
-    subType: "binary";
+    type: 'expression';
+    subType: 'binary';
     operandA: ChiriExpressionOperand;
     operandB: ChiriExpressionResult;
     operator: string;
@@ -19,47 +19,47 @@ export interface ChiriBinaryExpression {
     position: ChiriPosition;
 }
 export interface ChiriUnaryExpression {
-    type: "expression";
-    subType: "unary";
+    type: 'expression';
+    subType: 'unary';
     operand: ChiriExpressionOperand;
     operator: string;
     valueType: ChiriType;
     position: ChiriPosition;
 }
 export interface ChiriVariableReference {
-    type: "get";
+    type: 'get';
     name: ChiriWord;
     valueType: ChiriType;
     position: ChiriPosition;
 }
 export interface ChiriGetByKey {
-    type: "get-by-key";
+    type: 'get-by-key';
     value: ChiriExpressionOperand;
     key: ChiriExpressionOperand;
     valueType: ChiriType;
     position: ChiriPosition;
 }
 export interface ChiriListSlice {
-    type: "list-slice";
+    type: 'list-slice';
     list: ChiriExpressionOperand;
     range: ChiriLiteralRange;
     valueType: ChiriType;
     position: ChiriPosition;
 }
 export interface ChiriPipe {
-    type: "pipe";
+    type: 'pipe';
     left: ChiriExpressionOperand;
     right: ChiriExpressionResult;
     valueType: ChiriType;
     position: ChiriPosition;
 }
 export interface ChiriPipeUseLeft {
-    type: "pipe-use-left";
+    type: 'pipe-use-left';
     valueType: ChiriType;
     position: ChiriPosition;
 }
 export interface ChiriConditional {
-    type: "conditional";
+    type: 'conditional';
     condition: ChiriExpressionOperand;
     ifTrue: ChiriExpressionOperand;
     ifFalse: ChiriExpressionOperand;

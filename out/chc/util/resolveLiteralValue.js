@@ -38,31 +38,31 @@ var __importStar = (this && this.__importStar) || function (mod) {
     function resolveLiteralValue(compiler, expression) {
         const subType = expression.subType;
         switch (subType) {
-            case "dec":
-            case "int":
-            case "uint":
+            case 'dec':
+            case 'int':
+            case 'uint':
                 return +expression.value;
-            case "bool":
+            case 'bool':
                 return expression.value;
-            case "undefined":
+            case 'undefined':
                 return undefined;
-            case "string":
+            case 'string':
                 return expression.segments
-                    .map(segment => typeof segment === "string" ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
-                    .join("");
-            case "range":
+                    .map(segment => typeof segment === 'string' ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
+                    .join('');
+            case 'range':
                 return resolveLiteralRange(compiler, expression);
-            case "list":
+            case 'list':
                 return expression.value
                     .flatMap(content => {
-                    if (content.type !== "list-spread")
+                    if (content.type !== 'list-spread')
                         return [(0, resolveExpression_1.default)(compiler, content)];
                     const value = (0, resolveExpression_1.default)(compiler, content.value);
                     if (!Array.isArray(value))
                         throw compiler.error(content.position, `Unable to spread a value of type "${ChiriType_1.ChiriType.stringify(content.value.valueType)}"`);
                     return value;
                 });
-            case "record":
+            case 'record':
                 return Object.assign(Object.fromEntries(expression.value
                     .flatMap(content => {
                     if (Array.isArray(content)) {
@@ -83,10 +83,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     function resolveLiteralRange(compiler, range, list) {
         let startRaw = resolveLiteralValue.resolveExpression(compiler, range.start);
         if (startRaw !== undefined && !Number.isInteger(startRaw))
-            throw compiler.error(range.position, "Invalid value for range start bound");
+            throw compiler.error(range.position, 'Invalid value for range start bound');
         let endRaw = resolveLiteralValue.resolveExpression(compiler, range.end);
         if (endRaw !== undefined && !Number.isInteger(endRaw))
-            throw compiler.error(range.position, "Invalid value for range end bound");
+            throw compiler.error(range.position, 'Invalid value for range end bound');
         if (list && (startRaw >= list.length))
             return [];
         startRaw ??= 0;

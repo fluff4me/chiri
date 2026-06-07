@@ -1,7 +1,7 @@
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriExpressionResult } from "../expression/consumeExpression";
+import type { ChiriPosition } from '../../ChiriReader';
+import type { ChiriExpressionResult } from '../expression/consumeExpression';
 export interface ChiriReturn {
-    type: "return";
+    type: 'return';
     expression: ChiriExpressionResult;
     position: ChiriPosition;
 }

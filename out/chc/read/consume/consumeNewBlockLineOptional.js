@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             while (true) {
                 encounteredIndent = (0, consumeIndentOptional_1.default)(reader, reader.indent);
                 if (encounteredIndent !== reader.indent) {
-                    if (reader.consumeOptional("\r") || reader.consumeOptional("\n"))
+                    if (reader.consumeOptional('\r') || reader.consumeOptional('\n'))
                         continue;
                     reader.i = iPreConsumeLine;
                     return consumed;
@@ -49,12 +49,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!ignoreExtraIndentation) {
                 const iBeforeExtraIndentation = reader.i;
                 if ((0, consumeIndentOptional_1.default)(reader))
-                    throw reader.error(iBeforeExtraIndentation, "Too much indentation");
+                    throw reader.error(iBeforeExtraIndentation, 'Too much indentation');
             }
             const e = reader.i;
             if (encounteredIndent && !(0, consumeCommentOptional_1.default)(reader) && (0, consumeNewLineOptional_1.default)(reader)) {
                 reader.i = e;
-                throw reader.error(iPreConsumeIndent, "Unexpected indentation on empty line");
+                throw reader.error(iPreConsumeIndent, 'Unexpected indentation on empty line');
             }
             consumed++;
         }

@@ -14,11 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeLabelOptional_1 = __importDefault(require("../consumeLabelOptional"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("break")
+    exports.default = (0, MacroConstruct_1.default)('break')
         .consume(({ reader, position }) => {
         const label = (0, consumeLabelOptional_1.default)(reader);
         return {
-            type: "break",
+            type: 'break',
             label,
             position,
         };

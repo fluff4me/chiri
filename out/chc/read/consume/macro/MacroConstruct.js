@@ -41,10 +41,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             },
             parameter(name, type, ...value) {
                 (value.length ? parameters : requiredParameters).push({
-                    type: "variable",
-                    name: { type: "word", value: name, position: constants_1.INTERNAL_POSITION },
+                    type: 'variable',
+                    name: { type: 'word', value: name, position: constants_1.INTERNAL_POSITION },
                     valueType: type,
-                    assignment: !value.length ? undefined : "??=",
+                    assignment: !value.length ? undefined : '??=',
                     position: constants_1.INTERNAL_POSITION,
                     expression: value[0],
                 });
@@ -56,13 +56,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             },
             consume(consumer) {
                 const macro = {
-                    type: "macro:internal",
-                    name: { type: "word", value: macroName, position: constants_1.INTERNAL_POSITION },
+                    type: 'macro:internal',
+                    name: { type: 'word', value: macroName, position: constants_1.INTERNAL_POSITION },
                     position: constants_1.INTERNAL_POSITION,
                     content: [...requiredParameters, ...parameters],
                     async consumeOptional(reader, ...contextTuple) {
                         const [useContextType, useContextData] = contextTuple;
-                        const useContext = !useContextType || useContextType === "inherit" ? reader.context : { type: useContextType, data: useContextData };
+                        const useContext = !useContextType || useContextType === 'inherit' ? reader.context : { type: useContextType, data: useContextData };
                         const position = reader.getPosition();
                         const savedPosition = reader.savePosition();
                         const start = reader.i;
@@ -72,15 +72,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             throw reader.error(`#${useContextType} cannot be used in "${useContext.type}" context`);
                         let name;
                         if (named) {
-                            if (reader.peek("!")) {
+                            if (reader.peek('!')) {
                                 reader.restorePosition(savedPosition);
                                 return undefined;
                             }
                             if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
-                                throw reader.error("Expected declaration name");
+                                throw reader.error('Expected declaration name');
                             name = (0, consumeWordOptional_1.default)(reader);
                             if (!name)
-                                throw reader.error("Expected declaration name");
+                                throw reader.error('Expected declaration name');
                         }
                         const extra = await parametersConsumer?.(reader);
                         const assignments = parametersConsumer ? {} : (0, consumeMacroParameters_1.default)(reader, start, macro);
@@ -93,9 +93,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             start,
                         };
                         const [contextType, contextData] = bodyContext ?? [];
-                        const context = !contextType ? undefined : contextType === "inherit" ? reader.context : { type: contextType, data: contextData?.(info) };
+                        const context = !contextType ? undefined : contextType === 'inherit' ? reader.context : { type: contextType, data: contextData?.(info) };
                         const body = context ? await (0, consumeBodyOptional_1.default)(reader, ...[context.type, context.data]) : [];
-                        Object.defineProperty(info, "body", {
+                        Object.defineProperty(info, 'body', {
                             get: () => {
                                 if (!body)
                                     throw reader.error(`Expected body containing ${contextType}`);

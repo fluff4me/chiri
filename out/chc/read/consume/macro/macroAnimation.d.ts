@@ -1,7 +1,7 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriWordInterpolated } from '../consumeWordInterpolatedOptional';
 export interface ChiriAnimation {
-    type: "animation";
+    type: 'animation';
     name: ChiriWordInterpolated;
     content: ChiriStatement[];
     position: ChiriPosition;

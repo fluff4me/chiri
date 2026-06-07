@@ -1,6 +1,6 @@
-import type ChiriReader from "../ChiriReader";
+import type ChiriReader from '../ChiriReader';
 export interface ChiriPath {
-    type: "path";
+    type: 'path';
     module?: string;
     path: string;
     i: number;

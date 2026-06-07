@@ -16,42 +16,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const fs_1 = __importDefault(require("fs"));
     async function default_1(file, data) {
         const stream = fs_1.default.createWriteStream(file);
-        let hold = "";
+        let hold = '';
         const awrite = stream.awrite = (chunk, force = false) => new Promise((resolve, reject) => {
             hold += chunk;
             if (hold.length < 8192 && !force)
                 return resolve();
             stream.write(hold, err => err ? reject(err) : resolve());
-            hold = "";
+            hold = '';
         });
-        await write(stream, data, "");
+        await write(stream, data, '');
         if (hold)
-            await awrite("", true);
+            await awrite('', true);
         stream.end();
         stream.close();
     }
     async function write(stream, data, indent) {
         switch (typeof data) {
-            case "bigint":
-            case "function":
-            case "symbol":
-            case "undefined":
+            case 'bigint':
+            case 'function':
+            case 'symbol':
+            case 'undefined':
                 throw new Error(`Can't convert ${typeof data} to JSON`);
-            case "boolean":
-            case "number":
-            case "string":
+            case 'boolean':
+            case 'number':
+            case 'string':
                 await stream.awrite(JSON.stringify(data));
                 return;
         }
         // data is "object"
         if (data === null) {
-            await stream.awrite("null");
+            await stream.awrite('null');
             return;
         }
         if (Array.isArray(data)) {
-            await stream.awrite("[");
+            await stream.awrite('[');
             if (data.length) {
-                indent += "\t";
+                indent += '\t';
                 await stream.awrite(`\n${indent}`);
                 for (let i = 0; i < data.length; i++) {
                     await write(stream, data[i], indent);
@@ -61,20 +61,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 indent = indent.slice(0, -1);
                 await stream.awrite(`\n${indent}`);
             }
-            await stream.awrite("]");
+            await stream.awrite(']');
             return;
         }
         const entries = Object.entries(data);
-        await stream.awrite("{");
+        await stream.awrite('{');
         let hasWrittenKeyVal = false;
         if (entries.length) {
-            indent += "\t";
+            indent += '\t';
             for (let i = 0; i < entries.length; i++) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 const [key, value] = entries[i];
                 if (value === undefined)
                     continue;
-                await stream.awrite(`${hasWrittenKeyVal ? "," : ""}\n${indent}`);
+                await stream.awrite(`${hasWrittenKeyVal ? ',' : ''}\n${indent}`);
                 hasWrittenKeyVal = true;
                 await stream.awrite(`${JSON.stringify(key)}: `);
                 await write(stream, value, indent);
@@ -83,7 +83,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (hasWrittenKeyVal)
                 await stream.awrite(`\n${indent}`);
         }
-        await stream.awrite("}");
+        await stream.awrite('}');
     }
 });
 //# sourceMappingURL=streamJson.js.map

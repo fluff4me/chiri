@@ -15,11 +15,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const consumeWordInterpolated_1 = __importDefault(require("../consumeWordInterpolated"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("alias")
+    exports.default = (0, MacroConstruct_1.default)('alias')
         .consumeParameters(reader => (0, consumeWhiteSpace_1.default)(reader) && (0, consumeWordInterpolated_1.default)(reader))
-        .body("property-name")
+        .body('property-name')
         .consume(({ reader, body, position, extra }) => ({
-        type: "alias",
+        type: 'alias',
         property: extra,
         body,
         position,

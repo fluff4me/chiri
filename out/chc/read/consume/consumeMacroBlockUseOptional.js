@@ -63,12 +63,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     }
     function consumeLabelOptional(reader) {
         const savedPosition = reader.savePosition();
-        if (!reader.consumeOptional("#:"))
+        if (!reader.consumeOptional('#:'))
             return undefined;
         const label = (0, consumeWordOptional_1.default)(reader);
         if (!label?.value)
             return undefined;
-        if (!reader.consumeOptional(" ")) {
+        if (!reader.consumeOptional(' ')) {
             reader.restorePosition(savedPosition);
             return undefined;
         }

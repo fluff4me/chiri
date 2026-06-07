@@ -1,8 +1,8 @@
-import type { ChiriType } from "../../../type/ChiriType";
-import type { PromiseOr } from "../../../util/Type";
-import type ChiriReader from "../../ChiriReader";
-import type { ChiriPosition } from "../../ChiriReader";
-import type consumeExpression from "./consumeExpression";
+import type { ChiriType } from '../../../type/ChiriType';
+import type { PromiseOr } from '../../../util/Type';
+import type ChiriReader from '../../ChiriReader';
+import type { ChiriPosition } from '../../ChiriReader';
+import type consumeExpression from './consumeExpression';
 interface ExpressionConstruct<T> {
     consumeOptional(reader: ChiriReader, expressionConsumer: typeof consumeExpression, ...expectedTypes: ChiriType[]): Promise<T | undefined>;
 }

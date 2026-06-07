@@ -1,7 +1,7 @@
-import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression";
-import type ChiriCompiler from "../write/ChiriCompiler";
-import type { default as stringifyExpressionType } from "./stringifyExpression";
-import type { default as stringifyTextType } from "./stringifyText";
+import type { ChiriExpressionResult } from '../read/consume/expression/consumeExpression';
+import type ChiriCompiler from '../write/ChiriCompiler';
+import type { default as stringifyExpressionType } from './stringifyExpression';
+import type { default as stringifyTextType } from './stringifyText';
 export declare const SYMBOL_IS_RECORD: unique symbol;
 export type Literal = undefined | number | boolean | string;
 export type Record = {

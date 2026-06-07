@@ -18,9 +18,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return false;
         const e = reader.i;
         (0, consumeCommentOptional_1.default)(reader);
-        while (reader.consumeOptional("\r"))
+        while (reader.consumeOptional('\r'))
             ;
-        if (reader.consumeOptional("\n"))
+        if (reader.consumeOptional('\n'))
             return true;
         if (reader.i >= reader.input.length)
             return true;

@@ -19,20 +19,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const bodySelectors_1 = __importDefault(require("./bodySelectors"));
     const bodyText_1 = __importDefault(require("./bodyText"));
     const BodyRegistry = {
-        function: bodyFunction_1.default,
-        inherit: undefined,
-        generic: undefined,
-        root: undefined,
-        mixin: undefined,
-        component: undefined,
-        state: undefined,
-        pseudo: undefined,
-        keyframe: undefined,
-        "property-name": bodyPropertyName_1.default,
-        paths: bodyPaths_1.default,
-        text: bodyText_1.default,
-        keyframes: bodyKeyframes_1.default,
-        selectors: bodySelectors_1.default,
+        'function': bodyFunction_1.default,
+        'inherit': undefined,
+        'generic': undefined,
+        'root': undefined,
+        'mixin': undefined,
+        'component': undefined,
+        'state': undefined,
+        'pseudo': undefined,
+        'keyframe': undefined,
+        'property-name': bodyPropertyName_1.default,
+        'paths': bodyPaths_1.default,
+        'text': bodyText_1.default,
+        'keyframes': bodyKeyframes_1.default,
+        'selectors': bodySelectors_1.default,
     };
     exports.default = BodyRegistry;
 });

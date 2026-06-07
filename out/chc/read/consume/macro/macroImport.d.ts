@@ -1,15 +1,15 @@
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriPath } from "../consumePathOptional";
-import type { ChiriValueText } from "../consumeValueText";
+import type { ChiriPosition } from '../../ChiriReader';
+import type { ChiriPath } from '../consumePathOptional';
+import type { ChiriValueText } from '../consumeValueText';
 export interface ChiriImport {
-    type: "import";
+    type: 'import';
     paths: ChiriPath[];
     position: ChiriPosition;
 }
 declare const _default: import("./MacroConstruct").ChiriMacroInternal<ChiriImport>;
 export default _default;
 export interface ChiriCSSImport {
-    type: "import-css";
+    type: 'import-css';
     imports: ChiriValueText[];
     position: ChiriPosition;
 }

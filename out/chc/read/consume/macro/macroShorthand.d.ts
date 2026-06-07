@@ -1,7 +1,7 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriWordInterpolated } from '../consumeWordInterpolatedOptional';
 export interface ChiriShorthand {
-    type: "shorthand";
+    type: 'shorthand';
     property: ChiriWordInterpolated;
     body: ChiriStatement[];
     position: ChiriPosition;

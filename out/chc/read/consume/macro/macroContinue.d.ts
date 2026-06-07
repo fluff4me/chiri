@@ -1,7 +1,7 @@
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriWord } from "../consumeWord";
+import type { ChiriPosition } from '../../ChiriReader';
+import type { ChiriWord } from '../consumeWord';
 export interface ChiriContinue {
-    type: "continue";
+    type: 'continue';
     label?: ChiriWord;
     position: ChiriPosition;
 }

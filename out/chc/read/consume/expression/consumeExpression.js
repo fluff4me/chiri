@@ -85,7 +85,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     function validate(reader, e, operand, ...expectedTypes) {
         const valueType = operand.valueType;
         if (expectedTypes.length && !expectedTypes.some(expectedType => reader.types.isAssignable(valueType, expectedType)))
-            throw reader.error(Math.max(e, reader.getLineStart()), `Expected ${expectedTypes.map(type => `"${ChiriType_1.ChiriType.stringify(type)}"`).join(" or ")}, got "${ChiriType_1.ChiriType.stringify(valueType)}"`);
+            throw reader.error(Math.max(e, reader.getLineStart()), `Expected ${expectedTypes.map(type => `"${ChiriType_1.ChiriType.stringify(type)}"`).join(' or ')}, got "${ChiriType_1.ChiriType.stringify(valueType)}"`);
     }
     async function consumeExpressionValidatedPipe(reader, ...expectedTypes) {
         const e = reader.i;
@@ -109,17 +109,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             reader.pipeValueStack[pipeStackIndex].type = operand.valueType;
             reader.pipeValueStack[pipeStackIndex].used = false;
             const position = reader.getPosition();
-            reader.consume("->");
+            reader.consume('->');
             (0, consumeWhiteSpace_1.default)(reader);
             const restore = reader.savePosition();
             const name = (0, consumeWordOptional_1.default)(reader);
             const fn = name && reader.getFunctionOptional(name.value);
             if (fn) {
                 const parameters = (0, getFunctionParameters_1.default)(fn);
-                if (!reader.peek("(") && reader.types.isAssignable(operand.valueType, parameters[0].valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
+                if (!reader.peek('(') && reader.types.isAssignable(operand.valueType, parameters[0].valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
                     // value \n -> function-name \n
                     operand = {
-                        type: "function-call",
+                        type: 'function-call',
                         name,
                         indexedAssignments: false,
                         assignments: {
@@ -135,9 +135,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const e = reader.i;
             const right = await consumeExpression(reader);
             if (!reader.pipeValueStack[pipeStackIndex].used)
-                throw reader.error(e, "Piped value is not used in this expression");
+                throw reader.error(e, 'Piped value is not used in this expression');
             operand = {
-                type: "pipe",
+                type: 'pipe',
                 left: operand,
                 right,
                 valueType: right.valueType,
@@ -161,20 +161,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     function consumeConditionalOptional(reader) {
         const position = reader.getPosition();
         const e = reader.i;
-        if (!reader.consumeOptional("if "))
+        if (!reader.consumeOptional('if '))
             return undefined;
         const condition = consumeExpression.inline(reader);
-        reader.consume(":");
+        reader.consume(':');
         (0, consumeWhiteSpaceOptional_1.default)(reader);
         const ifTrue = consumeExpression.inline(reader);
         (0, consumeWhiteSpace_1.default)(reader);
-        reader.consume("else:");
+        reader.consume('else:');
         (0, consumeWhiteSpaceOptional_1.default)(reader);
         const ifFalse = consumeExpression.inline(reader);
         if (ifTrue.valueType.name.value !== ifFalse.valueType.name.value || ifTrue.valueType.generics.some((generic, i) => generic.name.value !== ifFalse.valueType.generics[i].name.value))
             throw reader.error(e, `Conditional expression must return the same value type for both branches. Currently returning "${ChiriType_1.ChiriType.stringify(ifTrue.valueType)}" and "${ChiriType_1.ChiriType.stringify(ifFalse.valueType)}"`);
         return {
-            type: "conditional",
+            type: 'conditional',
             valueType: ifTrue.valueType,
             condition,
             ifTrue,
@@ -196,7 +196,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const p = reader.i;
             if (!(0, consumeWhiteSpaceOptional_1.default)(reader) /* || consumeNewBlockLineOptional(reader) */)
                 return operandA;
-            const operandATypeName = operandA.valueType.isGeneric && reader.types.isEveryType(operandA.valueType.generics) ? "*" : operandA.valueType.name.value;
+            const operandATypeName = operandA.valueType.isGeneric && reader.types.isEveryType(operandA.valueType.generics) ? '*' : operandA.valueType.name.value;
             const operatorsForType = binaryOperators[operandATypeName] ?? empy;
             const operator = consumeOperatorOptional(reader, operatorsForType, precedence);
             if (!operator) {
@@ -206,7 +206,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             (0, consumeWhiteSpace_1.default)(reader);
             const resultTypesByOperandB = operatorsForType[operator] ?? empy;
             const operandB = consumeExpressionInternal(reader, precedence + 1);
-            const operandBTypeName = operandB.valueType.isGeneric && reader.types.isEveryType(operandB.valueType.generics) ? "*" : operandB.valueType.name.value;
+            const operandBTypeName = operandB.valueType.isGeneric && reader.types.isEveryType(operandB.valueType.generics) ? '*' : operandB.valueType.name.value;
             const resultType = resultTypesByOperandB[operandBTypeName];
             if (!resultType)
                 throw reader.error(e, `Undefined operation ${operandATypeName}${operator}${operandBTypeName}`);
@@ -215,8 +215,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             // operandATypeName = coerce?.[0] ?? operandATypeName
             // operandBTypeName = coerce?.[0] ?? operandBTypeName
             operandA = {
-                type: "expression",
-                subType: "binary",
+                type: 'expression',
+                subType: 'binary',
                 operandA,
                 operandB,
                 operator,
@@ -226,19 +226,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
     }
     function consumeOperand(reader) {
-        if (reader.consumeOptional("(")) {
+        if (reader.consumeOptional('(')) {
             const expr = consumeExpressionInternal(reader);
-            reader.consume(")");
+            reader.consume(')');
             return expr;
         }
         let e = reader.i;
-        const pipeValueToken = (0, consumeWordOptional_1.default)(reader, "@");
+        const pipeValueToken = (0, consumeWordOptional_1.default)(reader, '@');
         if (pipeValueToken) {
             const pipeValue = reader.pipeValueStack.at(-1);
             if (!pipeValue)
-                throw reader.error(e, "@ can only be used in the right operand of a pipe expression");
+                throw reader.error(e, '@ can only be used in the right operand of a pipe expression');
             pipeValue.used = true;
-            return { type: "pipe-use-left", valueType: pipeValue.type, position: pipeValueToken.position };
+            return { type: 'pipe-use-left', valueType: pipeValue.type, position: pipeValueToken.position };
         }
         const numeric = (0, consumeDecimalOptional_1.default)(reader) ?? (0, consumeUnsignedIntegerOptional_1.default)(reader) ?? (0, consumeIntegerOptional_1.default)(reader);
         if (numeric)
@@ -247,8 +247,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (string)
             return string;
         e = reader.i;
-        if (reader.consumeOptional("_"))
-            return { type: "literal", subType: "undefined", valueType: ChiriType_1.ChiriType.of("undefined"), position: reader.getPosition(e) };
+        if (reader.consumeOptional('_'))
+            return { type: 'literal', subType: 'undefined', valueType: ChiriType_1.ChiriType.of('undefined'), position: reader.getPosition(e) };
         const fnCall = (0, consumeFunctionCallOptional_1.default)(reader);
         if (fnCall)
             return fnCall;
@@ -259,18 +259,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const word = (0, consumeWordOptional_1.default)(reader);
         if (word) {
             const variable = reader.getVariableOptional(word.value);
-            if (variable?.valueType.name.value === "body")
-                throw reader.error(e, "Cannot use a variable of type \"body\" in an expression");
+            if (variable?.valueType.name.value === 'body')
+                throw reader.error(e, 'Cannot use a variable of type "body" in an expression');
             if (variable)
                 return {
-                    type: "get",
+                    type: 'get',
                     name: word,
-                    valueType: variable.valueType.name.value === "raw" ? ChiriType_1.ChiriType.of("string") : variable.valueType,
+                    valueType: variable.valueType.name.value === 'raw' ? ChiriType_1.ChiriType.of('string') : variable.valueType,
                     position: word.position,
                 };
             throw reader.error(e, `No variable "${word.value}"`);
         }
-        throw reader.error("Unknown expression operand type");
+        throw reader.error('Unknown expression operand type');
     }
     function consumeUnaryExpression(reader) {
         const position = reader.getPosition();
@@ -288,8 +288,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!returnType)
             throw reader.error(e, `Undefined operation ${operator}${typeName}`);
         return {
-            type: "expression",
-            subType: "unary",
+            type: 'expression',
+            subType: 'unary',
             operand,
             operator,
             valueType: ChiriType_1.ChiriType.of(returnType),
@@ -306,18 +306,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
     }
     function consumeInlinePipe(reader, operand) {
-        if (!reader.consumeOptional("::"))
+        if (!reader.consumeOptional('::'))
             return undefined;
         const e = reader.i;
         const name = (0, consumeWord_1.default)(reader);
         const fn = reader.getFunction(name.value, e);
         const parameters = (0, getFunctionParameters_1.default)(fn);
         const firstParameter = parameters.shift();
-        const paren = reader.peek("(");
+        const paren = reader.peek('(');
         if (!paren && reader.types.isAssignable(operand.valueType, firstParameter.valueType) && parameters.every((parameter, i) => i === 0 || parameter.assignment)) {
             // value \n -> function-name \n
             return {
-                type: "function-call",
+                type: 'function-call',
                 name,
                 indexedAssignments: false,
                 assignments: {
@@ -335,7 +335,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const isListOperand = reader.types.isAssignable(operand.valueType, typeList_1.default.type, typeString_1.default.type);
         if (!isListOperand && !reader.types.isAssignable(operand.valueType, typeRecord_1.default.type))
             return undefined;
-        if (!reader.consumeOptional("["))
+        if (!reader.consumeOptional('['))
             return undefined;
         const position = reader.getPosition(reader.i - 1);
         consumeRangeOptional_1.default.setCheckingForRange(true);
@@ -344,9 +344,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (expr?.valueType.name.value !== typeString_1.default.type.name.value) {
             const range = !isListOperand ? undefined : (0, consumeRangeOptional_1.default)(reader, true, expr);
             if (range) {
-                reader.consume("]");
+                reader.consume(']');
                 return {
-                    type: "list-slice",
+                    type: 'list-slice',
                     list: operand,
                     range: range,
                     valueType: operand.valueType,
@@ -355,10 +355,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         if (!expr)
-            throw reader.error("Expected expression");
-        reader.consume("]");
+            throw reader.error('Expected expression');
+        reader.consume(']');
         return {
-            type: "get-by-key",
+            type: 'get-by-key',
             value: operand,
             key: expr,
             valueType: reader.types.isAssignable(operand.valueType, typeString_1.default.type) ? typeString_1.default.type : operand.valueType.generics[0],

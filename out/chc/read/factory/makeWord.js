@@ -11,7 +11,7 @@
     Object.defineProperty(exports, "__esModule", { value: true });
     const constants_1 = require("../../../constants");
     exports.default = (value, position = constants_1.INTERNAL_POSITION) => ({
-        type: "word",
+        type: 'word',
         value,
         position,
     });

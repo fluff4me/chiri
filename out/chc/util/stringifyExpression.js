@@ -39,21 +39,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const resolveLiteralValue_1 = __importDefault(require("./resolveLiteralValue"));
     const stringifyExpression = (compiler, expression) => {
         if (expression === undefined)
-            return "";
-        const resolved = typeof expression === "object" && !Array.isArray(expression) && !resolveExpression_1.Record.is(expression) ? (0, resolveExpression_1.default)(compiler, expression) : expression;
+            return '';
+        const resolved = typeof expression === 'object' && !Array.isArray(expression) && !resolveExpression_1.Record.is(expression) ? (0, resolveExpression_1.default)(compiler, expression) : expression;
         switch (typeof resolved) {
-            case "number":
-            case "boolean":
+            case 'number':
+            case 'boolean':
                 return `${resolved}`;
-            case "undefined":
-                return "";
-            case "string":
+            case 'undefined':
+                return '';
+            case 'string':
                 return resolved;
         }
         if (Array.isArray(resolved))
-            return resolved.map(v => stringifyExpression(compiler, v)).join(" ");
+            return resolved.map(v => stringifyExpression(compiler, v)).join(' ');
         if (resolveExpression_1.Record.is(resolved))
-            return Object.entries(resolved).map(([k, v]) => `${k}: ${stringifyExpression(compiler, v)}`).join(" ");
+            return Object.entries(resolved).map(([k, v]) => `${k}: ${stringifyExpression(compiler, v)}`).join(' ');
         throw compiler.error(undefined, `Expression resolved to unstringifiable type "${typeof resolved}"`);
     };
     resolveLiteralValue_1.default.stringifyExpression = stringifyExpression;

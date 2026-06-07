@@ -16,12 +16,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (reader) => {
         const e = reader.i;
         (0, consumeWhiteSpaceOptional_1.default)(reader, false);
-        if (!reader.consumeOptional("; ")) {
+        if (!reader.consumeOptional('; ')) {
             reader.i = e;
             return false;
         }
         for (; reader.i < reader.input.length; reader.i++)
-            if (reader.input[reader.i] === "\n")
+            if (reader.input[reader.i] === '\n')
                 break;
         return true;
     };

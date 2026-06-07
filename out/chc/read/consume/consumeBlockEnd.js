@@ -21,11 +21,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         while ((0, consumeNewLineOptional_1.default)(reader))
             consumed = true;
         if (!consumed)
-            throw reader.error("Expected end of block");
+            throw reader.error('Expected end of block');
         const e = reader.i;
         const consumedIndent = (0, consumeIndent_1.default)(reader);
         if (consumedIndent > reader.indent)
-            throw reader.error(e, "Too much indentation");
+            throw reader.error(e, 'Too much indentation');
         reader.restorePosition(savedPosition);
         return true;
     };

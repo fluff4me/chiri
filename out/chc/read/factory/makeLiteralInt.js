@@ -12,9 +12,9 @@
     const constants_1 = require("../../../constants");
     const ChiriType_1 = require("../../type/ChiriType");
     exports.default = (int, position = constants_1.INTERNAL_POSITION) => ({
-        type: "literal",
-        subType: "int",
-        valueType: ChiriType_1.ChiriType.of("int"),
+        type: 'literal',
+        subType: 'int',
+        valueType: ChiriType_1.ChiriType.of('int'),
         value: `${int}`,
         position,
     });

@@ -1,7 +1,7 @@
-import type { PromiseOr } from "../../../util/Type";
-import type ChiriReader from "../../ChiriReader";
-import type { ChiriBodyConsumer } from "../../ChiriReader";
-import type { ChiriContextType } from "./Contexts";
+import type { PromiseOr } from '../../../util/Type';
+import type ChiriReader from '../../ChiriReader';
+import type { ChiriBodyConsumer } from '../../ChiriReader';
+import type { ChiriContextType } from './Contexts';
 interface BodyConsumer<T, ARGS extends any[]> {
     context: ChiriContextType;
     (reader: ChiriReader, ...args: ARGS): PromiseOr<T | undefined>;

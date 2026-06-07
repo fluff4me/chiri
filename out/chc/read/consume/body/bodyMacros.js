@@ -14,6 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeMacroUseOptional_1 = __importDefault(require("../consumeMacroUseOptional"));
     const BodyConsumer_1 = __importDefault(require("./BodyConsumer"));
-    exports.default = (0, BodyConsumer_1.default)("inherit", (reader, ...context) => (0, consumeMacroUseOptional_1.default)(reader, ...context));
+    exports.default = (0, BodyConsumer_1.default)('inherit', (reader, ...context) => (0, consumeMacroUseOptional_1.default)(reader, ...context));
 });
 //# sourceMappingURL=bodyMacros.js.map

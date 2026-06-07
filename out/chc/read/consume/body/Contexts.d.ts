@@ -1,4 +1,4 @@
-import type { ChiriTypeGeneric } from "../../../type/ChiriType";
+import type { ChiriTypeGeneric } from '../../../type/ChiriType';
 declare const Contexts: ("function" | "text" | "component" | "state" | "pseudo" | "keyframe" | "mixin" | "inherit" | "root" | "generic" | "paths" | "property-name" | "keyframes" | "selectors")[];
 export default Contexts;
 export type ChiriContextType = (typeof Contexts)[number];
@@ -6,20 +6,20 @@ export interface ChiriFunctionBodyContext {
     types: ChiriTypeGeneric[];
 }
 export interface ContextData {
-    function: ChiriFunctionBodyContext;
-    inherit?: undefined;
-    generic?: undefined;
-    root?: undefined;
-    mixin?: undefined;
-    component?: undefined;
-    state?: undefined;
-    pseudo?: undefined;
-    "property-name"?: undefined;
-    paths?: undefined;
-    text?: undefined;
-    keyframes?: undefined;
-    keyframe?: undefined;
-    selectors?: undefined;
+    'function': ChiriFunctionBodyContext;
+    'inherit'?: undefined;
+    'generic'?: undefined;
+    'root'?: undefined;
+    'mixin'?: undefined;
+    'component'?: undefined;
+    'state'?: undefined;
+    'pseudo'?: undefined;
+    'property-name'?: undefined;
+    'paths'?: undefined;
+    'text'?: undefined;
+    'keyframes'?: undefined;
+    'keyframe'?: undefined;
+    'selectors'?: undefined;
 }
 export type ChiriContextTypeWithoutData = {
     [CONTEXT in ChiriContextType as ContextData[CONTEXT] extends undefined ? CONTEXT : never]: CONTEXT;

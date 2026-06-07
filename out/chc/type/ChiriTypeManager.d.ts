@@ -1,9 +1,9 @@
-import type ChiriReader from "../read/ChiriReader";
-import type { Value } from "../util/resolveExpression";
-import type ChiriCompiler from "../write/ChiriCompiler";
-import type { ChiriTypeGeneric } from "./ChiriType";
-import { ChiriType } from "./ChiriType";
-import type TypeDefinition from "./TypeDefinition";
+import type ChiriReader from '../read/ChiriReader';
+import type { Value } from '../util/resolveExpression';
+import type ChiriCompiler from '../write/ChiriCompiler';
+import type { ChiriTypeGeneric } from './ChiriType';
+import { ChiriType } from './ChiriType';
+import type TypeDefinition from './TypeDefinition';
 declare const binaryNumericOperators: readonly ["**", "+", "-", "*", "/", "%", "==", "!=", "<=", ">=", "<", ">"];
 declare const unaryNumericOperators: readonly ["+", "-"];
 declare const binaryBitwiseOperators: readonly ["&", "|", "^", "<<", ">>", ">>>"];

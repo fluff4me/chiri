@@ -18,12 +18,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const restore = reader.savePosition();
             const e = reader.i;
             const word = reader.consumeOptional(...expectedWords);
-            if (!word || reader.isWordChar() || reader.input[reader.i] === "#") {
+            if (!word || reader.isWordChar() || reader.input[reader.i] === '#') {
                 reader.restorePosition(restore);
                 return undefined;
             }
             return {
-                type: "word",
+                type: 'word',
                 value: word,
                 position: reader.getPosition(e),
             };

@@ -15,36 +15,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeType_1 = require("../consumeType");
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("function")
+    exports.default = (0, MacroConstruct_1.default)('function')
         .named()
         .consumeParameters(reader => {
         (0, consumeWhiteSpace_1.default)(reader);
         const generics = [];
-        if (reader.consumeOptional("with")) {
+        if (reader.consumeOptional('with')) {
             (0, consumeWhiteSpace_1.default)(reader);
             while (true) {
-                if (reader.peek("returns"))
+                if (reader.peek('returns'))
                     break;
                 const type = (0, consumeType_1.consumeTypeOptional)(reader, true);
                 if (!type)
                     break;
                 if (!type.generics.length)
-                    throw reader.error("Function type declarations must be generic");
+                    throw reader.error('Function type declarations must be generic');
                 generics.push(type);
                 (0, consumeWhiteSpace_1.default)(reader);
             }
             if (!generics.length)
-                throw reader.error("Expected at least one type declaration");
+                throw reader.error('Expected at least one type declaration');
         }
-        reader.consume("returns");
+        reader.consume('returns');
         (0, consumeWhiteSpace_1.default)(reader);
         const returnType = reader.types.with(...generics)
             .do(() => (0, consumeType_1.consumeType)(reader));
         return { generics, returnType };
     })
-        .body("function", ({ extra: { generics: types } }) => ({ types }))
+        .body('function', ({ extra: { generics: types } }) => ({ types }))
         .consume(({ body, name, position, extra: { generics, returnType } }) => ({
-        type: "function",
+        type: 'function',
         name,
         content: body,
         position,

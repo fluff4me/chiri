@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeCommentOptional_1 = __importDefault(require("../consume/consumeCommentOptional"));
-    exports.default = (reader, message = "Expected newline") => {
+    exports.default = (reader, message = 'Expected newline') => {
         const savedPosition = reader.savePosition();
         (0, consumeCommentOptional_1.default)(reader);
-        while (reader.consumeOptional("\r"))
+        while (reader.consumeOptional('\r'))
             ;
-        if (!reader.consumeOptional("\n") && reader.i < reader.input.length)
+        if (!reader.consumeOptional('\n') && reader.i < reader.input.length)
             throw reader.error(message);
         reader.restorePosition(savedPosition);
     };

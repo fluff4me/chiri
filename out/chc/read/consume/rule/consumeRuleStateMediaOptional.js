@@ -18,23 +18,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     exports.default = async (reader) => {
         const restore = reader.savePosition();
-        const prefix = reader.consumeOptional(":", "&:");
+        const prefix = reader.consumeOptional(':', '&:');
         if (!prefix)
             return;
         const position = reader.getPosition();
-        if (!(0, consumeWordOptional_1.default)(reader, "media")) {
+        if (!(0, consumeWordOptional_1.default)(reader, 'media')) {
             reader.restorePosition(restore);
             return undefined;
         }
         (0, consumeWhiteSpace_1.default)(reader);
-        const query = (0, consumeValueText_1.default)(reader, false, () => !!reader.peek(":"));
-        reader.consume(":");
+        const query = (0, consumeValueText_1.default)(reader, false, () => !!reader.peek(':'));
+        reader.consume(':');
         return {
-            type: "component",
-            subType: "media",
-            spread: prefix === "&:",
+            type: 'component',
+            subType: 'media',
+            spread: prefix === '&:',
             query,
-            ...await (0, consumeBody_1.default)(reader, "state"),
+            ...await (0, consumeBody_1.default)(reader, 'state'),
             position,
         };
     };

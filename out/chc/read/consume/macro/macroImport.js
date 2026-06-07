@@ -14,21 +14,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.macroImportCSS = void 0;
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("import")
-        .body("paths")
+    exports.default = (0, MacroConstruct_1.default)('import')
+        .body('paths')
         .consume(({ reader, body, position }) => {
         if (!body)
-            throw reader.error("Expected paths to import");
+            throw reader.error('Expected paths to import');
         return {
-            type: "import",
+            type: 'import',
             paths: body,
             position,
         };
     });
-    exports.macroImportCSS = (0, MacroConstruct_1.default)("import css")
-        .body("text")
+    exports.macroImportCSS = (0, MacroConstruct_1.default)('import css')
+        .body('text')
         .consume(({ body, position }) => ({
-        type: "import-css",
+        type: 'import-css',
         imports: body,
         position,
     }));

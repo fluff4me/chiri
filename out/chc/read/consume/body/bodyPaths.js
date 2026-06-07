@@ -14,11 +14,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumePathOptional_1 = __importDefault(require("../consumePathOptional"));
     const BodyConsumer_1 = __importDefault(require("./BodyConsumer"));
-    exports.default = (0, BodyConsumer_1.default)("paths", reader => {
+    exports.default = (0, BodyConsumer_1.default)('paths', reader => {
         const path = (0, consumePathOptional_1.default)(reader);
         if (!path)
-            throw reader.error(reader.consumeOptional("./") ? "Remove the ./ from the start of this path"
-                : "Expected file path");
+            throw reader.error(reader.consumeOptional('./') ? 'Remove the ./ from the start of this path'
+                : 'Expected file path');
         return path;
     });
 });

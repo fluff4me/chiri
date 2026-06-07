@@ -22,35 +22,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const states = [];
         let prefix;
         do {
-            const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional(":", "&:");
+            const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional(':', '&:');
             if (!thisPrefix)
                 break;
             prefix = thisPrefix;
-            const state = (0, consumeWord_1.default)(reader, ...componentStates_1.STATES, "not");
-            if (state.value === "not") {
+            const state = (0, consumeWord_1.default)(reader, ...componentStates_1.STATES, 'not');
+            if (state.value === 'not') {
                 while ((0, consumeWhiteSpaceOptional_1.default)(reader)) {
-                    reader.consume(":");
+                    reader.consume(':');
                     const substate = reader.consume(...componentStates_1.STATES);
                     state.value += ` ${componentStates_1.STATE_MAP[substate]}`;
                 }
-                state.value = `:not(${state.value.slice(4).replaceAll(" ", ",")})`;
+                state.value = `:not(${state.value.slice(4).replaceAll(' ', ',')})`;
             }
             else {
-                state.value = componentStates_1.STATE_MAP[state.value].replaceAll(" ", ",");
+                state.value = componentStates_1.STATE_MAP[state.value].replaceAll(' ', ',');
             }
             states.push(state);
-        } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
+        } while (reader.consumeOptional(',') && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
         if (!states.length) {
             reader.restorePosition(restore);
             return undefined;
         }
-        reader.consume(":");
+        reader.consume(':');
         return {
-            type: "component",
-            subType: "state",
-            spread: prefix === "&:",
+            type: 'component',
+            subType: 'state',
+            spread: prefix === '&:',
             states,
-            ...await (0, consumeBody_1.default)(reader, "state"),
+            ...await (0, consumeBody_1.default)(reader, 'state'),
             position,
         };
     };

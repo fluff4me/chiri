@@ -1,7 +1,7 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriValueText } from "../consumeValueText";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriValueText } from '../consumeValueText';
 export interface ChiriAnimate {
-    type: "animate";
+    type: 'animate';
     shorthand: ChiriValueText;
     content: ChiriStatement[];
     position: ChiriPosition;

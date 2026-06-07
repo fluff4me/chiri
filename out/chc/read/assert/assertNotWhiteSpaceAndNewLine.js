@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const e = reader.i;
         if ((0, consumeNewLineOptional_1.default)(reader)) {
             reader.i = e;
-            throw reader.error(s, "Extraneous whitespace before newline");
+            throw reader.error(s, 'Extraneous whitespace before newline');
         }
         reader.restorePosition(savedPosition);
     };

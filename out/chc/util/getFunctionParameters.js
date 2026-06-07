@@ -9,6 +9,6 @@
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = (fn) => fn.content.filter((statement) => statement.type === "variable" && statement.assignment !== "=");
+    exports.default = (fn) => fn.content.filter((statement) => statement.type === 'variable' && statement.assignment !== '=');
 });
 //# sourceMappingURL=getFunctionParameters.js.map

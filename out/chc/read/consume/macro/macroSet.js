@@ -51,64 +51,64 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         let e = reader.i;
         const varName = (0, consumeWord_1.default)(reader);
         const variable = reader.getVariable(varName.value);
-        if (variable.valueType.name.value === "body")
-            throw reader.error(e, "Cannot reassign a variable of type \"body\"");
+        if (variable.valueType.name.value === 'body')
+            throw reader.error(e, 'Cannot reassign a variable of type "body"');
         (0, consumeWhiteSpaceOptional_1.default)(reader);
         const binaryOperators = reader.types.binaryOperators;
         const type = variable.valueType;
         const operatorsForType = binaryOperators[type.name.value] ?? empy;
         let operator = _1.default
-            ?? reader.consumeOptional("??")
-            ?? reader.consumeOptional("++")
-            ?? reader.consumeOptional("--")
+            ?? reader.consumeOptional('??')
+            ?? reader.consumeOptional('++')
+            ?? reader.consumeOptional('--')
             ?? (0, consumeExpression_1.consumeOperatorOptional)(reader, operatorsForType);
-        if (operator !== "++" && operator !== "--")
-            reader.consume("=");
+        if (operator !== '++' && operator !== '--')
+            reader.consume('=');
         (0, consumeWhiteSpaceOptional_1.default)(reader);
         e = reader.i;
-        const expr = operator === "++" || operator === "--" ? undefined
+        const expr = operator === '++' || operator === '--' ? undefined
             : inline ? consumeExpression_1.default.inline(reader) : await (0, consumeExpression_1.default)(reader);
         const coercible = expr && operator && reader.types.canCoerceOperandB(type.name.value, operator, expr.valueType.name.value);
         if (expr && !coercible && !reader.types.isAssignable(expr.valueType, type))
             throw reader.error(e, `Expression of type "${ChiriType_1.ChiriType.stringify(expr.valueType)}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable.valueType)}"`);
-        if (operator === "++")
-            operator = "+";
-        if (operator === "--")
-            operator = "-";
+        if (operator === '++')
+            operator = '+';
+        if (operator === '--')
+            operator = '-';
         return {
             name: varName,
-            assignment: operator === "??" ? "??=" : "=",
+            assignment: operator === '??' ? '??=' : '=',
             expression: !operator ? expr
                 : {
-                    type: "expression",
-                    subType: "binary",
+                    type: 'expression',
+                    subType: 'binary',
                     operator,
-                    operandA: { type: "get", name: varName, valueType: variable.valueType, position: varName.position },
-                    operandB: expr ? expr : { type: "literal", subType: "int", valueType: ChiriType_1.ChiriType.of("int"), value: "1", position: constants_1.INTERNAL_POSITION },
-                    valueType: ChiriType_1.ChiriType.of(reader.types.binaryOperators[variable.valueType.name.value]?.[operator]?.[expr?.valueType.name.value ?? "int"] ?? "*"),
+                    operandA: { type: 'get', name: varName, valueType: variable.valueType, position: varName.position },
+                    operandB: expr ? expr : { type: 'literal', subType: 'int', valueType: ChiriType_1.ChiriType.of('int'), value: '1', position: constants_1.INTERNAL_POSITION },
+                    valueType: ChiriType_1.ChiriType.of(reader.types.binaryOperators[variable.valueType.name.value]?.[operator]?.[expr?.valueType.name.value ?? 'int'] ?? '*'),
                     position: varName.position,
                 },
         };
     };
     const consumeAssignmentOptional = async (reader, inline = false) => {
         const position = reader.getPosition();
-        if (!reader.consumeOptional("set"))
+        if (!reader.consumeOptional('set'))
             return undefined;
         if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
             return undefined;
         const data = await consumeAssignmentData(reader, true, inline);
         return {
-            type: "assignment",
+            type: 'assignment',
             ...data,
             position,
         };
     };
     exports.consumeAssignmentOptional = consumeAssignmentOptional;
-    exports.default = (0, MacroConstruct_1.default)("set")
+    exports.default = (0, MacroConstruct_1.default)('set')
         .consumeParameters(consumeAssignmentData)
         .consume(({ extra, position }) => {
         return {
-            type: "assignment",
+            type: 'assignment',
             ...extra,
             position,
         };

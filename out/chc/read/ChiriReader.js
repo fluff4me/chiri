@@ -46,12 +46,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         source;
         static async load(filename, reader, watcher = !reader ? undefined : reader.#watcher) {
             filename = path_1.default.resolve(filename);
-            if (!filename.endsWith(".chiri"))
-                filename += ".chiri";
+            if (!filename.endsWith('.chiri'))
+                filename += '.chiri';
             watcher?.add(filename);
             if (reader?.used.has(filename) && !reader.reusable.has(filename))
-                throw reader.error("This source file is not exported as reusable");
-            const ch = await promises_1.default.readFile(filename, "utf8");
+                throw reader.error('This source file is not exported as reusable');
+            const ch = await promises_1.default.readFile(filename, 'utf8');
             const result = new ChiriReader(filename, ch, reader?.cwd, undefined, reader?.stack.slice(), reader?.source);
             result.setWatcher(watcher);
             result.used = reader?.used ?? result.used;
@@ -83,7 +83,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         get isSubReader() {
             return this.#isSubReader;
         }
-        constructor(filename, input, cwd, context = { type: "root" }, stack = [], source = {}) {
+        constructor(filename, input, cwd, context = { type: 'root' }, stack = [], source = {}) {
             this.filename = filename;
             this.input = input;
             this.context = context;
@@ -115,7 +115,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             reader.#lastLineNumberPosition = this.#lastLineNumberPosition;
             reader.#outerStatements = [...this.#outerStatements, ...this.#statements];
             reader.types = this.types.clone(reader);
-            if (reader.context.type === "function")
+            if (reader.context.type === 'function')
                 reader.types.registerGenerics(...reader.context.data.types);
             reader.used = this.used;
             reader.reusable = this.reusable;
@@ -137,12 +137,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         getVariables(onlyThisBlock) {
             return (onlyThisBlock ? this.#statements : [...this.#outerStatements, ...this.#statements])
-                .filter((statement) => statement.type === "variable");
+                .filter((statement) => statement.type === 'variable');
         }
         getVariableOptional(name) {
             return _1.default
-                ?? this.#statements.findLast((statement) => statement.type === "variable" && statement.name.value === name)
-                ?? this.#outerStatements.findLast((statement) => statement.type === "variable" && statement.name.value === name);
+                ?? this.#statements.findLast((statement) => statement.type === 'variable' && statement.name.value === name)
+                ?? this.#outerStatements.findLast((statement) => statement.type === 'variable' && statement.name.value === name);
         }
         getVariable(name, start = this.i) {
             const variable = this.getVariableOptional(name);
@@ -152,8 +152,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         getFunctionOptional(name) {
             return _1.default
-                ?? this.#statements.findLast((statement) => statement.type === "function" && statement.name.value === name)
-                ?? this.#outerStatements.findLast((statement) => statement.type === "function" && statement.name.value === name);
+                ?? this.#statements.findLast((statement) => statement.type === 'function' && statement.name.value === name)
+                ?? this.#outerStatements.findLast((statement) => statement.type === 'function' && statement.name.value === name);
         }
         getFunction(name, start = this.i) {
             const fn = this.getFunctionOptional(name);
@@ -163,8 +163,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         getMacroOptional(name) {
             return _1.default
-                ?? this.#statements.findLast((statement) => statement.type === "macro" && statement.name.value === name)
-                ?? this.#outerStatements.findLast((statement) => statement.type === "macro" && statement.name.value === name);
+                ?? this.#statements.findLast((statement) => statement.type === 'macro' && statement.name.value === name)
+                ?? this.#outerStatements.findLast((statement) => statement.type === 'macro' && statement.name.value === name);
         }
         with(...scopeStatements) {
             return {
@@ -180,7 +180,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             };
         }
         getType(name) {
-            name = typeof name === "string" ? name : name.name.value;
+            name = typeof name === 'string' ? name : name.name.value;
             const type = this.types.types[name];
             if (!type)
                 throw this.error(`There is no type by name "${name}"`);
@@ -196,7 +196,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         async read(configuredConsumer) {
             const consumer = async () => {
-                const macroResult = await (0, consumeMacroUseOptional_1.default)(this, (configuredConsumer ? undefined : this.#isSubReader ? "generic" : "root"));
+                const macroResult = await (0, consumeMacroUseOptional_1.default)(this, (configuredConsumer ? undefined : this.#isSubReader ? 'generic' : 'root'));
                 if (!configuredConsumer)
                     return this.consumeBodyDefault(macroResult);
                 return macroResult ?? await configuredConsumer(this);
@@ -220,12 +220,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         if (!consumed)
                             throw this.error(e, `Expected ${this.context.type} content`);
                         this.#statements.push(...Arrays_1.default.resolve(consumed).filter(Arrays_1.default.filterNullish));
-                    } while ((0, consumeNewBlockLineOptional_1.default)(this, this.context.type === "text"));
+                    } while ((0, consumeNewBlockLineOptional_1.default)(this, this.context.type === 'text'));
                     if (this.i < this.input.length)
                         (0, consumeBlockEnd_1.default)(this);
                 }
                 if (!this.#isSubReader && this.i < this.input.length)
-                    throw this.error("Failed to continue parsing input file");
+                    throw this.error('Failed to continue parsing input file');
             }
             catch (err) {
                 this.#errored = true;
@@ -241,11 +241,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         async consumeBodyDefault(macro) {
             ////////////////////////////////////
             //#region Macro
-            if (macro?.type === "import") {
+            if (macro?.type === 'import') {
                 for (const imp of macro.paths) {
-                    const raw = (imp.module ? `${imp.module}:` : "") + imp.path;
-                    const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? constants_1.LIB_ROOT : require.resolve(imp.module);
-                    const filename = imp.path.startsWith("/") ? path_1.default.join(this.cwd, imp.path) : path_1.default.resolve(dirname, imp.path);
+                    const raw = (imp.module ? `${imp.module}:` : '') + imp.path;
+                    const dirname = !imp.module ? this.dirname : imp.module === 'chiri' ? constants_1.LIB_ROOT : require.resolve(imp.module);
+                    const filename = imp.path.startsWith('/') ? path_1.default.join(this.cwd, imp.path) : path_1.default.resolve(dirname, imp.path);
                     if (this.stack.includes(filename))
                         throw this.error(`Cannot recursively import file "${raw}"`);
                     let sub;
@@ -257,7 +257,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         const err = e;
                         this.#errorStart = this.i;
                         this.i = imp.i;
-                        const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error");
+                        const message = err.message?.includes('no such file') ? 'does not exist' : (err.message ?? 'unknown error');
                         throw this.error(`Cannot import file "${raw}": ${message}`);
                     }
                     if (sub) {
@@ -292,13 +292,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const property = await (0, consumePropertyOptional_1.default)(this);
             if (property)
                 return property;
-            const rule = this.context.type === "keyframe" ? undefined : (_1.default
+            const rule = this.context.type === 'keyframe' ? undefined : (_1.default
                 ?? await (0, consumeRuleStateMediaOptional_1.default)(this)
                 ?? await (0, consumeRuleStateContainerOptional_1.default)(this)
                 ?? await (0, consumeRuleStateSchemeOptional_1.default)(this)
-                ?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await (0, consumeRuleMainOptional_1.default)(this))
+                ?? (this.context.type === 'state' || this.context.type === 'pseudo' ? undefined : await (0, consumeRuleMainOptional_1.default)(this))
                 ?? await (0, consumeRuleStateSpecialOptional_1.default)(this)
-                ?? (this.context.type === "pseudo" ? undefined : await (0, consumeRuleStateOptional_1.default)(this))
+                ?? (this.context.type === 'pseudo' ? undefined : await (0, consumeRuleStateOptional_1.default)(this))
                 ?? await (0, consumeRulePseudoOptional_1.default)(this));
             if (rule)
                 return rule;
@@ -306,30 +306,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         logState() {
             console.log(Object.entries({
-                variables: [...this.#outerStatements, ...this.#statements].filter(statement => statement.type === "variable")
-                    .map(statement => `${ansi_1.default.path + statement.name.value}: ${ansi_1.default.ok + ChiriType_1.ChiriType.stringify(statement.valueType)}`).join(ansi_1.default.label + ", "),
-            }).map(([k, v]) => `${ansi_1.default.label + k}: ${v}` + ansi_1.default.reset).join("\n"));
+                variables: [...this.#outerStatements, ...this.#statements].filter(statement => statement.type === 'variable')
+                    .map(statement => `${ansi_1.default.path + statement.name.value}: ${ansi_1.default.ok + ChiriType_1.ChiriType.stringify(statement.valueType)}`).join(ansi_1.default.label + ', '),
+            }).map(([k, v]) => `${ansi_1.default.label + k}: ${v}` + ansi_1.default.reset).join('\n'));
         }
         logLine(start, errOrMessage) {
             const line = Strings_1.default.symbolise(this.getCurrentLine(undefined, true));
             const lineNumber = this.getLineNumber(undefined, true);
             const columnNumber = this.getColumnNumber();
-            const err = typeof errOrMessage === "string" ? undefined : errOrMessage;
-            const message = typeof errOrMessage === "string" ? errOrMessage : undefined;
+            const err = typeof errOrMessage === 'string' ? undefined : errOrMessage;
+            const message = typeof errOrMessage === 'string' ? errOrMessage : undefined;
             const filename = this.formatFilePosAtFromScratch(this.i);
-            console[err ? "error" : "info"](filename
-                + ansi_1.default.label + (errOrMessage ? " - " : "")
-                + ansi_1.default.reset + (!err ? message ?? "" : ansi_1.default.err + err.message) + "\n"
-                + ansi_1.default.label + "  " + `${lineNumber + 1}`.padStart(5) + " " + ansi_1.default.reset + line + "\n"
-                + (err ? ansi_1.default.err : ansi_1.default.filepos) + `        ${" ".repeat(columnNumber)}${"^".repeat((start ?? this.i) - this.i || 1)}`
+            console[err ? 'error' : 'info'](filename
+                + ansi_1.default.label + (errOrMessage ? ' - ' : '')
+                + ansi_1.default.reset + (!err ? message ?? '' : ansi_1.default.err + err.message) + '\n'
+                + ansi_1.default.label + '  ' + `${lineNumber + 1}`.padStart(5) + ' ' + ansi_1.default.reset + line + '\n'
+                + (err ? ansi_1.default.err : ansi_1.default.filepos) + `        ${' '.repeat(columnNumber)}${'^'.repeat((start ?? this.i) - this.i || 1)}`
                 + ansi_1.default.reset
-                + (!err?.stack || (process.env.CHIRI_ENV !== "dev" && !(+process.env.CHIRI_STACK_LENGTH || 0)) ? ""
+                + (!err?.stack || (process.env.CHIRI_ENV !== 'dev' && !(+process.env.CHIRI_STACK_LENGTH || 0)) ? ''
                     : `\n${err.stack
-                        .slice(err.stack.indexOf("\n", start === undefined ? 0 : err.stack.indexOf("\n") + 1) + 1)
-                        .split("\n")
+                        .slice(err.stack.indexOf('\n', start === undefined ? 0 : err.stack.indexOf('\n') + 1) + 1)
+                        .split('\n')
                         .slice(0, +process.env.CHIRI_STACK_LENGTH || 3)
-                        .map(path => path.replace(constants_1.PACKAGE_ROOT + "\\", "").replaceAll("\\", "/"))
-                        .join("\n")}`));
+                        .map(path => path.replace(constants_1.PACKAGE_ROOT + '\\', '').replaceAll('\\', '/'))
+                        .join('\n')}`));
         }
         formatFilename() {
             return ansi_1.default.path + (0, relToCwd_1.default)(this.filename);
@@ -344,7 +344,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             let newlines = 0;
             let columns = 0;
             for (let j = 0; j < at; j++) {
-                if (this.input[j] === "\n") {
+                if (this.input[j] === '\n') {
                     newlines++;
                     columns = 0;
                     continue;
@@ -362,13 +362,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return string;
             }
             const expected = strings.map(string => string
-                .replace(/\r/g, "\u240D")
-                .replace(/\n/g, "\u240A")
-                .replace(/ /g, "\u00B7")
-                .replace(/\t/g, "\u2192"));
-            throw this.error("Expected "
+                .replace(/\r/g, '\u240D')
+                .replace(/\n/g, '\u240A')
+                .replace(/ /g, '\u00B7')
+                .replace(/\t/g, '\u2192'));
+            throw this.error('Expected '
                 + (expected.length === 1 ? expected[0]
-                    : "any of " + expected.map(string => `"${string}"`).join(", ")));
+                    : 'any of ' + expected.map(string => `"${string}"`).join(', ')));
         }
         consumeOptional(...strings) {
             NextString: for (const string of strings) {
@@ -384,7 +384,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
          * @param  {...string} strings
          */
         consumeUntil(...strings) {
-            let consumed = "";
+            let consumed = '';
             for (; this.i < this.input.length; this.i++) {
                 if (this.peek(...strings))
                     break;
@@ -403,26 +403,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         error(errorPositionOrMessage, message) {
             this.#errorStart = this.i;
-            if (typeof errorPositionOrMessage === "number")
+            if (typeof errorPositionOrMessage === 'number')
                 this.i = errorPositionOrMessage;
             else
                 message = errorPositionOrMessage;
-            return new Error(message ?? "Compilation failed for an unknown reason");
+            return new Error(message ?? 'Compilation failed for an unknown reason');
         }
         #subError = false;
         subError() {
             this.#subError = true;
-            throw new Error("if this is logged something is very wrong");
+            throw new Error('if this is logged something is very wrong');
         }
         getLineStart(at = this.i) {
-            return this.input.lastIndexOf("\n", at - 1) + 1;
+            return this.input.lastIndexOf('\n', at - 1) + 1;
         }
         getLineEnd(at = this.i, includeNewline = false) {
-            let index = this.input.indexOf("\n", at);
+            let index = this.input.indexOf('\n', at);
             if (index === -1)
                 return this.input.length;
             if (!includeNewline)
-                while (this.input[--index] === "\r")
+                while (this.input[--index] === '\r')
                     ;
             return index + 1;
         }
@@ -453,7 +453,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             let newlines = recalc ? 0 : this.#lastLineNumber;
             let j = recalc ? 0 : lastLineNumberPosition;
             for (; j < at; j++)
-                if (this.input[j] === "\n")
+                if (this.input[j] === '\n')
                     newlines++;
             this.#lastLineNumber = newlines;
             this.#lastLineNumberPosition = at;

@@ -1,6 +1,6 @@
-import type { ChiriMacroBase } from "./MacroConstruct";
+import type { ChiriMacroBase } from './MacroConstruct';
 export interface ChiriMacro extends ChiriMacroBase {
-    type: "macro";
+    type: 'macro';
 }
 declare const _default: import("./MacroConstruct").ChiriMacroInternal<ChiriMacro>;
 export default _default;

@@ -15,12 +15,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeValueText_1 = __importDefault(require("../consumeValueText"));
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("animate")
-        .consumeParameters(reader => (0, consumeWhiteSpace_1.default)(reader) && (0, consumeValueText_1.default)(reader, false, () => !!reader.peek(":")))
-        .body("keyframes")
+    exports.default = (0, MacroConstruct_1.default)('animate')
+        .consumeParameters(reader => (0, consumeWhiteSpace_1.default)(reader) && (0, consumeValueText_1.default)(reader, false, () => !!reader.peek(':')))
+        .body('keyframes')
         .consume(({ extra: shorthand, body, position }) => {
         return {
-            type: "animate",
+            type: 'animate',
             shorthand,
             content: body,
             position,

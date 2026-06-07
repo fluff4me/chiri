@@ -18,10 +18,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     (function (Strings) {
         function symbolise(text) {
             return text
-                .replace(/\r/g, ansi_1.default.whitespace + "\u240D" + ansi_1.default.reset)
-                .replace(/\n/g, ansi_1.default.whitespace + "\u240A" + ansi_1.default.reset)
-                .replace(/ /g, ansi_1.default.whitespace + "\u00B7" + ansi_1.default.reset)
-                .replace(/\t/g, ansi_1.default.whitespace + "\u2192" + ansi_1.default.reset);
+                .replace(/\r/g, ansi_1.default.whitespace + '\u240D' + ansi_1.default.reset)
+                .replace(/\n/g, ansi_1.default.whitespace + '\u240A' + ansi_1.default.reset)
+                .replace(/ /g, ansi_1.default.whitespace + '\u00B7' + ansi_1.default.reset)
+                .replace(/\t/g, ansi_1.default.whitespace + '\u2192' + ansi_1.default.reset);
         }
         Strings.symbolise = symbolise;
         function debug(value) {

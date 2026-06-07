@@ -1,4 +1,4 @@
-import type ChiriReader from "../ChiriReader";
+import type ChiriReader from '../ChiriReader';
 /**
  * Loop:
  * - Consumes newline. If not encountering a newline, return number of consumed newlines

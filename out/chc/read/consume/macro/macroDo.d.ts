@@ -1,7 +1,7 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriMacroBlock } from "./MacroConstruct";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriMacroBlock } from './MacroConstruct';
 export interface ChiriDo extends ChiriMacroBlock {
-    type: "do";
+    type: 'do';
     content: ChiriStatement[];
     position: ChiriPosition;
 }

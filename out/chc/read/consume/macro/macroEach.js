@@ -24,29 +24,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeExpression_1 = __importDefault(require("../expression/consumeExpression"));
     const consumeRangeOptional_1 = __importDefault(require("../expression/consumeRangeOptional"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("each")
+    exports.default = (0, MacroConstruct_1.default)('each')
         .consumeParameters(async (reader) => {
         (0, consumeWhiteSpace_1.default)(reader);
-        reader.consumeOptional("in ");
+        reader.consumeOptional('in ');
         const e = reader.i;
         const iterable = (0, consumeRangeOptional_1.default)(reader) ?? consumeExpression_1.default.inline(reader, typeList_1.default.type, typeRecord_1.default.type, typeString_1.default.type);
         const isRecord = reader.types.isAssignable(iterable.valueType, typeRecord_1.default.type);
         const isString = reader.types.isAssignable(iterable.valueType, typeString_1.default.type);
         let variable1;
         let variable2;
-        if ((0, consumeWhiteSpaceOptional_1.default)(reader) && reader.consumeOptional("as") && (0, consumeWhiteSpaceOptional_1.default)(reader)) {
+        if ((0, consumeWhiteSpaceOptional_1.default)(reader) && reader.consumeOptional('as') && (0, consumeWhiteSpaceOptional_1.default)(reader)) {
             variable1 = await (0, consumeCompilerVariableOptional_1.default)(reader, false, true);
             if (!variable1)
-                throw reader.error("Expected variable declaration");
-            if (reader.consumeOptional(",")) {
+                throw reader.error('Expected variable declaration');
+            if (reader.consumeOptional(',')) {
                 (0, consumeWhiteSpaceOptional_1.default)(reader);
                 variable2 = await (0, consumeCompilerVariableOptional_1.default)(reader, false, true);
                 if (!variable2)
-                    throw reader.error("Expected variable declaration");
+                    throw reader.error('Expected variable declaration');
             }
         }
         if (variable1 && !variable2 && isRecord)
-            throw reader.error("Expected variable declarations for both a key and its associated value");
+            throw reader.error('Expected variable declarations for both a key and its associated value');
         if (variable1 && isRecord && !reader.types.isAssignable(typeString_1.default.type, variable1.valueType))
             throw reader.error(e, `Iterable value of type "${ChiriType_1.ChiriType.stringify(typeString_1.default.type)}" is not assignable to "${ChiriType_1.ChiriType.stringify(variable1.valueType)}"`);
         const valueType = isString ? typeString_1.default.type : iterable.valueType.generics[0];
@@ -65,15 +65,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         };
     })
         .consume(async ({ reader, extra: { iterable, variable, keyVariable }, position }) => {
-        reader.consume(":");
-        const body = await (0, consumeBody_1.default)(reader, "inherit", sub => {
+        reader.consume(':');
+        const body = await (0, consumeBody_1.default)(reader, 'inherit', sub => {
             if (keyVariable)
                 sub.addOuterStatement(keyVariable);
             if (variable)
                 sub.addOuterStatement(variable);
         });
         return {
-            type: "each",
+            type: 'each',
             isBlock: true,
             iterable,
             keyVariable,

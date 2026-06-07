@@ -17,17 +17,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const Writer_1 = __importDefault(require("./Writer"));
     class DTSWriter extends Writer_1.default {
         constructor(ast, dest, config) {
-            super(ast, dest, { extension: ".d.ts", ...config });
+            super(ast, dest, { extension: '.d.ts', ...config });
         }
         createDestPath(outFile) {
-            return typeof args_1.default["out-dts"] === "string" ? path_1.default.resolve(args_1.default["out-dts"], outFile) : super.createDestPath(outFile);
+            return typeof args_1.default['out-dts'] === 'string' ? path_1.default.resolve(args_1.default['out-dts'], outFile) : super.createDestPath(outFile);
         }
         onCompileStart(compiler) {
-            this.writeLineStartBlock("declare const _default: {");
+            this.writeLineStartBlock('declare const _default: {');
         }
         onCompileEnd(compiler) {
-            this.writeLineEndBlock("};");
-            this.writeLine("export default _default");
+            this.writeLineEndBlock('};');
+            this.writeLine('export default _default');
         }
     }
     exports.default = DTSWriter;

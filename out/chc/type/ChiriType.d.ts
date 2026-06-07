@@ -1,6 +1,6 @@
-import type { ChiriWord } from "../read/consume/consumeWord";
+import type { ChiriWord } from '../read/consume/consumeWord';
 export interface ChiriType<TYPE extends string = string> {
-    type: "type";
+    type: 'type';
     name: ChiriWord<TYPE>;
     generics: ChiriType[];
     isGeneric?: true;

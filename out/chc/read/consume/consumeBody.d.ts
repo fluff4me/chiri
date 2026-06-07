@@ -1,8 +1,8 @@
-import type ChiriReader from "../ChiriReader";
-import type { ChiriStatement } from "../ChiriReader";
-import type { ContextStatement } from "./body/BodyRegistry";
-import type { ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData } from "./body/Contexts";
-import type { MacroResult } from "./consumeMacroUseOptional";
+import type ChiriReader from '../ChiriReader';
+import type { ChiriStatement } from '../ChiriReader';
+import type { ContextStatement } from './body/BodyRegistry';
+import type { ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData } from './body/Contexts';
+import type { MacroResult } from './consumeMacroUseOptional';
 export interface ChiriBody<STATEMENT = ChiriStatement> {
     content: (STATEMENT | MacroResult)[];
 }

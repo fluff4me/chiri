@@ -15,7 +15,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpaceOptional_1 = __importDefault(require("./consumeWhiteSpaceOptional"));
     exports.default = (reader) => {
         if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
-            throw reader.error("Expected whitespace");
+            throw reader.error('Expected whitespace');
         return true;
     };
 });

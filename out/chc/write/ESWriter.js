@@ -32,27 +32,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         .trimStart();
     class ESWriter extends Writer_1.default {
         constructor(ast, dest, config) {
-            super(ast, dest, { extension: ".js", ...config });
+            super(ast, dest, { extension: '.js', ...config });
         }
         createDestPath(outFile) {
-            return typeof args_1.default["out-es"] === "string" ? path_1.default.resolve(args_1.default["out-es"], outFile) : super.createDestPath(outFile);
+            return typeof args_1.default['out-es'] === 'string' ? path_1.default.resolve(args_1.default['out-es'], outFile) : super.createDestPath(outFile);
         }
         onCompileStart(compiler) {
             this.writeLineStartBlock(UMD_PREFIX);
-            this.writeLineStartBlock("exports.default = {");
+            this.writeLineStartBlock('exports.default = {');
         }
         emitComponent(compiler, component) {
-            this.write("\"");
+            this.write('"');
             this.writeWord(component.selector);
-            this.write("\"");
-            this.writeLineStartBlock(": [");
+            this.write('"');
+            this.writeLineStartBlock(': [');
             for (const mixin of new Set(component.mixins))
                 if (!mixin.skip)
                     this.writeLine(`"${mixin.name.value}",`);
-            this.writeLineEndBlock("],");
+            this.writeLineEndBlock('],');
         }
         onCompileEnd(compiler) {
-            this.writeLineEndBlock("};");
+            this.writeLineEndBlock('};');
             this.writeLineEndBlock(UMD_SUFFIX);
             this.write(`\n//# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())}`);
         }

@@ -1,8 +1,8 @@
-import type ChiriReader from "../ChiriReader";
-import type { ChiriPosition, ChiriStatement } from "../ChiriReader";
-import type { ChiriExpressionOperand } from "./expression/consumeExpression";
+import type ChiriReader from '../ChiriReader';
+import type { ChiriPosition, ChiriStatement } from '../ChiriReader';
+import type { ChiriExpressionOperand } from './expression/consumeExpression';
 export interface ChiriKeyframe {
-    type: "keyframe";
+    type: 'keyframe';
     at: ChiriExpressionOperand;
     content: ChiriStatement[];
     position: ChiriPosition;

@@ -17,14 +17,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (reader) => {
         const e = reader.i;
         const position = reader.getPosition(e);
-        const negative = reader.consumeOptional("-") ?? "";
+        const negative = reader.consumeOptional('-') ?? '';
         const numeric = (0, consumeUnsignedIntegerOptional_1.default)(reader);
         if (!numeric)
             reader.i = e;
         return !numeric ? undefined : {
-            type: "literal",
-            subType: "int",
-            valueType: ChiriType_1.ChiriType.of("int"),
+            type: 'literal',
+            subType: 'int',
+            valueType: ChiriType_1.ChiriType.of('int'),
             value: negative + numeric.value,
             position,
         };

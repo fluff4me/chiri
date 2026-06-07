@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const e = reader.i;
         const type = consumeTypeOptional(reader, genericDeclaration);
         if (!type)
-            throw reader.error(e, "Expected type");
+            throw reader.error(e, 'Expected type');
         return type;
     }
     function consumeTypeOptional(reader, genericDeclaration, throwOnInvalidName) {
@@ -30,11 +30,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (!typeName)
             return undefined;
         const type = {
-            type: "type",
+            type: 'type',
             name: typeName,
             generics: [],
         };
-        if (typeName.value === "*")
+        if (typeName.value === '*')
             return type;
         const definition = reader.getTypeOptional(typeName.value);
         if (definition?.type.isGeneric)
@@ -49,13 +49,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     }
     const consumeGenerics = (reader, generics) => {
         const result = [];
-        if (typeof generics === "number") {
+        if (typeof generics === 'number') {
             for (let g = 0; g < generics; g++) {
-                reader.consume("!");
-                const anyType = (0, consumeWordOptional_1.default)(reader, "*");
+                reader.consume('!');
+                const anyType = (0, consumeWordOptional_1.default)(reader, '*');
                 if (anyType)
                     result.push({
-                        type: "type",
+                        type: 'type',
                         name: anyType,
                         generics: [],
                     });
@@ -65,27 +65,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         else if (generics) {
             for (const generic of generics) {
-                reader.consume("!");
-                const parenthesised = reader.consumeOptional("(");
+                reader.consume('!');
+                const parenthesised = reader.consumeOptional('(');
                 result.push(ChiriType_1.ChiriType.of(reader.consume(...generic)));
                 if (parenthesised)
-                    reader.consume(")");
+                    reader.consume(')');
             }
         }
         else {
             while (true) {
-                if (!reader.consumeOptional("!"))
+                if (!reader.consumeOptional('!'))
                     break;
-                const parenthesised = reader.consumeOptional("(");
+                const parenthesised = reader.consumeOptional('(');
                 while (true) {
                     if (result.length)
                         if (!(0, consumeWhiteSpaceOptional_1.default)(reader))
                             break;
                     if (!parenthesised) {
-                        const anyType = (0, consumeWordOptional_1.default)(reader, "*");
+                        const anyType = (0, consumeWordOptional_1.default)(reader, '*');
                         if (anyType) {
                             result.push({
-                                type: "type",
+                                type: 'type',
                                 name: anyType,
                                 generics: [],
                             });
@@ -98,10 +98,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     result.push(type);
                 }
                 if (parenthesised)
-                    reader.consume(")");
+                    reader.consume(')');
             }
             if (!result.length)
-                throw reader.error("Expected type generic");
+                throw reader.error('Expected type generic');
         }
         return result;
     };

@@ -1,9 +1,9 @@
-import type { ChiriAST } from "../read/ChiriReader";
-import type { ChiriWord } from "../read/consume/consumeWord";
-import type ChiriCompiler from "./ChiriCompiler";
-import type { ResolvedMixin } from "./CSSWriter";
-import type { ChiriWriteConfig } from "./Writer";
-import Writer from "./Writer";
+import type { ChiriAST } from '../read/ChiriReader';
+import type { ChiriWord } from '../read/consume/consumeWord';
+import type ChiriCompiler from './ChiriCompiler';
+import type { ResolvedMixin } from './CSSWriter';
+import type { ChiriWriteConfig } from './Writer';
+import Writer from './Writer';
 export interface ResolvedComponent {
     selector: ChiriWord;
     mixins: ResolvedMixin[];

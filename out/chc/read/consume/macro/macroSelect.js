@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const typeString_1 = __importDefault(require("../../../type/typeString"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("select")
-        .parameter("where", typeString_1.default.type)
-        .body("mixin")
+    exports.default = (0, MacroConstruct_1.default)('select')
+        .parameter('where', typeString_1.default.type)
+        .body('mixin')
         .consume(({ reader, position, assignments, body }) => {
         return {
-            type: "select",
+            type: 'select',
             selector: assignments.where,
             content: body,
             position,

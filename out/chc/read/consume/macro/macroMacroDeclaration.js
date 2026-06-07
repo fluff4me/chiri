@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("macro")
+    exports.default = (0, MacroConstruct_1.default)('macro')
         .named()
-        .body("inherit")
+        .body('inherit')
         .consume(({ body, name, position }) => ({
-        type: "macro",
+        type: 'macro',
         name,
         content: body,
         position,

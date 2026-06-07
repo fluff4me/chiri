@@ -1,7 +1,7 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriExpressionOperand } from "../expression/consumeExpression";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriExpressionOperand } from '../expression/consumeExpression';
 export interface ChiriFontFace {
-    type: "font-face";
+    type: 'font-face';
     family: ChiriExpressionOperand;
     content: ChiriStatement[];
     position: ChiriPosition;

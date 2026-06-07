@@ -16,9 +16,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (reader, expected) => {
         const result = (0, consumeIndentOptional_1.default)(reader, expected);
         if (result === undefined) {
-            if (reader.consumeOptional("  "))
-                throw reader.error("Indentation must be with tab characters");
-            throw reader.error("Not enough indentation");
+            if (reader.consumeOptional('  '))
+                throw reader.error('Indentation must be with tab characters');
+            throw reader.error('Not enough indentation');
         }
         return result;
     };

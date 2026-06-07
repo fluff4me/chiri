@@ -10,20 +10,20 @@
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Contexts = [
-        "inherit",
-        "root",
-        "generic",
-        "function",
-        "paths",
-        "text",
-        "mixin",
-        "component",
-        "state",
-        "pseudo",
-        "property-name",
-        "keyframes",
-        "keyframe",
-        "selectors",
+        'inherit',
+        'root',
+        'generic',
+        'function',
+        'paths',
+        'text',
+        'mixin',
+        'component',
+        'state',
+        'pseudo',
+        'property-name',
+        'keyframes',
+        'keyframe',
+        'selectors',
     ];
     exports.default = Contexts;
 });

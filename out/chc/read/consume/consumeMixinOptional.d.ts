@@ -1,8 +1,8 @@
-import type ChiriReader from "../ChiriReader";
-import type { ChiriPosition, ChiriStatement } from "../ChiriReader";
-import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional";
+import type ChiriReader from '../ChiriReader';
+import type { ChiriPosition, ChiriStatement } from '../ChiriReader';
+import type { ChiriWordInterpolated } from './consumeWordInterpolatedOptional';
 export interface ChiriMixin {
-    type: "mixin";
+    type: 'mixin';
     name: ChiriWordInterpolated;
     content: ChiriStatement[];
     position: ChiriPosition;

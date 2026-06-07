@@ -18,7 +18,7 @@
         for (; reader.i < reader.input.length; reader.i++) {
             if (indent === expected)
                 break;
-            if (reader.input[reader.i] !== "\t")
+            if (reader.input[reader.i] !== '\t')
                 break;
             indent++;
         }

@@ -24,15 +24,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         let stringChar;
         let paren = 0;
         let textStart = start;
-        let text = "";
+        let text = '';
         for (; reader.i < reader.input.length;) {
-            if (reader.peek("\r\n", "\n")) {
+            if (reader.peek('\r\n', '\n')) {
                 if (!multiline || !(0, consumeNewBlockLineOptional_1.default)(reader))
                     break;
-                text += " ";
+                text += ' ';
                 continue;
             }
-            const varType = reader.consumeOptional("#{", "$$", "$");
+            const varType = reader.consumeOptional('#{', '$$', '$');
             if (!varType) {
                 if (!stringChar && !paren && until?.())
                     break;
@@ -40,13 +40,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 if (char === stringChar) {
                     stringChar = undefined;
                 }
-                else if (!stringChar && (char === "\"" || char === "'")) {
+                else if (!stringChar && (char === '"' || char === '\'')) {
                     stringChar = char;
                 }
-                else if (!stringChar && char === "(") {
+                else if (!stringChar && char === '(') {
                     paren++;
                 }
-                else if (!stringChar && paren && char === ")") {
+                else if (!stringChar && paren && char === ')') {
                     paren--;
                 }
                 text += char;
@@ -55,34 +55,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             if (text) {
                 content.push({
-                    type: "text-raw",
+                    type: 'text-raw',
                     position: textStart,
                     text,
                 });
             }
-            if (varType === "$" || varType === "$$") {
+            if (varType === '$' || varType === '$$') {
                 content.push((0, consumeCustomPropertyInterpolation_1.default)(reader, varType));
             }
             else {
                 content.push(consumeExpression_1.default.inline(reader));
-                if (!reader.consumeOptional("}")) {
+                if (!reader.consumeOptional('}')) {
                     (0, assertNewLine_1.default)(reader);
-                    text = "";
+                    text = '';
                 }
             }
-            text = "";
+            text = '';
             textStart = reader.getPosition();
         }
         if (text)
             content.push({
-                type: "text-raw",
+                type: 'text-raw',
                 position: textStart,
                 text,
             });
         return {
-            type: "text",
-            subType: "text",
-            valueType: ChiriType_1.ChiriType.of("string"),
+            type: 'text',
+            subType: 'text',
+            valueType: ChiriType_1.ChiriType.of('string'),
             content,
             position: start,
         };

@@ -16,19 +16,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     exports.default = (0, TypeDefinition_1.default)({
-        type: ChiriType_1.ChiriType.of("int"),
+        type: ChiriType_1.ChiriType.of('int'),
         stringable: true,
         consumeOptionalConstructor: reader => (0, consumeIntegerOptional_1.default)(reader),
         coerce: (value, error) => {
-            if (typeof value === "boolean")
+            if (typeof value === 'boolean')
                 return value ? 1 : 0;
             if (value === undefined || value === null)
                 return 0;
-            if (typeof value === "number")
+            if (typeof value === 'number')
                 return Math.trunc(value);
             throw error();
         },
-        is: value => typeof value === "number" && Number.isInteger(value),
+        is: value => typeof value === 'number' && Number.isInteger(value),
     });
 });
 //# sourceMappingURL=typeInt.js.map

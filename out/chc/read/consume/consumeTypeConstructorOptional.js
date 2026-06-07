@@ -28,7 +28,7 @@
         const result = type.consumeOptionalConstructor?.(reader);
         if (!result)
             return undefined;
-        if ("type" in result && result.type === "literal")
+        if ('type' in result && result.type === 'literal')
             return result;
         throw reader.error(`Invalid result from ${typename} constructor`);
     }

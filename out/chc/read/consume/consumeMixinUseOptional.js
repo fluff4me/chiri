@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (reader) => {
         const position = reader.getPosition();
         const start = reader.i;
-        const operator = reader.consumeOptional("%", "..%");
+        const operator = reader.consumeOptional('%', '..%');
         if (!operator)
             return undefined;
         const word = (0, consumeWordInterpolatedOptional_1.default)(reader);
@@ -25,9 +25,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
         (0, assertNewLine_1.default)(reader);
         return {
-            type: "mixin-use",
+            type: 'mixin-use',
             name: word,
-            spread: operator === "..%" ? true : undefined,
+            spread: operator === '..%' ? true : undefined,
             // assignments: {},
             position,
         };

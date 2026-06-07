@@ -16,10 +16,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     exports.default = (0, TypeDefinition_1.default)({
-        type: ChiriType_1.ChiriType.of("string"),
+        type: ChiriType_1.ChiriType.of('string'),
         stringable: true,
         consumeOptionalConstructor: consumeStringOptional_1.default,
-        is: value => typeof value === "string",
+        is: value => typeof value === 'string',
     });
 });
 //# sourceMappingURL=typeString.js.map

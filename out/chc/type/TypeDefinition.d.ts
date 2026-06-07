@@ -1,7 +1,7 @@
-import type ChiriReader from "../read/ChiriReader";
-import type { Value } from "../util/resolveExpression";
-import type { ChiriType } from "./ChiriType";
-import type ChiriTypeManager from "./ChiriTypeManager";
+import type ChiriReader from '../read/ChiriReader';
+import type { Value } from '../util/resolveExpression';
+import type { ChiriType } from './ChiriType';
+import type ChiriTypeManager from './ChiriTypeManager';
 interface TypeDefinition<TYPE extends string = string> {
     type: ChiriType<TYPE>;
     consumeOptionalConstructor?(reader: ChiriReader): object | undefined;

@@ -1,6 +1,6 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
 export interface ChiriAfter {
-    type: "after";
+    type: 'after';
     content: ChiriStatement[];
     position: ChiriPosition;
 }

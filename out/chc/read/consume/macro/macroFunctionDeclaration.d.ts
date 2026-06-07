@@ -1,7 +1,7 @@
-import type { ChiriType, ChiriTypeGeneric } from "../../../type/ChiriType";
-import type { ChiriMacroBase } from "./MacroConstruct";
+import type { ChiriType, ChiriTypeGeneric } from '../../../type/ChiriType';
+import type { ChiriMacroBase } from './MacroConstruct';
 export interface ChiriFunction extends ChiriMacroBase {
-    type: "function";
+    type: 'function';
     generics: ChiriTypeGeneric[];
     returnType: ChiriType;
 }

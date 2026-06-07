@@ -18,30 +18,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordOptional_1 = __importDefault(require("../consumeWordOptional"));
     const ExpressionConstruct_1 = __importDefault(require("./ExpressionConstruct"));
-    exports.default = (0, ExpressionConstruct_1.default)("match")
+    exports.default = (0, ExpressionConstruct_1.default)('match')
         .consume(async ({ reader, consumeExpression, expectedTypes, position }) => {
         const value = consumeExpression.inline(reader);
-        reader.consume(":");
+        reader.consume(':');
         if (!(0, consumeBlockStartOptional_1.default)(reader))
-            throw reader.error("Expected start of match cases block");
+            throw reader.error('Expected start of match cases block');
         const cases = [];
         let elseCase;
         do {
             const position = reader.getPosition();
-            const isElseCase = (0, consumeWordOptional_1.default)(reader, "else");
+            const isElseCase = (0, consumeWordOptional_1.default)(reader, 'else');
             const condition = isElseCase ? undefined : consumeExpression.inline(reader);
-            reader.consume(":");
+            reader.consume(':');
             (0, consumeWhiteSpaceOptional_1.default)(reader);
             const expression = await consumeExpression(reader, ...expectedTypes);
             if (isElseCase)
                 elseCase = {
-                    type: "match-else",
+                    type: 'match-else',
                     expression,
                     position,
                 };
             else
                 cases.push({
-                    type: "match-case",
+                    type: 'match-case',
                     condition: condition,
                     expression,
                     position,
@@ -53,7 +53,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             valueTypes.push(elseCase.expression.valueType);
         const intersection = reader.types.intersection(...valueTypes);
         return {
-            type: "match",
+            type: 'match',
             value,
             cases,
             elseCase,

@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const restore = reader.savePosition();
         const position = reader.getPosition();
         start ??= consumeExpression.inlineOptional(reader, typeInt_1.default.type);
-        const operator = reader.consumeOptional("...", "..");
+        const operator = reader.consumeOptional('...', '..');
         const end = operator && consumeExpression.inlineOptional(reader, typeInt_1.default.type);
         checkingForRange = false;
         if (!operator || (!end && !listSlice)) {
@@ -31,12 +31,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
         }
         return {
-            type: "literal",
-            subType: "range",
+            type: 'literal',
+            subType: 'range',
             start,
             end,
-            inclusive: operator === "..." ? true : undefined,
-            valueType: ChiriType_1.ChiriType.of("list", "int"),
+            inclusive: operator === '...' ? true : undefined,
+            valueType: ChiriType_1.ChiriType.of('list', 'int'),
             position,
         };
     }, {

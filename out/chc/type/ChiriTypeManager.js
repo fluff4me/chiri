@@ -37,77 +37,77 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         typeFunction_1.default,
     ];
     const types = Object.fromEntries(typesList.map(typedef => [typedef.type.name.value, typedef]));
-    const numericTypes = ["uint", "int", "dec"];
+    const numericTypes = ['uint', 'int', 'dec'];
     const isNumeric = (type) => numericTypes.includes(type);
-    const binaryNumericOperators = ["**", "+", "-", "*", "/", "%", "==", "!=", "<=", ">=", "<", ">"];
-    const unaryNumericOperators = ["+", "-"];
-    const binaryBitwiseOperators = ["&", "|", "^", "<<", ">>", ">>>"];
-    const unaryBitwiseOperators = ["~"];
-    const binaryBooleanOperators = ["||", "&&", "==", "!="];
-    const unaryBooleanOperators = ["!"];
-    const binaryStringOperators = [".", "x", "==", "!="];
-    const binaryOtherOperators = ["is"];
-    const unaryOtherOperators = ["exists"];
-    const minNumericPrecision2 = (typeA, typeB) => (typeA === "dec" || typeB === "dec") ? "dec"
-        : (typeA === "int" || typeB === "int") ? "int"
-            : "uint";
-    const minNumericPrecision = (...types) => types.reduce(minNumericPrecision2, "uint");
+    const binaryNumericOperators = ['**', '+', '-', '*', '/', '%', '==', '!=', '<=', '>=', '<', '>'];
+    const unaryNumericOperators = ['+', '-'];
+    const binaryBitwiseOperators = ['&', '|', '^', '<<', '>>', '>>>'];
+    const unaryBitwiseOperators = ['~'];
+    const binaryBooleanOperators = ['||', '&&', '==', '!='];
+    const unaryBooleanOperators = ['!'];
+    const binaryStringOperators = ['.', 'x', '==', '!='];
+    const binaryOtherOperators = ['is'];
+    const unaryOtherOperators = ['exists'];
+    const minNumericPrecision2 = (typeA, typeB) => (typeA === 'dec' || typeB === 'dec') ? 'dec'
+        : (typeA === 'int' || typeB === 'int') ? 'int'
+            : 'uint';
+    const minNumericPrecision = (...types) => types.reduce(minNumericPrecision2, 'uint');
     const operatorResults = {
-        "+": (a, b = a) => minNumericPrecision(a, b),
-        "-": (a, b = a) => minNumericPrecision("int", a, b),
-        "*": (a, b = a) => minNumericPrecision(a, b),
-        "/": "dec",
-        "%": (a, b = a) => minNumericPrecision(a, b),
-        "**": "dec",
-        "<=": "bool",
-        ">=": "bool",
-        "<": "bool",
-        ">": "bool",
-        "==": "bool",
-        "!=": "bool",
-        "||": "bool",
-        "&&": "bool",
-        "!": "bool",
-        "~": "int",
-        "&": "int",
-        "|": "int",
-        "^": "int",
-        "<<": "int",
-        ">>": "int",
-        ">>>": "int",
-        ".": "string",
-        "x": "string",
-        "is": "bool",
-        "exists": "bool",
+        '+': (a, b = a) => minNumericPrecision(a, b),
+        '-': (a, b = a) => minNumericPrecision('int', a, b),
+        '*': (a, b = a) => minNumericPrecision(a, b),
+        '/': 'dec',
+        '%': (a, b = a) => minNumericPrecision(a, b),
+        '**': 'dec',
+        '<=': 'bool',
+        '>=': 'bool',
+        '<': 'bool',
+        '>': 'bool',
+        '==': 'bool',
+        '!=': 'bool',
+        '||': 'bool',
+        '&&': 'bool',
+        '!': 'bool',
+        '~': 'int',
+        '&': 'int',
+        '|': 'int',
+        '^': 'int',
+        '<<': 'int',
+        '>>': 'int',
+        '>>>': 'int',
+        '.': 'string',
+        'x': 'string',
+        'is': 'bool',
+        'exists': 'bool',
     };
     const operatorPrecedence = [
-        ["||"],
-        ["&&"],
-        ["|"],
-        ["^"],
-        ["&"],
-        ["==", "!="],
-        ["<", "<=", ">", ">="],
-        ["is"],
-        ["<<", ">>", ">>>"],
-        ["x"],
-        ["."],
-        ["+", "-"],
-        ["*", "/", "%"],
-        ["**"],
-        ["!"],
-        ["~"],
-        ["exists"],
+        ['||'],
+        ['&&'],
+        ['|'],
+        ['^'],
+        ['&'],
+        ['==', '!='],
+        ['<', '<=', '>', '>='],
+        ['is'],
+        ['<<', '>>', '>>>'],
+        ['x'],
+        ['.'],
+        ['+', '-'],
+        ['*', '/', '%'],
+        ['**'],
+        ['!'],
+        ['~'],
+        ['exists'],
     ];
     const binaryOperatorOperandCoercion = {
-        ".": "string",
+        '.': 'string',
     };
     const unaryOperatorOperandCoercion = {
-        "+": "dec",
-        "-": "dec",
+        '+': 'dec',
+        '-': 'dec',
     };
     const operatorOperandBTypes = {
-        "x": "uint",
+        x: 'uint',
     };
     class ChiriTypeManager {
         host;
@@ -121,7 +121,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const operatorsOfTypeA = this.binaryOperators[typeA] ??= {};
             let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {};
             let result = output ?? operatorResults[operator];
-            result = typeof result === "function" ? result(typeA, typeB) : result;
+            result = typeof result === 'function' ? result(typeA, typeB) : result;
             if (!result)
                 throw new Error(`Unable to determine output type of operation ${typeA}${operator}${typeB}`);
             if (instancesOfThisOperator[typeB] && instancesOfThisOperator[typeB] !== result)
@@ -132,7 +132,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const operatorsOfTypeB = this.binaryOperators[typeB] ??= {};
             instancesOfThisOperator = operatorsOfTypeB[operator] ??= {};
             result = output ?? operatorResults[operator];
-            result = typeof result === "function" ? result(typeB, typeA) : result;
+            result = typeof result === 'function' ? result(typeB, typeA) : result;
             if (!result)
                 throw new Error(`Unable to determine output type of operation ${typeB}${operator}${typeA}`);
             if (instancesOfThisOperator[typeA] && instancesOfThisOperator[typeA] !== result)
@@ -142,7 +142,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         registerUnaryOperator(operator, type, output) {
             const instancesOfThisOperator = this.unaryOperators[operator] ??= {};
             let result = output ?? operatorResults[operator];
-            result = typeof result === "function" ? result(type) : result;
+            result = typeof result === 'function' ? result(type) : result;
             if (!result)
                 throw new Error(`Unable to determine output type of operation ${operator}${type}`);
             if (instancesOfThisOperator[type] && instancesOfThisOperator[type] !== result)
@@ -150,12 +150,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             instancesOfThisOperator[type] = result;
         }
         registerBinaryCoercion(operator, coercion) {
-            const coercibleTypes = Object.keys(types).filter((type) => type !== "body");
+            const coercibleTypes = Object.keys(types).filter((type) => type !== 'body');
             const registerBinaryCoercion = (operandAType, operationsOfType) => {
-                if (typeof coercion === "string" || coercion[1]) {
+                if (typeof coercion === 'string' || coercion[1]) {
                     for (const operandBType of coercibleTypes) {
                         let result = operatorResults[operator];
-                        result = typeof result === "function" ? result(operandAType, operandBType) : result;
+                        result = typeof result === 'function' ? result(operandAType, operandBType) : result;
                         this.registerBinaryOperator(operandAType, operator, operandBType, result);
                         const coercionsA = this.binaryOperatorCoercion[operandAType] ??= {};
                         const operations = coercionsA[operator] ??= {};
@@ -171,7 +171,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                 }
             };
-            if (typeof coercion === "string" || coercion[0]) {
+            if (typeof coercion === 'string' || coercion[0]) {
                 for (const operandAType of coercibleTypes) {
                     const operatorsOfTypeA = this.binaryOperators[operandAType] ??= {};
                     const instancesOfThisOperator = operatorsOfTypeA[operator] ??= {};
@@ -188,10 +188,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         registerUnaryCoercion(operator, coercion) {
-            const coercibleTypes = Object.keys(types).filter((type) => type !== "body");
+            const coercibleTypes = Object.keys(types).filter((type) => type !== 'body');
             for (const operandType of coercibleTypes) {
                 let result = operatorResults[operator];
-                result = typeof result === "function" ? result(operandType) : result;
+                result = typeof result === 'function' ? result(operandType) : result;
                 this.registerUnaryOperator(operator, operandType, result);
                 const operations = this.unaryOperatorCoercion[operator] ??= {};
                 operations[operandType] = coercion;
@@ -205,28 +205,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         this.registerBinaryOperator(typeA, operator, typeB);
                     }
             for (const operator of binaryBooleanOperators)
-                this.registerBinaryOperator("bool", operator);
+                this.registerBinaryOperator('bool', operator);
             for (const operator of unaryNumericOperators)
                 for (const type of numericTypes)
                     this.registerUnaryOperator(operator, type);
             for (const operator of unaryBooleanOperators)
-                this.registerUnaryOperator(operator, "bool");
+                this.registerUnaryOperator(operator, 'bool');
             for (const operator of binaryStringOperators)
-                this.registerBinaryOperator("string", operator, operatorOperandBTypes[operator] ?? "string");
+                this.registerBinaryOperator('string', operator, operatorOperandBTypes[operator] ?? 'string');
             for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion))
                 this.registerBinaryCoercion(operator, coercion);
             for (const [operator, coercion] of Object.entries(unaryOperatorOperandCoercion))
                 this.registerUnaryCoercion(operator, coercion);
             for (const type of Object.keys(types)) {
-                this.registerBinaryOperator(type, "is", "string", "bool");
-                this.registerBinaryOperator(type, "==", "undefined", "bool");
-                this.registerBinaryOperator(type, "!=", "undefined", "bool");
-                this.registerBinaryOperator("*", "==", type, "bool");
-                this.registerBinaryOperator("*", "!=", type, "bool");
-                this.registerUnaryOperator("exists", type, "bool");
+                this.registerBinaryOperator(type, 'is', 'string', 'bool');
+                this.registerBinaryOperator(type, '==', 'undefined', 'bool');
+                this.registerBinaryOperator(type, '!=', 'undefined', 'bool');
+                this.registerBinaryOperator('*', '==', type, 'bool');
+                this.registerBinaryOperator('*', '!=', type, 'bool');
+                this.registerUnaryOperator('exists', type, 'bool');
             }
-            this.registerBinaryOperator("*", "==", "undefined", "bool");
-            this.registerBinaryOperator("*", "!=", "undefined", "bool");
+            this.registerBinaryOperator('*', '==', 'undefined', 'bool');
+            this.registerBinaryOperator('*', '!=', 'undefined', 'bool');
         }
         registerGenerics(...generics) {
             for (const type of generics) {
@@ -236,10 +236,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         continue;
                     throw this.host.error(`Cannot redefine type "${type.name.value}"`);
                 }
-                if (type.generics.length === 1 && type.generics[0].name.value === "*")
+                if (type.generics.length === 1 && type.generics[0].name.value === '*')
                     type.generics = Object.values(this.types)
                         .map(typeDef => typeDef?.type)
-                        .filter((type) => !!type && type.name.value !== "body");
+                        .filter((type) => !!type && type.name.value !== 'body');
                 const componentTypeDefinitions = type.generics.map(component => {
                     const typeDef = this.types[component.name.value];
                     if (!typeDef)
@@ -333,7 +333,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         canCoerceOperandB(operandAType, operator, operandBType) {
             const coercion = this.binaryOperatorCoercion[operandAType]?.[operator]?.[operandBType];
-            return typeof coercion === "string" || !!coercion?.[1];
+            return typeof coercion === 'string' || !!coercion?.[1];
         }
         isAssignable(type, ...toTypes) {
             if (toTypes.includes(type) || !toTypes.length)
@@ -349,9 +349,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             // only 1 toType
             const [toType] = toTypes;
-            if (toType.name.value === "*")
+            if (toType.name.value === '*')
                 return true;
-            if (type.name.value === "*")
+            if (type.name.value === '*')
                 // this should never happen
                 throw new Error(`* is not a statically known type and therefore cannot be assigned to ${ChiriType_1.ChiriType.stringify(toType)}`);
             const typeDef = this.types[type.name.value];
@@ -369,10 +369,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     || type.generics.every((generic, i) => this.isAssignable(generic, toType.generics[i])));
         }
         isEveryType(types) {
-            if (types.some(type => type.name.value === "*"))
+            if (types.some(type => type.name.value === '*'))
                 return true;
             return typesList.every(a => {
-                if (a.type.name.value === "body")
+                if (a.type.name.value === 'body')
                     return true; // skip
                 const hasAssignableType = types.some(b => this.isAssignable(b, a.type));
                 return hasAssignableType;
@@ -387,7 +387,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         intersection(...types) {
             if (!types.length)
-                throw this.host.error("Cannot form an intersection");
+                throw this.host.error('Cannot form an intersection');
             types = this.dedupe(...types);
             if (types.length === 1)
                 return types[0];
@@ -398,7 +398,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!primaryType) {
                 if (types.every(type => isNumeric(type.name.value)))
                     return ChiriType_1.ChiriType.of(minNumericPrecision(...types.map(type => type.name.value)));
-                throw this.host.error("Cannot form an intersection");
+                throw this.host.error('Cannot form an intersection');
             }
             if (generics.length > 1)
                 for (let i = 1; i < generics.length; i++)

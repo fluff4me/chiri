@@ -1,12 +1,12 @@
-import type { ChiriType } from "../../../type/ChiriType";
-import type { PromiseOr } from "../../../util/Type";
-import type ChiriReader from "../../ChiriReader";
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ContextStatement } from "../body/BodyRegistry";
-import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData, ResolveContextDataTuple } from "../body/Contexts";
-import type { ChiriWord } from "../consumeWord";
-import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional";
-import type { ChiriExpressionOperand } from "../expression/consumeExpression";
+import type { ChiriType } from '../../../type/ChiriType';
+import type { PromiseOr } from '../../../util/Type';
+import type ChiriReader from '../../ChiriReader';
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ContextStatement } from '../body/BodyRegistry';
+import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData, ResolveContextDataTuple } from '../body/Contexts';
+import type { ChiriWord } from '../consumeWord';
+import type { ChiriWordInterpolated } from '../consumeWordInterpolatedOptional';
+import type { ChiriExpressionOperand } from '../expression/consumeExpression';
 export interface ChiriMacroBase {
     type: string;
     name: ChiriWord;
@@ -18,7 +18,7 @@ export interface ChiriMacroBlock {
     label?: ChiriWord;
 }
 export interface ChiriMacroInternal<T> extends ChiriMacroBase {
-    type: "macro:internal";
+    type: 'macro:internal';
     consumeOptional(reader: ChiriReader): Promise<T | undefined>;
     consumeOptional<CONTEXT extends ChiriContextType>(reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<T | undefined>;
     consumeOptional(reader: ChiriReader, ...context: ChiriContextSpreadable): Promise<T | undefined>;
@@ -28,13 +28,13 @@ export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefin
     assignments: Record<string, ChiriExpressionOperand>;
     body: (BODY extends null ? never : BODY)[];
     optionalBody: (BODY extends null ? never : BODY)[];
-    name: NAMED extends "plain" ? ChiriWord : NAMED extends "interpolated" ? ChiriWordInterpolated : undefined;
+    name: NAMED extends 'plain' ? ChiriWord : NAMED extends 'interpolated' ? ChiriWordInterpolated : undefined;
     extra: EXTRA;
     position: ChiriPosition;
     start: number;
 }
-type NameType = "plain" | "interpolated" | undefined;
-export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> = Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body" | "optionalBody">;
+type NameType = 'plain' | 'interpolated' | undefined;
+export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> = Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, 'body' | 'optionalBody'>;
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>;
 export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, BODY = null, EXTRA = never> {
     usability(...types: ChiriContextType[]): this;
@@ -42,8 +42,8 @@ export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, B
      * Note: This does not consume white space for you, in case the parameters are optional
      */
     consumeParameters<T>(consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>;
-    named(): ChiriMacroInternalFactory<"plain", BODY>;
-    named(allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>;
+    named(): ChiriMacroInternalFactory<'plain', BODY>;
+    named(allowInterpolations: true): ChiriMacroInternalFactory<'interpolated', BODY>;
     /** Require a parameter */
     parameter(name: string, type: ChiriType): this;
     /** Add an optional parameter */

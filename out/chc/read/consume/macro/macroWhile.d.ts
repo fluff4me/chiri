@@ -1,8 +1,8 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriExpressionOperand } from "../expression/consumeExpression";
-import type { ChiriMacroBlock } from "./MacroConstruct";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriExpressionOperand } from '../expression/consumeExpression';
+import type { ChiriMacroBlock } from './MacroConstruct';
 export interface ChiriWhile extends ChiriMacroBlock {
-    type: "while";
+    type: 'while';
     condition: ChiriExpressionOperand;
     content: ChiriStatement[];
     position: ChiriPosition;

@@ -16,29 +16,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     exports.default = (0, TypeDefinition_1.default)({
-        type: ChiriType_1.ChiriType.of("uint"),
+        type: ChiriType_1.ChiriType.of('uint'),
         stringable: true,
         consumeOptionalConstructor: reader => {
             const restore = reader.savePosition();
             const uint = (0, consumeUnsignedIntegerOptional_1.default)(reader);
             if (!uint)
                 return undefined;
-            if (reader.peek(".")) {
+            if (reader.peek('.')) {
                 reader.restorePosition(restore);
                 return undefined;
             }
             return uint;
         },
         coerce: (value, error) => {
-            if (typeof value === "boolean")
+            if (typeof value === 'boolean')
                 return value ? 1 : 0;
             if (value === undefined || value === null)
                 return 0;
-            if (typeof value === "number")
+            if (typeof value === 'number')
                 return Math.max(0, Math.trunc(value));
             throw error();
         },
-        is: value => typeof value === "number" && Number.isInteger(value) && value >= 0,
+        is: value => typeof value === 'number' && Number.isInteger(value) && value >= 0,
     });
 });
 //# sourceMappingURL=typeUint.js.map

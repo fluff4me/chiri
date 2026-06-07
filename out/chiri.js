@@ -47,15 +47,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     if (process.cwd() === constants_1.PACKAGE_ROOT)
         dotenv_1.default.config();
     Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH || 4);
-    if (process.env.CHIRI_ENV === "dev")
+    if (process.env.CHIRI_ENV === 'dev')
         // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-        require("source-map-support").install();
+        require('source-map-support').install();
     if (process.env.CHIRI_INSPECT)
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        require("inspector").open(+process.env.CHIRI_INSPECT_PORT || undefined, process.env.CHIRI_INSPECT_HOST);
+        require('inspector').open(+process.env.CHIRI_INSPECT_PORT || undefined, process.env.CHIRI_INSPECT_HOST);
     if (args_1.default.v) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        console.log(require(path_1.default.join(constants_1.PACKAGE_ROOT, "package.json")).version);
+        console.log(require(path_1.default.join(constants_1.PACKAGE_ROOT, 'package.json')).version);
         process.exit();
     }
     let compilationPromise = undefined;
@@ -65,10 +65,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         for (const file of files) {
             let watcher;
             if (watch) {
-                console.log(ansi_1.default.label + "watch", ansi_1.default.path + (0, relToCwd_js_1.default)(file), ansi_1.default.reset);
+                console.log(ansi_1.default.label + 'watch', ansi_1.default.path + (0, relToCwd_js_1.default)(file), ansi_1.default.reset);
                 watcher = chokidar_1.default.watch([], { ignoreInitial: true })
                     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                    .on("all", async (event, filename) => {
+                    .on('all', async (event, filename) => {
                     if (queuedTryCompile)
                         return; // dedupe
                     queuedTryCompile = true;
@@ -79,7 +79,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     await (compilationPromise = tryCompile(file, watcher));
                     compilationPromise = undefined;
                 })
-                    .on("error", console.error);
+                    .on('error', console.error);
             }
             await (compilationPromise = tryCompile(file, watcher));
             compilationPromise = undefined;
@@ -94,10 +94,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const err = e;
             let message = err.message;
             let stack = err.stack;
-            const enomdl = message.startsWith("Cannot find module");
-            stack = enomdl ? message.slice(message.indexOf("\n") + 1) : err.stack?.slice(err.stack.indexOf("\n") + 1) ?? "";
+            const enomdl = message.startsWith('Cannot find module');
+            stack = enomdl ? message.slice(message.indexOf('\n') + 1) : err.stack?.slice(err.stack.indexOf('\n') + 1) ?? '';
             // stack = enomdl ? message.slice(message.indexOf("\n") + 1) : err.stack?.slice(err.stack.indexOf("\n", err.stack.indexOf("\n") + 1)) ?? "";
-            message = enomdl ? message.slice(0, message.indexOf("\n") + 1) : message;
+            message = enomdl ? message.slice(0, message.indexOf('\n') + 1) : message;
             console.error(ansi_1.default.err + message, ansi_1.default.reset + stack);
         }
     }
@@ -108,10 +108,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 delete require.cache[key];
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const rerequire = (path) => require(path).default;
-        const ChiriReader = rerequire("./chc/read/ChiriReader.js");
+        const ChiriReader = rerequire('./chc/read/ChiriReader.js');
         const reader = await ChiriReader.load(filename, undefined, watcher);
         if (!reader) {
-            console.log(ansi_1.default.err + "Failed to load ChiriReader");
+            console.log(ansi_1.default.err + 'Failed to load ChiriReader');
             return;
         }
         reader.setWatcher(watcher);
@@ -119,18 +119,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         if (reader.errored)
             return;
         if (process.env.CHIRI_AST) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            const streamJsonFunction = rerequire("./chc/util/streamJson.js");
-            await streamJsonFunction(reader.basename + ".ast.json", ast)
-                .catch(e => { throw (0, prefixError_js_1.default)(e, "Failed to write AST JSON file"); });
+            const streamJsonFunction = rerequire('./chc/util/streamJson.js');
+            await streamJsonFunction(reader.basename + '.ast.json', ast)
+                .catch(e => { throw (0, prefixError_js_1.default)(e, 'Failed to write AST JSON file'); });
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const ChiriCompilerClass = rerequire("./chc/write/ChiriCompiler.js");
+        const ChiriCompilerClass = rerequire('./chc/write/ChiriCompiler.js');
         const compiler = ChiriCompilerClass(ast, reader.basename);
         compiler.compile();
         await compiler.writeFiles();
         const elapsed = performance.now() - start;
-        console.log(ansi_1.default.label + "chiri", ansi_1.default.path + (0, relToCwd_js_1.default)(reader.filename), ansi_1.default.label + formatElapsed(elapsed));
+        console.log(ansi_1.default.label + 'chiri', ansi_1.default.path + (0, relToCwd_js_1.default)(reader.filename), ansi_1.default.label + formatElapsed(elapsed));
     }
     function formatElapsed(elapsed) {
         if (elapsed < 1)
@@ -144,17 +142,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     void (async () => {
         const files = args_1.allArgs.map(file => path_1.default.resolve(file));
         await compileAll(files, !!args_1.default.w);
-        if (args_1.default.w && process.env.CHIRI_ENV === "dev") {
+        if (args_1.default.w && process.env.CHIRI_ENV === 'dev') {
             let lastQueueAttemptId;
             const debounceTime = 100;
-            chokidar_1.default.watch([constants_1.CHC_ROOT, "!**/*.d.ts", constants_1.LIB_ROOT], { ignoreInitial: true })
-                .on("all", (event, filename) => {
+            chokidar_1.default.watch([constants_1.CHC_ROOT, '!**/*.d.ts', constants_1.LIB_ROOT], { ignoreInitial: true })
+                .on('all', (event, filename) => {
                 if (lastQueueAttemptId)
                     clearTimeout(lastQueueAttemptId);
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 lastQueueAttemptId = setTimeout(queueCompileAll.bind(null, event, filename), debounceTime);
             })
-                .on("error", console.error);
+                .on('error', console.error);
         }
         async function queueCompileAll(event, filename) {
             if (queuedCompileAll)

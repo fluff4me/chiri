@@ -1,12 +1,12 @@
-import { ChiriType } from "../../../type/ChiriType";
-import type ChiriReader from "../../ChiriReader";
-import type { ChiriPosition } from "../../ChiriReader";
-import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional";
-import type { ChiriWord } from "../consumeWord";
-import type { ChiriFunction } from "../macro/macroFunctionDeclaration";
-import type { ChiriExpressionOperand, ChiriExpressionResult } from "./consumeExpression";
+import { ChiriType } from '../../../type/ChiriType';
+import type ChiriReader from '../../ChiriReader';
+import type { ChiriPosition } from '../../ChiriReader';
+import type { ChiriCompilerVariable } from '../consumeCompilerVariableOptional';
+import type { ChiriWord } from '../consumeWord';
+import type { ChiriFunction } from '../macro/macroFunctionDeclaration';
+import type { ChiriExpressionOperand, ChiriExpressionResult } from './consumeExpression';
 export interface ChiriFunctionCall {
-    type: "function-call";
+    type: 'function-call';
     name: ChiriWord;
     indexedAssignments: boolean;
     assignments: Record<string, ChiriExpressionResult>;

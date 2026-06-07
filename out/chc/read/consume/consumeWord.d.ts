@@ -1,7 +1,7 @@
-import type ChiriReader from "../ChiriReader";
-import type { ChiriPosition } from "../ChiriReader";
+import type ChiriReader from '../ChiriReader';
+import type { ChiriPosition } from '../ChiriReader';
 export interface ChiriWord<WORD extends string = string> {
-    type: "word";
+    type: 'word';
     value: WORD;
     position: ChiriPosition;
 }

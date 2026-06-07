@@ -15,27 +15,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeNewBlockLineOptional_1 = __importDefault(require("./consumeNewBlockLineOptional"));
     exports.default = (reader) => {
         const position = reader.getPosition();
-        if (!reader.consumeOptional(";; "))
+        if (!reader.consumeOptional(';; '))
             return undefined;
-        let documentation = "";
+        let documentation = '';
         while (true) {
-            if (documentation && !reader.consumeOptional("  "))
-                documentation += "\n";
+            if (documentation && !reader.consumeOptional('  '))
+                documentation += '\n';
             for (; reader.i < reader.input.length; reader.i++) {
-                if (reader.input[reader.i] === "\n") {
-                    documentation += "\n";
+                if (reader.input[reader.i] === '\n') {
+                    documentation += '\n';
                     break;
                 }
-                else if (reader.input[reader.i] !== "\r")
+                else if (reader.input[reader.i] !== '\r')
                     documentation += reader.input[reader.i];
             }
             const beforeConsumeNewline = reader.savePosition();
             if (!(0, consumeNewBlockLineOptional_1.default)(reader))
-                throw reader.error("Expected additional documentation or documented declaration");
-            if (!reader.consumeOptional(";; ")) {
+                throw reader.error('Expected additional documentation or documented declaration');
+            if (!reader.consumeOptional(';; ')) {
                 reader.restorePosition(beforeConsumeNewline);
                 return {
-                    type: "documentation",
+                    type: 'documentation',
                     content: documentation.slice(0, -1),
                     position,
                 };

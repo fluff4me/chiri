@@ -21,12 +21,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordOptional_1 = __importDefault(require("./consumeWordOptional"));
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
     exports.default = (reader, start, fn) => {
-        const fnTypeSymbol = fn.type === "mixin" ? "%"
-            : fn.type === "macro" || fn.type === "macro:internal" ? "#"
-                : "???";
+        const fnTypeSymbol = fn.type === 'mixin' ? '%'
+            : fn.type === 'macro' || fn.type === 'macro:internal' ? '#'
+                : '???';
         const parameters = (0, getFunctionParameters_1.default)(fn)
             .sort((a, b) => +!!a.expression - +!!b.expression)
-            .filter(parameter => parameter.valueType.name.value !== "body");
+            .filter(parameter => parameter.valueType.name.value !== 'body');
         if (!parameters.length)
             return {};
         const assignments = {};
@@ -37,8 +37,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (!parameter) {
                 const expected = parameters
                     .filter(param => !assignments[param.name.value])
-                    .map(param => `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
-                    .join(", ");
+                    .map(param => `${param.expression ? '[' : ''}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? ']?' : ''}`)
+                    .join(', ');
                 if (!expected)
                     throw reader.error(e, `Unexpected parameter for ${fnTypeSymbol}${fn.name.value}`);
                 throw reader.error(e, `Expected parameter for ${fnTypeSymbol}${fn.name.value}, any of: ${expected}`);
@@ -48,28 +48,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const expectedType = parameter.valueType;
             const restore = reader.savePosition();
             (0, consumeWhiteSpaceOptional_1.default)(reader);
-            if (!reader.consumeOptional("=")) {
+            if (!reader.consumeOptional('=')) {
                 reader.restorePosition(restore);
                 const variableInScope = reader.getVariableOptional(word.value);
                 if (variableInScope) {
-                    if (variableInScope?.valueType.name.value === "body")
-                        throw reader.error(e, "Cannot use a variable of type \"body\" in an expression");
+                    if (variableInScope?.valueType.name.value === 'body')
+                        throw reader.error(e, 'Cannot use a variable of type "body" in an expression');
                     if (!reader.types.isAssignable(variableInScope.valueType, expectedType))
                         throw reader.error(e, `Unable to set ${word.value} to variable of same name, expected ${ChiriType_1.ChiriType.stringify(expectedType)}, but variable is ${ChiriType_1.ChiriType.stringify(variableInScope.valueType)}`);
                     assignments[word.value] = {
-                        type: "get",
+                        type: 'get',
                         name: word,
                         valueType: variableInScope.valueType,
                         position: word.position,
                     };
                     return;
                 }
-                const valueType = ChiriType_1.ChiriType.of("bool");
+                const valueType = ChiriType_1.ChiriType.of('bool');
                 if (!reader.types.isAssignable(valueType, expectedType))
                     throw reader.error(e, `Unable to set ${word.value} to true, expected ${ChiriType_1.ChiriType.stringify(expectedType)}`);
                 assignments[word.value] = {
-                    type: "literal",
-                    subType: "bool",
+                    type: 'literal',
+                    subType: 'bool',
                     valueType,
                     value: true,
                     position: word.position,
@@ -87,14 +87,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const consumeParameterSeparatorOptional = multiline ? consumeNewBlockLineOptional_1.default : consumeWhiteSpaceOptional_1.default;
         do
             consumeParameterAssignment();
-        while (consumeParameterSeparatorOptional(reader) && !(multiline && reader.peek("..")));
+        while (consumeParameterSeparatorOptional(reader) && !(multiline && reader.peek('..')));
         const missing = parameters.filter(parameter => !parameter.assignment && !(parameter.name.value in assignments));
         if (missing.length)
             throw reader.error(start, `Missing parameters for ${fnTypeSymbol}${fn.name.value}: ${parameters
                 .filter(param => !assignments[param.name.value])
-                .map(param => `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
-                .join(", ")}`);
-        if (multiline && !reader.peek(".."))
+                .map(param => `${param.expression ? '[' : ''}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? ']?' : ''}`)
+                .join(', ')}`);
+        if (multiline && !reader.peek('..'))
             (0, consumeBlockEnd_1.default)(reader);
         return assignments;
     };

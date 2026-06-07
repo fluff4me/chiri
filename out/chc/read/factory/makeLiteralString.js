@@ -12,10 +12,10 @@
     const constants_1 = require("../../../constants");
     const ChiriType_1 = require("../../type/ChiriType");
     exports.default = (string, position = constants_1.INTERNAL_POSITION) => ({
-        type: "literal",
-        subType: "string",
-        valueType: ChiriType_1.ChiriType.of("string"),
-        segments: typeof string === "string" ? [string] : string,
+        type: 'literal',
+        subType: 'string',
+        valueType: ChiriType_1.ChiriType.of('string'),
+        segments: typeof string === 'string' ? [string] : string,
         position,
     });
 });

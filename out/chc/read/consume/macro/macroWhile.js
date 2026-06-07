@@ -16,12 +16,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const consumeExpression_1 = __importDefault(require("../expression/consumeExpression"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("while")
-        .consumeParameters(reader => (0, consumeWhiteSpace_1.default)(reader) && consumeExpression_1.default.inline(reader, ChiriType_1.ChiriType.of("bool")))
-        .body("inherit")
+    exports.default = (0, MacroConstruct_1.default)('while')
+        .consumeParameters(reader => (0, consumeWhiteSpace_1.default)(reader) && consumeExpression_1.default.inline(reader, ChiriType_1.ChiriType.of('bool')))
+        .body('inherit')
         .consume(({ extra: condition, body: content, position }) => {
         return {
-            type: "while",
+            type: 'while',
             isBlock: true,
             condition,
             content,

@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     var QueuedWrite;
     (function (QueuedWrite) {
         function makeQueue() {
-            return [{ output: "" }];
+            return [{ output: '' }];
         }
         QueuedWrite.makeQueue = makeQueue;
     })(QueuedWrite || (exports.QueuedWrite = QueuedWrite = {}));
@@ -40,7 +40,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         #indent = 0;
         dest;
-        output = "";
+        output = '';
         outputQueue = QueuedWrite.makeQueue();
         map;
         get queue() {
@@ -57,7 +57,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 this.map.setSourceContent(filename, source);
         }
         createDestPath(outFile) {
-            if (typeof args_1.default.out === "string")
+            if (typeof args_1.default.out === 'string')
                 outFile = path_1.default.join(args_1.default.out, outFile);
             return path_1.default.resolve(outFile);
         }
@@ -67,13 +67,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         unindent(amount = 1) {
             this.#indent -= amount;
             for (let i = 0; i < amount; i++)
-                if (this.currentWrite.output.at(-1) === "\t")
+                if (this.currentWrite.output.at(-1) === '\t')
                     this.currentWrite.output = this.currentWrite.output.slice(0, -1);
         }
         async writeFile() {
-            this.output = "";
+            this.output = '';
             for (const queued of this.queue) {
-                if (queued.mapping && queued.mapping.sourcePosition.file !== "internal") {
+                if (queued.mapping && queued.mapping.sourcePosition.file !== 'internal') {
                     this.map.addMapping({
                         generated: this.getPosition(),
                         source: queued.mapping.sourcePosition.file,
@@ -110,13 +110,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.addMapping(source.value, source.position, source.value);
         }
         writeNewLine() {
-            this.currentWrite.output += "\n" + "\t".repeat(this.#indent);
+            this.currentWrite.output += '\n' + '\t'.repeat(this.#indent);
         }
         getNewLineOptional() {
-            return "\n" + "\t".repeat(this.#indent);
+            return '\n' + '\t'.repeat(this.#indent);
         }
         getSpaceOptional() {
-            return " ";
+            return ' ';
         }
         writeNewLineOptional() {
             this.currentWrite.output += this.getNewLineOptional();
@@ -127,25 +127,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         writeBlock(inside) {
             const startIndex = this.currentWrite.output.length;
             this.indent();
-            this.writeLine("{");
+            this.writeLine('{');
             const currentWrite = this.currentWrite;
             const insideStartIndex = this.currentWrite.output.length;
             inside();
             if (currentWrite === this.currentWrite && this.currentWrite.output.length === insideStartIndex) {
                 this.currentWrite.output = this.currentWrite.output.slice(0, startIndex);
-                this.write("{}");
+                this.write('{}');
                 this.#indent--;
                 return;
             }
             this.unindent();
-            this.writeLine("}");
+            this.writeLine('}');
         }
         writeDocumentation(documentation) {
-            this.writeLine("/**");
-            const lines = documentation.content.split("\n");
+            this.writeLine('/**');
+            const lines = documentation.content.split('\n');
             for (const line of lines)
                 this.writeLine(` * ${line}`);
-            this.writeLine(" */");
+            this.writeLine(' */');
         }
         onCompileStart(compiler) { }
         onCompileEnd(compiler) { }
@@ -157,16 +157,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     tokenName,
                 },
             });
-            this.queue.push({ output: "" });
+            this.queue.push({ output: '' });
         }
         getLineStart(at = this.output.length) {
-            return this.output.lastIndexOf("\n", at - 1) + 1;
+            return this.output.lastIndexOf('\n', at - 1) + 1;
         }
         getLineEnd(at = this.output.length) {
-            let index = this.output.indexOf("\n", at);
+            let index = this.output.indexOf('\n', at);
             if (index === -1)
                 return this.output.length;
-            while (this.output[--index] === "\r")
+            while (this.output[--index] === '\r')
                 ;
             return index + 1;
         }
@@ -181,11 +181,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         getLineNumber(at = this.output.length) {
             const recalc = at < this.#lastLineNumberPosition;
             if (recalc)
-                console.warn(ansi_1.default.err + "Recalculating line number from start :(");
+                console.warn(ansi_1.default.err + 'Recalculating line number from start :(');
             let newlines = recalc ? 0 : this.#lastLineNumber;
             let j = recalc ? 0 : this.#lastLineNumberPosition;
             for (; j < at; j++)
-                if (this.output[j] === "\n")
+                if (this.output[j] === '\n')
                     newlines++;
             if (!recalc) {
                 this.#lastLineNumber = newlines;

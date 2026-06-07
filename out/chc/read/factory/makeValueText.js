@@ -15,8 +15,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const constants_1 = require("../../../constants");
     const typeString_1 = __importDefault(require("../../type/typeString"));
     exports.default = (content, position = constants_1.INTERNAL_POSITION) => ({
-        type: "text",
-        subType: "text",
+        type: 'text',
+        subType: 'text',
         valueType: typeString_1.default.type,
         content,
         position,

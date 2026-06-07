@@ -16,12 +16,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     exports.BodyVariableContexts = [
-        "text",
-        "property-name",
-        "component",
+        'text',
+        'property-name',
+        'component',
     ];
     exports.default = (0, TypeDefinition_1.default)({
-        type: ChiriType_1.ChiriType.of("body"),
+        type: ChiriType_1.ChiriType.of('body'),
         generics: [
             exports.BodyVariableContexts,
         ],

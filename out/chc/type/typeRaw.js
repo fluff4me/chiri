@@ -15,7 +15,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     exports.default = (0, TypeDefinition_1.default)({
-        type: ChiriType_1.ChiriType.of("raw"),
+        type: ChiriType_1.ChiriType.of('raw'),
         stringable: true,
     });
 });

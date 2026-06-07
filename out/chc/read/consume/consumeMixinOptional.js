@@ -17,17 +17,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = async (reader) => {
         const position = reader.getPosition();
         const restore = reader.savePosition();
-        if (!reader.consumeOptional("%"))
+        if (!reader.consumeOptional('%'))
             return undefined;
         const name = (0, consumeWordInterpolated_1.default)(reader);
-        if (!reader.consumeOptional(":")) {
+        if (!reader.consumeOptional(':')) {
             reader.restorePosition(restore);
             return undefined;
         }
         return {
-            type: "mixin",
+            type: 'mixin',
             name,
-            ...await (0, consumeBody_1.default)(reader, "mixin"),
+            ...await (0, consumeBody_1.default)(reader, 'mixin'),
             position,
         };
     };

@@ -1,9 +1,9 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional";
-import type { ChiriExpressionOperand } from "../expression/consumeExpression";
-import type { ChiriMacroBlock } from "./MacroConstruct";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriCompilerVariable } from '../consumeCompilerVariableOptional';
+import type { ChiriExpressionOperand } from '../expression/consumeExpression';
+import type { ChiriMacroBlock } from './MacroConstruct';
 export interface ChiriEach extends ChiriMacroBlock {
-    type: "each";
+    type: 'each';
     iterable: ChiriExpressionOperand;
     keyVariable?: ChiriCompilerVariable;
     variable?: ChiriCompilerVariable;

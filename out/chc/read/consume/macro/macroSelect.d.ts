@@ -1,7 +1,7 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriExpressionOperand } from "../expression/consumeExpression";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriExpressionOperand } from '../expression/consumeExpression';
 export interface ChiriSelect {
-    type: "select";
+    type: 'select';
     selector: ChiriExpressionOperand;
     content: ChiriStatement[];
     position: ChiriPosition;

@@ -23,20 +23,17 @@
             && c !== 62 // >
             && c !== 124 // |
             && c !== 10 // \n
-            && c !== 13 // \r
-        ,
+            && c !== 13, // \r
         darwin: (c) => true // HFS, HFS+ 
             && c !== 58 // :
             && c !== 47 // /
             && c !== 10 // \n
-            && c !== 13 // \r
-        ,
+            && c !== 13, // \r
         linux: (c) => true // ext[2-4]
             && c !== 0 // NUL
             && c !== 47 // /
             && c !== 10 // \n
-            && c !== 13 // \r
-        ,
+            && c !== 13, // \r
         aix: undefined,
         android: undefined,
         cygwin: undefined,
@@ -49,7 +46,7 @@
     if (!isValidPathCharacter)
         throw new Error(`Unsupported platform "${process.platform}"`);
     const consumePathSegment = (reader) => {
-        let segment = "";
+        let segment = '';
         while (isValidPathCharacter(reader.input.charCodeAt(reader.i))) {
             segment += reader.input[reader.i];
             reader.i++;
@@ -65,38 +62,38 @@
     const consumeNodeModuleNameOptional = (reader) => {
         const s = reader.i;
         switch (reader.input[reader.i]) {
-            case "_":
-            case ".": return undefined;
+            case '_':
+            case '.': return undefined;
         }
-        let moduleName = "";
+        let moduleName = '';
         while (isValidNodeModuleCharacter(reader.input.charCodeAt(reader.i))) {
             moduleName += reader.input[reader.i];
             reader.i++;
         }
-        if (moduleName.length && moduleName.length <= 214 && reader.input[reader.i++] === ":")
+        if (moduleName.length && moduleName.length <= 214 && reader.input[reader.i++] === ':')
             return moduleName;
         reader.i = s;
         return undefined;
     };
     exports.default = (reader) => {
         const s = reader.i;
-        let path = "";
+        let path = '';
         const moduleName = consumeNodeModuleNameOptional(reader);
-        const absolute = !moduleName && reader.consumeOptional("/");
+        const absolute = !moduleName && reader.consumeOptional('/');
         if (absolute)
-            path += "/";
+            path += '/';
         reader.i--;
         do {
             reader.i++;
             path += `/${consumePathSegment(reader)}`;
-        } while (reader.input[reader.i] === "/");
+        } while (reader.input[reader.i] === '/');
         path = (path || undefined)?.slice(1);
         if (!path) {
             reader.i = s;
             return undefined;
         }
         return {
-            type: "path",
+            type: 'path',
             module: moduleName,
             path,
             i: s,

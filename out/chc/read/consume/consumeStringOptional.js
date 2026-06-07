@@ -23,18 +23,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeExpression_1 = __importDefault(require("./expression/consumeExpression"));
     exports.default = (reader) => {
         const position = reader.getPosition();
-        if (reader.consumeOptional("$")) {
-            const isName = reader.consumeOptional("$");
-            const varType = isName ? "$$" : "$";
+        if (reader.consumeOptional('$')) {
+            const isName = reader.consumeOptional('$');
+            const varType = isName ? '$$' : '$';
             return {
-                type: "literal",
-                subType: "string",
-                valueType: ChiriType_1.ChiriType.of("string"),
+                type: 'literal',
+                subType: 'string',
+                valueType: ChiriType_1.ChiriType.of('string'),
                 segments: [
                     {
-                        type: "text",
-                        subType: "text",
-                        valueType: ChiriType_1.ChiriType.of("string"),
+                        type: 'text',
+                        subType: 'text',
+                        valueType: ChiriType_1.ChiriType.of('string'),
                         content: [
                             (0, consumeCustomPropertyInterpolation_1.default)(reader, varType),
                         ],
@@ -48,15 +48,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
         (0, assertNotWhiteSpaceAndNewLine_1.default)(reader);
         const block = (0, consumeBlockStartOptional_1.default)(reader);
-        const segments = [""];
-        let pendingNewlines = "";
+        const segments = [''];
+        let pendingNewlines = '';
         String: for (; reader.i < reader.input.length; reader.i++) {
             if (block)
-                pendingNewlines += "\n".repeat((0, consumeNewBlockLineOptional_1.default)(reader, true));
+                pendingNewlines += '\n'.repeat((0, consumeNewBlockLineOptional_1.default)(reader, true));
             const appendSegment = (text) => segments[segments.length - 1] += text;
             const char = reader.input[reader.i];
             switch (char) {
-                case "\\": {
+                case '\\': {
                     reader.i++;
                     if ((0, consumeNewBlockLineOptional_1.default)(reader, true)) {
                         (0, consumeIndentOptional_1.default)(reader);
@@ -65,25 +65,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                     const escapeChar = reader.input[reader.i];
                     switch (escapeChar) {
-                        case "r":
-                            appendSegment(pendingNewlines + "\r");
+                        case 'r':
+                            appendSegment(pendingNewlines + '\r');
                             break;
-                        case "n":
-                            appendSegment(pendingNewlines + "\n");
+                        case 'n':
+                            appendSegment(pendingNewlines + '\n');
                             break;
-                        case "t":
-                            appendSegment(pendingNewlines + "\t");
+                        case 't':
+                            appendSegment(pendingNewlines + '\t');
                             break;
-                        case "$":
+                        case '$':
                             appendSegment(pendingNewlines + escapeChar);
                             break;
-                        case "\\":
+                        case '\\':
                             appendSegment(pendingNewlines + char + escapeChar);
-                            pendingNewlines = "";
+                            pendingNewlines = '';
                             break;
                         case '"':
                             appendSegment(pendingNewlines + escapeChar);
-                            pendingNewlines = "";
+                            pendingNewlines = '';
                             break;
                         default: {
                             const charCode = escapeChar.charCodeAt(0);
@@ -93,30 +93,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 || (charCode >= 97 && charCode <= 102); // a-f
                             if (isHex) {
                                 appendSegment(pendingNewlines + char);
-                                pendingNewlines = "";
+                                pendingNewlines = '';
                                 reader.i--;
                                 continue;
                             }
-                            throw reader.error("Unexpected escape character");
+                            throw reader.error('Unexpected escape character');
                         }
                     }
                     break;
                 }
-                case "$": {
+                case '$': {
                     appendSegment(pendingNewlines);
-                    pendingNewlines = "";
+                    pendingNewlines = '';
                     reader.i++;
-                    const isName = reader.consumeOptional("$");
-                    const varType = isName ? "$$" : "$";
+                    const isName = reader.consumeOptional('$');
+                    const varType = isName ? '$$' : '$';
                     segments.push({
-                        type: "literal",
-                        subType: "string",
-                        valueType: ChiriType_1.ChiriType.of("string"),
+                        type: 'literal',
+                        subType: 'string',
+                        valueType: ChiriType_1.ChiriType.of('string'),
                         segments: [
                             {
-                                type: "text",
-                                subType: "text",
-                                valueType: ChiriType_1.ChiriType.of("string"),
+                                type: 'text',
+                                subType: 'text',
+                                valueType: ChiriType_1.ChiriType.of('string'),
                                 content: [
                                     (0, consumeCustomPropertyInterpolation_1.default)(reader, varType),
                                 ],
@@ -125,7 +125,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         ],
                         position,
                     });
-                    segments.push("");
+                    segments.push('');
                     reader.i--;
                     break;
                 }
@@ -134,30 +134,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 // 	appendSegment(pendingNewlines + `\\${char}`)
                 // 	pendingNewlines = ""
                 // 	break
-                case "#": {
-                    if (reader.input[reader.i + 1] !== "{") {
+                case '#': {
+                    if (reader.input[reader.i + 1] !== '{') {
                         appendSegment(pendingNewlines + `${char}`);
-                        pendingNewlines = "";
+                        pendingNewlines = '';
                         break;
                     }
                     reader.i += 2;
                     appendSegment(pendingNewlines);
-                    pendingNewlines = "";
+                    pendingNewlines = '';
                     const expr = consumeExpression_1.default.inline(reader);
                     segments.push(expr);
-                    segments.push("");
-                    reader.consume("}");
+                    segments.push('');
+                    reader.consume('}');
                     reader.i--;
                     break;
                 }
-                case "\r":
+                case '\r':
                     break;
-                case "\n":
+                case '\n':
                     break String;
-                case "\t":
-                    pendingNewlines += pendingNewlines + "\t";
+                case '\t':
+                    pendingNewlines += pendingNewlines + '\t';
                     break;
-                case "\"":
+                case '"':
                     if (!block) {
                         reader.i++;
                         break String;
@@ -165,15 +165,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 // maybe intentional fallthrough? this should be investigated
                 default:
                     appendSegment(pendingNewlines + char);
-                    pendingNewlines = "";
+                    pendingNewlines = '';
             }
         }
         if (block)
             (0, consumeBlockEnd_1.default)(reader);
         return {
-            type: "literal",
-            subType: "string",
-            valueType: { type: "type", name: { type: "word", value: "string", position: constants_1.INTERNAL_POSITION }, generics: [] },
+            type: 'literal',
+            subType: 'string',
+            valueType: { type: 'type', name: { type: 'word', value: 'string', position: constants_1.INTERNAL_POSITION }, generics: [] },
             segments,
             position,
         };

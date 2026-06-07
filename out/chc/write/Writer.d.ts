@@ -1,9 +1,9 @@
-import { SourceMapGenerator } from "source-map";
-import type { ChiriAST, ChiriPosition } from "../read/ChiriReader";
-import type { ChiriDocumentation } from "../read/consume/consumeDocumentationOptional";
-import type { ChiriBaseText } from "../read/consume/consumeValueText";
-import type { ChiriWord } from "../read/consume/consumeWord";
-import type ChiriCompiler from "./ChiriCompiler";
+import { SourceMapGenerator } from 'source-map';
+import type { ChiriAST, ChiriPosition } from '../read/ChiriReader';
+import type { ChiriDocumentation } from '../read/consume/consumeDocumentationOptional';
+import type { ChiriBaseText } from '../read/consume/consumeValueText';
+import type { ChiriWord } from '../read/consume/consumeWord';
+import type ChiriCompiler from './ChiriCompiler';
 export interface QueuedWrite {
     output: string;
     mapping?: {
@@ -47,7 +47,7 @@ export default class Writer {
     private addMapping;
     getLineStart(at?: number): number;
     getLineEnd(at?: number): number;
-    getPosition(at?: number): Omit<ChiriPosition, "file">;
+    getPosition(at?: number): Omit<ChiriPosition, 'file'>;
     getLineNumber(at?: number): number;
     getColumnNumber(at?: number): number;
 }

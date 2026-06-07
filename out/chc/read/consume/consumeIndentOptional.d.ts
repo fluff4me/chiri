@@ -1,4 +1,4 @@
-import type ChiriReader from "../ChiriReader";
+import type ChiriReader from '../ChiriReader';
 /**
  * Consume indent up to expected #
  * @returns Undefined if not enough indentation found, otherwise indentations consumed

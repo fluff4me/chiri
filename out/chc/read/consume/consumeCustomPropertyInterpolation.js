@@ -15,26 +15,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpaceOptional_1 = __importDefault(require("./consumeWhiteSpaceOptional"));
     const consumeWordInterpolated_1 = __importDefault(require("./consumeWordInterpolated"));
     function consumeCustomPropertyInterpolation(reader, varType) {
-        const wrapped = reader.consumeOptional("{");
+        const wrapped = reader.consumeOptional('{');
         const property = (0, consumeWordInterpolated_1.default)(reader);
         let defaultValue;
         if (wrapped) {
-            if (varType !== "$$" && reader.consumeOptional(":")) {
+            if (varType !== '$$' && reader.consumeOptional(':')) {
                 (0, consumeWhiteSpaceOptional_1.default)(reader);
-                defaultValue = consumeCustomPropertyInterpolation.consumeValueText(reader, false, () => !!reader.peek("}"));
+                defaultValue = consumeCustomPropertyInterpolation.consumeValueText(reader, false, () => !!reader.peek('}'));
             }
-            reader.consume("}");
+            reader.consume('}');
         }
-        if (varType === "$$") {
+        if (varType === '$$') {
             return {
-                type: "interpolation-property-name",
+                type: 'interpolation-property-name',
                 name: property,
                 position: property.position,
             };
         }
         else {
             return {
-                type: "interpolation-property",
+                type: 'interpolation-property',
                 name: property,
                 defaultValue,
                 position: property.position,

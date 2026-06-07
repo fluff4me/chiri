@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (file, cwd = process.cwd()) => {
         file = file.startsWith(cwd) ? path_1.default.relative(cwd, file) : file;
         file = file.startsWith(constants_1.LIB_ROOT) ? `lib:${path_1.default.relative(constants_1.LIB_ROOT, file)}` : file;
-        return file.replaceAll("\\", "/");
+        return file.replaceAll('\\', '/');
     };
 });
 //# sourceMappingURL=relToCwd.js.map

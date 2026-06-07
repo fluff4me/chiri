@@ -17,13 +17,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = (reader) => {
         const e = reader.i;
         const position = reader.getPosition();
-        const negative = reader.consumeOptional("-") ?? "";
+        const negative = reader.consumeOptional('-') ?? '';
         const int = (0, consumeUnsignedIntegerOptional_1.default)(reader);
-        if (int === undefined && !reader.peek(".")) {
+        if (int === undefined && !reader.peek('.')) {
             reader.i = e;
             return undefined;
         }
-        if (!reader.consumeOptional(".")) {
+        if (!reader.consumeOptional('.')) {
             reader.i = e;
             return undefined;
         }
@@ -33,9 +33,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return undefined;
         }
         return {
-            type: "literal",
-            subType: "dec",
-            valueType: ChiriType_1.ChiriType.of("dec"),
+            type: 'literal',
+            subType: 'dec',
+            valueType: ChiriType_1.ChiriType.of('dec'),
             value: `${negative}${int?.value || 0}.${dec.value}`,
             position,
         };

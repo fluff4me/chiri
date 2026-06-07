@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("debug")
-        .body("text")
+    exports.default = (0, MacroConstruct_1.default)('debug')
+        .body('text')
         .consume(({ reader, assignments, body, position }) => ({
-        type: "macro-use",
-        name: { type: "word", value: "debug", position: { file: "internal", line: 0, column: 0 } },
+        type: 'macro-use',
+        name: { type: 'word', value: 'debug', position: { file: 'internal', line: 0, column: 0 } },
         assignments: {},
         content: body,
         position,

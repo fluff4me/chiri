@@ -1,11 +1,11 @@
-import { ChiriType } from "../../../type/ChiriType";
-import type ChiriReader from "../../ChiriReader";
-import type { ChiriPosition } from "../../ChiriReader";
-import type consumeExpressionType from "./consumeExpression";
-import type { ChiriExpressionOperand } from "./consumeExpression";
+import { ChiriType } from '../../../type/ChiriType';
+import type ChiriReader from '../../ChiriReader';
+import type { ChiriPosition } from '../../ChiriReader';
+import type consumeExpressionType from './consumeExpression';
+import type { ChiriExpressionOperand } from './consumeExpression';
 export interface ChiriLiteralRange {
-    type: "literal";
-    subType: "range";
+    type: 'literal';
+    subType: 'range';
     valueType: ChiriType;
     start?: ChiriExpressionOperand;
     end?: ChiriExpressionOperand;

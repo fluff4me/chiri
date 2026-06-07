@@ -1,3 +1,3 @@
-import TypeDefinition from "./TypeDefinition";
+import TypeDefinition from './TypeDefinition';
 declare const _default: TypeDefinition<"dec">;
 export default _default;

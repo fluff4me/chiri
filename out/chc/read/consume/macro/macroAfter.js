@@ -13,11 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("after")
-        .body("selectors")
+    exports.default = (0, MacroConstruct_1.default)('after')
+        .body('selectors')
         .consume(({ body, position }) => {
         return {
-            type: "after",
+            type: 'after',
             content: body.flat(),
             position,
         };

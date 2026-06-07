@@ -14,6 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeValueText_1 = __importDefault(require("../consumeValueText"));
     const BodyConsumer_1 = __importDefault(require("./BodyConsumer"));
-    exports.default = (0, BodyConsumer_1.default)("text", reader => (0, consumeValueText_1.default)(reader, false));
+    exports.default = (0, BodyConsumer_1.default)('text', reader => (0, consumeValueText_1.default)(reader, false));
 });
 //# sourceMappingURL=bodyText.js.map

@@ -15,13 +15,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpace_1 = __importDefault(require("../consumeWhiteSpace"));
     const consumeWord_1 = __importDefault(require("../consumeWord"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("include")
+    exports.default = (0, MacroConstruct_1.default)('include')
         .consumeParameters(reader => (0, consumeWhiteSpace_1.default)(reader) && { e: reader.i, word: (0, consumeWord_1.default)(reader) })
         .consume(({ reader, extra: { e, word }, position }) => {
-        if (reader.getVariable(word.value).valueType.name.value !== "body")
-            throw reader.error(e, "#include requires variable of type \"body\"");
+        if (reader.getVariable(word.value).valueType.name.value !== 'body')
+            throw reader.error(e, '#include requires variable of type "body"');
         return {
-            type: "include",
+            type: 'include',
             name: word,
             position,
         };

@@ -19,19 +19,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeExpression_1 = __importDefault(require("../expression/consumeExpression"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("for")
+    exports.default = (0, MacroConstruct_1.default)('for')
         .consumeParameters(async (reader) => {
         (0, consumeWhiteSpace_1.default)(reader);
         const variable = await (0, consumeCompilerVariableOptional_1.default)(reader, false);
         if (!variable)
-            throw reader.error("Expected variable declaration");
-        reader.consume(",");
+            throw reader.error('Expected variable declaration');
+        reader.consume(',');
         (0, consumeWhiteSpaceOptional_1.default)(reader);
         const [condition, update] = await reader
             .with(variable)
             .do(async () => {
             const condition = consumeExpression_1.default.inline(reader);
-            reader.consume(",");
+            reader.consume(',');
             (0, consumeWhiteSpaceOptional_1.default)(reader);
             const update = await (0, consumeInlineMacroUseOptional_1.default)(reader);
             return [condition, update];
@@ -43,10 +43,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         };
     })
         .consume(async ({ reader, extra: { variable, condition, update }, position }) => {
-        reader.consume(":");
-        const body = await (0, consumeBody_1.default)(reader, "inherit", sub => sub.addOuterStatement(variable));
+        reader.consume(':');
+        const body = await (0, consumeBody_1.default)(reader, 'inherit', sub => sub.addOuterStatement(variable));
         return {
-            type: "for",
+            type: 'for',
             isBlock: true,
             variable,
             condition,

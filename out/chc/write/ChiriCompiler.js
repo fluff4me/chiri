@@ -98,13 +98,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const types = new ChiriTypeManager_1.default(compiler);
         Object.assign(compiler, { types });
         const blankContent = {
-            type: "property",
+            type: 'property',
             property: {
-                type: "word",
-                value: "content",
+                type: 'word',
+                value: 'content',
                 position: constants_1.INTERNAL_POSITION,
             },
-            value: "\"\"",
+            value: '""',
             position: constants_1.INTERNAL_POSITION,
         };
         return compiler;
@@ -170,19 +170,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function breakBlock(position, name) {
             const blockIndex = findBlock(name);
             if (blockIndex === undefined)
-                throw error(position, `Cannot #break ${name ? `:${name}` : ""}`);
+                throw error(position, `Cannot #break ${name ? `:${name}` : ''}`);
             blocks.splice(blockIndex, Infinity);
         }
         function breakFunction(position) {
-            const blockIndex = blocks.findLastIndex(block => block.type === "function-call");
+            const blockIndex = blocks.findLastIndex(block => block.type === 'function-call');
             if (blockIndex === undefined)
-                throw error(position, "Cannot #return outside of a function");
+                throw error(position, 'Cannot #return outside of a function');
             blocks.splice(blockIndex, Infinity);
         }
         function continueBlock(position, name) {
             const blockIndex = findBlock(name);
             if (blockIndex === undefined)
-                throw error(position, `Cannot #continue ${name ? `:${name}` : ""}`);
+                throw error(position, `Cannot #continue ${name ? `:${name}` : ''}`);
             blocks[blockIndex].continuing = true;
             blocks.splice(blockIndex + 1, Infinity);
         }
@@ -190,23 +190,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             for (let i = blocks.length - 1; i >= 0; i--) {
                 const block = blocks[i];
                 switch (block.type) {
-                    case "if":
-                    case "else":
-                    case "elseif":
-                    case "do":
+                    case 'if':
+                    case 'else':
+                    case 'elseif':
+                    case 'do':
                         if (!name)
                             continue;
                         if (block.label?.value !== name)
                             continue;
                         return i;
-                    case "each":
-                    case "for":
-                    case "while":
+                    case 'each':
+                    case 'for':
+                    case 'while':
                         if (!name || block.label?.value === name)
                             return i;
                         continue;
-                    case "function-call":
-                    case "macro-use":
+                    case 'function-call':
+                    case 'macro-use':
                         return i + 1;
                     default: {
                         const assertNever = block;
@@ -283,7 +283,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             throw error(position, `Function ${name} is not defined`);
         }
         function isFunction(fn) {
-            return fn?.type === "function";
+            return fn?.type === 'function';
         }
         function setFunction(fn) {
             scope().functions ??= {};
@@ -303,7 +303,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             let baseMixin = mixins[mixin.name.value];
             if (mixin.spread && !baseMixin) {
                 baseMixin = mixins[mixin.name.value] = {
-                    type: "mixin",
+                    type: 'mixin',
                     name: mixin.name,
                     content: [],
                     pseudos: [undefined],
@@ -345,7 +345,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     mixin = usedMixins[bumpMixinNameString];
                     if (mixin)
                         continue;
-                    const bumpMixinName = { type: "word", value: bumpMixinNameString, position: baseMixin.name.position };
+                    const bumpMixinName = { type: 'word', value: bumpMixinNameString, position: baseMixin.name.position };
                     mixin = {
                         ...preRegisteredMixin,
                         index: ++usedMixinIndex,
@@ -407,14 +407,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return animation.name;
         }
         function error(position, message) {
-            message = typeof position === "string" ? position : message;
-            position = typeof position === "string" ? undefined : position;
-            return Object.assign(new Error(message ?? "Compilation failed for an unknown reason"), { position });
+            message = typeof position === 'string' ? position : message;
+            position = typeof position === 'string' ? undefined : position;
+            return Object.assign(new Error(message ?? 'Compilation failed for an unknown reason'), { position });
         }
         function internalError(position, message) {
-            message = typeof position === "string" ? position : message;
-            position = typeof position === "string" ? undefined : position;
-            return error(position, `Internal Error: ${message ?? "Compilation failed for an unknown reason"}`);
+            message = typeof position === 'string' ? position : message;
+            position = typeof position === 'string' ? undefined : position;
+            return error(position, `Internal Error: ${message ?? 'Compilation failed for an unknown reason'}`);
         }
         function logLine(position, message, stack = true, preview = true) {
             const err = message instanceof Error ? message : undefined;
@@ -422,27 +422,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 position ??= message.position;
                 message = ansi_1.default.err + message.message + ansi_1.default.reset;
             }
-            message ??= "";
-            const line = !position?.file ? "" : Strings_1.default.symbolise(getLine(ast.source[position.file] ?? "", position.line - 1));
-            const positionBlock = !position || !preview ? "" : "\n"
-                + ansi_1.default.label + "  " + `${position.line}`.padStart(5) + " " + ansi_1.default.reset + line + "\n"
-                + (err ? ansi_1.default.err : ansi_1.default.filepos) + `        ${" ".repeat(position.column - 1)}${"^"}`
+            message ??= '';
+            const line = !position?.file ? '' : Strings_1.default.symbolise(getLine(ast.source[position.file] ?? '', position.line - 1));
+            const positionBlock = !position || !preview ? '' : '\n'
+                + ansi_1.default.label + '  ' + `${position.line}`.padStart(5) + ' ' + ansi_1.default.reset + line + '\n'
+                + (err ? ansi_1.default.err : ansi_1.default.filepos) + `        ${' '.repeat(position.column - 1)}${'^'}`
                 + ansi_1.default.reset;
-            const filename = !position?.file ? "Unknown location"
+            const filename = !position?.file ? 'Unknown location'
                 : ansi_1.default.path + (0, relToCwd_1.default)(position.file)
                     + ansi_1.default.filepos + `:${position.line}:${position.column}` + ansi_1.default.reset;
-            const stackString = err?.stack ?? new Error().stack ?? "";
-            console[err ? "error" : "info"](filename
-                + ansi_1.default.label + (message ? " - " : "")
+            const stackString = err?.stack ?? new Error().stack ?? '';
+            console[err ? 'error' : 'info'](filename
+                + ansi_1.default.label + (message ? ' - ' : '')
                 + ansi_1.default.reset + message
                 + positionBlock
-                + (!stack || (process.env.CHIRI_ENV !== "dev" && !(+process.env.CHIRI_STACK_LENGTH || 0)) ? ""
+                + (!stack || (process.env.CHIRI_ENV !== 'dev' && !(+process.env.CHIRI_STACK_LENGTH || 0)) ? ''
                     : `\n${stackString
-                        .slice(stackString.indexOf("\n", !position ? 0 : stackString.indexOf("\n") + 1) + 1)
-                        .split("\n")
+                        .slice(stackString.indexOf('\n', !position ? 0 : stackString.indexOf('\n') + 1) + 1)
+                        .split('\n')
                         .slice(0, +process.env.CHIRI_STACK_LENGTH || 3)
-                        .map(path => path.replace(constants_1.PACKAGE_ROOT + "\\", "").replaceAll("\\", "/"))
-                        .join("\n")}`));
+                        .map(path => path.replace(constants_1.PACKAGE_ROOT + '\\', '').replaceAll('\\', '/'))
+                        .join('\n')}`));
         }
         //#endregion
         ////////////////////////////////////
@@ -452,11 +452,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Context: Root
         function compileRoot(statement) {
             switch (statement.type) {
-                case "documentation":
+                case 'documentation':
                     for (const writer of writers)
                         writer.writeDocumentation(statement);
                     return true;
-                case "mixin": {
+                case 'mixin': {
                     const name = resolveWordLowercase(statement.name);
                     const properties = compileStatements(statement.content, undefined, compileMixinContent);
                     setMixin({
@@ -470,21 +470,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     });
                     return true;
                 }
-                case "shorthand": {
+                case 'shorthand': {
                     const property = (0, stringifyText_1.default)(compiler, statement.property);
                     const affects = compileStatements(statement.body, undefined, compileShorthand)
                         .filter(affected => !!affected);
                     setShorthand(property, affects, statement.position);
                     return true;
                 }
-                case "alias": {
+                case 'alias': {
                     const property = (0, stringifyText_1.default)(compiler, statement.property);
                     const properties = compileStatements(statement.body, undefined, compileShorthand)
                         .filter(affected => !!affected);
                     setAlias(property, properties, statement.position);
                     return true;
                 }
-                case "component": {
+                case 'component': {
                     let results = compileComponent(statement);
                     if (results === undefined)
                         return undefined;
@@ -511,76 +511,76 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 mixins: [],
                             };
                             registered.mixins.push(...registeredMixins);
-                            dts.write("\"");
+                            dts.write('"');
                             dts.writeWord(selector);
-                            dts.write("\"");
-                            dts.writeLine(": string[],");
+                            dts.write('"');
+                            dts.writeLine(': string[],');
                         }
                     }
                     return true;
                 }
-                case "mixin-use": {
+                case 'mixin-use': {
                     const mixin = getMixin((0, stringifyText_1.default)(compiler, statement.name), statement.name.position);
                     for (const property of mixin.content) {
-                        css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
+                        css.writingTo(property.isCustomProperty ? 'root-properties' : 'root-styles', () => {
                             css.writeProperty(compiler, property);
                         });
                     }
                     return true;
                 }
-                case "property-definition":
-                    css.writingTo("property-definitions", () => {
-                        css.write("@property ");
+                case 'property-definition':
+                    css.writingTo('property-definitions', () => {
+                        css.write('@property ');
                         const name = resolveWordLowercase(statement.property);
                         name.value = `--${name.value}`;
                         css.writeWord(name);
                         css.writeSpaceOptional();
                         css.writeBlock(() => {
-                            css.write("syntax:");
+                            css.write('syntax:');
                             css.writeSpaceOptional();
-                            css.write("\"");
+                            css.write('"');
                             css.writeWord(statement.syntax);
-                            css.writeLine("\";");
-                            css.write("inherits:");
+                            css.writeLine('";');
+                            css.write('inherits:');
                             css.writeSpaceOptional();
-                            css.writeLine("false;");
-                            const initialValue = compileStatements(statement.value, undefined, compileText).join("").trim();
+                            css.writeLine('false;');
+                            const initialValue = compileStatements(statement.value, undefined, compileText).join('').trim();
                             if (initialValue) {
-                                css.write("initial-value:");
+                                css.write('initial-value:');
                                 css.writeSpaceOptional();
                                 css.write(initialValue);
-                                css.writeLine(";");
+                                css.writeLine(';');
                             }
                         });
                     });
                     return true;
-                case "property":
-                    css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
+                case 'property':
+                    css.writingTo(statement.isCustomProperty ? 'root-properties' : 'root-styles', () => {
                         css.writeProperty(compiler, {
                             ...statement,
                             property: resolveWordLowercase(statement.property),
-                            value: compileStatements(statement.value, undefined, compileText).join(""),
+                            value: compileStatements(statement.value, undefined, compileText).join(''),
                         });
                     });
                     return true;
-                case "import-css": {
-                    css.writingTo("imports", () => {
+                case 'import-css': {
+                    css.writingTo('imports', () => {
                         for (const imp of statement.imports) {
                             css.writeLine(`@import ${(0, stringifyText_1.default)(compiler, imp)};`);
                         }
                     });
                     return true;
                 }
-                case "font-face": {
+                case 'font-face': {
                     css.writeFontFace(compiler, {
                         family: (0, makeWord_1.default)((0, stringifyExpression_1.default)(compiler, statement.family), statement.family.position),
                         content: compileStatements(statement.content, undefined, compileMixinContent),
                     });
                     return true;
                 }
-                case "select": {
+                case 'select': {
                     css.writeSelect(compiler, {
-                        type: "select",
+                        type: 'select',
                         selector: (0, stringifyExpression_1.default)(compiler, statement.selector),
                         content: compileStatements(statement.content, undefined, compileMixinContent),
                         position: statement.position,
@@ -590,39 +590,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         function compileComponent(statement, allowMixins = false) {
-            if (statement.type !== "component")
+            if (statement.type !== 'component')
                 return undefined;
             const containingSelector = selectorStack.at(-1);
-            if (statement.subType === "component" || statement.subType === "custom-state") {
+            if (statement.subType === 'component' || statement.subType === 'custom-state') {
                 const selector = createSelector(undefined, {
-                    class: mergeWords(containingSelector?.class, statement.subType === "component" ? "-" : "--", statement.names),
+                    class: mergeWords(containingSelector?.class, statement.subType === 'component' ? '-' : '--', statement.names),
                 });
                 const content = compileSelector(selector, statement.content, true);
                 const component = {
-                    type: "compiled-component",
+                    type: 'compiled-component',
                     selector: selector.class,
-                    mixins: content.filter(item => item.type === "word"),
-                    after: content.filter(item => item.type === "compiled-after")
+                    mixins: content.filter(item => item.type === 'word'),
+                    after: content.filter(item => item.type === 'compiled-after')
                         .flatMap(after => after.selectors),
                 };
-                if ((component.mixins.some(m => m.value === "before") && component.mixins.some(m => m.value === "after")) || component.mixins.some(m => m.value === "before-after")) {
-                    component.mixins = component.mixins.filter(mixin => mixin.value !== "before-after");
-                    component.mixins.unshift({ type: "word", value: "before-after", position: constants_1.INTERNAL_POSITION });
+                if ((component.mixins.some(m => m.value === 'before') && component.mixins.some(m => m.value === 'after')) || component.mixins.some(m => m.value === 'before-after')) {
+                    component.mixins = component.mixins.filter(mixin => mixin.value !== 'before-after');
+                    component.mixins.unshift({ type: 'word', value: 'before-after', position: constants_1.INTERNAL_POSITION });
                 }
-                if (component.mixins.some(m => m.value === "before-after"))
-                    component.mixins = component.mixins.filter(m => m.value !== "before" && m.value !== "after");
-                const results = content.filter(item => item.type === "compiled-component");
+                if (component.mixins.some(m => m.value === 'before-after'))
+                    component.mixins = component.mixins.filter(m => m.value !== 'before' && m.value !== 'after');
+                const results = content.filter(item => item.type === 'compiled-component');
                 results.unshift(component);
                 return results;
             }
-            if (statement.subType === "view-transition" || statement.subType === "view-transition-class") {
-                const viewTransitionName = !containingSelector ? "root" : [
-                    containingSelector.class.map(word => word.value).join("_"),
+            if (statement.subType === 'view-transition' || statement.subType === 'view-transition-class') {
+                const viewTransitionName = !containingSelector ? 'root' : [
+                    containingSelector.class.map(word => word.value).join('_'),
                     getStatesNameAffix(containingSelector.pseudo),
                     getWordsAffix(containingSelector.pseudo),
-                ].filter(s => s).join("_");
+                ].filter(s => s).join('_');
                 const selector = createSelector(containingSelector, {
-                    class: mergeWords(containingSelector?.class, "_", [getWordsAffix(statement.pseudos)]),
+                    class: mergeWords(containingSelector?.class, '_', [getWordsAffix(statement.pseudos)]),
                 });
                 selectorStack.push(selector);
                 const content = compileStatements(statement.content, undefined, compileComponentContent);
@@ -630,14 +630,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 const properties = [];
                 for (const item of content) {
                     switch (item.type) {
-                        case "compiled-after":
-                            throw error("#after cannot be used in this context");
-                        case "compiled-component":
-                            throw error("Sub-component selectors cannot be used in this context");
-                        case "property":
+                        case 'compiled-after':
+                            throw error('#after cannot be used in this context');
+                        case 'compiled-component':
+                            throw error('Sub-component selectors cannot be used in this context');
+                        case 'property':
                             properties.push(item);
                             continue;
-                        case "word": {
+                        case 'word': {
                             const mixin = getMixin(item.value, item.position);
                             properties.push(...mixin.content);
                             continue;
@@ -646,82 +646,82 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 viewTransitions.push({
                     type: statement.subType,
-                    subTypes: statement.pseudos.map(w => w.value.slice(w.value.lastIndexOf("!") + 1)),
+                    subTypes: statement.pseudos.map(w => w.value.slice(w.value.lastIndexOf('!') + 1)),
                     name: (0, makeWord_1.default)(viewTransitionName, statement.position),
                     content: properties,
                     position: statement.position,
                 });
                 return [{
-                        type: "property",
-                        property: (0, makeWord_1.default)(statement.subType === "view-transition-class" ? "view-transition-class" : "view-transition-name", statement.position),
+                        type: 'property',
+                        property: (0, makeWord_1.default)(statement.subType === 'view-transition-class' ? 'view-transition-class' : 'view-transition-name', statement.position),
                         value: viewTransitionName,
                         position: statement.position,
                     }];
             }
             let selector;
             switch (statement.subType) {
-                case "state":
+                case 'state':
                     selector = createSelector(containingSelector, {
-                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
-                        state: mergeWords(containingSelector?.state, "):where(", statement.states, false),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getStatesNameAffix(statement.states)]),
+                        state: mergeWords(containingSelector?.state, '):where(', statement.states, false),
                         spread: statement.spread || undefined,
                     });
                     break;
-                case "state-special":
+                case 'state-special':
                     selector = createSelector(containingSelector, {
-                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix([statement.state])]),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getStatesNameAffix([statement.state])]),
                         specialState: statement.state,
                         spread: statement.spread || undefined,
                     });
                     break;
-                case "media": {
+                case 'media': {
                     const query = (0, stringifyText_1.default)(compiler, statement.query);
                     selector = createSelector(containingSelector, {
                         mediaQueries: [query],
                     });
                     break;
                 }
-                case "container": {
+                case 'container': {
                     const query = (0, stringifyText_1.default)(compiler, statement.query);
                     selector = createSelector(containingSelector, {
                         containerQueries: [query],
                     });
                     break;
                 }
-                case "scheme": {
+                case 'scheme': {
                     selector = createSelector(containingSelector, {
                         mediaQueries: [{ scheme: statement.scheme }],
                     });
                     break;
                 }
-                case "element": {
+                case 'element': {
                     const names = statement.names.map(resolveWordLowercase);
                     selector = createSelector(containingSelector, {
-                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getWordsAffix(names)]),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getWordsAffix(names)]),
                         elementTypes: names,
                         spread: statement.spread || undefined,
                     });
                     break;
                 }
-                case "pseudo":
+                case 'pseudo':
                     selector = createSelector(containingSelector, {
-                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getWordsAffix(statement.pseudos)]),
-                        pseudo: mergeWords(containingSelector?.pseudo, "::", statement.pseudos),
+                        class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getWordsAffix(statement.pseudos)]),
+                        pseudo: mergeWords(containingSelector?.pseudo, '::', statement.pseudos),
                         spread: statement.spread || undefined,
                     });
                     break;
             }
             const result = compileSelector(selector, statement.content);
-            if (statement.subType === "pseudo" && allowMixins) {
-                const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-");
-                if (pseudoClassName === "before" || pseudoClassName === "after")
-                    result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position });
+            if (statement.subType === 'pseudo' && allowMixins) {
+                const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join('-');
+                if (pseudoClassName === 'before' || pseudoClassName === 'after')
+                    result.unshift({ type: 'word', value: pseudoClassName, position: statement.pseudos[0].position });
             }
             // if (statement.subType === "state-special")
             // 	throw error("stop here!")
             if (!allowMixins) {
                 rootSpecials.push({
-                    type: "mixin",
+                    type: 'mixin',
                     content: result.flatMap(name => getMixin(name.value, name.position).content),
                     pseudos: selector.pseudo.map(pseudo => pseudo?.value),
                     states: selector.state.map(state => state?.value),
@@ -739,14 +739,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }));
         }
         function getStatesNameAffix(states) {
-            return !states.length ? "" : "_" + states
-                .map(state => state.value.replace(/[:)]/g, "").replace(/[^\w-]+/g, "-"))
-                .join("_");
+            return !states.length ? '' : '_' + states
+                .map(state => state.value.replace(/[:)]/g, '').replace(/[^\w-]+/g, '-'))
+                .join('_');
         }
         function getWordsAffix(words) {
-            return !words.length ? "" : "_" + words
+            return !words.length ? '' : '_' + words
                 .map(pseudo => pseudo.value)
-                .join("-");
+                .join('-');
         }
         function compileSelector(selector, content, allowComponents = false) {
             selectorStack.push(selector);
@@ -756,29 +756,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const affects = [];
             let propertyGroup;
             let groupIndex = 0;
-            const className = selector.class.map(cls => cls.value).join("_");
-            const getDedupedClassName = () => `${className}${groupIndex <= 1 ? "" : `_${groupIndex}`}`;
-            for (const item of [...compiledContent, { type: "end" }]) {
+            const className = selector.class.map(cls => cls.value).join('_');
+            const getDedupedClassName = () => `${className}${groupIndex <= 1 ? '' : `_${groupIndex}`}`;
+            for (const item of [...compiledContent, { type: 'end' }]) {
                 switch (item.type) {
-                    case "compiled-after":
+                    case 'compiled-after':
                         results.push(item);
                         break; // irrelevant for this mixin generation
-                    case "compiled-component":
+                    case 'compiled-component':
                         if (!allowComponents)
-                            throw internalError(item.selector[0].position, "Unexpected component in this context");
+                            throw internalError(item.selector[0].position, 'Unexpected component in this context');
                         results.push(item);
                         break;
-                    case "property": {
+                    case 'property': {
                         // a CSS property assignment rather than a mixin usage — add it to a group that will be made into a dynamic mixin
                         propertyGroup ??= [];
                         propertyGroup.push(item);
                         break;
                     }
-                    case "end":
-                    case "word": {
+                    case 'end':
+                    case 'word': {
                         // mixin use — end the dynamic mixin CSS property group, if it exists
                         if (!propertyGroup?.length) {
-                            if (item.type === "word")
+                            if (item.type === 'word')
                                 addWord(item);
                             break;
                         }
@@ -789,9 +789,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                                 groupIndex++;
                             nameString = getDedupedClassName();
                         } while (!selector.spread && getMixin(nameString, position, true));
-                        const name = { type: "word", value: nameString, position };
+                        const name = { type: 'word', value: nameString, position };
                         setMixin({
-                            type: "mixin",
+                            type: 'mixin',
                             name,
                             states: selector.state.map(state => state?.value),
                             pseudos: selector.pseudo.map(pseudo => pseudo?.value),
@@ -808,7 +808,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         propertyGroup = undefined;
                         if (!selector.spread)
                             groupIndex++;
-                        if (item.type === "word")
+                        if (item.type === 'word')
                             addWord(item);
                     }
                 }
@@ -822,7 +822,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 else {
                     const name = (0, makeWord_1.default)(className, selector.class[0].position);
                     setMixin({
-                        type: "mixin",
+                        type: 'mixin',
                         name,
                         affects: mixinAffects,
                         content: [],
@@ -855,26 +855,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             if (componentResults !== undefined)
                 return componentResults;
             switch (statement.type) {
-                case "after":
+                case 'after':
                     return {
-                        type: "compiled-after",
+                        type: 'compiled-after',
                         selectors: compileStatements(statement.content, undefined, statement => {
-                            if (statement.type === "text" && statement.subType === "word-interpolated")
+                            if (statement.type === 'text' && statement.subType === 'word-interpolated')
                                 return resolveWordLowercase(statement);
                         }),
                     };
-                case "property":
+                case 'property':
                     return {
                         ...statement,
                         property: resolveWordLowercase(statement.property),
-                        value: compileStatements(statement.value, undefined, compileText).join(" "),
+                        value: compileStatements(statement.value, undefined, compileText).join(' '),
                     };
-                case "mixin-use": {
+                case 'mixin-use': {
                     let name = resolveWordLowercase(statement.name);
                     const baseName = name.value;
                     const selector = selectorStack.at(-1);
                     if (!selector)
-                        throw error(name.position, "Unable to use mixin here, no selector");
+                        throw error(name.position, 'Unable to use mixin here, no selector');
                     if (selector.containerQueries.length || selector.mediaQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
                         const mixin = getMixin(name.value, name.position);
                         return mixin.content;
@@ -883,19 +883,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         return name;
                     if (selector.state.length)
                         name = {
-                            type: "word",
+                            type: 'word',
                             value: `${name.value}_${getStatesNameAffix(selector.state)}`,
                             position: name.position,
                         };
                     if (selector.specialState)
                         name = {
-                            type: "word",
+                            type: 'word',
                             value: `${name.value}_${getStatesNameAffix([selector.specialState])}`,
                             position: name.position,
                         };
                     if (selector.pseudo.length)
                         name = {
-                            type: "word",
+                            type: 'word',
                             value: `${name.value}_${getWordsAffix(selector.pseudo)}`,
                             position: name.position,
                         };
@@ -912,25 +912,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         });
                     return name;
                 }
-                case "animate": {
+                case 'animate': {
                     const selector = selectorStack.at(-1);
                     if (!selector)
-                        throw error(statement.position, "#animate cannot be used in this context");
+                        throw error(statement.position, '#animate cannot be used in this context');
                     const baseAnimationName = [
-                        selector.class.map(word => word.value).join("_"),
+                        selector.class.map(word => word.value).join('_'),
                         getStatesNameAffix(selector.pseudo),
                         getWordsAffix(selector.pseudo),
-                    ].filter(s => s).join("_");
+                    ].filter(s => s).join('_');
                     const keyframes = compileStatements(statement.content, undefined, compileKeyframes);
                     const dedupedName = setAnimation({
-                        type: "animation",
+                        type: 'animation',
                         name: (0, makeWord_1.default)(baseAnimationName, statement.position),
                         content: keyframes,
                         position: statement.position,
                     }, true);
                     return {
-                        type: "property",
-                        property: (0, makeWord_1.default)("animation", statement.position),
+                        type: 'property',
+                        property: (0, makeWord_1.default)('animation', statement.position),
                         value: `${(0, stringifyText_1.default)(compiler, statement.shorthand)} ${dedupedName.value}`,
                         position: statement.position,
                         merge: true,
@@ -940,11 +940,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         function createSelector(selector, assignFrom) {
             if (assignFrom.mediaQueries?.length && !selector)
-                selector = { type: "selector", class: [], state: [], pseudo: [], specialState: undefined, containerQueries: [], mediaQueries: [], elementTypes: [] };
+                selector = { type: 'selector', class: [], state: [], pseudo: [], specialState: undefined, containerQueries: [], mediaQueries: [], elementTypes: [] };
             if (!selector && !assignFrom.class?.length)
-                throw internalError("Unable to construct a selector with no class name");
+                throw internalError('Unable to construct a selector with no class name');
             return {
-                type: "selector",
+                type: 'selector',
                 class: (assignFrom.class ?? selector?.class),
                 state: assignFrom.state ?? selector?.state ?? [],
                 pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
@@ -961,9 +961,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Context: Mixins
         function compileMixinContent(statement) {
             switch (statement.type) {
-                case "property":
+                case 'property':
                     return compileProperty(statement);
-                case "mixin-use": {
+                case 'mixin-use': {
                     const mixin = getMixin((0, stringifyText_1.default)(compiler, statement.name), statement.name.position);
                     return mixin.content;
                 }
@@ -973,7 +973,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return {
                 ...property,
                 property: resolveWordLowercase(property.property),
-                value: compileStatements(property.value, undefined, compileText).join(" "),
+                value: compileStatements(property.value, undefined, compileText).join(' '),
             };
         }
         //#endregion
@@ -982,12 +982,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Context: Macros
         function compileMacros(statement, contextConsumer) {
             switch (statement.type) {
-                case "variable": {
+                case 'variable': {
                     if (!statement.assignment)
                         return true;
-                    if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position, true) !== undefined)
+                    if (statement.assignment === '??=' && getVariable(statement.name.value, statement.position, true) !== undefined)
                         return true;
-                    if (!statement.expression && statement.assignment === "??=") {
+                    if (!statement.expression && statement.assignment === '??=') {
                         scope().variables ??= {};
                         scope().variables[statement.name.value] = { type: statement.valueType, value: undefined };
                         return true;
@@ -997,44 +997,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     setVariable(statement.name.value, result, statement.valueType, true);
                     return true;
                 }
-                case "assignment": {
-                    if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position) !== undefined)
+                case 'assignment': {
+                    if (statement.assignment === '??=' && getVariable(statement.name.value, statement.position) !== undefined)
                         // already assigned
                         return true;
                     const value = (0, resolveExpression_1.default)(compiler, statement.expression);
-                    setVariable(statement.name.value, value, statement.expression?.valueType ?? ChiriType_1.ChiriType.of("undefined"));
+                    setVariable(statement.name.value, value, statement.expression?.valueType ?? ChiriType_1.ChiriType.of('undefined'));
                     return true;
                 }
-                case "macro":
+                case 'macro':
                     setMacro(statement);
                     return true;
-                case "function":
+                case 'function':
                     setFunction(statement);
                     return true;
-                case "macro-use": {
+                case 'macro-use': {
                     switch (statement.name.value) {
-                        case "debug": {
+                        case 'debug': {
                             const lines = compileStatements(statement.content, undefined, compileText);
-                            logLine(statement.position, ansi_1.default.label + "debug" + (lines.length === 1 ? " - " : "") + ansi_1.default.reset + (lines.length <= 1 ? "" : "\n") + lines.join("\n"), false, false);
+                            logLine(statement.position, ansi_1.default.label + 'debug' + (lines.length === 1 ? ' - ' : '') + ansi_1.default.reset + (lines.length <= 1 ? '' : '\n') + lines.join('\n'), false, false);
                             return true;
                         }
-                        case "error": {
+                        case 'error': {
                             const lines = compileStatements(statement.content, undefined, compileText);
                             const position = _1.default
-                                ?? (!(0, resolveExpression_1.default)(compiler, statement.assignments.function) ? undefined : blocks.findLast(block => block.type === "function-call")?.position)
-                                ?? (!(0, resolveExpression_1.default)(compiler, statement.assignments.macro) ? undefined : blocks.findLast(block => block.type === "macro-use")?.position)
+                                ?? (!(0, resolveExpression_1.default)(compiler, statement.assignments.function) ? undefined : blocks.findLast(block => block.type === 'function-call')?.position)
+                                ?? (!(0, resolveExpression_1.default)(compiler, statement.assignments.macro) ? undefined : blocks.findLast(block => block.type === 'macro-use')?.position)
                                 ?? statement.position;
-                            throw error(position, (lines.length <= 1 ? "" : "\n") + lines.join("\n"));
+                            throw error(position, (lines.length <= 1 ? '' : '\n') + lines.join('\n'));
                         }
                     }
                     const fn = getMacro(statement.name.value, statement.position);
                     if (!fn)
                         return undefined;
                     const assignments = resolveAssignments(statement.assignments);
-                    const bodyParameter = fn.content.find((statement) => statement.type === "variable" && statement.valueType.name.value === "body");
+                    const bodyParameter = fn.content.find((statement) => statement.type === 'variable' && statement.valueType.name.value === 'body');
                     if (bodyParameter) {
                         assignments.variables ??= {};
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         assignments.variables[bodyParameter.name.value] = {
                             type: bodyParameter.valueType,
                             value: Object.assign([...statement.content], { isBody: true }),
@@ -1045,12 +1044,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     popBlock(block);
                     return result;
                 }
-                case "each": {
+                case 'each': {
                     let list = (0, resolveExpression_1.default)(compiler, statement.iterable);
-                    if (typeof list !== "string" && !Array.isArray(list) && (!resolveExpression_1.Record.is(list) || !statement.keyVariable))
-                        throw error(statement.iterable.position, "Variable is not iterable");
+                    if (typeof list !== 'string' && !Array.isArray(list) && (!resolveExpression_1.Record.is(list) || !statement.keyVariable))
+                        throw error(statement.iterable.position, 'Variable is not iterable');
                     list = !statement.keyVariable ? list
-                        : typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
+                        : typeof list !== 'string' && !Array.isArray(list) ? Object.entries(list)
                             : Object.values(list).map((v, i) => [i, v]);
                     const block = pushBlock(statement);
                     const result = [];
@@ -1074,7 +1073,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     popBlock(block);
                     return result;
                 }
-                case "for": {
+                case 'for': {
                     scopes.push({});
                     setVariable(statement.variable.name.value, (0, resolveExpression_1.default)(compiler, statement.variable.expression), statement.variable.valueType, true);
                     const block = pushBlock(statement);
@@ -1092,7 +1091,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     scopes.pop();
                     return result;
                 }
-                case "while": {
+                case 'while': {
                     scopes.push({});
                     const block = pushBlock(statement);
                     const result = [];
@@ -1107,11 +1106,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     scopes.pop();
                     return result;
                 }
-                case "elseif":
+                case 'elseif':
                     if (blockIfState())
                         return EMPTY;
                 // eslint-disable-next-line no-fallthrough
-                case "if": {
+                case 'if': {
                     setBlockIfState(!!(0, resolveExpression_1.default)(compiler, statement.condition));
                     if (!blockIfState())
                         return EMPTY;
@@ -1124,7 +1123,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     popBlock(block);
                     return result;
                 }
-                case "else": {
+                case 'else': {
                     if (blockIfState())
                         return EMPTY;
                     const block = pushBlock(statement);
@@ -1136,7 +1135,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     popBlock(block);
                     return result;
                 }
-                case "do": {
+                case 'do': {
                     const block = pushBlock(statement);
                     const result = [];
                     do {
@@ -1146,21 +1145,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     popBlock(block);
                     return result;
                 }
-                case "break": {
+                case 'break': {
                     breakBlock(statement.position, statement.label?.value);
                     return EMPTY;
                 }
-                case "continue": {
+                case 'continue': {
                     continueBlock(statement.position, statement.label?.value);
                     return EMPTY;
                 }
-                case "include": {
+                case 'include': {
                     const statements = getVariable(statement.name.value, statement.name.position) ?? [];
                     const type = getVariableType(statement.name.value, statement.name.position);
                     const bodyType = type.generics[0].name.value;
                     return compileStatements(statements, undefined, getContextConsumer(bodyType));
                 }
-                case "animation": {
+                case 'animation': {
                     const name = resolveWordLowercase(statement.name);
                     const keyframes = compileStatements(statement.content, undefined, compileKeyframes);
                     setAnimation({
@@ -1174,10 +1173,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         function getContextConsumer(context) {
             switch (context) {
-                case "text":
-                case "property-name":
+                case 'text':
+                case 'property-name':
                     return compileText;
-                case "component":
+                case 'component':
                     return compileComponentContent;
             }
         }
@@ -1186,7 +1185,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         //#region Context: Text
         function compileText(statement) {
-            if (statement.type !== "text")
+            if (statement.type !== 'text')
                 throw error(statement.position, `Expected text, got ${debugStatementString(statement)}`);
             return (0, stringifyText_1.default)(compiler, statement);
         }
@@ -1195,7 +1194,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         ////////////////////////////////////
         //#region Context: Shorthand
         function compileShorthand(statement) {
-            if (statement.type !== "text")
+            if (statement.type !== 'text')
                 throw error(statement.position, `Expected text, got ${debugStatementString(statement)}`);
             return (0, stringifyText_1.default)(compiler, statement);
         }
@@ -1205,9 +1204,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Context: Function
         function compileFunction(statement) {
             switch (statement.type) {
-                case "return": {
+                case 'return': {
                     breakFunction(statement.position);
-                    return { type: "result", value: (0, resolveExpression_1.default)(compiler, statement.expression) };
+                    return { type: 'result', value: (0, resolveExpression_1.default)(compiler, statement.expression) };
                 }
             }
         }
@@ -1217,7 +1216,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         //#region Context: Animation
         function compileKeyframes(statement) {
             switch (statement.type) {
-                case "keyframe":
+                case 'keyframe':
                     return {
                         ...statement,
                         at: +(0, resolveExpression_1.default)(compiler, statement.at) || 0,
@@ -1235,33 +1234,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             scopes.push(using ?? {});
             if (scopes.length === 1) {
                 setMixin({
-                    type: "mixin",
-                    pseudos: ["before"],
+                    type: 'mixin',
+                    pseudos: ['before'],
                     states: [undefined],
                     elementTypes: [undefined],
                     content: [blankContent],
-                    affects: ["content"],
-                    name: { type: "word", value: "before", position: constants_1.INTERNAL_POSITION },
+                    affects: ['content'],
+                    name: { type: 'word', value: 'before', position: constants_1.INTERNAL_POSITION },
                     position: constants_1.INTERNAL_POSITION,
                 });
                 setMixin({
-                    type: "mixin",
-                    pseudos: ["after"],
+                    type: 'mixin',
+                    pseudos: ['after'],
                     states: [undefined],
                     elementTypes: [undefined],
                     content: [blankContent],
-                    affects: ["content"],
-                    name: { type: "word", value: "after", position: constants_1.INTERNAL_POSITION },
+                    affects: ['content'],
+                    name: { type: 'word', value: 'after', position: constants_1.INTERNAL_POSITION },
                     position: constants_1.INTERNAL_POSITION,
                 });
                 setMixin({
-                    type: "mixin",
-                    pseudos: ["before", "after"],
+                    type: 'mixin',
+                    pseudos: ['before', 'after'],
                     states: [undefined],
                     elementTypes: [undefined],
                     content: [blankContent],
-                    affects: ["content"],
-                    name: { type: "word", value: "before-after", position: constants_1.INTERNAL_POSITION },
+                    affects: ['content'],
+                    name: { type: 'word', value: 'before-after', position: constants_1.INTERNAL_POSITION },
                     position: constants_1.INTERNAL_POSITION,
                 });
             }
@@ -1297,7 +1296,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                         results.push(result);
                 }
                 if (result === undefined)
-                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`);
+                    throw internalError(statement.position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || 'unknown'}"`);
             }
             if (scopes.length > 1) // don't remove the root scope once it's set up
                 scopes.pop();
@@ -1306,8 +1305,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function failedToExitBlocksError(blockId) {
             return error(`Failed to exit block(s): ${blocks
                 .slice(blockId)
-                .map(b => `${b.type}${b.label ? `:${b.label?.value}` : ""}`)
-                .join(", ")}`);
+                .map(b => `${b.type}${b.label ? `:${b.label?.value}` : ''}`)
+                .join(', ')}`);
         }
         function callFunction(call) {
             const fnVar = getVariable(call.name.value, call.position, true);
@@ -1317,16 +1316,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             const result = compileStatements(fn.content, assignments, compileFunction);
             popBlock(block);
             if (result.length > 1)
-                throw internalError(call.position, "Function call returned multiple values");
+                throw internalError(call.position, 'Function call returned multiple values');
             if (result.length === 0)
-                throw internalError(call.position, "Function call did not return a value");
+                throw internalError(call.position, 'Function call did not return a value');
             return result[0]?.value;
         }
         function getPropertyAffects(property) {
             return property.isCustomProperty ? [`--${property.property.value}`] : getShorthand(property.property.value);
         }
         function debugStatementString(statement) {
-            const name = "name" in statement ? ` "${(0, stringifyText_1.default)(compiler, statement.name)}"` : "";
+            const name = 'name' in statement ? ` "${(0, stringifyText_1.default)(compiler, statement.name)}"` : '';
             return statement.type + name;
         }
         function resolveAssignments(assignments, indicesIntoParams) {
@@ -1334,42 +1333,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 .map(([name, expr]) => [indicesIntoParams?.[+name] ?? name, { type: expr.valueType, value: (0, resolveExpression_1.default)(compiler, expr) }])));
         }
         function resolveWordLowercase(word) {
-            return typeof word === "object" && word.type === "word" ? word : {
-                type: "word",
-                value: typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word).replace(/[^\w-]+/g, "-").toLowerCase(),
-                position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
+            return typeof word === 'object' && word.type === 'word' ? word : {
+                type: 'word',
+                value: typeof word === 'string' ? word : (0, stringifyText_1.default)(compiler, word).replace(/[^\w-]+/g, '-').toLowerCase(),
+                position: typeof word === 'string' ? constants_1.INTERNAL_POSITION : word.position,
             };
         }
         function resolveWordPreserve(word, restrictCharacters = true) {
-            if (typeof word === "object" && word.type === "word")
+            if (typeof word === 'object' && word.type === 'word')
                 return word;
-            let value = typeof word === "string" ? word : (0, stringifyText_1.default)(compiler, word);
+            let value = typeof word === 'string' ? word : (0, stringifyText_1.default)(compiler, word);
             if (restrictCharacters)
-                value = value.replace(/[^\w-]+/g, "-");
+                value = value.replace(/[^\w-]+/g, '-');
             return {
-                type: "word",
+                type: 'word',
                 value,
-                position: typeof word === "string" ? constants_1.INTERNAL_POSITION : word.position,
+                position: typeof word === 'string' ? constants_1.INTERNAL_POSITION : word.position,
             };
         }
         function mergeWords(words, separator, newSegment, restrictCharacters = true) {
             return !words?.length ? newSegment.map(segment => resolveWordPreserve(segment, restrictCharacters)) : words.flatMap(selector => newSegment.map((newSegment) => resolveWordPreserve({
-                type: "text",
-                subType: "word-interpolated",
-                valueType: ChiriType_1.ChiriType.of("string"),
+                type: 'text',
+                subType: 'word-interpolated',
+                valueType: ChiriType_1.ChiriType.of('string'),
                 content: [
                     selector.value,
                     ...!separator ? [] : [separator],
-                    ...typeof newSegment === "string" ? [newSegment] : newSegment.type === "word" ? [newSegment.value] : newSegment.content,
+                    ...typeof newSegment === 'string' ? [newSegment] : newSegment.type === 'word' ? [newSegment.value] : newSegment.content,
                 ],
-                position: typeof newSegment === "string" ? constants_1.INTERNAL_POSITION : newSegment.position,
+                position: typeof newSegment === 'string' ? constants_1.INTERNAL_POSITION : newSegment.position,
             }, restrictCharacters)));
         }
         function mergeText(position, ...texts) {
             return {
-                type: "text",
-                subType: "text",
-                valueType: ChiriType_1.ChiriType.of("string"),
+                type: 'text',
+                subType: 'text',
+                valueType: ChiriType_1.ChiriType.of('string'),
                 content: texts.flatMap(text => text.content),
                 position,
             };
@@ -1383,12 +1382,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         function getLine(file, line) {
             let cursor = 0;
             for (let i = 0; i < line; i++) {
-                const newlineIndex = file.indexOf("\n", cursor);
+                const newlineIndex = file.indexOf('\n', cursor);
                 if (newlineIndex === -1)
-                    return "";
+                    return '';
                 cursor = newlineIndex + 1;
             }
-            const lineEnd = file.indexOf("\n", cursor);
+            const lineEnd = file.indexOf('\n', cursor);
             return file.slice(cursor, lineEnd === -1 ? undefined : lineEnd);
         }
         //#endregion

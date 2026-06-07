@@ -22,48 +22,48 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const save = reader.savePosition();
         const position = reader.getPosition();
         if (prefix)
-            reader.consume("#");
-        const varWord = (0, consumeWordOptional_1.default)(reader, "var");
+            reader.consume('#');
+        const varWord = (0, consumeWordOptional_1.default)(reader, 'var');
         let valueType = !varWord ? (0, consumeType_1.consumeTypeOptional)(reader)
             : {
-                type: "type",
-                name: { ...varWord, value: "*" },
+                type: 'type',
+                name: { ...varWord, value: '*' },
                 generics: [],
             };
         if (!valueType) {
             reader.restorePosition(save);
             return undefined;
         }
-        if (valueType.name.value === "body" && reader.getVariables(true).find(variable => variable.valueType.name.value === "body"))
-            throw reader.error(save.i, "A macro cannot accept multiple body parameters");
-        if (valueType.name.value === "body" && reader.context.type === "function")
-            throw reader.error(save.i, "A function cannot accept a body parameter");
+        if (valueType.name.value === 'body' && reader.getVariables(true).find(variable => variable.valueType.name.value === 'body'))
+            throw reader.error(save.i, 'A macro cannot accept multiple body parameters');
+        if (valueType.name.value === 'body' && reader.context.type === 'function')
+            throw reader.error(save.i, 'A function cannot accept a body parameter');
         (0, consumeWhiteSpace_1.default)(reader);
         const name = (0, consumeWord_1.default)(reader);
         const postType = reader.i;
         if (valueType)
             (0, consumeWhiteSpaceOptional_1.default)(reader);
-        let assignment = reader.consumeOptional("??=", "=");
-        if (!skipInvalidParamCheck && assignment === "??=" && reader.context.type === "mixin")
-            throw reader.error(save.i, "Mixins cannot accept parameters");
+        let assignment = reader.consumeOptional('??=', '=');
+        if (!skipInvalidParamCheck && assignment === '??=' && reader.context.type === 'mixin')
+            throw reader.error(save.i, 'Mixins cannot accept parameters');
         let expression;
         if (assignment) {
             (0, consumeWhiteSpaceOptional_1.default)(reader);
             expression = await (0, consumeExpression_1.default)(reader, valueType);
-            if (valueType.name.value === "*")
+            if (valueType.name.value === '*')
                 valueType = expression.valueType;
         }
         else {
             reader.i = postType;
-            if (!assignment && reader.consumeOptional("?"))
-                assignment = "??=";
-            else if (!skipInvalidParamCheck && reader.context.type === "mixin")
-                throw reader.error(save.i, "Mixins cannot accept parameters");
+            if (!assignment && reader.consumeOptional('?'))
+                assignment = '??=';
+            else if (!skipInvalidParamCheck && reader.context.type === 'mixin')
+                throw reader.error(save.i, 'Mixins cannot accept parameters');
         }
-        if (!skipInvalidParamCheck && assignment !== "=" && reader.getStatements(true).some(statement => statement.type === "variable" && statement.valueType.name.value === "raw"))
-            throw reader.error(save.i, "No further parameters can appear after a parameter of type \"raw\"");
+        if (!skipInvalidParamCheck && assignment !== '=' && reader.getStatements(true).some(statement => statement.type === 'variable' && statement.valueType.name.value === 'raw'))
+            throw reader.error(save.i, 'No further parameters can appear after a parameter of type "raw"');
         return {
-            type: "variable",
+            type: 'variable',
             valueType,
             name,
             expression,

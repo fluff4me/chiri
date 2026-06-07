@@ -34,11 +34,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         const parameters = resolveFunctionParameters(reader, fn);
         const variableSharingName = reader.getVariableOptional(name.value);
-        if (variableSharingName && variableSharingName.valueType.name.value !== "function" && parameters.length && !reader.consumeOptional("(")) {
+        if (variableSharingName && variableSharingName.valueType.name.value !== 'function' && parameters.length && !reader.consumeOptional('(')) {
             reader.restorePosition(restore);
             return undefined;
         }
-        if (!reader.peek("(")) {
+        if (!reader.peek('(')) {
             reader.restorePosition(restore);
             return undefined;
         }
@@ -48,55 +48,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const assignments = {};
         let parens = true;
         if (requireParens)
-            reader.consume("(");
+            reader.consume('(');
         else
-            parens = !!reader.consumeOptional("(");
+            parens = !!reader.consumeOptional('(');
         if (parameters.length) {
             for (let i = 0; i < parameters.length; i++) {
                 const parameter = parameters[i];
                 if (i > 0) {
-                    if (!parens || !reader.consumeOptional(",") && (parameter.type === "type" || parameter.assignment !== "??=")) {
+                    if (!parens || !reader.consumeOptional(',') && (parameter.type === 'type' || parameter.assignment !== '??=')) {
                         const missingParameters = parameters.slice(i)
-                            .map(param => param.type === "type" ? ChiriType_1.ChiriType.stringify(param)
-                            : `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
-                            .join(", ");
+                            .map(param => param.type === 'type' ? ChiriType_1.ChiriType.stringify(param)
+                            : `${param.expression ? '[' : ''}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? ']?' : ''}`)
+                            .join(', ');
                         throw reader.error(`Missing parameters for #function ${fn.name.value}: ${missingParameters}`);
                     }
                     (0, consumeWhiteSpaceOptional_1.default)(reader);
                 }
-                if (!parens || reader.peek(")")) {
+                if (!parens || reader.peek(')')) {
                     const missingParameters = parameters.slice(i)
-                        .filter(param => param.type === "type" || !param.assignment)
-                        .map(param => param.type === "type" ? ChiriType_1.ChiriType.stringify(param)
-                        : `${param.expression ? "[" : ""}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? "]?" : ""}`)
-                        .join(", ");
+                        .filter(param => param.type === 'type' || !param.assignment)
+                        .map(param => param.type === 'type' ? ChiriType_1.ChiriType.stringify(param)
+                        : `${param.expression ? '[' : ''}${ChiriType_1.ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? ']?' : ''}`)
+                        .join(', ');
                     if (missingParameters)
                         throw reader.error(`Missing required parameters for #function ${fn.name.value}: ${missingParameters}`);
                     break;
                 }
-                const paramType = parameter.type === "type" ? parameter : parameter.valueType;
+                const paramType = parameter.type === 'type' ? parameter : parameter.valueType;
                 const expectedType = [paramType];
-                if (parameter.type === "variable" && parameter.assignment === "??=")
-                    expectedType.push(ChiriType_1.ChiriType.of("undefined"));
-                const key = parameter.type === "type" ? i : parameter.name.value;
-                if (paramType.name.value !== "raw")
+                if (parameter.type === 'variable' && parameter.assignment === '??=')
+                    expectedType.push(ChiriType_1.ChiriType.of('undefined'));
+                const key = parameter.type === 'type' ? i : parameter.name.value;
+                if (paramType.name.value !== 'raw')
                     assignments[key] = consumeExpression_1.default.inline(reader, ...expectedType);
                 else {
                     const multiline = (0, consumeBlockStartOptional_1.default)(reader);
-                    assignments[key] = (0, consumeValueText_1.default)(reader, multiline, () => !!reader.peek(")"));
+                    assignments[key] = (0, consumeValueText_1.default)(reader, multiline, () => !!reader.peek(')'));
                     if (multiline)
                         (0, consumeBlockEnd_1.default)(reader);
                 }
             }
         }
-        reader.consumeOptional(")");
+        reader.consumeOptional(')');
         const returnType = computeFunctionReturnType(reader, fn, assignments, boundFirstParam);
         if (!reader.types.isAssignable(returnType, ...expectedTypes))
-            throw reader.error(`Expected ${expectedTypes.map(type => `"${ChiriType_1.ChiriType.stringify(type)}"`).join(", ")}, but #function ${fn.name.value} will return "${ChiriType_1.ChiriType.stringify(returnType)}"`);
+            throw reader.error(`Expected ${expectedTypes.map(type => `"${ChiriType_1.ChiriType.stringify(type)}"`).join(', ')}, but #function ${fn.name.value} will return "${ChiriType_1.ChiriType.stringify(returnType)}"`);
         return {
-            type: "function-call",
+            type: 'function-call',
             name,
-            indexedAssignments: fn.type !== "function",
+            indexedAssignments: fn.type !== 'function',
             assignments,
             valueType: returnType,
             position,
@@ -104,19 +104,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     }
     function resolveFunctionFromName(reader, name) {
         const variable = reader.getVariableOptional(name.value);
-        if (variable && variable.valueType.name.value === "function")
+        if (variable && variable.valueType.name.value === 'function')
             return variable;
         else if (variable)
             return undefined;
         return reader.getFunctionOptional(name.value);
     }
     function resolveFunctionParameters(reader, fn) {
-        if (fn.type === "function")
+        if (fn.type === 'function')
             return (0, getFunctionParameters_1.default)(fn);
         return fn.valueType.generics.slice(0, -1); // params are every type up to the last (which is the return type)
     }
     function resolveFunctionReturnType(reader, fn) {
-        if (fn.type === "function")
+        if (fn.type === 'function')
             return fn.returnType;
         return fn.valueType.generics.at(-1); // last = return type
     }
@@ -149,11 +149,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         return ChiriType_1.ChiriType.of(returnType.name.value, ...mappedGenerics);
     }
     function getMatchingGenericTypeParameters(reader, matching, fn, assignments, boundFirstParam) {
-        if (fn.type === "function") {
+        if (fn.type === 'function') {
             const matches = [];
             let firstParam = true;
             for (const statement of fn.content) {
-                if (statement.type !== "variable")
+                if (statement.type !== 'variable')
                     continue;
                 let assignment;
                 if (firstParam) {

@@ -41,32 +41,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const componentStates_1 = require("../util/componentStates");
     const Writer_1 = __importStar(require("./Writer"));
     const SPLIT_PSEUDO_MAP = {
-        "range-thumb": ["-webkit-slider-thumb", "-moz-range-thumb"],
-        "range-track": ["-webkit-slider-runnable-track", "-moz-range-track"],
-        "swatch": ["-webkit-color-swatch", "-moz-color-swatch"],
-        "swatch-wrapper": ["-webkit-color-swatch-wrapper"],
+        'range-thumb': ['-webkit-slider-thumb', '-moz-range-thumb'],
+        'range-track': ['-webkit-slider-runnable-track', '-moz-range-track'],
+        'swatch': ['-webkit-color-swatch', '-moz-color-swatch'],
+        'swatch-wrapper': ['-webkit-color-swatch-wrapper'],
     };
     class CSSWriter extends Writer_1.default {
-        currentSection = "default";
+        currentSection = 'default';
         queues = {
-            "imports": Writer_1.QueuedWrite.makeQueue(),
-            "property-definitions": Writer_1.QueuedWrite.makeQueue(),
-            "font-faces": Writer_1.QueuedWrite.makeQueue(),
-            "root-properties": Writer_1.QueuedWrite.makeQueue(),
-            "root-styles": Writer_1.QueuedWrite.makeQueue(),
-            "default": this.outputQueue,
-            "selects": Writer_1.QueuedWrite.makeQueue(),
-            "view-transitions": Writer_1.QueuedWrite.makeQueue(),
-            "animations": Writer_1.QueuedWrite.makeQueue(),
+            'imports': Writer_1.QueuedWrite.makeQueue(),
+            'property-definitions': Writer_1.QueuedWrite.makeQueue(),
+            'font-faces': Writer_1.QueuedWrite.makeQueue(),
+            'root-properties': Writer_1.QueuedWrite.makeQueue(),
+            'root-styles': Writer_1.QueuedWrite.makeQueue(),
+            'default': this.outputQueue,
+            'selects': Writer_1.QueuedWrite.makeQueue(),
+            'view-transitions': Writer_1.QueuedWrite.makeQueue(),
+            'animations': Writer_1.QueuedWrite.makeQueue(),
         };
         get queue() {
             return this.queues[this.currentSection];
         }
         constructor(ast, dest, config) {
-            super(ast, dest, { extension: ".css", ...config });
+            super(ast, dest, { extension: '.css', ...config });
         }
         createDestPath(outFile) {
-            return typeof args_1.default["out-css"] === "string" ? path_1.default.resolve(args_1.default["out-css"], outFile) : super.createDestPath(outFile);
+            return typeof args_1.default['out-css'] === 'string' ? path_1.default.resolve(args_1.default['out-css'], outFile) : super.createDestPath(outFile);
         }
         writingTo(section, dowhile) {
             if (this.currentSection === section)
@@ -78,14 +78,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         writeProperty(compiler, property) {
             if (property.isCustomProperty)
-                this.write("--");
+                this.write('--');
             const aliases = property.isCustomProperty ? [property.property.value] : compiler.getAlias(property.property.value);
             for (const alias of aliases) {
-                this.writeWord({ type: "word", value: alias, position: property.property.position });
-                this.write(":");
+                this.writeWord({ type: 'word', value: alias, position: property.property.position });
+                this.write(':');
                 this.writeSpaceOptional();
                 this.write(property.value);
-                this.writeLine(";");
+                this.writeLine(';');
             }
         }
         writeMixin(compiler, mixin) {
@@ -96,24 +96,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             for (const query of mixin.containerQueries ?? []) {
                 this.write(`@container ${query}`);
                 this.writeSpaceOptional();
-                this.writeLineStartBlock("{");
+                this.writeLineStartBlock('{');
             }
             for (const query of mixin.mediaQueries ?? []) {
-                if (typeof query === "string") {
+                if (typeof query === 'string') {
                     this.write(`@media ${query}`);
                     this.writeSpaceOptional();
-                    this.writeLineStartBlock("{");
+                    this.writeLineStartBlock('{');
                 }
                 else if (query.scheme) {
                     this.write(`@media (prefers-color-scheme: ${query.scheme})`);
                     this.writeSpaceOptional();
-                    this.writeLineStartBlock("{");
+                    this.writeLineStartBlock('{');
                 }
             }
             if (mixin.specialState) {
                 this.write(componentStates_1.STATE_MAP_SPECIAL[mixin.specialState]);
                 this.writeSpaceOptional();
-                this.writeLineStartBlock("{");
+                this.writeLineStartBlock('{');
             }
             if (!mixin.states.length)
                 mixin.states.push(undefined);
@@ -133,11 +133,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     for (const state of mixin.states) {
                         for (const pseudo of nonSplitPseudos) {
                             if (i) {
-                                this.write(",");
+                                this.write(',');
                                 this.writeSpaceOptional();
                             }
                             if (mixin.name) {
-                                this.write(".");
+                                this.write('.');
                                 this.writeWord(mixin.name);
                             }
                             if (elementType)
@@ -154,39 +154,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     }
                 }
                 if (!i)
-                    this.write(":root");
+                    this.write(':root');
                 //#endregion
                 ////////////////////////////////////
                 this.writeSpaceOptional();
-                this.writeLineStartBlock("{");
+                this.writeLineStartBlock('{');
                 for (const property of mergeProperties(mixin.content))
                     this.writeProperty(compiler, property);
-                this.writeLineEndBlock("}");
+                this.writeLineEndBlock('}');
             }
             ////////////////////////////////////
             //#region Rule End
             if (mixin.specialState)
-                this.writeLineEndBlock("}");
+                this.writeLineEndBlock('}');
             for (const query of mixin.containerQueries ?? [])
-                this.writeLineEndBlock("}");
+                this.writeLineEndBlock('}');
             for (const query of mixin.mediaQueries ?? [])
-                this.writeLineEndBlock("}");
+                this.writeLineEndBlock('}');
             //#endregion
             ////////////////////////////////////
         }
         writeSelect(compiler, select) {
-            this.writingTo("selects", () => {
+            this.writingTo('selects', () => {
                 this.writeWord((0, makeWord_1.default)(select.selector, select.position));
                 this.writeSpaceOptional();
-                this.writeLineStartBlock("{");
+                this.writeLineStartBlock('{');
                 for (const property of mergeProperties(select.content))
                     this.writeProperty(compiler, property);
-                this.writeLineEndBlock("}");
+                this.writeLineEndBlock('}');
             });
         }
         writeAnimation(compiler, animation) {
-            this.writingTo("animations", () => {
-                this.write("@keyframes ");
+            this.writingTo('animations', () => {
+                this.write('@keyframes ');
                 this.writeWord(animation.name);
                 this.writeSpaceOptional();
                 this.writeBlock(() => {
@@ -202,12 +202,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             });
         }
         writeViewTransition(compiler, viewTransition) {
-            this.writingTo("view-transitions", () => {
-                const selector = viewTransition.type === "view-transition" ? viewTransition.name.value
+            this.writingTo('view-transitions', () => {
+                const selector = viewTransition.type === 'view-transition' ? viewTransition.name.value
                     : `*.${viewTransition.name.value}`;
                 this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[0]}(${selector})`, viewTransition.position));
                 if (viewTransition.subTypes[1]) {
-                    this.write(",");
+                    this.write(',');
                     this.writeSpaceOptional();
                     this.writeWord((0, makeWord_1.default)(`::view-transition-${viewTransition.subTypes[1]}(${selector})`, viewTransition.position));
                 }
@@ -219,13 +219,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             });
         }
         writeFontFace(compiler, fontFace) {
-            this.writingTo("font-faces", () => {
-                this.write("@font-face");
+            this.writingTo('font-faces', () => {
+                this.write('@font-face');
                 this.writeSpaceOptional();
                 this.writeBlock(() => {
                     this.writeProperty(compiler, {
-                        type: "property",
-                        property: (0, makeWord_1.default)("font-family", fontFace.family.position),
+                        type: 'property',
+                        property: (0, makeWord_1.default)('font-family', fontFace.family.position),
                         value: `"${fontFace.family.value}"`,
                         position: fontFace.family.position,
                     });
@@ -237,28 +237,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         onCompileEnd(compiler) {
             const headerQueue = Writer_1.QueuedWrite.makeQueue();
             headerQueue.push(...this.queues.imports);
-            headerQueue.push({ output: "\n" });
-            headerQueue.push(...this.queues["property-definitions"]);
-            headerQueue.push({ output: "\n" });
-            headerQueue.push(...this.queues["font-faces"]);
-            headerQueue.push({ output: "\n" });
-            headerQueue.push({ output: ":root {\n\t" });
-            headerQueue.push(...this.queues["root-properties"]
-                .map(wr => ({ ...wr, output: wr.output.replaceAll("\n", "\n\t") })));
+            headerQueue.push({ output: '\n' });
+            headerQueue.push(...this.queues['property-definitions']);
+            headerQueue.push({ output: '\n' });
+            headerQueue.push(...this.queues['font-faces']);
+            headerQueue.push({ output: '\n' });
+            headerQueue.push({ output: ':root {\n\t' });
+            headerQueue.push(...this.queues['root-properties']
+                .map(wr => ({ ...wr, output: wr.output.replaceAll('\n', '\n\t') })));
             headerQueue.at(-1).output = headerQueue.at(-1).output.slice(0, -1);
-            headerQueue.push({ output: "\n\t" });
-            headerQueue.push(...this.queues["root-styles"]
-                .map(wr => ({ ...wr, output: wr.output.replaceAll("\n", "\n\t") })));
+            headerQueue.push({ output: '\n\t' });
+            headerQueue.push(...this.queues['root-styles']
+                .map(wr => ({ ...wr, output: wr.output.replaceAll('\n', '\n\t') })));
             headerQueue.at(-1).output = headerQueue.at(-1).output.slice(0, -1);
-            headerQueue.push({ output: "}\n\n" });
+            headerQueue.push({ output: '}\n\n' });
             this.outputQueue.unshift(...headerQueue);
-            if (this.currentSection !== "default")
-                this.currentSection = "default";
-            this.outputQueue.push({ output: "\n" });
-            this.outputQueue.push(...this.queues["selects"]);
-            this.outputQueue.push({ output: "\n" });
-            this.outputQueue.push(...this.queues["view-transitions"]);
-            this.outputQueue.push({ output: "\n" });
+            if (this.currentSection !== 'default')
+                this.currentSection = 'default';
+            this.outputQueue.push({ output: '\n' });
+            this.outputQueue.push(...this.queues['selects']);
+            this.outputQueue.push({ output: '\n' });
+            this.outputQueue.push(...this.queues['view-transitions']);
+            this.outputQueue.push({ output: '\n' });
             this.outputQueue.push(...this.queues.animations);
             this.write(`\n/*# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())} */`);
         }
@@ -290,7 +290,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         alreadyEmitted.length = 0;
         for (let i = properties.length - 1; i >= 0; i--) {
             const property = properties[i];
-            const propertyId = `${property.isCustomProperty ? "$" : ""}${property.property.value}`;
+            const propertyId = `${property.isCustomProperty ? '$' : ''}${property.property.value}`;
             if (alreadyEmitted.includes(propertyId)) {
                 newProperties ??= properties.slice(i + 1);
                 continue;

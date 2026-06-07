@@ -17,10 +17,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeBlockStartOptional_1 = __importDefault(require("./consumeBlockStartOptional"));
     const consumeWhiteSpaceOptional_1 = __importDefault(require("./consumeWhiteSpaceOptional"));
     async function consumeBody(reader, type, initialiserOrData, initialiserOrSingleLineOnly, singleLineOnly) {
-        const data = typeof initialiserOrData === "function" ? undefined : initialiserOrData;
-        const initialiser = typeof initialiserOrData === "function" ? initialiserOrData : initialiserOrSingleLineOnly;
+        const data = typeof initialiserOrData === 'function' ? undefined : initialiserOrData;
+        const initialiser = typeof initialiserOrData === 'function' ? initialiserOrData : initialiserOrSingleLineOnly;
         singleLineOnly ||= initialiserOrSingleLineOnly === true ? true : undefined;
-        const context = type === "inherit" ? reader.context : { type, data };
+        const context = type === 'inherit' ? reader.context : { type, data };
         (0, assertNotWhiteSpaceAndNewLine_1.default)(reader);
         const multiline = !singleLineOnly && (0, consumeBlockStartOptional_1.default)(reader);
         const whitespace = multiline || (0, consumeWhiteSpaceOptional_1.default)(reader);
@@ -28,8 +28,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return {
                 content: [],
             };
-        if (reader.peek("\r\n", "\n"))
-            throw reader.error(reader.i - reader.getColumnNumber(), "Unexpected indentation on empty line");
+        if (reader.peek('\r\n', '\n'))
+            throw reader.error(reader.i - reader.getColumnNumber(), 'Unexpected indentation on empty line');
         const sub = reader.sub(multiline, context.type, context.data);
         initialiser?.(sub);
         const consumer = BodyRegistry_1.default[context.type];

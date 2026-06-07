@@ -1,14 +1,14 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader";
-import type { ChiriExpressionOperand } from "../expression/consumeExpression";
-import type { ChiriMacroBlock } from "./MacroConstruct";
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader';
+import type { ChiriExpressionOperand } from '../expression/consumeExpression';
+import type { ChiriMacroBlock } from './MacroConstruct';
 export interface ChiriIf extends ChiriMacroBlock {
-    type: "if" | "elseif";
+    type: 'if' | 'elseif';
     condition: ChiriExpressionOperand;
     content: ChiriStatement[];
     position: ChiriPosition;
 }
 export interface ChiriElse extends ChiriMacroBlock {
-    type: "else";
+    type: 'else';
     content: ChiriStatement[];
     position: ChiriPosition;
 }

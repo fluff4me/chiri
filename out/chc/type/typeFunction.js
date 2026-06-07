@@ -16,7 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const getFunctionParameters_1 = __importDefault(require("../util/getFunctionParameters"));
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
-    const TYPE_FUNCTION = ChiriType_1.ChiriType.of("function", "*");
+    const TYPE_FUNCTION = ChiriType_1.ChiriType.of('function', '*');
     exports.default = (0, TypeDefinition_1.default)({
         type: TYPE_FUNCTION,
         stringable: true,
@@ -44,9 +44,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
             const parameterTypes = (0, getFunctionParameters_1.default)(fn).map(param => param.valueType);
             return {
-                type: "literal",
-                subType: "function",
-                valueType: ChiriType_1.ChiriType.of("function", ...parameterTypes, fn.returnType),
+                type: 'literal',
+                subType: 'function',
+                valueType: ChiriType_1.ChiriType.of('function', ...parameterTypes, fn.returnType),
                 name: name,
                 position: name.position,
             };

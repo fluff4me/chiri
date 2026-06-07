@@ -20,21 +20,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const position = reader.getPosition();
         const e = reader.i;
         const result = _1.default
-            ?? consumePseudoType(reader, "view-transition", "view-transition!old", "view-transition!new", "view-transition!image-pair")
-            ?? consumePseudoType(reader, "view-transition-class", "view-transition-class!old", "view-transition-class!new", "view-transition-class!group", "view-transition-class!image-pair")
-            ?? consumePseudoType(reader, "pseudo", "before", "after", "view-transition", "backdrop", "range-thumb", "range-track", "placeholder", "selection", "details-content", "swatch-wrapper", "swatch", "marker");
+            ?? consumePseudoType(reader, 'view-transition', 'view-transition!old', 'view-transition!new', 'view-transition!image-pair')
+            ?? consumePseudoType(reader, 'view-transition-class', 'view-transition-class!old', 'view-transition-class!new', 'view-transition-class!group', 'view-transition-class!image-pair')
+            ?? consumePseudoType(reader, 'pseudo', 'before', 'after', 'view-transition', 'backdrop', 'range-thumb', 'range-track', 'placeholder', 'selection', 'details-content', 'swatch-wrapper', 'swatch', 'marker');
         if (!result)
             return undefined;
         const duplicates = new Set(result.pseudos.map(e => e.value));
         if (result.pseudos.length > 2 || duplicates.size !== result.pseudos.length)
-            throw reader.error(e, "Duplicate pseudoelement selector");
-        reader.consume(":");
+            throw reader.error(e, 'Duplicate pseudoelement selector');
+        reader.consume(':');
         return {
-            type: "component",
+            type: 'component',
             subType: result.type,
             spread: result.spread,
             pseudos: result.pseudos,
-            ...await (0, consumeBody_1.default)(reader, "pseudo"),
+            ...await (0, consumeBody_1.default)(reader, 'pseudo'),
             position,
         };
     };
@@ -43,7 +43,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         let prefix;
         const results = [];
         do {
-            const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional("@", "&@");
+            const thisPrefix = prefix ? reader.consumeOptional(prefix) : reader.consumeOptional('@', '&@');
             if (!thisPrefix)
                 break;
             prefix = thisPrefix;
@@ -53,14 +53,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 return undefined;
             }
             results.push(word);
-        } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
+        } while (reader.consumeOptional(',') && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
         if (!results.length) {
             reader.restorePosition(restore);
             return undefined;
         }
         return {
             type,
-            spread: prefix === "&@",
+            spread: prefix === '&@',
             pseudos: results,
         };
     }

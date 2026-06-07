@@ -1,16 +1,16 @@
-import type { ChiriAST, ChiriPosition } from "../read/ChiriReader";
-import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional";
-import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration";
-import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration";
-import { ChiriType } from "../type/ChiriType";
-import ChiriTypeManager from "../type/ChiriTypeManager";
-import type { Value } from "../util/resolveExpression";
-import type { ResolvedMixin } from "./CSSWriter";
-import CSSWriter from "./CSSWriter";
-import DTSWriter from "./DTSWriter";
-import ESWriter from "./ESWriter";
-import type Writer from "./Writer";
-interface PreRegisteredMixin extends Omit<ResolvedMixin, "index"> {
+import type { ChiriAST, ChiriPosition } from '../read/ChiriReader';
+import type { ChiriFunctionCall } from '../read/consume/expression/consumeFunctionCallOptional';
+import type { ChiriFunction } from '../read/consume/macro/macroFunctionDeclaration';
+import type { ChiriMacro } from '../read/consume/macro/macroMacroDeclaration';
+import { ChiriType } from '../type/ChiriType';
+import ChiriTypeManager from '../type/ChiriTypeManager';
+import type { Value } from '../util/resolveExpression';
+import type { ResolvedMixin } from './CSSWriter';
+import CSSWriter from './CSSWriter';
+import DTSWriter from './DTSWriter';
+import ESWriter from './ESWriter';
+import type Writer from './Writer';
+interface PreRegisteredMixin extends Omit<ResolvedMixin, 'index'> {
     spread?: true;
     children?: PreRegisteredMixin[];
     used?: true;

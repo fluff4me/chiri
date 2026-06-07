@@ -22,28 +22,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.default = async (reader) => {
         const position = reader.getPosition();
         const at = consumeKeyframeAt(reader);
-        reader.consume(":");
+        reader.consume(':');
         return {
-            type: "keyframe",
+            type: 'keyframe',
             at,
-            ...await (0, consumeBody_1.default)(reader, "keyframe"),
+            ...await (0, consumeBody_1.default)(reader, 'keyframe'),
             position,
         };
     };
     function consumeKeyframeAt(reader) {
-        const keyword = (0, consumeWordOptional_1.default)(reader, "from", "to");
+        const keyword = (0, consumeWordOptional_1.default)(reader, 'from', 'to');
         switch (keyword?.value) {
-            case "from": return (0, makeLiteralDec_1.default)(0);
-            case "to": return (0, makeLiteralDec_1.default)(100);
+            case 'from': return (0, makeLiteralDec_1.default)(0);
+            case 'to': return (0, makeLiteralDec_1.default)(100);
         }
         const dec = (0, consumeDecimalOptional_1.default)(reader) ?? (0, consumeUnsignedIntegerOptional_1.default)(reader);
         if (dec) {
-            reader.consume("%");
+            reader.consume('%');
             return dec;
         }
-        reader.consume("#{");
+        reader.consume('#{');
         const expr = consumeExpression_1.default.inline(reader, typeDec_1.default.type);
-        reader.consume("}");
+        reader.consume('}');
         return expr;
     }
 });

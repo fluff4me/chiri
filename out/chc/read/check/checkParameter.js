@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const savedPosition = reader.savePosition();
         if (!(0, consumeWordOptional_1.default)(reader))
             return false;
-        const result = reader.consumeOptional("=", "\r\n", " ");
+        const result = reader.consumeOptional('=', '\r\n', ' ');
         reader.restorePosition(savedPosition);
         return result;
     };

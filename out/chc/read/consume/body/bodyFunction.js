@@ -15,7 +15,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const _1 = __importDefault(require("../../../util/_"));
     const macroReturn_1 = __importDefault(require("../macro/macroReturn"));
     const BodyConsumer_1 = __importDefault(require("./BodyConsumer"));
-    exports.default = (0, BodyConsumer_1.default)("function", async (reader) => _1.default
+    exports.default = (0, BodyConsumer_1.default)('function', async (reader) => _1.default
         ?? await macroReturn_1.default.consumeOptional(reader)
         ?? undefined);
 });

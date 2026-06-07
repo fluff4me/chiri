@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const consumeBody_1 = __importDefault(require("../consumeBody"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("do")
+    exports.default = (0, MacroConstruct_1.default)('do')
         .consume(async ({ reader, position }) => {
-        reader.consume(":");
-        const body = await (0, consumeBody_1.default)(reader, "inherit");
+        reader.consume(':');
+        const body = await (0, consumeBody_1.default)(reader, 'inherit');
         return {
-            type: "do",
+            type: 'do',
             isBlock: true,
             content: body.content,
             position,

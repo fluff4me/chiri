@@ -15,12 +15,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWhiteSpaceOptional_1 = __importDefault(require("../consumeWhiteSpaceOptional"));
     const consumeWordInterpolated_1 = __importDefault(require("../consumeWordInterpolated"));
     const BodyConsumer_1 = __importDefault(require("./BodyConsumer"));
-    exports.default = (0, BodyConsumer_1.default)("selectors", reader => {
+    exports.default = (0, BodyConsumer_1.default)('selectors', reader => {
         const selectors = [];
         do {
-            reader.consume(".");
+            reader.consume('.');
             selectors.push((0, consumeWordInterpolated_1.default)(reader));
-        } while (reader.consumeOptional(",") && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
+        } while (reader.consumeOptional(',') && ((0, consumeWhiteSpaceOptional_1.default)(reader) || true));
         return selectors;
     });
 });

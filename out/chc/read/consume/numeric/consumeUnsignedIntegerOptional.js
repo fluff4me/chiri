@@ -12,7 +12,7 @@
     const ChiriType_1 = require("../../../type/ChiriType");
     exports.default = (reader) => {
         const i = reader.i;
-        let intStr = "";
+        let intStr = '';
         for (; reader.i < reader.input.length; reader.i++)
             if (reader.isDigit())
                 intStr += reader.input[reader.i];
@@ -21,9 +21,9 @@
         if (!intStr.length)
             return undefined;
         return {
-            type: "literal",
-            subType: "uint",
-            valueType: ChiriType_1.ChiriType.of("uint"),
+            type: 'literal',
+            subType: 'uint',
+            valueType: ChiriType_1.ChiriType.of('uint'),
             value: intStr,
             position: reader.getPosition(i),
         };

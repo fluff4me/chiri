@@ -1,6 +1,6 @@
-import type { ChiriStatement } from "../../ChiriReader";
-import type BodyConsumer from "./BodyConsumer";
-import type { ChiriContextType } from "./Contexts";
+import type { ChiriStatement } from '../../ChiriReader';
+import type BodyConsumer from './BodyConsumer';
+import type { ChiriContextType } from './Contexts';
 declare const BodyRegistry: {
     function: BodyConsumer.Sync<Promise<ChiriStatement | undefined>, []>;
     inherit: undefined;
@@ -11,7 +11,7 @@ declare const BodyRegistry: {
     state: undefined;
     pseudo: undefined;
     keyframe: undefined;
-    "property-name": BodyConsumer.Sync<import("../consumeWordInterpolatedOptional").ChiriWordInterpolated, []>;
+    'property-name': BodyConsumer.Sync<import("../consumeWordInterpolatedOptional").ChiriWordInterpolated, []>;
     paths: BodyConsumer.Sync<import("../consumePathOptional").ChiriPath, []>;
     text: BodyConsumer.Sync<import("../consumeValueText").ChiriValueText, []>;
     keyframes: BodyConsumer.Sync<Promise<import("../consumeKeyframe").ChiriKeyframe>, []>;

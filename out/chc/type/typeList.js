@@ -20,7 +20,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeRangeOptional_1 = __importDefault(require("../read/consume/expression/consumeRangeOptional"));
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
-    const TYPE_LIST = ChiriType_1.ChiriType.of("list", "*");
+    const TYPE_LIST = ChiriType_1.ChiriType.of('list', '*');
     exports.default = (0, TypeDefinition_1.default)({
         type: TYPE_LIST,
         stringable: true,
@@ -31,16 +31,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     });
     function consumeLiteralList(reader) {
         const position = reader.getPosition();
-        if (!reader.consumeOptional("["))
+        if (!reader.consumeOptional('['))
             return undefined;
         const expressions = [];
         const multiline = (0, consumeBlockStartOptional_1.default)(reader);
         if (!multiline) {
-            if (!reader.peek("\r\n", "\n")) {
+            if (!reader.peek('\r\n', '\n')) {
                 (0, consumeWhiteSpaceOptional_1.default)(reader);
                 do
                     expressions.push(consumeOptionalSpread(reader) ?? consumeExpression_1.default.inline(reader));
-                while (reader.consumeOptional(", "));
+                while (reader.consumeOptional(', '));
             }
         }
         else {
@@ -49,28 +49,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             while ((0, consumeNewBlockLineOptional_1.default)(reader));
             (0, consumeBlockEnd_1.default)(reader);
         }
-        const valueTypes = expressions.map(expr => expr.type === "list-spread" ? expr.value.valueType.generics[0] : expr.valueType);
+        const valueTypes = expressions.map(expr => expr.type === 'list-spread' ? expr.value.valueType.generics[0] : expr.valueType);
         const stringifiedTypes = valueTypes.map(type => ChiriType_1.ChiriType.stringify(type));
         if (new Set(stringifiedTypes).size > 1 && !reader.types.isEveryType(valueTypes))
-            throw reader.error(`Lists can only contain a single type. This list contains:\n  - ${stringifiedTypes.join("\n  - ")}`);
+            throw reader.error(`Lists can only contain a single type. This list contains:\n  - ${stringifiedTypes.join('\n  - ')}`);
         if (!multiline) {
             (0, consumeWhiteSpaceOptional_1.default)(reader);
-            reader.consumeOptional("]");
+            reader.consumeOptional(']');
         }
         return {
-            type: "literal",
-            subType: "list",
-            valueType: ChiriType_1.ChiriType.of("list", valueTypes[0] ?? "*"),
+            type: 'literal',
+            subType: 'list',
+            valueType: ChiriType_1.ChiriType.of('list', valueTypes[0] ?? '*'),
             value: expressions,
             position,
         };
     }
     function consumeOptionalSpread(reader) {
         const position = reader.getPosition();
-        if (!reader.consumeOptional("..."))
+        if (!reader.consumeOptional('...'))
             return undefined;
         return {
-            type: "list-spread",
+            type: 'list-spread',
             value: consumeExpression_1.default.inline(reader, TYPE_LIST),
             position,
         };

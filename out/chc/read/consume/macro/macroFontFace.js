@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     Object.defineProperty(exports, "__esModule", { value: true });
     const typeString_1 = __importDefault(require("../../../type/typeString"));
     const MacroConstruct_1 = __importDefault(require("./MacroConstruct"));
-    exports.default = (0, MacroConstruct_1.default)("font-face")
-        .parameter("family", typeString_1.default.type)
-        .body("mixin")
+    exports.default = (0, MacroConstruct_1.default)('font-face')
+        .parameter('family', typeString_1.default.type)
+        .body('mixin')
         .consume(({ assignments, body, position }) => {
         return {
-            type: "font-face",
+            type: 'font-face',
             family: assignments.family,
             content: body,
             position,

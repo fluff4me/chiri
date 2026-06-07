@@ -16,15 +16,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const ChiriType_1 = require("./ChiriType");
     const TypeDefinition_1 = __importDefault(require("./TypeDefinition"));
     exports.default = (0, TypeDefinition_1.default)({
-        type: ChiriType_1.ChiriType.of("bool"),
+        type: ChiriType_1.ChiriType.of('bool'),
         stringable: true,
         consumeOptionalConstructor: (reader) => {
-            const bool = (0, consumeWordOptional_1.default)(reader, "true", "false");
+            const bool = (0, consumeWordOptional_1.default)(reader, 'true', 'false');
             return !bool ? undefined : {
-                type: "literal",
-                subType: "bool",
-                valueType: ChiriType_1.ChiriType.of("bool"),
-                value: bool.value === "true" ? true : false,
+                type: 'literal',
+                subType: 'bool',
+                valueType: ChiriType_1.ChiriType.of('bool'),
+                value: bool.value === 'true' ? true : false,
                 position: bool.position,
             };
         },
