@@ -16,7 +16,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const consumeWordInterpolatedOptional_1 = __importDefault(require("./consumeWordInterpolatedOptional"));
     exports.default = (reader) => {
         const position = reader.getPosition();
-        const start = reader.i;
         const operator = reader.consumeOptional('%', '..%');
         if (!operator)
             return undefined;

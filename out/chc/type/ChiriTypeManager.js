@@ -41,13 +41,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     const isNumeric = (type) => numericTypes.includes(type);
     const binaryNumericOperators = ['**', '+', '-', '*', '/', '%', '==', '!=', '<=', '>=', '<', '>'];
     const unaryNumericOperators = ['+', '-'];
-    const binaryBitwiseOperators = ['&', '|', '^', '<<', '>>', '>>>'];
-    const unaryBitwiseOperators = ['~'];
+    const BINARY_BITWISE_OPERATORS = ['&', '|', '^', '<<', '>>', '>>>'];
+    const UNARY_BITWISE_OPERATORS = ['~'];
     const binaryBooleanOperators = ['||', '&&', '==', '!='];
     const unaryBooleanOperators = ['!'];
     const binaryStringOperators = ['.', 'x', '==', '!='];
-    const binaryOtherOperators = ['is'];
-    const unaryOtherOperators = ['exists'];
+    const BINARY_OTHER_OPERATORS = ['is'];
+    const UNARY_OTHER_OPERATORS = ['exists'];
     const minNumericPrecision2 = (typeA, typeB) => (typeA === 'dec' || typeB === 'dec') ? 'dec'
         : (typeA === 'int' || typeB === 'int') ? 'int'
             : 'uint';

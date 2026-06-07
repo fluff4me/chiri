@@ -167,9 +167,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             case '!=':
                                 return operandA !== operandB;
                             case '||':
-                                return operandA || operandB;
+                                return (operandA || operandB);
                             case '&&':
-                                return operandA && operandB;
+                                return (operandA && operandB);
                             case '|':
                                 return operandA | operandB;
                             case '&':
@@ -189,7 +189,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                             case 'x':
                                 return `${operandA}`.repeat(+operandB || 1);
                             case '??':
-                                return operandA ?? operandB;
+                                return (operandA ?? operandB);
                             case '<<':
                                 return operandA << operandB;
                             case '>>':

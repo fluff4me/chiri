@@ -48,13 +48,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         dotenv_1.default.config();
     Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH || 4);
     if (process.env.CHIRI_ENV === 'dev')
-        // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+        // eslint-disable-next-line @typescript-eslint/consistent-type-imports, @typescript-eslint/no-require-imports
         require('source-map-support').install();
     if (process.env.CHIRI_INSPECT)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         require('inspector').open(+process.env.CHIRI_INSPECT_PORT || undefined, process.env.CHIRI_INSPECT_HOST);
     if (args_1.default.v) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
         console.log(require(path_1.default.join(constants_1.PACKAGE_ROOT, 'package.json')).version);
         process.exit();
     }
@@ -106,7 +106,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         for (const key of Object.keys(require.cache))
             if (key.startsWith(constants_1.CHC_ROOT))
                 delete require.cache[key];
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
         const rerequire = (path) => require(path).default;
         const ChiriReader = rerequire('./chc/read/ChiriReader.js');
         const reader = await ChiriReader.load(filename, undefined, watcher);

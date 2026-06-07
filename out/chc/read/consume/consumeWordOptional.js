@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.default = default_1;
     const consumeWord_1 = __importDefault(require("./consumeWord"));
-    exports.default = (reader, ...expectedWords) => {
+    function default_1(reader, ...expectedWords) {
         if (expectedWords.length) {
             const restore = reader.savePosition();
             const e = reader.i;
@@ -29,6 +30,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             };
         }
         return !reader.isLetter() ? undefined : (0, consumeWord_1.default)(reader);
-    };
+    }
 });
 //# sourceMappingURL=consumeWordOptional.js.map

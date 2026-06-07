@@ -17,7 +17,7 @@ export declare namespace QueuedWrite {
 export default class Writer {
     #private;
     readonly config: ChiriWriteConfig;
-    static writeBlocks(writers: Writer[], inside: () => any): void;
+    static writeBlocks(writers: Writer[], inside: () => unknown): void;
     readonly dest: string;
     private output;
     protected outputQueue: QueuedWrite[];

@@ -167,9 +167,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             //#region Rule End
             if (mixin.specialState)
                 this.writeLineEndBlock('}');
-            for (const query of mixin.containerQueries ?? [])
+            for (const _ of mixin.containerQueries ?? [])
                 this.writeLineEndBlock('}');
-            for (const query of mixin.mediaQueries ?? [])
+            for (const _ of mixin.mediaQueries ?? [])
                 this.writeLineEndBlock('}');
             //#endregion
             ////////////////////////////////////

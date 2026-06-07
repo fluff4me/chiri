@@ -62,7 +62,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     };
     const typeNames = Object.keys(customPropertyDefinitionTypes);
     exports.default = async (reader) => {
-        const e = reader.i;
         if (!reader.isLetter() && reader.input[reader.i] !== '$' && reader.input[reader.i] !== '#' && reader.input[reader.i] !== '-')
             return undefined;
         if (reader.input[reader.i] === '#' && reader.input[reader.i + 1] !== '{')
@@ -92,7 +91,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }];
         }
         else {
-            const position = reader.getPosition();
             const textBody = await (0, consumeBody_1.default)(reader, 'text');
             value = textBody.content;
         }

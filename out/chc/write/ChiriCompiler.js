@@ -132,7 +132,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             }
         }
         async function writeFiles() {
-            return Promise.all(writers.map(writer => writer.writeFile()));
+            await Promise.all(writers.map(writer => writer.writeFile()));
         }
         ////////////////////////////////////
         //#region Scope
@@ -208,9 +208,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     case 'function-call':
                     case 'macro-use':
                         return i + 1;
-                    default: {
-                        const assertNever = block;
-                    }
+                    default: throw new Error(`Unexpected block type ${block.type ?? 'unknown'}`);
                 }
             }
         }
@@ -1272,7 +1270,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             for (const statement of statements) {
                 if (blocks.length - 1 > blockIndex)
                     throw failedToExitBlocksError(blockIndex);
-                if (block && blockBroken(block) || blockContinuing())
+                if ((block && blockBroken(block)) || blockContinuing())
                     break;
                 const macroResult = compileMacros(statement, contextCompiler);
                 if (macroResult) {
@@ -1286,7 +1284,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 }
                 if (blocks.length - 1 > blockIndex)
                     throw failedToExitBlocksError(blockIndex);
-                if (block && blockBroken(block) || blockContinuing())
+                if ((block && blockBroken(block)) || blockContinuing())
                     break;
                 const result = contextCompiler(statement);
                 if (result !== undefined) {
@@ -1363,15 +1361,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 ],
                 position: typeof newSegment === 'string' ? constants_1.INTERNAL_POSITION : newSegment.position,
             }, restrictCharacters)));
-        }
-        function mergeText(position, ...texts) {
-            return {
-                type: 'text',
-                subType: 'text',
-                valueType: ChiriType_1.ChiriType.of('string'),
-                content: texts.flatMap(text => text.content),
-                position,
-            };
         }
         function root() {
             return scopes[0];

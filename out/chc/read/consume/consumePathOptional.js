@@ -24,7 +24,7 @@
             && c !== 124 // |
             && c !== 10 // \n
             && c !== 13, // \r
-        darwin: (c) => true // HFS, HFS+ 
+        darwin: (c) => true // HFS, HFS+
             && c !== 58 // :
             && c !== 47 // /
             && c !== 10 // \n
