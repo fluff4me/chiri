@@ -1,7 +1,7 @@
-import { ChiriType } from "./ChiriType"
-import TypeDefinition from "./TypeDefinition"
+import { ChiriType } from './ChiriType'
+import TypeDefinition from './TypeDefinition'
 
 export default TypeDefinition({
-	type: ChiriType.of("raw"),
+	type: ChiriType.of('raw'),
 	stringable: true,
 })

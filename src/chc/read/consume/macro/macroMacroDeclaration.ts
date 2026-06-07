@@ -1,17 +1,15 @@
-
-
-import type { ChiriMacroBase } from "./MacroConstruct"
-import MacroConstruct from "./MacroConstruct"
+import type { ChiriMacroBase } from './MacroConstruct'
+import MacroConstruct from './MacroConstruct'
 
 export interface ChiriMacro extends ChiriMacroBase {
-	type: "macro"
+	type: 'macro'
 }
 
-export default MacroConstruct("macro")
+export default MacroConstruct('macro')
 	.named()
-	.body("inherit")
+	.body('inherit')
 	.consume(({ body, name, position }): ChiriMacro | undefined => ({
-		type: "macro",
+		type: 'macro',
 		name,
 		content: body,
 		position,

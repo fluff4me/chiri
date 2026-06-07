@@ -1,19 +1,19 @@
-import { INTERNAL_POSITION } from "../../../../constants"
-import type { ChiriType } from "../../../type/ChiriType"
-import type { PromiseOr } from "../../../util/Type"
-import type ChiriReader from "../../ChiriReader"
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
-import type { ContextStatement } from "../body/BodyRegistry"
-import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData, ResolveContextDataTuple } from "../body/Contexts"
-import Contexts from "../body/Contexts"
-import consumeBodyOptional from "../consumeBodyOptional"
-import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
-import consumeMacroParameters from "../consumeMacroParameters"
-import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
-import type { ChiriWord } from "../consumeWord"
-import type { ChiriWordInterpolated } from "../consumeWordInterpolatedOptional"
-import consumeWordOptional from "../consumeWordOptional"
-import type { ChiriExpressionOperand } from "../expression/consumeExpression"
+import { INTERNAL_POSITION } from '../../../../constants'
+import type { ChiriType } from '../../../type/ChiriType'
+import type { PromiseOr } from '../../../util/Type'
+import type ChiriReader from '../../ChiriReader'
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader'
+import type { ContextStatement } from '../body/BodyRegistry'
+import type { ChiriContextSpreadable, ChiriContextType, ChiriContextTypeWithData, ChiriContextTypeWithoutData, ContextData, ResolveContextDataTuple } from '../body/Contexts'
+import Contexts from '../body/Contexts'
+import consumeBodyOptional from '../consumeBodyOptional'
+import type { ChiriCompilerVariable } from '../consumeCompilerVariableOptional'
+import consumeMacroParameters from '../consumeMacroParameters'
+import consumeWhiteSpaceOptional from '../consumeWhiteSpaceOptional'
+import type { ChiriWord } from '../consumeWord'
+import type { ChiriWordInterpolated } from '../consumeWordInterpolatedOptional'
+import consumeWordOptional from '../consumeWordOptional'
+import type { ChiriExpressionOperand } from '../expression/consumeExpression'
 
 export interface ChiriMacroBase {
 	type: string
@@ -28,7 +28,7 @@ export interface ChiriMacroBlock {
 }
 
 export interface ChiriMacroInternal<T> extends ChiriMacroBase {
-	type: "macro:internal"
+	type: 'macro:internal'
 	consumeOptional (reader: ChiriReader): Promise<T | undefined>
 	consumeOptional<CONTEXT extends ChiriContextType> (reader: ChiriReader, context: CONTEXT, ...data: ResolveContextDataTuple<CONTEXT>): Promise<T | undefined>
 	consumeOptional (reader: ChiriReader, ...context: ChiriContextSpreadable): Promise<T | undefined>
@@ -39,15 +39,15 @@ export interface ChiriMacroInternalConsumerInfo<NAMED extends NameType = undefin
 	assignments: Record<string, ChiriExpressionOperand>
 	body: (BODY extends null ? never : BODY)[]
 	optionalBody: (BODY extends null ? never : BODY)[]
-	name: NAMED extends "plain" ? ChiriWord : NAMED extends "interpolated" ? ChiriWordInterpolated : undefined
+	name: NAMED extends 'plain' ? ChiriWord : NAMED extends 'interpolated' ? ChiriWordInterpolated : undefined
 	extra: EXTRA
 	position: ChiriPosition
 	start: number
 }
 
-type NameType = "plain" | "interpolated" | undefined
+type NameType = 'plain' | 'interpolated' | undefined
 export type ChiriMacroInternalBodyContextSupplierInfo<NAMED extends NameType = undefined, EXTRA = never> =
-	Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, "body" | "optionalBody">
+	Omit<ChiriMacroInternalConsumerInfo<NAMED, null, EXTRA>, 'body' | 'optionalBody'>
 
 export type ChiriMacroInternalParametersConsumer<T> = (reader: ChiriReader) => PromiseOr<T>
 
@@ -57,8 +57,8 @@ export interface ChiriMacroInternalFactory<NAMED extends NameType = undefined, B
 	 * Note: This does not consume white space for you, in case the parameters are optional
 	 */
 	consumeParameters<T> (consumer: ChiriMacroInternalParametersConsumer<T>): ChiriMacroInternalFactory<NAMED, BODY, T>
-	named (): ChiriMacroInternalFactory<"plain", BODY>
-	named (allowInterpolations: true): ChiriMacroInternalFactory<"interpolated", BODY>
+	named (): ChiriMacroInternalFactory<'plain', BODY>
+	named (allowInterpolations: true): ChiriMacroInternalFactory<'interpolated', BODY>
 	/** Require a parameter */
 	parameter (name: string, type: ChiriType): this
 	/** Add an optional parameter */
@@ -91,10 +91,10 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 		},
 		parameter (name, type, ...value: [] | [ChiriExpressionOperand | undefined]) {
 			(value.length ? parameters : requiredParameters).push({
-				type: "variable",
-				name: { type: "word", value: name, position: INTERNAL_POSITION },
+				type: 'variable',
+				name: { type: 'word', value: name, position: INTERNAL_POSITION },
 				valueType: type,
-				assignment: !value.length ? undefined : "??=",
+				assignment: !value.length ? undefined : '??=',
 				position: INTERNAL_POSITION,
 				expression: value[0],
 			})
@@ -106,13 +106,13 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 		},
 		consume (consumer) {
 			const macro: ChiriMacroInternal<any> = {
-				type: "macro:internal",
-				name: { type: "word", value: macroName, position: INTERNAL_POSITION },
+				type: 'macro:internal',
+				name: { type: 'word', value: macroName, position: INTERNAL_POSITION },
 				position: INTERNAL_POSITION,
 				content: [...requiredParameters, ...parameters],
 				async consumeOptional (reader: ChiriReader, ...contextTuple: any[]) {
 					const [useContextType, useContextData] = contextTuple as ChiriContextSpreadable
-					const useContext = !useContextType || useContextType === "inherit" ? reader.context : { type: useContextType, data: useContextData }
+					const useContext = !useContextType || useContextType === 'inherit' ? reader.context : { type: useContextType, data: useContextData }
 
 					const position = reader.getPosition()
 					const savedPosition = reader.savePosition()
@@ -125,17 +125,17 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 
 					let name: ChiriWord | undefined
 					if (named) {
-						if (reader.peek("!")) {
+						if (reader.peek('!')) {
 							reader.restorePosition(savedPosition)
 							return undefined
 						}
 
 						if (!consumeWhiteSpaceOptional(reader))
-							throw reader.error("Expected declaration name")
+							throw reader.error('Expected declaration name')
 
 						name = consumeWordOptional(reader)
 						if (!name)
-							throw reader.error("Expected declaration name")
+							throw reader.error('Expected declaration name')
 					}
 
 					const extra = await parametersConsumer?.(reader) as never
@@ -151,9 +151,9 @@ export default function (macroName: string): ChiriMacroInternalFactory {
 					}
 
 					const [contextType, contextData] = bodyContext ?? []
-					const context = !contextType ? undefined : contextType === "inherit" ? reader.context : { type: contextType, data: contextData?.(info) }
-					const body = context ? await consumeBodyOptional(reader, ...[context.type, context.data] as ["generic", undefined]) : []
-					Object.defineProperty(info, "body", {
+					const context = !contextType ? undefined : contextType === 'inherit' ? reader.context : { type: contextType, data: contextData?.(info) }
+					const body = context ? await consumeBodyOptional(reader, ...[context.type, context.data] as ['generic', undefined]) : []
+					Object.defineProperty(info, 'body', {
 						get: () => {
 							if (!body)
 								throw reader.error(`Expected body containing ${contextType}`)

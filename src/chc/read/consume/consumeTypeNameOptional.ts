@@ -1,7 +1,5 @@
-
-
-import type ChiriReader from "../ChiriReader"
-import consumeWordOptional from "./consumeWordOptional"
+import type ChiriReader from '../ChiriReader'
+import consumeWordOptional from './consumeWordOptional'
 
 export default (reader: ChiriReader, genericDeclaration = false, throwOnInvalidName?: true) => {
 	const e = reader.i

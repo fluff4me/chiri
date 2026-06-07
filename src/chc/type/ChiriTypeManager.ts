@@ -1,22 +1,20 @@
-
-
-import ansi from "../../ansi"
-import type ChiriReader from "../read/ChiriReader"
-import type { Value } from "../util/resolveExpression"
-import type ChiriCompiler from "../write/ChiriCompiler"
-import type { ChiriTypeGeneric } from "./ChiriType"
-import { ChiriType } from "./ChiriType"
-import typeBody from "./typeBody"
-import typeBool from "./typeBool"
-import typeDec from "./typeDec"
-import type TypeDefinition from "./TypeDefinition"
-import typeFunction from "./typeFunction"
-import typeInt from "./typeInt"
-import typeList from "./typeList"
-import typeRaw from "./typeRaw"
-import typeRecord from "./typeRecord"
-import typeString from "./typeString"
-import typeUint from "./typeUint"
+import ansi from '../../ansi'
+import type ChiriReader from '../read/ChiriReader'
+import type { Value } from '../util/resolveExpression'
+import type ChiriCompiler from '../write/ChiriCompiler'
+import type { ChiriTypeGeneric } from './ChiriType'
+import { ChiriType } from './ChiriType'
+import typeBody from './typeBody'
+import typeBool from './typeBool'
+import typeDec from './typeDec'
+import type TypeDefinition from './TypeDefinition'
+import typeFunction from './typeFunction'
+import typeInt from './typeInt'
+import typeList from './typeList'
+import typeRaw from './typeRaw'
+import typeRecord from './typeRecord'
+import typeString from './typeString'
+import typeUint from './typeUint'
 
 const typesList = [
 	typeString,
@@ -38,21 +36,21 @@ type TypeRegistry =
 
 const types = Object.fromEntries(typesList.map(typedef => [typedef.type.name.value, typedef])) as TypeRegistry
 
-const numericTypes = ["uint", "int", "dec"] as const
+const numericTypes = ['uint', 'int', 'dec'] as const
 type NumericType = (typeof numericTypes)[number]
 const isNumeric = (type: string) => numericTypes.includes(type as NumericType)
 
 type TypeName = keyof typeof types
 
-const binaryNumericOperators = ["**", "+", "-", "*", "/", "%", "==", "!=", "<=", ">=", "<", ">"] as const
-const unaryNumericOperators = ["+", "-"] as const
-const binaryBitwiseOperators = ["&", "|", "^", "<<", ">>", ">>>"] as const
-const unaryBitwiseOperators = ["~"] as const
-const binaryBooleanOperators = ["||", "&&", "==", "!="] as const
-const unaryBooleanOperators = ["!"] as const
-const binaryStringOperators = [".", "x", "==", "!="] as const
-const binaryOtherOperators = ["is"] as const
-const unaryOtherOperators = ["exists"] as const
+const binaryNumericOperators = ['**', '+', '-', '*', '/', '%', '==', '!=', '<=', '>=', '<', '>'] as const
+const unaryNumericOperators = ['+', '-'] as const
+const binaryBitwiseOperators = ['&', '|', '^', '<<', '>>', '>>>'] as const
+const unaryBitwiseOperators = ['~'] as const
+const binaryBooleanOperators = ['||', '&&', '==', '!='] as const
+const unaryBooleanOperators = ['!'] as const
+const binaryStringOperators = ['.', 'x', '==', '!='] as const
+const binaryOtherOperators = ['is'] as const
+const unaryOtherOperators = ['exists'] as const
 
 export type Operator =
 	| (typeof binaryNumericOperators)[number]
@@ -65,74 +63,74 @@ export type Operator =
 	| (typeof unaryOtherOperators)[number]
 	| (typeof binaryOtherOperators)[number]
 
-const minNumericPrecision2 = (typeA: string, typeB: string): "uint" | "int" | "dec" => (typeA === "dec" || typeB === "dec") ? "dec"
-	: (typeA === "int" || typeB === "int") ? "int"
-		: "uint"
+const minNumericPrecision2 = (typeA: string, typeB: string): 'uint' | 'int' | 'dec' => (typeA === 'dec' || typeB === 'dec') ? 'dec'
+	: (typeA === 'int' || typeB === 'int') ? 'int'
+		: 'uint'
 
-const minNumericPrecision = (...types: string[]) => types.reduce(minNumericPrecision2, "uint")
+const minNumericPrecision = (...types: string[]) => types.reduce(minNumericPrecision2, 'uint')
 
 const operatorResults: Record<Operator, string | ((typeA: string, typeB?: string) => string)> = {
-	"+": (a, b = a) => minNumericPrecision(a, b),
-	"-": (a, b = a) => minNumericPrecision("int", a, b),
-	"*": (a, b = a) => minNumericPrecision(a, b),
-	"/": "dec",
-	"%": (a, b = a) => minNumericPrecision(a, b),
-	"**": "dec",
-	"<=": "bool",
-	">=": "bool",
-	"<": "bool",
-	">": "bool",
-	"==": "bool",
-	"!=": "bool",
-	"||": "bool",
-	"&&": "bool",
-	"!": "bool",
-	"~": "int",
-	"&": "int",
-	"|": "int",
-	"^": "int",
-	"<<": "int",
-	">>": "int",
-	">>>": "int",
-	".": "string",
-	"x": "string",
-	"is": "bool",
-	"exists": "bool",
+	'+': (a, b = a) => minNumericPrecision(a, b),
+	'-': (a, b = a) => minNumericPrecision('int', a, b),
+	'*': (a, b = a) => minNumericPrecision(a, b),
+	'/': 'dec',
+	'%': (a, b = a) => minNumericPrecision(a, b),
+	'**': 'dec',
+	'<=': 'bool',
+	'>=': 'bool',
+	'<': 'bool',
+	'>': 'bool',
+	'==': 'bool',
+	'!=': 'bool',
+	'||': 'bool',
+	'&&': 'bool',
+	'!': 'bool',
+	'~': 'int',
+	'&': 'int',
+	'|': 'int',
+	'^': 'int',
+	'<<': 'int',
+	'>>': 'int',
+	'>>>': 'int',
+	'.': 'string',
+	'x': 'string',
+	'is': 'bool',
+	'exists': 'bool',
 }
 
 const operatorPrecedence = [
-	["||"],
-	["&&"],
-	["|"],
-	["^"],
-	["&"],
-	["==", "!="],
-	["<", "<=", ">", ">="],
-	["is"],
-	["<<", ">>", ">>>"],
-	["x"],
-	["."],
-	["+", "-"],
-	["*", "/", "%"],
-	["**"],
-	["!"],
-	["~"],
-	["exists"],
+	['||'],
+	['&&'],
+	['|'],
+	['^'],
+	['&'],
+	['==', '!='],
+	['<', '<=', '>', '>='],
+	['is'],
+	['<<', '>>', '>>>'],
+	['x'],
+	['.'],
+	['+', '-'],
+	['*', '/', '%'],
+	['**'],
+	['!'],
+	['~'],
+	['exists'],
 ] satisfies Operator[][]
 
 type VerifyHasAllOperators = { [KEY in (typeof operatorPrecedence)[number][number]]: true }[Operator]
 
 type BinaryCoercion = readonly [string, undefined] | readonly [undefined, string]
 const binaryOperatorOperandCoercion: Partial<Record<Operator, string | BinaryCoercion>> = {
-	".": "string",
+	'.': 'string',
 }
 const unaryOperatorOperandCoercion: Partial<Record<Operator, string>> = {
-	"+": "dec",
-	"-": "dec",
+	'+': 'dec',
+	'-': 'dec',
 }
 
 const operatorOperandBTypes: Partial<Record<Operator, string>> = {
-	"x": "uint",
+	x: 'uint',
 }
 
 type BinaryOperationData<DATA> = Record<string, Partial<Record<Operator, Record<string, DATA | undefined>>> | undefined>
@@ -153,7 +151,7 @@ export default class ChiriTypeManager {
 		const operatorsOfTypeA = this.binaryOperators[typeA] ??= {}
 		let instancesOfThisOperator = operatorsOfTypeA[operator] ??= {}
 		let result = output ?? operatorResults[operator]
-		result = typeof result === "function" ? result(typeA, typeB) : result
+		result = typeof result === 'function' ? result(typeA, typeB) : result
 		if (!result)
 			throw new Error(`Unable to determine output type of operation ${typeA}${operator}${typeB}`)
 
@@ -168,7 +166,7 @@ export default class ChiriTypeManager {
 		const operatorsOfTypeB = this.binaryOperators[typeB] ??= {}
 		instancesOfThisOperator = operatorsOfTypeB[operator] ??= {}
 		result = output ?? operatorResults[operator]
-		result = typeof result === "function" ? result(typeB, typeA) : result
+		result = typeof result === 'function' ? result(typeB, typeA) : result
 		if (!result)
 			throw new Error(`Unable to determine output type of operation ${typeB}${operator}${typeA}`)
 
@@ -181,7 +179,7 @@ export default class ChiriTypeManager {
 	registerUnaryOperator (operator: Operator, type: string, output?: string) {
 		const instancesOfThisOperator = this.unaryOperators[operator] ??= {}
 		let result = output ?? operatorResults[operator]
-		result = typeof result === "function" ? result(type) : result
+		result = typeof result === 'function' ? result(type) : result
 		if (!result)
 			throw new Error(`Unable to determine output type of operation ${operator}${type}`)
 
@@ -192,20 +190,20 @@ export default class ChiriTypeManager {
 	}
 
 	registerBinaryCoercion (operator: Operator, coercion: string | BinaryCoercion) {
-		const coercibleTypes = Object.keys(types).filter((type): type is Exclude<TypeName, "body"> => type !== "body")
+		const coercibleTypes = Object.keys(types).filter((type): type is Exclude<TypeName, 'body'> => type !== 'body')
 
 		const registerBinaryCoercion = (operandAType: string, operationsOfType: Record<string, string | undefined>) => {
-			if (typeof coercion === "string" || coercion[1]) {
+			if (typeof coercion === 'string' || coercion[1]) {
 				for (const operandBType of coercibleTypes) {
 					let result = operatorResults[operator]
-					result = typeof result === "function" ? result(operandAType, operandBType) : result
+					result = typeof result === 'function' ? result(operandAType, operandBType) : result
 					this.registerBinaryOperator(operandAType, operator, operandBType, result)
 					const coercionsA = this.binaryOperatorCoercion[operandAType] ??= {}
 					const operations = coercionsA[operator] ??= {}
 					operations[operandBType] = coercion
 				}
-
-			} else {
+			}
+ else {
 				for (const [operandBType, result] of Object.entries(operationsOfType)) {
 					this.registerBinaryOperator(operandAType, operator, operandBType, result)
 					const coercionsA = this.binaryOperatorCoercion[operandAType] ??= {}
@@ -215,14 +213,14 @@ export default class ChiriTypeManager {
 			}
 		}
 
-		if (typeof coercion === "string" || coercion[0]) {
+		if (typeof coercion === 'string' || coercion[0]) {
 			for (const operandAType of coercibleTypes) {
 				const operatorsOfTypeA = this.binaryOperators[operandAType] ??= {}
 				const instancesOfThisOperator = operatorsOfTypeA[operator] ??= {}
 				registerBinaryCoercion(operandAType, instancesOfThisOperator)
 			}
-
-		} else {
+		}
+ else {
 			for (const [operandAType, operators] of Object.entries(this.binaryOperators)) {
 				const existingOperation = operators![operator]
 				if (!existingOperation)
@@ -234,10 +232,10 @@ export default class ChiriTypeManager {
 	}
 
 	registerUnaryCoercion (operator: Operator, coercion: string) {
-		const coercibleTypes = Object.keys(types).filter((type): type is Exclude<TypeName, "body"> => type !== "body")
+		const coercibleTypes = Object.keys(types).filter((type): type is Exclude<TypeName, 'body'> => type !== 'body')
 		for (const operandType of coercibleTypes) {
 			let result = operatorResults[operator]
-			result = typeof result === "function" ? result(operandType) : result
+			result = typeof result === 'function' ? result(operandType) : result
 			this.registerUnaryOperator(operator, operandType, result)
 			const operations = this.unaryOperatorCoercion[operator] ??= {}
 			operations[operandType] = coercion
@@ -252,17 +250,17 @@ export default class ChiriTypeManager {
 				}
 
 		for (const operator of binaryBooleanOperators)
-			this.registerBinaryOperator("bool", operator)
+			this.registerBinaryOperator('bool', operator)
 
 		for (const operator of unaryNumericOperators)
 			for (const type of numericTypes)
 				this.registerUnaryOperator(operator, type)
 
 		for (const operator of unaryBooleanOperators)
-			this.registerUnaryOperator(operator, "bool")
+			this.registerUnaryOperator(operator, 'bool')
 
 		for (const operator of binaryStringOperators)
-			this.registerBinaryOperator("string", operator, operatorOperandBTypes[operator] ?? "string")
+			this.registerBinaryOperator('string', operator, operatorOperandBTypes[operator] ?? 'string')
 
 		for (const [operator, coercion] of Object.entries(binaryOperatorOperandCoercion))
 			this.registerBinaryCoercion(operator as Operator, coercion)
@@ -271,16 +269,16 @@ export default class ChiriTypeManager {
 			this.registerUnaryCoercion(operator as Operator, coercion)
 
 		for (const type of Object.keys(types) as (keyof typeof types)[]) {
-			this.registerBinaryOperator(type, "is", "string", "bool")
-			this.registerBinaryOperator(type, "==", "undefined", "bool")
-			this.registerBinaryOperator(type, "!=", "undefined", "bool")
-			this.registerBinaryOperator("*", "==", type, "bool")
-			this.registerBinaryOperator("*", "!=", type, "bool")
-			this.registerUnaryOperator("exists", type, "bool")
+			this.registerBinaryOperator(type, 'is', 'string', 'bool')
+			this.registerBinaryOperator(type, '==', 'undefined', 'bool')
+			this.registerBinaryOperator(type, '!=', 'undefined', 'bool')
+			this.registerBinaryOperator('*', '==', type, 'bool')
+			this.registerBinaryOperator('*', '!=', type, 'bool')
+			this.registerUnaryOperator('exists', type, 'bool')
 		}
 
-		this.registerBinaryOperator("*", "==", "undefined", "bool")
-		this.registerBinaryOperator("*", "!=", "undefined", "bool")
+		this.registerBinaryOperator('*', '==', 'undefined', 'bool')
+		this.registerBinaryOperator('*', '!=', 'undefined', 'bool')
 	}
 
 	registerGenerics (...generics: ChiriTypeGeneric[]) {
@@ -293,10 +291,10 @@ export default class ChiriTypeManager {
 				throw this.host.error(`Cannot redefine type "${type.name.value}"`)
 			}
 
-			if (type.generics.length === 1 && type.generics[0].name.value === "*")
+			if (type.generics.length === 1 && type.generics[0].name.value === '*')
 				type.generics = Object.values(this.types)
 					.map(typeDef => typeDef?.type)
-					.filter((type): type is ChiriType => !!type && type.name.value !== "body")
+					.filter((type): type is ChiriType => !!type && type.name.value !== 'body')
 
 			const componentTypeDefinitions = type.generics.map(component => {
 				const typeDef = this.types[component.name.value]
@@ -413,7 +411,7 @@ export default class ChiriTypeManager {
 
 	canCoerceOperandB (operandAType: string, operator: string, operandBType: string) {
 		const coercion = this.binaryOperatorCoercion[operandAType]?.[operator as Operator]?.[operandBType]
-		return typeof coercion === "string" || !!coercion?.[1]
+		return typeof coercion === 'string' || !!coercion?.[1]
 	}
 
 	isAssignable (type: ChiriType, ...toTypes: ChiriType[]): boolean {
@@ -434,17 +432,16 @@ export default class ChiriTypeManager {
 
 		// only 1 toType
 		const [toType] = toTypes
-		if (toType.name.value === "*")
+		if (toType.name.value === '*')
 			return true
 
-		if (type.name.value === "*")
+		if (type.name.value === '*')
 			// this should never happen
 			throw new Error(`* is not a statically known type and therefore cannot be assigned to ${ChiriType.stringify(toType)}`)
 
 		const typeDef = this.types[type.name.value]
 		if (type.name.value === toType.name.value && type.generics && toType.generics && typeDef?.isAssignable)
 			return typeDef.isAssignable(this, type, toType)
-
 
 		if (isNumeric(type.name.value) && isNumeric(toType.name.value))
 			// explicitly allow putting any numbers in contexts that expect specific types
@@ -460,11 +457,11 @@ export default class ChiriTypeManager {
 	}
 
 	isEveryType (types: ChiriType[]) {
-		if (types.some(type => type.name.value === "*"))
+		if (types.some(type => type.name.value === '*'))
 			return true
 
 		return typesList.every(a => {
-			if (a.type.name.value === "body")
+			if (a.type.name.value === 'body')
 				return true // skip
 
 			const hasAssignableType = types.some(b => this.isAssignable(b, a.type))
@@ -483,7 +480,7 @@ export default class ChiriTypeManager {
 
 	intersection (...types: ChiriType[]) {
 		if (!types.length)
-			throw this.host.error("Cannot form an intersection")
+			throw this.host.error('Cannot form an intersection')
 
 		types = this.dedupe(...types)
 		if (types.length === 1)
@@ -498,7 +495,7 @@ export default class ChiriTypeManager {
 			if (types.every(type => isNumeric(type.name.value)))
 				return ChiriType.of(minNumericPrecision(...types.map(type => type.name.value)))
 
-			throw this.host.error("Cannot form an intersection")
+			throw this.host.error('Cannot form an intersection')
 		}
 
 		if (generics.length > 1)
@@ -534,4 +531,5 @@ export default class ChiriTypeManager {
 				.map(([key, record]) => [key, { ...record }]))]))
 		return man
 	}
+
 }

@@ -1,35 +1,34 @@
 #!/usr/bin/env node
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-import type { FSWatcher } from "chokidar"
-import chokidar from "chokidar"
-import dotenv from "dotenv"
-import path from "path"
-import ansi from "./ansi"
-import args, { allArgs } from "./args"
-import type ChiriReaderType from "./chc/read/ChiriReader"
-import prefixError from "./chc/util/prefixError.js"
-import relToCwd from "./chc/util/relToCwd.js"
-import type streamJsonType from "./chc/util/streamJson"
-import type ChiriCompilerType from "./chc/write/ChiriCompiler"
-import { CHC_ROOT, LIB_ROOT, PACKAGE_ROOT } from "./constants"
+ 
+import type { FSWatcher } from 'chokidar'
+import chokidar from 'chokidar'
+import dotenv from 'dotenv'
+import path from 'path'
+import ansi from './ansi'
+import args, { allArgs } from './args'
+import type ChiriReaderType from './chc/read/ChiriReader'
+import prefixError from './chc/util/prefixError.js'
+import relToCwd from './chc/util/relToCwd.js'
+import type streamJsonType from './chc/util/streamJson'
+import type ChiriCompilerType from './chc/write/ChiriCompiler'
+import { CHC_ROOT, LIB_ROOT, PACKAGE_ROOT } from './constants'
 
 if (process.cwd() === PACKAGE_ROOT)
 	dotenv.config()
 
 Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH! || 4)
 
-if (process.env.CHIRI_ENV === "dev")
+if (process.env.CHIRI_ENV === 'dev')
 	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-	(require("source-map-support") as typeof import("source-map-support")).install()
+	(require('source-map-support') as typeof import('source-map-support')).install()
 
 if (process.env.CHIRI_INSPECT)
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-	require("inspector").open(+process.env.CHIRI_INSPECT_PORT! || undefined, process.env.CHIRI_INSPECT_HOST)
+	require('inspector').open(+process.env.CHIRI_INSPECT_PORT! || undefined, process.env.CHIRI_INSPECT_HOST)
 
 if (args.v) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	console.log(require(path.join(PACKAGE_ROOT, "package.json")).version)
+	console.log(require(path.join(PACKAGE_ROOT, 'package.json')).version)
 	process.exit()
 }
 
@@ -41,10 +40,10 @@ async function compileAll (files: string[], watch = false) {
 	for (const file of files) {
 		let watcher: FSWatcher | undefined
 		if (watch) {
-			console.log(ansi.label + "watch", ansi.path + relToCwd(file), ansi.reset)
+			console.log(ansi.label + 'watch', ansi.path + relToCwd(file), ansi.reset)
 			watcher = chokidar.watch([], { ignoreInitial: true })
 				// eslint-disable-next-line @typescript-eslint/no-misused-promises
-				.on("all", async (event, filename) => {
+				.on('all', async (event, filename) => {
 					if (queuedTryCompile)
 						return // dedupe
 
@@ -55,7 +54,7 @@ async function compileAll (files: string[], watch = false) {
 					await (compilationPromise = tryCompile(file, watcher))
 					compilationPromise = undefined
 				})
-				.on("error", console.error)
+				.on('error', console.error)
 		}
 
 		await (compilationPromise = tryCompile(file, watcher))
@@ -68,14 +67,15 @@ async function compileAll (files: string[], watch = false) {
 async function tryCompile (filename: string, watcher?: FSWatcher) {
 	try {
 		return compile(filename, watcher)
-	} catch (e) {
+	}
+ catch (e) {
 		const err = e as Error
 		let message = err.message
 		let stack = err.stack
-		const enomdl = message.startsWith("Cannot find module")
-		stack = enomdl ? message.slice(message.indexOf("\n") + 1) : err.stack?.slice(err.stack.indexOf("\n") + 1) ?? ""
+		const enomdl = message.startsWith('Cannot find module')
+		stack = enomdl ? message.slice(message.indexOf('\n') + 1) : err.stack?.slice(err.stack.indexOf('\n') + 1) ?? ''
 		// stack = enomdl ? message.slice(message.indexOf("\n") + 1) : err.stack?.slice(err.stack.indexOf("\n", err.stack.indexOf("\n") + 1)) ?? "";
-		message = enomdl ? message.slice(0, message.indexOf("\n") + 1) : message
+		message = enomdl ? message.slice(0, message.indexOf('\n') + 1) : message
 		console.error(ansi.err + message, ansi.reset + stack)
 	}
 }
@@ -90,10 +90,10 @@ async function compile (filename: string, watcher?: FSWatcher) {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 	const rerequire = <T> (path: string): T => require(path).default as T
 
-	const ChiriReader = rerequire<typeof ChiriReaderType>("./chc/read/ChiriReader.js")
+	const ChiriReader = rerequire<typeof ChiriReaderType>('./chc/read/ChiriReader.js')
 	const reader = await ChiriReader.load(filename, undefined, watcher)
 	if (!reader) {
-		console.log(ansi.err + "Failed to load ChiriReader")
+		console.log(ansi.err + 'Failed to load ChiriReader')
 		return
 	}
 
@@ -104,20 +104,18 @@ async function compile (filename: string, watcher?: FSWatcher) {
 		return
 
 	if (process.env.CHIRI_AST) {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-		const streamJsonFunction = rerequire<typeof streamJsonType>("./chc/util/streamJson.js")
-		await streamJsonFunction(reader.basename + ".ast.json", ast)
-			.catch(e => { throw prefixError(e, "Failed to write AST JSON file") })
+		const streamJsonFunction = rerequire<typeof streamJsonType>('./chc/util/streamJson.js')
+		await streamJsonFunction(reader.basename + '.ast.json', ast)
+			.catch(e => { throw prefixError(e, 'Failed to write AST JSON file') })
 	}
-
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-	const ChiriCompilerClass = rerequire<typeof ChiriCompilerType>("./chc/write/ChiriCompiler.js")
+	 
+	const ChiriCompilerClass = rerequire<typeof ChiriCompilerType>('./chc/write/ChiriCompiler.js')
 	const compiler = ChiriCompilerClass(ast, reader.basename)
 	compiler.compile()
 	await compiler.writeFiles()
 
 	const elapsed = performance.now() - start
-	console.log(ansi.label + "chiri", ansi.path + relToCwd(reader.filename), ansi.label + formatElapsed(elapsed))
+	console.log(ansi.label + 'chiri', ansi.path + relToCwd(reader.filename), ansi.label + formatElapsed(elapsed))
 }
 
 function formatElapsed (elapsed: number) {
@@ -137,16 +135,16 @@ void (async () => {
 	const files = allArgs.map(file => path.resolve(file))
 	await compileAll(files, !!args.w)
 
-	if (args.w && process.env.CHIRI_ENV === "dev") {
+	if (args.w && process.env.CHIRI_ENV === 'dev') {
 		let lastQueueAttemptId: NodeJS.Timeout | undefined
 		const debounceTime = 100
-		chokidar.watch([CHC_ROOT, "!**/*.d.ts", LIB_ROOT], { ignoreInitial: true })
-			.on("all", (event, filename) => {
+		chokidar.watch([CHC_ROOT, '!**/*.d.ts', LIB_ROOT], { ignoreInitial: true })
+			.on('all', (event, filename) => {
 				if (lastQueueAttemptId) clearTimeout(lastQueueAttemptId)
 				// eslint-disable-next-line @typescript-eslint/no-misused-promises
 				lastQueueAttemptId = setTimeout(queueCompileAll.bind(null, event, filename), debounceTime)
 			})
-			.on("error", console.error)
+			.on('error', console.error)
 	}
 
 	async function queueCompileAll (event: string, filename: string) {
@@ -160,4 +158,3 @@ void (async () => {
 		await compileAll(files)
 	}
 })()
-

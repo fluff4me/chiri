@@ -1,39 +1,39 @@
-import ansi from "../../ansi"
-import { INTERNAL_POSITION, PACKAGE_ROOT } from "../../constants"
-import type { ChiriAST, ChiriPosition, ChiriStatement } from "../read/ChiriReader"
-import type { ChiriCompilerVariable } from "../read/consume/consumeCompilerVariableOptional"
-import type { ChiriMacroUse } from "../read/consume/consumeMacroUseOptional"
-import type { ChiriProperty } from "../read/consume/consumePropertyOptional"
-import type { ChiriBaseText, ChiriValueText } from "../read/consume/consumeValueText"
-import type { ChiriWord } from "../read/consume/consumeWord"
-import type { ChiriWordInterpolated } from "../read/consume/consumeWordInterpolatedOptional"
-import type { ChiriExpressionResult } from "../read/consume/expression/consumeExpression"
-import type { ChiriFunctionCall } from "../read/consume/expression/consumeFunctionCallOptional"
-import type { ChiriMacroBlock } from "../read/consume/macro/MacroConstruct"
-import type { ChiriFunction } from "../read/consume/macro/macroFunctionDeclaration"
-import type { ChiriMacro } from "../read/consume/macro/macroMacroDeclaration"
-import type { PseudoName } from "../read/consume/rule/Rule"
-import makeWord from "../read/factory/makeWord"
-import { ChiriType } from "../type/ChiriType"
-import ChiriTypeManager from "../type/ChiriTypeManager"
-import type { BodyVariableContext, BodyVariableContexts } from "../type/typeBody"
-import typeString from "../type/typeString"
-import _ from "../util/_"
-import type { ComponentStateSpecial } from "../util/componentStates"
-import getFunctionParameters from "../util/getFunctionParameters"
-import relToCwd from "../util/relToCwd"
-import type { Value } from "../util/resolveExpression"
-import resolveExpression, { Record as ChiriRecord } from "../util/resolveExpression"
-import stringifyExpression from "../util/stringifyExpression"
-import stringifyText from "../util/stringifyText"
-import Strings from "../util/Strings"
-import type { ArrayOr } from "../util/Type"
-import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMediaQuery, ResolvedMixin, ResolvedProperty, ResolvedRootSpecial, ResolvedViewTransition } from "./CSSWriter"
-import CSSWriter from "./CSSWriter"
-import DTSWriter from "./DTSWriter"
-import type { ResolvedComponent } from "./ESWriter"
-import ESWriter from "./ESWriter"
-import type Writer from "./Writer"
+import ansi from '../../ansi'
+import { INTERNAL_POSITION, PACKAGE_ROOT } from '../../constants'
+import type { ChiriAST, ChiriPosition, ChiriStatement } from '../read/ChiriReader'
+import type { ChiriCompilerVariable } from '../read/consume/consumeCompilerVariableOptional'
+import type { ChiriMacroUse } from '../read/consume/consumeMacroUseOptional'
+import type { ChiriProperty } from '../read/consume/consumePropertyOptional'
+import type { ChiriBaseText, ChiriValueText } from '../read/consume/consumeValueText'
+import type { ChiriWord } from '../read/consume/consumeWord'
+import type { ChiriWordInterpolated } from '../read/consume/consumeWordInterpolatedOptional'
+import type { ChiriExpressionResult } from '../read/consume/expression/consumeExpression'
+import type { ChiriFunctionCall } from '../read/consume/expression/consumeFunctionCallOptional'
+import type { ChiriMacroBlock } from '../read/consume/macro/MacroConstruct'
+import type { ChiriFunction } from '../read/consume/macro/macroFunctionDeclaration'
+import type { ChiriMacro } from '../read/consume/macro/macroMacroDeclaration'
+import type { PseudoName } from '../read/consume/rule/Rule'
+import makeWord from '../read/factory/makeWord'
+import { ChiriType } from '../type/ChiriType'
+import ChiriTypeManager from '../type/ChiriTypeManager'
+import type { BodyVariableContext, BodyVariableContexts } from '../type/typeBody'
+import typeString from '../type/typeString'
+import _ from '../util/_'
+import type { ComponentStateSpecial } from '../util/componentStates'
+import getFunctionParameters from '../util/getFunctionParameters'
+import relToCwd from '../util/relToCwd'
+import type { Value } from '../util/resolveExpression'
+import resolveExpression, { Record as ChiriRecord } from '../util/resolveExpression'
+import stringifyExpression from '../util/stringifyExpression'
+import stringifyText from '../util/stringifyText'
+import Strings from '../util/Strings'
+import type { ArrayOr } from '../util/Type'
+import type { ResolvedAnimation, ResolvedAnimationKeyframe, ResolvedMediaQuery, ResolvedMixin, ResolvedProperty, ResolvedRootSpecial, ResolvedViewTransition } from './CSSWriter'
+import CSSWriter from './CSSWriter'
+import DTSWriter from './DTSWriter'
+import type { ResolvedComponent } from './ESWriter'
+import ESWriter from './ESWriter'
+import type Writer from './Writer'
 
 const EMPTY: never[] = []
 
@@ -55,10 +55,10 @@ function Scope (data: Scope): Scope {
 }
 
 namespace Scope {
-	export function variables (variables: Scope["variables"]): Scope {
+	export function variables (variables: Scope['variables']): Scope {
 		return { variables }
 	}
-	export function mixins (mixins: Scope["mixins"]): Scope {
+	export function mixins (mixins: Scope['mixins']): Scope {
 		return { mixins }
 	}
 }
@@ -76,7 +76,7 @@ interface Variable {
 	value: Value
 }
 
-interface PreRegisteredMixin extends Omit<ResolvedMixin, "index"> {
+interface PreRegisteredMixin extends Omit<ResolvedMixin, 'index'> {
 	spread?: true
 	children?: PreRegisteredMixin[]
 	used?: true
@@ -89,7 +89,7 @@ interface PreRegisteredMixin extends Omit<ResolvedMixin, "index"> {
 ////////////////////////////////////
 
 interface ChiriSelector {
-	type: "selector"
+	type: 'selector'
 	class: ChiriWord[]
 	state: ChiriWord[]
 	pseudo: ChiriWord[]
@@ -178,13 +178,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	Object.assign(compiler, { types })
 
 	const blankContent: ResolvedProperty = {
-		type: "property",
+		type: 'property',
 		property: {
-			type: "word",
-			value: "content",
+			type: 'word',
+			value: 'content',
 			position: INTERNAL_POSITION,
 		},
-		value: "\"\"",
+		value: '""',
 		position: INTERNAL_POSITION,
 	}
 
@@ -216,8 +216,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			for (const writer of writers)
 				writer.onCompileEnd(compiler)
-
-		} catch (err) {
+		}
+ catch (err) {
 			logLine(undefined, err as ErrorPositioned)
 		}
 	}
@@ -229,11 +229,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Scope
 
-
 	////////////////////////////////////
 	//#region Blocks
 
-	function pushBlock<BLOCK extends Omit<Block, "ifState">> (inblock: BLOCK): BLOCK & Block {
+	function pushBlock<BLOCK extends Omit<Block, 'ifState'>> (inblock: BLOCK): BLOCK & Block {
 		const block = inblock as any as Block
 		block.ifState = true
 		blocks.push(block)
@@ -273,15 +272,15 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function breakBlock (position: ChiriPosition, name?: string) {
 		const blockIndex = findBlock(name)
 		if (blockIndex === undefined)
-			throw error(position, `Cannot #break ${name ? `:${name}` : ""}`)
+			throw error(position, `Cannot #break ${name ? `:${name}` : ''}`)
 
 		blocks.splice(blockIndex, Infinity)
 	}
 
 	function breakFunction (position: ChiriPosition) {
-		const blockIndex = blocks.findLastIndex(block => block.type === "function-call")
+		const blockIndex = blocks.findLastIndex(block => block.type === 'function-call')
 		if (blockIndex === undefined)
-			throw error(position, "Cannot #return outside of a function")
+			throw error(position, 'Cannot #return outside of a function')
 
 		blocks.splice(blockIndex, Infinity)
 	}
@@ -289,7 +288,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function continueBlock (position: ChiriPosition, name?: string) {
 		const blockIndex = findBlock(name)
 		if (blockIndex === undefined)
-			throw error(position, `Cannot #continue ${name ? `:${name}` : ""}`)
+			throw error(position, `Cannot #continue ${name ? `:${name}` : ''}`)
 
 		blocks[blockIndex].continuing = true
 		blocks.splice(blockIndex + 1, Infinity)
@@ -299,10 +298,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		for (let i = blocks.length - 1; i >= 0; i--) {
 			const block = blocks[i]
 			switch (block.type) {
-				case "if":
-				case "else":
-				case "elseif":
-				case "do":
+				case 'if':
+				case 'else':
+				case 'elseif':
+				case 'do':
 					if (!name)
 						continue
 
@@ -311,16 +310,16 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 					return i
 
-				case "each":
-				case "for":
-				case "while":
+				case 'each':
+				case 'for':
+				case 'while':
 					if (!name || block.label?.value === name)
 						return i
 
 					continue
 
-				case "function-call":
-				case "macro-use":
+				case 'function-call':
+				case 'macro-use':
 					return i + 1
 
 				default: { const assertNever: never = block }
@@ -417,7 +416,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function isFunction (fn: unknown): fn is ChiriFunction {
-		return (fn as ChiriFunction)?.type === "function"
+		return (fn as ChiriFunction)?.type === 'function'
 	}
 
 	function setFunction (fn: ChiriFunction) {
@@ -451,7 +450,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		let baseMixin = mixins[mixin.name.value]
 		if (mixin.spread && !baseMixin) {
 			baseMixin = mixins[mixin.name.value] = {
-				type: "mixin",
+				type: 'mixin',
 				name: mixin.name,
 				content: [],
 				pseudos: [undefined],
@@ -468,8 +467,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				baseMixin.children ??= []
 				baseMixin.children.push(mixin)
 				return mixin
-
-			} else if (mixin.name.value in usedMixins)
+			}
+ else if (mixin.name.value in usedMixins)
 				throw error(mixin.position, `%${mixin.name.value} cannot be redefined after being used`)
 		}
 
@@ -488,8 +487,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		if (!baseMixin) {
 			// never used yet, so guaranteed to be after all the other mixins!
 			mixin = { ...preRegisteredMixin, index: ++usedMixinIndex }
-
-		} else {
+		}
+ else {
 			const intersectingMixin = after.sort((a, b) => b.index - a.index).find(mixin => mixin.affects.some(affect => baseMixin.affects.includes(affect)))
 			const intersectingMixinIndex = intersectingMixin?.index ?? -1
 			let bump = 1
@@ -500,7 +499,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				if (mixin)
 					continue
 
-				const bumpMixinName: ChiriWord = { type: "word", value: bumpMixinNameString, position: baseMixin.name.position }
+				const bumpMixinName: ChiriWord = { type: 'word', value: bumpMixinNameString, position: baseMixin.name.position }
 				mixin = {
 					...preRegisteredMixin,
 					index: ++usedMixinIndex,
@@ -591,17 +590,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function error (message?: string): ErrorPositioned
 	function error (position?: ChiriPosition, message?: string): ErrorPositioned
 	function error (position?: ChiriPosition | string, message?: string): ErrorPositioned {
-		message = typeof position === "string" ? position : message
-		position = typeof position === "string" ? undefined : position
-		return Object.assign(new Error(message ?? "Compilation failed for an unknown reason"), { position })
+		message = typeof position === 'string' ? position : message
+		position = typeof position === 'string' ? undefined : position
+		return Object.assign(new Error(message ?? 'Compilation failed for an unknown reason'), { position })
 	}
 
 	function internalError (message?: string): ErrorPositioned
 	function internalError (position?: ChiriPosition, message?: string): ErrorPositioned
 	function internalError (position?: ChiriPosition | string, message?: string): ErrorPositioned {
-		message = typeof position === "string" ? position : message
-		position = typeof position === "string" ? undefined : position
-		return error(position, `Internal Error: ${message ?? "Compilation failed for an unknown reason"}`)
+		message = typeof position === 'string' ? position : message
+		position = typeof position === 'string' ? undefined : position
+		return error(position, `Internal Error: ${message ?? 'Compilation failed for an unknown reason'}`)
 	}
 
 	function logLine (position?: ChiriPosition, message?: string | ErrorPositioned, stack = true, preview = true) {
@@ -611,32 +610,32 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			message = ansi.err + message.message + ansi.reset
 		}
 
-		message ??= ""
+		message ??= ''
 
-		const line = !position?.file ? "" : Strings.symbolise(getLine(ast.source[position.file] ?? "", position.line - 1))
+		const line = !position?.file ? '' : Strings.symbolise(getLine(ast.source[position.file] ?? '', position.line - 1))
 
-		const positionBlock = !position || !preview ? "" : "\n"
-			+ ansi.label + "  " + `${position.line}`.padStart(5) + " " + ansi.reset + line + "\n"
-			+ (err ? ansi.err : ansi.filepos) + `        ${" ".repeat(position.column - 1)}${"^"}`
+		const positionBlock = !position || !preview ? '' : '\n'
+			+ ansi.label + '  ' + `${position.line}`.padStart(5) + ' ' + ansi.reset + line + '\n'
+			+ (err ? ansi.err : ansi.filepos) + `        ${' '.repeat(position.column - 1)}${'^'}`
 			+ ansi.reset
 
-		const filename = !position?.file ? "Unknown location"
+		const filename = !position?.file ? 'Unknown location'
 			: ansi.path + relToCwd(position.file)
 			+ ansi.filepos + `:${position.line}:${position.column}` + ansi.reset
 
-		const stackString = err?.stack ?? new Error().stack ?? ""
+		const stackString = err?.stack ?? new Error().stack ?? ''
 
-		console[err ? "error" : "info"](filename
-			+ ansi.label + (message ? " - " : "")
+		console[err ? 'error' : 'info'](filename
+			+ ansi.label + (message ? ' - ' : '')
 			+ ansi.reset + message
 			+ positionBlock
-			+ (!stack || (process.env.CHIRI_ENV !== "dev" && !(+process.env.CHIRI_STACK_LENGTH! || 0)) ? ""
+			+ (!stack || (process.env.CHIRI_ENV !== 'dev' && !(+process.env.CHIRI_STACK_LENGTH! || 0)) ? ''
 				: `\n${stackString
-					.slice(stackString.indexOf("\n", !position ? 0 : stackString.indexOf("\n") + 1) + 1)
-					.split("\n")
+					.slice(stackString.indexOf('\n', !position ? 0 : stackString.indexOf('\n') + 1) + 1)
+					.split('\n')
 					.slice(0, +process.env.CHIRI_STACK_LENGTH! || 3)
-					.map(path => path.replace(PACKAGE_ROOT + "\\", "").replaceAll("\\", "/"))
-					.join("\n")}`))
+					.map(path => path.replace(PACKAGE_ROOT + '\\', '').replaceAll('\\', '/'))
+					.join('\n')}`))
 	}
 
 	//#endregion
@@ -645,18 +644,17 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	////////////////////////////////////
 	//#region Contexts
 
-
 	////////////////////////////////////
 	//#region Context: Root
 
 	function compileRoot (statement: ChiriStatement) {
 		switch (statement.type) {
-			case "documentation":
+			case 'documentation':
 				for (const writer of writers)
 					writer.writeDocumentation(statement)
 				return true
 
-			case "mixin": {
+			case 'mixin': {
 				const name = resolveWordLowercase(statement.name)
 
 				const properties = compileStatements(statement.content, undefined, compileMixinContent)
@@ -671,7 +669,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				})
 				return true
 			}
-			case "shorthand": {
+			case 'shorthand': {
 				const property = stringifyText(compiler, statement.property)
 				const affects = compileStatements(statement.body, undefined, compileShorthand)
 					.filter(affected => !!affected)
@@ -679,7 +677,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				setShorthand(property, affects, statement.position)
 				return true
 			}
-			case "alias": {
+			case 'alias': {
 				const property = stringifyText(compiler, statement.property)
 				const properties = compileStatements(statement.body, undefined, compileShorthand)
 					.filter(affected => !!affected)
@@ -687,7 +685,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				setAlias(property, properties, statement.position)
 				return true
 			}
-			case "component": {
+			case 'component': {
 				let results = compileComponent(statement)
 				if (results === undefined)
 					return undefined
@@ -719,67 +717,67 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 						}
 						registered.mixins.push(...registeredMixins)
 
-						dts.write("\"")
+						dts.write('"')
 						dts.writeWord(selector)
-						dts.write("\"")
-						dts.writeLine(": string[],")
+						dts.write('"')
+						dts.writeLine(': string[],')
 					}
 				}
 
 				return true
 			}
 
-			case "mixin-use": {
+			case 'mixin-use': {
 				const mixin = getMixin(stringifyText(compiler, statement.name), statement.name.position)
 				for (const property of mixin.content) {
-					css.writingTo(property.isCustomProperty ? "root-properties" : "root-styles", () => {
+					css.writingTo(property.isCustomProperty ? 'root-properties' : 'root-styles', () => {
 						css.writeProperty(compiler, property)
 					})
 				}
 				return true
 			}
 
-			case "property-definition":
-				css.writingTo("property-definitions", () => {
-					css.write("@property ")
+			case 'property-definition':
+				css.writingTo('property-definitions', () => {
+					css.write('@property ')
 					const name = resolveWordLowercase(statement.property)
 					name.value = `--${name.value}`
 					css.writeWord(name)
 					css.writeSpaceOptional()
 					css.writeBlock(() => {
-						css.write("syntax:")
+						css.write('syntax:')
 						css.writeSpaceOptional()
-						css.write("\"")
+						css.write('"')
 						css.writeWord(statement.syntax)
-						css.writeLine("\";")
+						css.writeLine('";')
 
-						css.write("inherits:")
+						css.write('inherits:')
 						css.writeSpaceOptional()
-						css.writeLine("false;")
+						css.writeLine('false;')
 
-						const initialValue = compileStatements(statement.value, undefined, compileText).join("").trim()
+						const initialValue = compileStatements(statement.value, undefined, compileText).join('').trim()
 						if (initialValue) {
-							css.write("initial-value:")
+							css.write('initial-value:')
 							css.writeSpaceOptional()
 							css.write(initialValue)
-							css.writeLine(";")
+							css.writeLine(';')
 						}
 					})
 				})
 				return true
 
-			case "property":
-				css.writingTo(statement.isCustomProperty ? "root-properties" : "root-styles", () => {
+			case 'property':
+				css.writingTo(statement.isCustomProperty ? 'root-properties' : 'root-styles', () => {
 					css.writeProperty(compiler, {
 						...statement,
 						property: resolveWordLowercase(statement.property),
-						value: compileStatements(statement.value, undefined, compileText).join(""),
+						value: compileStatements(statement.value, undefined, compileText).join(''),
 					})
 				})
 				return true
 
-			case "import-css": {
-				css.writingTo("imports", () => {
+			case 'import-css': {
+				css.writingTo('imports', () => {
 					for (const imp of statement.imports) {
 						css.writeLine(`@import ${stringifyText(compiler, imp)};`)
 					}
@@ -787,7 +785,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 
-			case "font-face": {
+			case 'font-face': {
 				css.writeFontFace(compiler, {
 					family: makeWord(stringifyExpression(compiler, statement.family), statement.family.position),
 					content: compileStatements(statement.content, undefined, compileMixinContent),
@@ -795,9 +793,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 
-			case "select": {
+			case 'select': {
 				css.writeSelect(compiler, {
-					type: "select",
+					type: 'select',
 					selector: stringifyExpression(compiler, statement.selector),
 					content: compileStatements(statement.content, undefined, compileMixinContent),
 					position: statement.position,
@@ -814,14 +812,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	//#region Context: Component
 
 	interface Component {
-		type: "compiled-component"
+		type: 'compiled-component'
 		selector: ChiriWord[]
 		mixins: ChiriWord[]
 		after: ChiriWord[]
 	}
 
 	interface ResolvedAfter {
-		type: "compiled-after"
+		type: 'compiled-after'
 		selectors: ChiriWord[]
 	}
 
@@ -833,47 +831,47 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function compileComponent (statement: ChiriStatement): Component[] | undefined
 	function compileComponent (statement: ChiriStatement, allowMixins: true): (Component | ResolvedMixinName | ResolvedProperty)[] | undefined
 	function compileComponent (statement: ChiriStatement, allowMixins = false): (Component | ResolvedMixinName | ResolvedProperty)[] | undefined {
-		if (statement.type !== "component")
+		if (statement.type !== 'component')
 			return undefined
 
 		const containingSelector = selectorStack.at(-1)
 
-		if (statement.subType === "component" || statement.subType === "custom-state") {
+		if (statement.subType === 'component' || statement.subType === 'custom-state') {
 			const selector = createSelector(undefined, {
-				class: mergeWords(containingSelector?.class, statement.subType === "component" ? "-" : "--", statement.names),
+				class: mergeWords(containingSelector?.class, statement.subType === 'component' ? '-' : '--', statement.names),
 			})
 			const content = compileSelector(selector, statement.content, true)
 
 			const component: Component = {
-				type: "compiled-component",
+				type: 'compiled-component',
 				selector: selector.class,
-				mixins: content.filter(item => item.type === "word"),
-				after: content.filter(item => item.type === "compiled-after")
+				mixins: content.filter(item => item.type === 'word'),
+				after: content.filter(item => item.type === 'compiled-after')
 					.flatMap(after => after.selectors),
 			}
 
-			if ((component.mixins.some(m => m.value === "before") && component.mixins.some(m => m.value === "after")) || component.mixins.some(m => m.value === "before-after")) {
-				component.mixins = component.mixins.filter(mixin => mixin.value !== "before-after")
-				component.mixins.unshift({ type: "word", value: "before-after", position: INTERNAL_POSITION })
+			if ((component.mixins.some(m => m.value === 'before') && component.mixins.some(m => m.value === 'after')) || component.mixins.some(m => m.value === 'before-after')) {
+				component.mixins = component.mixins.filter(mixin => mixin.value !== 'before-after')
+				component.mixins.unshift({ type: 'word', value: 'before-after', position: INTERNAL_POSITION })
 			}
 
-			if (component.mixins.some(m => m.value === "before-after"))
-				component.mixins = component.mixins.filter(m => m.value !== "before" && m.value !== "after")
+			if (component.mixins.some(m => m.value === 'before-after'))
+				component.mixins = component.mixins.filter(m => m.value !== 'before' && m.value !== 'after')
 
-			const results = content.filter(item => item.type === "compiled-component")
+			const results = content.filter(item => item.type === 'compiled-component')
 			results.unshift(component)
 			return results
 		}
 
-		if (statement.subType === "view-transition" || statement.subType === "view-transition-class") {
-			const viewTransitionName = !containingSelector ? "root" : [
-				containingSelector.class.map(word => word.value).join("_"),
+		if (statement.subType === 'view-transition' || statement.subType === 'view-transition-class') {
+			const viewTransitionName = !containingSelector ? 'root' : [
+				containingSelector.class.map(word => word.value).join('_'),
 				getStatesNameAffix(containingSelector.pseudo),
 				getWordsAffix(containingSelector.pseudo),
-			].filter(s => s).join("_")
+			].filter(s => s).join('_')
 
 			const selector = createSelector(containingSelector, {
-				class: mergeWords(containingSelector?.class, "_", [getWordsAffix(statement.pseudos)]),
+				class: mergeWords(containingSelector?.class, '_', [getWordsAffix(statement.pseudos)]),
 			})
 
 			selectorStack.push(selector)
@@ -883,14 +881,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			const properties: ResolvedProperty[] = []
 			for (const item of content) {
 				switch (item.type) {
-					case "compiled-after":
-						throw error("#after cannot be used in this context")
-					case "compiled-component":
-						throw error("Sub-component selectors cannot be used in this context")
-					case "property":
+					case 'compiled-after':
+						throw error('#after cannot be used in this context')
+					case 'compiled-component':
+						throw error('Sub-component selectors cannot be used in this context')
+					case 'property':
 						properties.push(item)
 						continue
-					case "word": {
+					case 'word': {
 						const mixin = getMixin(item.value, item.position)
 						properties.push(...mixin.content)
 						continue
@@ -900,14 +898,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			viewTransitions.push({
 				type: statement.subType,
-				subTypes: statement.pseudos.map(w => w.value.slice(w.value.lastIndexOf("!") + 1)) as ("old" | "new" | "group" | "image-pair")[],
+				subTypes: statement.pseudos.map(w => w.value.slice(w.value.lastIndexOf('!') + 1)) as ('old' | 'new' | 'group' | 'image-pair')[],
 				name: makeWord(viewTransitionName, statement.position),
 				content: properties,
 				position: statement.position,
 			})
 			return [{
-				type: "property",
-				property: makeWord(statement.subType === "view-transition-class" ? "view-transition-class" : "view-transition-name", statement.position),
+				type: 'property',
+				property: makeWord(statement.subType === 'view-transition-class' ? 'view-transition-class' : 'view-transition-name', statement.position),
 				value: viewTransitionName,
 				position: statement.position,
 			}]
@@ -916,23 +914,23 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		let selector: ChiriSelector
 		switch (statement.subType) {
 
-			case "state":
+			case 'state':
 				selector = createSelector(containingSelector, {
-					class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix(statement.states)]),
-					state: mergeWords(containingSelector?.state, "):where(", statement.states, false),
+					class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getStatesNameAffix(statement.states)]),
+					state: mergeWords(containingSelector?.state, '):where(', statement.states, false),
 					spread: statement.spread || undefined,
 				})
 				break
 
-			case "state-special":
+			case 'state-special':
 				selector = createSelector(containingSelector, {
-					class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getStatesNameAffix([statement.state])]),
+					class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getStatesNameAffix([statement.state])]),
 					specialState: statement.state,
 					spread: statement.spread || undefined,
 				})
 				break
 
-			case "media": {
+			case 'media': {
 				const query = stringifyText(compiler, statement.query)
 				selector = createSelector(containingSelector, {
 					mediaQueries: [query],
@@ -940,7 +938,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				break
 			}
 
-			case "container": {
+			case 'container': {
 				const query = stringifyText(compiler, statement.query)
 				selector = createSelector(containingSelector, {
 					containerQueries: [query],
@@ -948,27 +946,27 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				break
 			}
 
-			case "scheme": {
+			case 'scheme': {
 				selector = createSelector(containingSelector, {
 					mediaQueries: [{ scheme: statement.scheme }],
 				})
 				break
 			}
 
-			case "element": {
+			case 'element': {
 				const names = statement.names.map(resolveWordLowercase)
 				selector = createSelector(containingSelector, {
-					class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getWordsAffix(names)]),
+					class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getWordsAffix(names)]),
 					elementTypes: names,
 					spread: statement.spread || undefined,
 				})
 				break
 			}
 
-			case "pseudo":
+			case 'pseudo':
 				selector = createSelector(containingSelector, {
-					class: statement.spread ? undefined : mergeWords(containingSelector?.class, "_", [getWordsAffix(statement.pseudos)]),
-					pseudo: mergeWords(containingSelector?.pseudo, "::", statement.pseudos),
+					class: statement.spread ? undefined : mergeWords(containingSelector?.class, '_', [getWordsAffix(statement.pseudos)]),
+					pseudo: mergeWords(containingSelector?.pseudo, '::', statement.pseudos),
 					spread: statement.spread || undefined,
 				})
 				break
@@ -976,10 +974,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 		const result = compileSelector(selector, statement.content)
 
-		if (statement.subType === "pseudo" && allowMixins) {
-			const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join("-")
-			if (pseudoClassName === "before" || pseudoClassName === "after")
-				result.unshift({ type: "word", value: pseudoClassName, position: statement.pseudos[0].position })
+		if (statement.subType === 'pseudo' && allowMixins) {
+			const pseudoClassName = statement.pseudos.map(p => p.value).sort((a, b) => b.localeCompare(a)).join('-')
+			if (pseudoClassName === 'before' || pseudoClassName === 'after')
+				result.unshift({ type: 'word', value: pseudoClassName, position: statement.pseudos[0].position })
 		}
 
 		// if (statement.subType === "state-special")
@@ -987,7 +985,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 		if (!allowMixins) {
 			rootSpecials.push({
-				type: "mixin",
+				type: 'mixin',
 				content: result.flatMap(name => getMixin(name.value, name.position).content),
 				pseudos: selector.pseudo.map(pseudo => pseudo?.value as PseudoName | undefined),
 				states: selector.state.map(state => state?.value),
@@ -1007,15 +1005,15 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function getStatesNameAffix (states: ChiriWord[]) {
-		return !states.length ? "" : "_" + states
-			.map(state => state.value.replace(/[:)]/g, "").replace(/[^\w-]+/g, "-"))
-			.join("_")
+		return !states.length ? '' : '_' + states
+			.map(state => state.value.replace(/[:)]/g, '').replace(/[^\w-]+/g, '-'))
+			.join('_')
 	}
 
 	function getWordsAffix (words: ChiriWord[]) {
-		return !words.length ? "" : "_" + words
+		return !words.length ? '' : '_' + words
 			.map(pseudo => pseudo.value)
-			.join("-")
+			.join('-')
 	}
 
 	function compileSelector (selector: ChiriSelector, content: ChiriStatement[]): ResolvedMixinName[]
@@ -1029,34 +1027,34 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		const affects: string[] = []
 		let propertyGroup: ResolvedProperty[] | undefined
 		let groupIndex = 0
-		const className = selector.class.map(cls => cls.value).join("_")
+		const className = selector.class.map(cls => cls.value).join('_')
 
-		const getDedupedClassName = () => `${className}${groupIndex <= 1 ? "" : `_${groupIndex}`}`
-		for (const item of [...compiledContent, { type: "end" as const }]) {
+		const getDedupedClassName = () => `${className}${groupIndex <= 1 ? '' : `_${groupIndex}`}`
+		for (const item of [...compiledContent, { type: 'end' as const }]) {
 			switch (item.type) {
-				case "compiled-after":
+				case 'compiled-after':
 					results.push(item)
 					break // irrelevant for this mixin generation
 
-				case "compiled-component":
+				case 'compiled-component':
 					if (!allowComponents)
-						throw internalError(item.selector[0].position, "Unexpected component in this context")
+						throw internalError(item.selector[0].position, 'Unexpected component in this context')
 
 					results.push(item)
 					break
 
-				case "property": {
+				case 'property': {
 					// a CSS property assignment rather than a mixin usage — add it to a group that will be made into a dynamic mixin
 					propertyGroup ??= []
 					propertyGroup.push(item)
 					break
 				}
 
-				case "end":
-				case "word": {
+				case 'end':
+				case 'word': {
 					// mixin use — end the dynamic mixin CSS property group, if it exists
 					if (!propertyGroup?.length) {
-						if (item.type === "word")
+						if (item.type === 'word')
 							addWord(item)
 						break
 					}
@@ -1068,10 +1066,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 							groupIndex++
 						nameString = getDedupedClassName()
 					} while (!selector.spread && getMixin(nameString, position, true))
-					const name: ChiriWord = { type: "word", value: nameString, position }
+					const name: ChiriWord = { type: 'word', value: nameString, position }
 
 					setMixin({
-						type: "mixin",
+						type: 'mixin',
 						name,
 						states: selector.state.map(state => state?.value),
 						pseudos: selector.pseudo.map(pseudo => pseudo?.value as PseudoName | undefined),
@@ -1090,7 +1088,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 					if (!selector.spread)
 						groupIndex++
 
-					if (item.type === "word")
+					if (item.type === 'word')
 						addWord(item)
 				}
 			}
@@ -1101,10 +1099,11 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			const mixinAffects = [...new Set([...mixin?.affects ?? [], ...affects])]
 			if (mixin) {
 				mixin.affects = mixinAffects
-			} else {
+			}
+ else {
 				const name = makeWord(className, selector.class[0].position)
 				setMixin({
-					type: "mixin",
+					type: 'mixin',
 					name,
 					affects: mixinAffects,
 					content: [],
@@ -1143,29 +1142,29 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			return componentResults
 
 		switch (statement.type) {
-			case "after":
+			case 'after':
 				return {
-					type: "compiled-after",
+					type: 'compiled-after',
 					selectors: compileStatements(statement.content, undefined, statement => {
-						if (statement.type === "text" && statement.subType === "word-interpolated")
+						if (statement.type === 'text' && statement.subType === 'word-interpolated')
 							return resolveWordLowercase(statement)
 					}),
 				}
 
-			case "property":
+			case 'property':
 				return {
 					...statement,
 					property: resolveWordLowercase(statement.property),
-					value: compileStatements(statement.value, undefined, compileText).join(" "),
+					value: compileStatements(statement.value, undefined, compileText).join(' '),
 				}
 
-			case "mixin-use": {
+			case 'mixin-use': {
 				let name = resolveWordLowercase(statement.name)
 				const baseName = name.value
 
 				const selector = selectorStack.at(-1)
 				if (!selector)
-					throw error(name.position, "Unable to use mixin here, no selector")
+					throw error(name.position, 'Unable to use mixin here, no selector')
 
 				if (selector.containerQueries.length || selector.mediaQueries.length || selector.elementTypes.length || statement.spread || selector.spread) {
 					const mixin = getMixin(name.value, name.position)
@@ -1177,21 +1176,21 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 				if (selector.state.length)
 					name = {
-						type: "word",
+						type: 'word',
 						value: `${name.value}_${getStatesNameAffix(selector.state)}`,
 						position: name.position,
 					}
 
 				if (selector.specialState)
 					name = {
-						type: "word",
+						type: 'word',
 						value: `${name.value}_${getStatesNameAffix([selector.specialState])}`,
 						position: name.position,
 					}
 
 				if (selector.pseudo.length)
 					name = {
-						type: "word",
+						type: 'word',
 						value: `${name.value}_${getWordsAffix(selector.pseudo)}`,
 						position: name.position,
 					}
@@ -1211,28 +1210,28 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return name
 			}
 
-			case "animate": {
+			case 'animate': {
 				const selector = selectorStack.at(-1)
 				if (!selector)
-					throw error(statement.position, "#animate cannot be used in this context")
+					throw error(statement.position, '#animate cannot be used in this context')
 
 				const baseAnimationName = [
-					selector.class.map(word => word.value).join("_"),
+					selector.class.map(word => word.value).join('_'),
 					getStatesNameAffix(selector.pseudo),
 					getWordsAffix(selector.pseudo),
-				].filter(s => s).join("_")
+				].filter(s => s).join('_')
 
 				const keyframes = compileStatements(statement.content, undefined, compileKeyframes)
 				const dedupedName = setAnimation({
-					type: "animation",
+					type: 'animation',
 					name: makeWord(baseAnimationName, statement.position),
 					content: keyframes,
 					position: statement.position,
 				}, true)
 
 				return {
-					type: "property",
-					property: makeWord("animation", statement.position),
+					type: 'property',
+					property: makeWord('animation', statement.position),
 					value: `${stringifyText(compiler, statement.shorthand)} ${dedupedName.value}`,
 					position: statement.position,
 					merge: true,
@@ -1243,13 +1242,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function createSelector (selector: ChiriSelector | undefined, assignFrom: Partial<ChiriSelector>): ChiriSelector {
 		if (assignFrom.mediaQueries?.length && !selector)
-			selector = { type: "selector", class: [], state: [], pseudo: [], specialState: undefined, containerQueries: [], mediaQueries: [], elementTypes: [] }
+			selector = { type: 'selector', class: [], state: [], pseudo: [], specialState: undefined, containerQueries: [], mediaQueries: [], elementTypes: [] }
 
 		if (!selector && !assignFrom.class?.length)
-			throw internalError("Unable to construct a selector with no class name")
+			throw internalError('Unable to construct a selector with no class name')
 
 		return {
-			type: "selector",
+			type: 'selector',
 			class: (assignFrom.class ?? selector?.class)!,
 			state: assignFrom.state ?? selector?.state ?? [],
 			pseudo: assignFrom.pseudo ?? selector?.pseudo ?? [],
@@ -1269,9 +1268,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function compileMixinContent (statement: ChiriStatement): ArrayOr<ResolvedProperty> | undefined {
 		switch (statement.type) {
-			case "property":
+			case 'property':
 				return compileProperty(statement)
-			case "mixin-use": {
+			case 'mixin-use': {
 				const mixin = getMixin(stringifyText(compiler, statement.name), statement.name.position)
 				return mixin.content
 			}
@@ -1282,7 +1281,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		return {
 			...property,
 			property: resolveWordLowercase(property.property),
-			value: compileStatements(property.value, undefined, compileText).join(" "),
+			value: compileStatements(property.value, undefined, compileText).join(' '),
 		}
 	}
 
@@ -1294,14 +1293,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function compileMacros<T> (statement: ChiriStatement, contextConsumer: (statement: ChiriStatement) => ArrayOr<T> | undefined) {
 		switch (statement.type) {
-			case "variable": {
+			case 'variable': {
 				if (!statement.assignment)
 					return true
 
-				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position, true) !== undefined)
+				if (statement.assignment === '??=' && getVariable(statement.name.value, statement.position, true) !== undefined)
 					return true
 
-				if (!statement.expression && statement.assignment === "??=") {
+				if (!statement.expression && statement.assignment === '??=') {
 					scope().variables ??= {}
 					scope().variables![statement.name.value] = { type: statement.valueType, value: undefined }
 					return true
@@ -1313,38 +1312,38 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return true
 			}
 
-			case "assignment": {
-				if (statement.assignment === "??=" && getVariable(statement.name.value, statement.position) !== undefined)
+			case 'assignment': {
+				if (statement.assignment === '??=' && getVariable(statement.name.value, statement.position) !== undefined)
 					// already assigned
 					return true
 
 				const value = resolveExpression(compiler, statement.expression)
-				setVariable(statement.name.value, value, statement.expression?.valueType ?? ChiriType.of("undefined"))
+				setVariable(statement.name.value, value, statement.expression?.valueType ?? ChiriType.of('undefined'))
 				return true
 			}
 
-			case "macro":
+			case 'macro':
 				setMacro(statement)
 				return true
 
-			case "function":
+			case 'function':
 				setFunction(statement)
 				return true
 
-			case "macro-use": {
+			case 'macro-use': {
 				switch (statement.name.value) {
-					case "debug": {
+					case 'debug': {
 						const lines = compileStatements(statement.content, undefined, compileText)
-						logLine(statement.position, ansi.label + "debug" + (lines.length === 1 ? " - " : "") + ansi.reset + (lines.length <= 1 ? "" : "\n") + lines.join("\n"), false, false)
+						logLine(statement.position, ansi.label + 'debug' + (lines.length === 1 ? ' - ' : '') + ansi.reset + (lines.length <= 1 ? '' : '\n') + lines.join('\n'), false, false)
 						return true
 					}
-					case "error": {
+					case 'error': {
 						const lines = compileStatements(statement.content, undefined, compileText)
 						const position = _
-							?? (!resolveExpression(compiler, statement.assignments.function) ? undefined : blocks.findLast(block => block.type === "function-call")?.position)
-							?? (!resolveExpression(compiler, statement.assignments.macro) ? undefined : blocks.findLast(block => block.type === "macro-use")?.position)
+							?? (!resolveExpression(compiler, statement.assignments.function) ? undefined : blocks.findLast(block => block.type === 'function-call')?.position)
+							?? (!resolveExpression(compiler, statement.assignments.macro) ? undefined : blocks.findLast(block => block.type === 'macro-use')?.position)
 							?? statement.position
-						throw error(position, (lines.length <= 1 ? "" : "\n") + lines.join("\n"))
+						throw error(position, (lines.length <= 1 ? '' : '\n') + lines.join('\n'))
 					}
 				}
 
@@ -1354,10 +1353,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 				const assignments = resolveAssignments(statement.assignments)
 
-				const bodyParameter = fn.content.find((statement): statement is ChiriCompilerVariable => statement.type === "variable" && statement.valueType.name.value === "body")
+				const bodyParameter = fn.content.find((statement): statement is ChiriCompilerVariable => statement.type === 'variable' && statement.valueType.name.value === 'body')
 				if (bodyParameter) {
 					assignments.variables ??= {}
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					 
 					assignments.variables[bodyParameter.name.value] = {
 						type: bodyParameter.valueType,
 						value: Object.assign([...statement.content], { isBody: true }) as any[],
@@ -1370,14 +1369,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "each": {
+			case 'each': {
 				let list = resolveExpression(compiler, statement.iterable)
 
-				if (typeof list !== "string" && !Array.isArray(list) && (!ChiriRecord.is(list) || !statement.keyVariable))
-					throw error(statement.iterable.position, "Variable is not iterable")
+				if (typeof list !== 'string' && !Array.isArray(list) && (!ChiriRecord.is(list) || !statement.keyVariable))
+					throw error(statement.iterable.position, 'Variable is not iterable')
 
 				list = !statement.keyVariable ? list as Value[]
-					: typeof list !== "string" && !Array.isArray(list) ? Object.entries(list)
+					: typeof list !== 'string' && !Array.isArray(list) ? Object.entries(list)
 						: Object.values(list).map((v, i) => [i, v] as const)
 
 				const block = pushBlock(statement)
@@ -1406,7 +1405,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "for": {
+			case 'for': {
 				scopes.push({})
 				setVariable(statement.variable.name.value, resolveExpression(compiler, statement.variable.expression), statement.variable.valueType, true)
 
@@ -1428,7 +1427,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "while": {
+			case 'while': {
 				scopes.push({})
 
 				const block = pushBlock(statement)
@@ -1446,12 +1445,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "elseif":
+			case 'elseif':
 				if (blockIfState())
 					return EMPTY
 
 			// eslint-disable-next-line no-fallthrough
-			case "if": {
+			case 'if': {
 				setBlockIfState(!!resolveExpression(compiler, statement.condition))
 				if (!blockIfState())
 					return EMPTY
@@ -1466,7 +1465,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "else": {
+			case 'else': {
 				if (blockIfState())
 					return EMPTY
 
@@ -1480,7 +1479,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "do": {
+			case 'do': {
 				const block = pushBlock(statement)
 				const result: T[] = []
 				do {
@@ -1491,24 +1490,24 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				return result
 			}
 
-			case "break": {
+			case 'break': {
 				breakBlock(statement.position, statement.label?.value)
 				return EMPTY
 			}
 
-			case "continue": {
+			case 'continue': {
 				continueBlock(statement.position, statement.label?.value)
 				return EMPTY
 			}
 
-			case "include": {
+			case 'include': {
 				const statements = getVariable(statement.name.value, statement.name.position) as any as ChiriStatement[] ?? []
 				const type = getVariableType(statement.name.value, statement.name.position)
 				const bodyType = type.generics[0].name.value as BodyVariableContext
 				return compileStatements(statements, undefined, getContextConsumer(bodyType)) as T[]
 			}
 
-			case "animation": {
+			case 'animation': {
 				const name = resolveWordLowercase(statement.name)
 				const keyframes = compileStatements(statement.content, undefined, compileKeyframes)
 				setAnimation({
@@ -1523,10 +1522,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function getContextConsumer (context: (typeof BodyVariableContexts)[number]): (statement: ChiriStatement) => ReturnType<typeof compileText> | ReturnType<typeof compileComponentContent> {
 		switch (context) {
-			case "text":
-			case "property-name":
+			case 'text':
+			case 'property-name':
 				return compileText
-			case "component":
+			case 'component':
 				return compileComponentContent
 		}
 	}
@@ -1538,7 +1537,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	//#region Context: Text
 
 	function compileText (statement: ChiriStatement): ArrayOr<string> | undefined {
-		if (statement.type !== "text")
+		if (statement.type !== 'text')
 			throw error(statement.position, `Expected text, got ${debugStatementString(statement)}`)
 
 		return stringifyText(compiler, statement)
@@ -1551,7 +1550,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	//#region Context: Shorthand
 
 	function compileShorthand (statement: ChiriStatement): ArrayOr<string> | undefined {
-		if (statement.type !== "text")
+		if (statement.type !== 'text')
 			throw error(statement.position, `Expected text, got ${debugStatementString(statement)}`)
 
 		return stringifyText(compiler, statement)
@@ -1565,9 +1564,9 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function compileFunction (statement: ChiriStatement) {
 		switch (statement.type) {
-			case "return": {
+			case 'return': {
 				breakFunction(statement.position)
-				return { type: "result" as const, value: resolveExpression(compiler, statement.expression) }
+				return { type: 'result' as const, value: resolveExpression(compiler, statement.expression) }
 			}
 		}
 	}
@@ -1580,7 +1579,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	function compileKeyframes (statement: ChiriStatement): ResolvedAnimationKeyframe | undefined {
 		switch (statement.type) {
-			case "keyframe":
+			case 'keyframe':
 				return {
 					...statement,
 					at: +resolveExpression(compiler, statement.at)! || 0,
@@ -1591,7 +1590,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 	//#endregion
 	////////////////////////////////////
-
 
 	//#endregion
 	////////////////////////////////////
@@ -1604,33 +1602,33 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 		if (scopes.length === 1) {
 			setMixin({
-				type: "mixin",
-				pseudos: ["before"],
+				type: 'mixin',
+				pseudos: ['before'],
 				states: [undefined],
 				elementTypes: [undefined],
 				content: [blankContent],
-				affects: ["content"],
-				name: { type: "word", value: "before", position: INTERNAL_POSITION },
+				affects: ['content'],
+				name: { type: 'word', value: 'before', position: INTERNAL_POSITION },
 				position: INTERNAL_POSITION,
 			})
 			setMixin({
-				type: "mixin",
-				pseudos: ["after"],
+				type: 'mixin',
+				pseudos: ['after'],
 				states: [undefined],
 				elementTypes: [undefined],
 				content: [blankContent],
-				affects: ["content"],
-				name: { type: "word", value: "after", position: INTERNAL_POSITION },
+				affects: ['content'],
+				name: { type: 'word', value: 'after', position: INTERNAL_POSITION },
 				position: INTERNAL_POSITION,
 			})
 			setMixin({
-				type: "mixin",
-				pseudos: ["before", "after"],
+				type: 'mixin',
+				pseudos: ['before', 'after'],
 				states: [undefined],
 				elementTypes: [undefined],
 				content: [blankContent],
-				affects: ["content"],
-				name: { type: "word", value: "before-after", position: INTERNAL_POSITION },
+				affects: ['content'],
+				name: { type: 'word', value: 'before-after', position: INTERNAL_POSITION },
 				position: INTERNAL_POSITION,
 			})
 		}
@@ -1676,7 +1674,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			}
 
 			if (result === undefined)
-				throw internalError((statement as { position?: ChiriPosition }).position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || "unknown"}"`)
+				throw internalError((statement as { position?: ChiriPosition }).position, `Failed to compile ${debugStatementString(statement)} in context "${contextCompiler.name || 'unknown'}"`)
 		}
 
 		if (scopes.length > 1) // don't remove the root scope once it's set up
@@ -1688,8 +1686,8 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function failedToExitBlocksError (blockId: number) {
 		return error(`Failed to exit block(s): ${blocks
 			.slice(blockId)
-			.map(b => `${b.type}${(b as ChiriMacroBlock).label ? `:${(b as ChiriMacroBlock).label?.value}` : ""}`)
-			.join(", ")}`)
+			.map(b => `${b.type}${(b as ChiriMacroBlock).label ? `:${(b as ChiriMacroBlock).label?.value}` : ''}`)
+			.join(', ')}`)
 	}
 
 	function callFunction (call: ChiriFunctionCall) {
@@ -1700,10 +1698,10 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 		const result = compileStatements(fn.content, assignments, compileFunction)
 		popBlock(block)
 		if (result.length > 1)
-			throw internalError(call.position, "Function call returned multiple values")
+			throw internalError(call.position, 'Function call returned multiple values')
 
 		if (result.length === 0)
-			throw internalError(call.position, "Function call did not return a value")
+			throw internalError(call.position, 'Function call did not return a value')
 
 		return result[0]?.value
 	}
@@ -1713,7 +1711,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function debugStatementString (statement: ChiriStatement) {
-		const name = "name" in statement ? ` "${stringifyText(compiler, statement.name)}"` : ""
+		const name = 'name' in statement ? ` "${stringifyText(compiler, statement.name)}"` : ''
 		return statement.type + name
 	}
 
@@ -1724,47 +1722,47 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	}
 
 	function resolveWordLowercase (word: ChiriWordInterpolated | ChiriWord | string): ChiriWord {
-		return typeof word === "object" && word.type === "word" ? word : {
-			type: "word",
-			value: typeof word === "string" ? word : stringifyText(compiler, word).replace(/[^\w-]+/g, "-").toLowerCase(),
-			position: typeof word === "string" ? INTERNAL_POSITION : word.position,
+		return typeof word === 'object' && word.type === 'word' ? word : {
+			type: 'word',
+			value: typeof word === 'string' ? word : stringifyText(compiler, word).replace(/[^\w-]+/g, '-').toLowerCase(),
+			position: typeof word === 'string' ? INTERNAL_POSITION : word.position,
 		}
 	}
 
 	function resolveWordPreserve (word: ChiriWordInterpolated | ChiriWord | string, restrictCharacters = true): ChiriWord {
-		if (typeof word === "object" && word.type === "word")
+		if (typeof word === 'object' && word.type === 'word')
 			return word
 
-		let value = typeof word === "string" ? word : stringifyText(compiler, word)
+		let value = typeof word === 'string' ? word : stringifyText(compiler, word)
 		if (restrictCharacters)
-			value = value.replace(/[^\w-]+/g, "-")
+			value = value.replace(/[^\w-]+/g, '-')
 
 		return {
-			type: "word",
+			type: 'word',
 			value,
-			position: typeof word === "string" ? INTERNAL_POSITION : word.position,
+			position: typeof word === 'string' ? INTERNAL_POSITION : word.position,
 		}
 	}
 
 	function mergeWords (words: ChiriWord[] | undefined, separator: string, newSegment: (ChiriWordInterpolated | ChiriWord | string)[], restrictCharacters = true): ChiriWord[] {
 		return !words?.length ? newSegment.map(segment => resolveWordPreserve(segment, restrictCharacters)) : words.flatMap(selector => newSegment.map((newSegment): ChiriWord => resolveWordPreserve({
-			type: "text",
-			subType: "word-interpolated",
-			valueType: ChiriType.of("string"),
+			type: 'text',
+			subType: 'word-interpolated',
+			valueType: ChiriType.of('string'),
 			content: [
 				selector.value,
 				...!separator ? [] : [separator],
-				...typeof newSegment === "string" ? [newSegment] : newSegment.type === "word" ? [newSegment.value] : newSegment.content,
+				...typeof newSegment === 'string' ? [newSegment] : newSegment.type === 'word' ? [newSegment.value] : newSegment.content,
 			],
-			position: typeof newSegment === "string" ? INTERNAL_POSITION : newSegment.position,
+			position: typeof newSegment === 'string' ? INTERNAL_POSITION : newSegment.position,
 		}, restrictCharacters)))
 	}
 
 	function mergeText (position: ChiriPosition, ...texts: ChiriBaseText[]): ChiriValueText {
 		return {
-			type: "text",
-			subType: "text",
-			valueType: ChiriType.of("string"),
+			type: 'text',
+			subType: 'text',
+			valueType: ChiriType.of('string'),
 			content: texts.flatMap(text => text.content),
 			position,
 		}
@@ -1781,14 +1779,14 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 	function getLine (file: string, line: number): string {
 		let cursor = 0
 		for (let i = 0; i < line; i++) {
-			const newlineIndex = file.indexOf("\n", cursor)
+			const newlineIndex = file.indexOf('\n', cursor)
 			if (newlineIndex === -1)
-				return ""
+				return ''
 
 			cursor = newlineIndex + 1
 		}
 
-		const lineEnd = file.indexOf("\n", cursor)
+		const lineEnd = file.indexOf('\n', cursor)
 		return file.slice(cursor, lineEnd === -1 ? undefined : lineEnd)
 	}
 

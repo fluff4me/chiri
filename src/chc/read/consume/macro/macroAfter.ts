@@ -1,17 +1,17 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
-import MacroConstruct from "./MacroConstruct"
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader'
+import MacroConstruct from './MacroConstruct'
 
 export interface ChiriAfter {
-	type: "after"
+	type: 'after'
 	content: ChiriStatement[]
 	position: ChiriPosition
 }
 
-export default MacroConstruct("after")
-	.body("selectors")
+export default MacroConstruct('after')
+	.body('selectors')
 	.consume(({ body, position }): ChiriAfter => {
 		return {
-			type: "after",
+			type: 'after',
 			content: body.flat(),
 			position,
 		}

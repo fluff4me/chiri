@@ -1,4 +1,4 @@
-import type { ArrayOr } from "./Type"
+import type { ArrayOr } from './Type'
 
 namespace Arrays {
 	export function resolve<T> (arrayOr: ArrayOr<T>): T[] {

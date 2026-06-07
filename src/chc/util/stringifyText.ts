@@ -1,34 +1,34 @@
-import type { ChiriBaseText } from "../read/consume/consumeValueText"
-import type { ChiriWord } from "../read/consume/consumeWord"
-import type ChiriCompiler from "../write/ChiriCompiler"
-import resolveExpression from "./resolveExpression"
-import stringifyExpression from "./stringifyExpression"
+import type { ChiriBaseText } from '../read/consume/consumeValueText'
+import type { ChiriWord } from '../read/consume/consumeWord'
+import type ChiriCompiler from '../write/ChiriCompiler'
+import resolveExpression from './resolveExpression'
+import stringifyExpression from './stringifyExpression'
 
 const stringifyText = (compiler: ChiriCompiler, text: ChiriBaseText | ChiriWord): string => {
-	if (text.type === "word")
+	if (text.type === 'word')
 		return text.value
 
-	let result = ""
+	let result = ''
 	for (const value of text.content) {
-		if (typeof value === "string") {
+		if (typeof value === 'string') {
 			result += value
 			continue
 		}
 
 		switch (value.type) {
-			case "text":
+			case 'text':
 				result += stringifyText(compiler, value)
 				continue
-			case "text-raw":
+			case 'text-raw':
 				result += value.text
 				continue
-			case "interpolation-property":
-				result += `var(--${stringifyText(compiler, value.name)}${!value.defaultValue ? "" : `,${compiler.css.getSpaceOptional()}${stringifyText(compiler, value.defaultValue)}`})`
+			case 'interpolation-property':
+				result += `var(--${stringifyText(compiler, value.name)}${!value.defaultValue ? '' : `,${compiler.css.getSpaceOptional()}${stringifyText(compiler, value.defaultValue)}`})`
 				continue
-			case "interpolation-property-name":
+			case 'interpolation-property-name':
 				result += `--${stringifyText(compiler, value.name)}`
 				continue
-			case "interpolation-variable":
+			case 'interpolation-variable':
 				result += stringifyExpression(compiler, compiler.getVariable(value.name.value, value.name.position))
 				continue
 			default:

@@ -1,4 +1,4 @@
-import consumeWordInterpolatedOptional from "../consumeWordInterpolatedOptional"
-import BodyConsumer from "./BodyConsumer"
+import consumeWordInterpolatedOptional from '../consumeWordInterpolatedOptional'
+import BodyConsumer from './BodyConsumer'
 
-export default BodyConsumer("property-name", reader => consumeWordInterpolatedOptional(reader, reader.peek("-") ? true : undefined))
+export default BodyConsumer('property-name', reader => consumeWordInterpolatedOptional(reader, reader.peek('-') ? true : undefined))

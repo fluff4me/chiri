@@ -1,7 +1,7 @@
-import type { PromiseOr } from "../../../util/Type"
-import type ChiriReader from "../../ChiriReader"
-import type { ChiriBodyConsumer } from "../../ChiriReader"
-import type { ChiriContextType } from "./Contexts"
+import type { PromiseOr } from '../../../util/Type'
+import type ChiriReader from '../../ChiriReader'
+import type { ChiriBodyConsumer } from '../../ChiriReader'
+import type { ChiriContextType } from './Contexts'
 
 interface BodyConsumer<T, ARGS extends any[]> {
 	context: ChiriContextType
@@ -21,7 +21,7 @@ namespace BodyConsumer {
 	}
 
 	export function is<T> (consumer?: ChiriBodyConsumer<T>): consumer is BodyConsumer<T, []> {
-		return !!consumer && "context" in consumer
+		return !!consumer && 'context' in consumer
 	}
 }
 

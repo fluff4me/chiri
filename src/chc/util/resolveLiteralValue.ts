@@ -1,34 +1,34 @@
-import type { ChiriLiteralValue } from "../read/consume/consumeTypeConstructorOptional"
-import type { ChiriLiteralRange } from "../read/consume/expression/consumeRangeOptional"
-import { ChiriType } from "../type/ChiriType"
-import type ChiriCompiler from "../write/ChiriCompiler"
-import type { default as resolveExpressionType } from "./resolveExpression"
-import resolveExpression, { Record, SYMBOL_IS_RECORD } from "./resolveExpression"
-import type { default as stringifyExpressionType } from "./stringifyExpression"
+import type { ChiriLiteralValue } from '../read/consume/consumeTypeConstructorOptional'
+import type { ChiriLiteralRange } from '../read/consume/expression/consumeRangeOptional'
+import { ChiriType } from '../type/ChiriType'
+import type ChiriCompiler from '../write/ChiriCompiler'
+import type { default as resolveExpressionType } from './resolveExpression'
+import resolveExpression, { Record, SYMBOL_IS_RECORD } from './resolveExpression'
+import type { default as stringifyExpressionType } from './stringifyExpression'
 
 function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralValue) {
 	const subType = expression.subType
 	switch (subType) {
-		case "dec":
-		case "int":
-		case "uint":
+		case 'dec':
+		case 'int':
+		case 'uint':
 			return +expression.value
-		case "bool":
+		case 'bool':
 			return expression.value
-		case "undefined":
+		case 'undefined':
 			return undefined
-		case "string":
+		case 'string':
 			return expression.segments
-				.map(segment => typeof segment === "string" ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
-				.join("")
+				.map(segment => typeof segment === 'string' ? segment : resolveLiteralValue.stringifyExpression?.(compiler, segment))
+				.join('')
 
-		case "range":
+		case 'range':
 			return resolveLiteralRange(compiler, expression)
 
-		case "list":
+		case 'list':
 			return expression.value
 				.flatMap(content => {
-					if (content.type !== "list-spread")
+					if (content.type !== 'list-spread')
 						return [resolveExpression(compiler, content)]
 
 					const value = resolveExpression(compiler, content.value)
@@ -38,7 +38,7 @@ function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralV
 					return value
 				})
 
-		case "record":
+		case 'record':
 			return Object.assign(Object.fromEntries(expression.value
 				.flatMap(content => {
 					if (Array.isArray(content)) {
@@ -63,11 +63,11 @@ function resolveLiteralValue (compiler: ChiriCompiler, expression: ChiriLiteralV
 export function resolveLiteralRange (compiler: ChiriCompiler, range: ChiriLiteralRange, list?: string | any[]) {
 	let startRaw = resolveLiteralValue.resolveExpression(compiler, range.start)
 	if (startRaw !== undefined && !Number.isInteger(startRaw))
-		throw compiler.error(range.position, "Invalid value for range start bound")
+		throw compiler.error(range.position, 'Invalid value for range start bound')
 
 	let endRaw = resolveLiteralValue.resolveExpression(compiler, range.end)
 	if (endRaw !== undefined && !Number.isInteger(endRaw))
-		throw compiler.error(range.position, "Invalid value for range end bound")
+		throw compiler.error(range.position, 'Invalid value for range end bound')
 
 	if (list && (startRaw as number >= list.length))
 		return []

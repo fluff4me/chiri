@@ -1,20 +1,20 @@
-import type { ChiriTypeGeneric } from "../../../type/ChiriType"
+import type { ChiriTypeGeneric } from '../../../type/ChiriType'
 
 const Contexts = [
-	"inherit" as const,
-	"root" as const,
-	"generic" as const,
-	"function" as const,
-	"paths" as const,
-	"text" as const,
-	"mixin" as const,
-	"component" as const,
-	"state" as const,
-	"pseudo" as const,
-	"property-name" as const,
-	"keyframes" as const,
-	"keyframe" as const,
-	"selectors" as const,
+	'inherit' as const,
+	'root' as const,
+	'generic' as const,
+	'function' as const,
+	'paths' as const,
+	'text' as const,
+	'mixin' as const,
+	'component' as const,
+	'state' as const,
+	'pseudo' as const,
+	'property-name' as const,
+	'keyframes' as const,
+	'keyframe' as const,
+	'selectors' as const,
 ]
 
 export default Contexts
@@ -26,20 +26,20 @@ export interface ChiriFunctionBodyContext {
 }
 
 export interface ContextData {
-	function: ChiriFunctionBodyContext
-	inherit?: undefined
-	generic?: undefined
-	root?: undefined
-	mixin?: undefined
-	component?: undefined
-	state?: undefined
-	pseudo?: undefined
-	"property-name"?: undefined
-	paths?: undefined
-	text?: undefined
-	keyframes?: undefined
-	keyframe?: undefined
-	selectors?: undefined
+	'function': ChiriFunctionBodyContext
+	'inherit'?: undefined
+	'generic'?: undefined
+	'root'?: undefined
+	'mixin'?: undefined
+	'component'?: undefined
+	'state'?: undefined
+	'pseudo'?: undefined
+	'property-name'?: undefined
+	'paths'?: undefined
+	'text'?: undefined
+	'keyframes'?: undefined
+	'keyframe'?: undefined
+	'selectors'?: undefined
 }
 
 type VerifyContexts = ContextData[ChiriContextType]

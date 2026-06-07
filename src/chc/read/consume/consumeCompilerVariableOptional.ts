@@ -1,36 +1,34 @@
-
-
-import type { ChiriType } from "../../type/ChiriType"
-import type ChiriReader from "../ChiriReader"
-import type { ChiriPosition } from "../ChiriReader"
-import { consumeTypeOptional } from "./consumeType"
-import consumeWhiteSpace from "./consumeWhiteSpace"
-import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
-import consumeWord, { type ChiriWord } from "./consumeWord"
-import consumeWordOptional from "./consumeWordOptional"
-import type { ChiriExpressionResult } from "./expression/consumeExpression"
-import consumeExpression from "./expression/consumeExpression"
+import type { ChiriType } from '../../type/ChiriType'
+import type ChiriReader from '../ChiriReader'
+import type { ChiriPosition } from '../ChiriReader'
+import { consumeTypeOptional } from './consumeType'
+import consumeWhiteSpace from './consumeWhiteSpace'
+import consumeWhiteSpaceOptional from './consumeWhiteSpaceOptional'
+import consumeWord, { type ChiriWord } from './consumeWord'
+import consumeWordOptional from './consumeWordOptional'
+import type { ChiriExpressionResult } from './expression/consumeExpression'
+import consumeExpression from './expression/consumeExpression'
 
 export interface ChiriCompilerVariable {
-	type: "variable"
+	type: 'variable'
 	valueType: ChiriType
 	name: ChiriWord
 	expression?: ChiriExpressionResult
 	position: ChiriPosition
-	assignment?: "=" | "??="
+	assignment?: '=' | '??='
 }
 
 export default async (reader: ChiriReader, prefix = true, skipInvalidParamCheck?: true): Promise<ChiriCompilerVariable | undefined> => {
 	const save = reader.savePosition()
 	const position = reader.getPosition()
 	if (prefix)
-		reader.consume("#")
+		reader.consume('#')
 
-	const varWord = consumeWordOptional(reader, "var")
+	const varWord = consumeWordOptional(reader, 'var')
 	let valueType: ChiriType | undefined = !varWord ? consumeTypeOptional(reader)
 		: {
-			type: "type",
-			name: { ...varWord, value: "*" },
+			type: 'type',
+			name: { ...varWord, value: '*' },
 			generics: [],
 		}
 
@@ -39,11 +37,11 @@ export default async (reader: ChiriReader, prefix = true, skipInvalidParamCheck?
 		return undefined
 	}
 
-	if (valueType.name.value === "body" && reader.getVariables(true).find(variable => variable.valueType.name.value === "body"))
-		throw reader.error(save.i, "A macro cannot accept multiple body parameters")
+	if (valueType.name.value === 'body' && reader.getVariables(true).find(variable => variable.valueType.name.value === 'body'))
+		throw reader.error(save.i, 'A macro cannot accept multiple body parameters')
 
-	if (valueType.name.value === "body" && reader.context.type === "function")
-		throw reader.error(save.i, "A function cannot accept a body parameter")
+	if (valueType.name.value === 'body' && reader.context.type === 'function')
+		throw reader.error(save.i, 'A function cannot accept a body parameter')
 
 	consumeWhiteSpace(reader)
 
@@ -54,32 +52,32 @@ export default async (reader: ChiriReader, prefix = true, skipInvalidParamCheck?
 	if (valueType)
 		consumeWhiteSpaceOptional(reader)
 
-	let assignment = reader.consumeOptional("??=", "=") as "??=" | "=" | undefined
-	if (!skipInvalidParamCheck && assignment === "??=" && reader.context.type === "mixin")
-		throw reader.error(save.i, "Mixins cannot accept parameters")
+	let assignment = reader.consumeOptional('??=', '=')
+	if (!skipInvalidParamCheck && assignment === '??=' && reader.context.type === 'mixin')
+		throw reader.error(save.i, 'Mixins cannot accept parameters')
 
 	let expression: ChiriExpressionResult | undefined
 	if (assignment) {
 		consumeWhiteSpaceOptional(reader)
 		expression = await consumeExpression(reader, valueType)
-		if (valueType.name.value === "*")
+		if (valueType.name.value === '*')
 			valueType = expression.valueType
-
-	} else {
+	}
+ else {
 		reader.i = postType
 
-		if (!assignment && reader.consumeOptional("?"))
-			assignment = "??="
+		if (!assignment && reader.consumeOptional('?'))
+			assignment = '??='
 
-		else if (!skipInvalidParamCheck && reader.context.type === "mixin")
-			throw reader.error(save.i, "Mixins cannot accept parameters")
+		else if (!skipInvalidParamCheck && reader.context.type === 'mixin')
+			throw reader.error(save.i, 'Mixins cannot accept parameters')
 	}
 
-	if (!skipInvalidParamCheck && assignment !== "=" && reader.getStatements(true).some(statement => statement.type === "variable" && statement.valueType.name.value === "raw"))
-		throw reader.error(save.i, "No further parameters can appear after a parameter of type \"raw\"")
+	if (!skipInvalidParamCheck && assignment !== '=' && reader.getStatements(true).some(statement => statement.type === 'variable' && statement.valueType.name.value === 'raw'))
+		throw reader.error(save.i, 'No further parameters can appear after a parameter of type "raw"')
 
 	return {
-		type: "variable",
+		type: 'variable',
 		valueType,
 		name,
 		expression,

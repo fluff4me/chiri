@@ -1,4 +1,4 @@
-import type ChiriReader from "../ChiriReader"
+import type ChiriReader from '../ChiriReader'
 
 /**
  * Consume indent up to expected #
@@ -10,7 +10,7 @@ export default (reader: ChiriReader, expected?: number) => {
 		if (indent === expected)
 			break
 
-		if (reader.input[reader.i] !== "\t")
+		if (reader.input[reader.i] !== '\t')
 			break
 
 		indent++

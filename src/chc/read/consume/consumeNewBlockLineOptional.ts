@@ -1,9 +1,7 @@
-
-
-import type ChiriReader from "../ChiriReader"
-import consumeCommentOptional from "./consumeCommentOptional"
-import consumeOptionalIndent from "./consumeIndentOptional"
-import consumeOptionalNewLine from "./consumeNewLineOptional"
+import type ChiriReader from '../ChiriReader'
+import consumeCommentOptional from './consumeCommentOptional'
+import consumeOptionalIndent from './consumeIndentOptional'
+import consumeOptionalNewLine from './consumeNewLineOptional'
 
 /**
  * Loop:
@@ -30,7 +28,7 @@ export default (reader: ChiriReader, ignoreExtraIndentation = false) => {
 		while (true) {
 			encounteredIndent = consumeOptionalIndent(reader, reader.indent)
 			if (encounteredIndent !== reader.indent) {
-				if (reader.consumeOptional("\r") || reader.consumeOptional("\n"))
+				if (reader.consumeOptional('\r') || reader.consumeOptional('\n'))
 					continue
 
 				reader.i = iPreConsumeLine
@@ -42,13 +40,13 @@ export default (reader: ChiriReader, ignoreExtraIndentation = false) => {
 		if (!ignoreExtraIndentation) {
 			const iBeforeExtraIndentation = reader.i
 			if (consumeOptionalIndent(reader))
-				throw reader.error(iBeforeExtraIndentation, "Too much indentation")
+				throw reader.error(iBeforeExtraIndentation, 'Too much indentation')
 		}
 
 		const e = reader.i
 		if (encounteredIndent && !consumeCommentOptional(reader) && consumeOptionalNewLine(reader)) {
 			reader.i = e
-			throw reader.error(iPreConsumeIndent, "Unexpected indentation on empty line")
+			throw reader.error(iPreConsumeIndent, 'Unexpected indentation on empty line')
 		}
 
 		consumed++

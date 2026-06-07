@@ -1,64 +1,62 @@
-
-
-import type { FSWatcher } from "chokidar"
-import fsp from "fs/promises"
-import path from "path"
-import ansi from "../../ansi"
-import { LIB_ROOT, PACKAGE_ROOT } from "../../constants"
-import { ChiriType } from "../type/ChiriType"
-import ChiriTypeManager from "../type/ChiriTypeManager"
-import type TypeDefinition from "../type/TypeDefinition"
-import _ from "../util/_"
-import Arrays from "../util/Arrays"
-import Errors from "../util/Errors"
-import relToCwd from "../util/relToCwd"
-import Strings from "../util/Strings"
-import type { ArrayOr, PromiseOr } from "../util/Type"
-import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from "./consume/body/Contexts"
-import consumeBlockEnd from "./consume/consumeBlockEnd"
-import type { ChiriCompilerVariable } from "./consume/consumeCompilerVariableOptional"
-import consumeDocumentationOptional, { type ChiriDocumentation } from "./consume/consumeDocumentationOptional"
-import type { ChiriKeyframe } from "./consume/consumeKeyframe"
-import type { ChiriMacroUse, MacroResult } from "./consume/consumeMacroUseOptional"
-import consumeMacroUseOptional from "./consume/consumeMacroUseOptional"
-import type { ChiriMixin } from "./consume/consumeMixinOptional"
-import consumeMixinOptional from "./consume/consumeMixinOptional"
-import consumeMixinUseOptional, { type ChiriMixinUse } from "./consume/consumeMixinUseOptional"
-import consumeNewBlockLineOptional from "./consume/consumeNewBlockLineOptional"
-import type { ChiriPropertyDefinition } from "./consume/consumePropertyOptional"
-import consumePropertyOptional, { type ChiriProperty } from "./consume/consumePropertyOptional"
-import type { ChiriValueText } from "./consume/consumeValueText"
-import consumeWhiteSpaceOptional from "./consume/consumeWhiteSpaceOptional"
-import type { ChiriWord } from "./consume/consumeWord"
-import type { ChiriWordInterpolated } from "./consume/consumeWordInterpolatedOptional"
-import type { ChiriAfter } from "./consume/macro/macroAfter"
-import type { ChiriAlias } from "./consume/macro/macroAlias"
-import type { ChiriAnimate } from "./consume/macro/macroAnimate"
-import type { ChiriAnimation } from "./consume/macro/macroAnimation"
-import type { ChiriBreak } from "./consume/macro/macroBreak"
-import type { ChiriContinue } from "./consume/macro/macroContinue"
-import type { ChiriDo } from "./consume/macro/macroDo"
-import type { ChiriEach } from "./consume/macro/macroEach"
-import type { ChiriFontFace } from "./consume/macro/macroFontFace"
-import type { ChiriFor } from "./consume/macro/macroFor"
-import type { ChiriFunction } from "./consume/macro/macroFunctionDeclaration"
-import type { ChiriElse, ChiriIf } from "./consume/macro/macroIf"
-import type { ChiriCSSImport, ChiriImport } from "./consume/macro/macroImport"
-import type { ChiriInclude } from "./consume/macro/macroInclude"
-import type { ChiriMacro } from "./consume/macro/macroMacroDeclaration"
-import type { ChiriReturn } from "./consume/macro/macroReturn"
-import type { ChiriSelect } from "./consume/macro/macroSelect"
-import type { ChiriAssignment } from "./consume/macro/macroSet"
-import type { ChiriShorthand } from "./consume/macro/macroShorthand"
-import type { ChiriWhile } from "./consume/macro/macroWhile"
-import consumeRuleMainOptional from "./consume/rule/consumeRuleMainOptional"
-import consumeRulePseudoOptional from "./consume/rule/consumeRulePseudoOptional"
-import consumeRuleStateContainerOptional from "./consume/rule/consumeRuleStateContainerOptional"
-import consumeRuleStateMediaOptional from "./consume/rule/consumeRuleStateMediaOptional"
-import consumeRuleStateOptional from "./consume/rule/consumeRuleStateOptional"
-import consumeRuleStateSchemeOptional from "./consume/rule/consumeRuleStateSchemeOptional"
-import consumeRuleStateSpecialOptional from "./consume/rule/consumeRuleStateSpecialOptional"
-import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentDescendantElement, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateMedia, ChiriComponentStateScheme, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from "./consume/rule/Rule"
+import type { FSWatcher } from 'chokidar'
+import fsp from 'fs/promises'
+import path from 'path'
+import ansi from '../../ansi'
+import { LIB_ROOT, PACKAGE_ROOT } from '../../constants'
+import { ChiriType } from '../type/ChiriType'
+import ChiriTypeManager from '../type/ChiriTypeManager'
+import type TypeDefinition from '../type/TypeDefinition'
+import _ from '../util/_'
+import Arrays from '../util/Arrays'
+import Errors from '../util/Errors'
+import relToCwd from '../util/relToCwd'
+import Strings from '../util/Strings'
+import type { ArrayOr, PromiseOr } from '../util/Type'
+import type { ChiriContext, ChiriContextType, ResolveContextDataTuple } from './consume/body/Contexts'
+import consumeBlockEnd from './consume/consumeBlockEnd'
+import type { ChiriCompilerVariable } from './consume/consumeCompilerVariableOptional'
+import consumeDocumentationOptional, { type ChiriDocumentation } from './consume/consumeDocumentationOptional'
+import type { ChiriKeyframe } from './consume/consumeKeyframe'
+import type { ChiriMacroUse, MacroResult } from './consume/consumeMacroUseOptional'
+import consumeMacroUseOptional from './consume/consumeMacroUseOptional'
+import type { ChiriMixin } from './consume/consumeMixinOptional'
+import consumeMixinOptional from './consume/consumeMixinOptional'
+import consumeMixinUseOptional, { type ChiriMixinUse } from './consume/consumeMixinUseOptional'
+import consumeNewBlockLineOptional from './consume/consumeNewBlockLineOptional'
+import type { ChiriPropertyDefinition } from './consume/consumePropertyOptional'
+import consumePropertyOptional, { type ChiriProperty } from './consume/consumePropertyOptional'
+import type { ChiriValueText } from './consume/consumeValueText'
+import consumeWhiteSpaceOptional from './consume/consumeWhiteSpaceOptional'
+import type { ChiriWord } from './consume/consumeWord'
+import type { ChiriWordInterpolated } from './consume/consumeWordInterpolatedOptional'
+import type { ChiriAfter } from './consume/macro/macroAfter'
+import type { ChiriAlias } from './consume/macro/macroAlias'
+import type { ChiriAnimate } from './consume/macro/macroAnimate'
+import type { ChiriAnimation } from './consume/macro/macroAnimation'
+import type { ChiriBreak } from './consume/macro/macroBreak'
+import type { ChiriContinue } from './consume/macro/macroContinue'
+import type { ChiriDo } from './consume/macro/macroDo'
+import type { ChiriEach } from './consume/macro/macroEach'
+import type { ChiriFontFace } from './consume/macro/macroFontFace'
+import type { ChiriFor } from './consume/macro/macroFor'
+import type { ChiriFunction } from './consume/macro/macroFunctionDeclaration'
+import type { ChiriElse, ChiriIf } from './consume/macro/macroIf'
+import type { ChiriCSSImport, ChiriImport } from './consume/macro/macroImport'
+import type { ChiriInclude } from './consume/macro/macroInclude'
+import type { ChiriMacro } from './consume/macro/macroMacroDeclaration'
+import type { ChiriReturn } from './consume/macro/macroReturn'
+import type { ChiriSelect } from './consume/macro/macroSelect'
+import type { ChiriAssignment } from './consume/macro/macroSet'
+import type { ChiriShorthand } from './consume/macro/macroShorthand'
+import type { ChiriWhile } from './consume/macro/macroWhile'
+import consumeRuleMainOptional from './consume/rule/consumeRuleMainOptional'
+import consumeRulePseudoOptional from './consume/rule/consumeRulePseudoOptional'
+import consumeRuleStateContainerOptional from './consume/rule/consumeRuleStateContainerOptional'
+import consumeRuleStateMediaOptional from './consume/rule/consumeRuleStateMediaOptional'
+import consumeRuleStateOptional from './consume/rule/consumeRuleStateOptional'
+import consumeRuleStateSchemeOptional from './consume/rule/consumeRuleStateSchemeOptional'
+import consumeRuleStateSpecialOptional from './consume/rule/consumeRuleStateSpecialOptional'
+import type { ChiriComponent, ChiriComponentCustomState, ChiriComponentDescendantElement, ChiriComponentPseudo, ChiriComponentState, ChiriComponentStateContainer, ChiriComponentStateMedia, ChiriComponentStateScheme, ChiriComponentStateSpecial, ChiriComponentViewTransition, ChiriComponentViewTransitionClass } from './consume/rule/Rule'
 
 export interface ChiriPosition {
 	file: string
@@ -118,7 +116,7 @@ export type ChiriStatement =
 	// debug
 	| ChiriValueText
 
-type VerifyChiriStatement = ChiriStatement["position"]
+type VerifyChiriStatement = ChiriStatement['position']
 
 export interface ChiriAST<STATEMENT = ChiriStatement> {
 	source: Record<string, string>
@@ -141,15 +139,15 @@ export default class ChiriReader {
 
 	static async load (filename: string, reader?: ChiriReader, watcher = !reader ? undefined : reader.#watcher) {
 		filename = path.resolve(filename)
-		if (!filename.endsWith(".chiri"))
-			filename += ".chiri"
+		if (!filename.endsWith('.chiri'))
+			filename += '.chiri'
 
 		watcher?.add(filename)
 
 		if (reader?.used.has(filename) && !reader.reusable.has(filename))
-			throw reader.error("This source file is not exported as reusable")
+			throw reader.error('This source file is not exported as reusable')
 
-		const ch = await fsp.readFile(filename, "utf8")
+		const ch = await fsp.readFile(filename, 'utf8')
 		const result = new ChiriReader(filename, ch, reader?.cwd, undefined, reader?.stack.slice(), reader?.source)
 		result.setWatcher(watcher)
 		result.used = reader?.used ?? result.used
@@ -194,7 +192,7 @@ export default class ChiriReader {
 		public readonly filename: string,
 		public readonly input: string,
 		cwd?: string,
-		public readonly context: ChiriContext = { type: "root" },
+		public readonly context: ChiriContext = { type: 'root' },
 		public readonly stack: string[] = [],
 		public readonly source: Record<string, string> = {},
 	) {
@@ -227,7 +225,7 @@ export default class ChiriReader {
 		reader.#lastLineNumberPosition = this.#lastLineNumberPosition
 		reader.#outerStatements = [...this.#outerStatements, ...this.#statements]
 		reader.types = this.types.clone(reader)
-		if (reader.context.type === "function")
+		if (reader.context.type === 'function')
 			reader.types.registerGenerics(...reader.context.data.types)
 		reader.used = this.used
 		reader.reusable = this.reusable
@@ -252,15 +250,15 @@ export default class ChiriReader {
 
 	getVariables (onlyThisBlock?: true) {
 		return (onlyThisBlock ? this.#statements : [...this.#outerStatements, ...this.#statements])
-			.filter((statement): statement is ChiriCompilerVariable => statement.type === "variable")
+			.filter((statement): statement is ChiriCompilerVariable => statement.type === 'variable')
 	}
 
 	getVariableOptional (name: string) {
 		return _
 			?? this.#statements.findLast((statement): statement is ChiriCompilerVariable =>
-				statement.type === "variable" && statement.name.value === name)
+				statement.type === 'variable' && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriCompilerVariable =>
-				statement.type === "variable" && statement.name.value === name)
+				statement.type === 'variable' && statement.name.value === name)
 	}
 
 	getVariable (name: string, start = this.i) {
@@ -274,9 +272,9 @@ export default class ChiriReader {
 	getFunctionOptional (name: string) {
 		return _
 			?? this.#statements.findLast((statement): statement is ChiriFunction =>
-				statement.type === "function" && statement.name.value === name)
+				statement.type === 'function' && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriFunction =>
-				statement.type === "function" && statement.name.value === name)
+				statement.type === 'function' && statement.name.value === name)
 	}
 
 	getFunction (name: string, start = this.i) {
@@ -290,9 +288,9 @@ export default class ChiriReader {
 	getMacroOptional (name: string) {
 		return _
 			?? this.#statements.findLast((statement): statement is ChiriMacro =>
-				statement.type === "macro" && statement.name.value === name)
+				statement.type === 'macro' && statement.name.value === name)
 			?? this.#outerStatements.findLast((statement): statement is ChiriMacro =>
-				statement.type === "macro" && statement.name.value === name)
+				statement.type === 'macro' && statement.name.value === name)
 	}
 
 	with (...scopeStatements: ChiriStatement[]) {
@@ -301,7 +299,8 @@ export default class ChiriReader {
 				this.#statements.push(...scopeStatements)
 				try {
 					return callback()
-				} finally {
+				}
+ finally {
 					this.#statements.splice(-scopeStatements.length, scopeStatements.length)
 				}
 			},
@@ -309,7 +308,7 @@ export default class ChiriReader {
 	}
 
 	getType (name: string | ChiriType) {
-		name = typeof name === "string" ? name : name.name.value
+		name = typeof name === 'string' ? name : name.name.value
 		const type = this.types.types[name]
 		if (!type)
 			throw this.error(`There is no type by name "${name}"`)
@@ -332,7 +331,7 @@ export default class ChiriReader {
 	async read<STATEMENT = ChiriStatement> (consumer: ChiriBodyConsumer<STATEMENT>): Promise<ChiriAST<STATEMENT>>
 	async read (configuredConsumer?: ChiriBodyConsumer<ChiriStatement>): Promise<ChiriAST<object>> {
 		const consumer = async (): Promise<ArrayOr<ChiriStatement | undefined>> => {
-			const macroResult = await consumeMacroUseOptional(this, (configuredConsumer ? undefined : this.#isSubReader ? "generic" : "root")!)
+			const macroResult = await consumeMacroUseOptional(this, (configuredConsumer ? undefined : this.#isSubReader ? 'generic' : 'root')!)
 			if (!configuredConsumer)
 				return this.consumeBodyDefault(macroResult)
 
@@ -349,8 +348,8 @@ export default class ChiriReader {
 					throw this.error(e, `Expected ${this.context.type} content`)
 
 				this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish))
-
-			} else {
+			}
+ else {
 				do {
 					// if (this.#errored)
 					// 	break
@@ -362,16 +361,16 @@ export default class ChiriReader {
 						throw this.error(e, `Expected ${this.context.type} content`)
 
 					this.#statements.push(...Arrays.resolve(consumed).filter(Arrays.filterNullish))
-				} while (consumeNewBlockLineOptional(this, this.context.type === "text"))
+				} while (consumeNewBlockLineOptional(this, this.context.type === 'text'))
 
 				if (this.i < this.input.length)
 					consumeBlockEnd(this)
 			}
 
 			if (!this.#isSubReader && this.i < this.input.length)
-				throw this.error("Failed to continue parsing input file")
-
-		} catch (err) {
+				throw this.error('Failed to continue parsing input file')
+		}
+ catch (err) {
 			this.#errored = true
 			if (!this.#subError)
 				this.logLine(this.#errorStart, err as Error)
@@ -388,11 +387,11 @@ export default class ChiriReader {
 		////////////////////////////////////
 		//#region Macro
 
-		if (macro?.type === "import") {
+		if (macro?.type === 'import') {
 			for (const imp of macro.paths) {
-				const raw = (imp.module ? `${imp.module}:` : "") + imp.path
-				const dirname = !imp.module ? this.dirname : imp.module === "chiri" ? LIB_ROOT : require.resolve(imp.module)
-				const filename = imp.path.startsWith("/") ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path)
+				const raw = (imp.module ? `${imp.module}:` : '') + imp.path
+				const dirname = !imp.module ? this.dirname : imp.module === 'chiri' ? LIB_ROOT : require.resolve(imp.module)
+				const filename = imp.path.startsWith('/') ? path.join(this.cwd, imp.path) : path.resolve(dirname, imp.path)
 				if (this.stack.includes(filename))
 					throw this.error(`Cannot recursively import file "${raw}"`)
 
@@ -400,12 +399,12 @@ export default class ChiriReader {
 				try {
 					sub = await ChiriReader.load(filename, this)
 					sub.importName = raw
-
-				} catch (e) {
+				}
+ catch (e) {
 					const err = e as Error
 					this.#errorStart = this.i
 					this.i = imp.i
-					const message = err.message?.includes("no such file") ? "does not exist" : (err.message ?? "unknown error")
+					const message = err.message?.includes('no such file') ? 'does not exist' : (err.message ?? 'unknown error')
 					throw this.error(`Cannot import file "${raw}": ${message}`)
 				}
 
@@ -451,13 +450,13 @@ export default class ChiriReader {
 		if (property)
 			return property
 
-		const rule = this.context.type === "keyframe" ? undefined : (_
+		const rule = this.context.type === 'keyframe' ? undefined : (_
 			?? await consumeRuleStateMediaOptional(this)
 			?? await consumeRuleStateContainerOptional(this)
 			?? await consumeRuleStateSchemeOptional(this)
-			?? (this.context.type === "state" || this.context.type === "pseudo" ? undefined : await consumeRuleMainOptional(this))
+			?? (this.context.type === 'state' || this.context.type === 'pseudo' ? undefined : await consumeRuleMainOptional(this))
 			?? await consumeRuleStateSpecialOptional(this)
-			?? (this.context.type === "pseudo" ? undefined : await consumeRuleStateOptional(this))
+			?? (this.context.type === 'pseudo' ? undefined : await consumeRuleStateOptional(this))
 			?? await consumeRulePseudoOptional(this)
 		)
 		if (rule)
@@ -468,9 +467,9 @@ export default class ChiriReader {
 
 	logState () {
 		console.log(Object.entries({
-			variables: [...this.#outerStatements, ...this.#statements].filter(statement => statement.type === "variable")
-				.map(statement => `${ansi.path + statement.name.value}: ${ansi.ok + ChiriType.stringify(statement.valueType)}`).join(ansi.label + ", "),
-		}).map(([k, v]) => `${ansi.label + k}: ${v}` + ansi.reset).join("\n"))
+			variables: [...this.#outerStatements, ...this.#statements].filter(statement => statement.type === 'variable')
+				.map(statement => `${ansi.path + statement.name.value}: ${ansi.ok + ChiriType.stringify(statement.valueType)}`).join(ansi.label + ', '),
+		}).map(([k, v]) => `${ansi.label + k}: ${v}` + ansi.reset).join('\n'))
 	}
 
 	logLine (start?: number, errOrMessage?: Error | string) {
@@ -479,23 +478,23 @@ export default class ChiriReader {
 		const lineNumber = this.getLineNumber(undefined, true)
 		const columnNumber = this.getColumnNumber()
 
-		const err = typeof errOrMessage === "string" ? undefined : errOrMessage
-		const message = typeof errOrMessage === "string" ? errOrMessage : undefined
+		const err = typeof errOrMessage === 'string' ? undefined : errOrMessage
+		const message = typeof errOrMessage === 'string' ? errOrMessage : undefined
 
 		const filename = this.formatFilePosAtFromScratch(this.i)
-		console[err ? "error" : "info"](filename
-			+ ansi.label + (errOrMessage ? " - " : "")
-			+ ansi.reset + (!err ? message ?? "" : ansi.err + err.message) + "\n"
-			+ ansi.label + "  " + `${lineNumber + 1}`.padStart(5) + " " + ansi.reset + line + "\n"
-			+ (err ? ansi.err : ansi.filepos) + `        ${" ".repeat(columnNumber)}${"^".repeat((start ?? this.i) - this.i || 1)}`
+		console[err ? 'error' : 'info'](filename
+			+ ansi.label + (errOrMessage ? ' - ' : '')
+			+ ansi.reset + (!err ? message ?? '' : ansi.err + err.message) + '\n'
+			+ ansi.label + '  ' + `${lineNumber + 1}`.padStart(5) + ' ' + ansi.reset + line + '\n'
+			+ (err ? ansi.err : ansi.filepos) + `        ${' '.repeat(columnNumber)}${'^'.repeat((start ?? this.i) - this.i || 1)}`
 			+ ansi.reset
-			+ (!err?.stack || (process.env.CHIRI_ENV !== "dev" && !(+process.env.CHIRI_STACK_LENGTH! || 0)) ? ""
+			+ (!err?.stack || (process.env.CHIRI_ENV !== 'dev' && !(+process.env.CHIRI_STACK_LENGTH! || 0)) ? ''
 				: `\n${err.stack
-					.slice(err.stack.indexOf("\n", start === undefined ? 0 : err.stack.indexOf("\n") + 1) + 1)
-					.split("\n")
+					.slice(err.stack.indexOf('\n', start === undefined ? 0 : err.stack.indexOf('\n') + 1) + 1)
+					.split('\n')
 					.slice(0, +process.env.CHIRI_STACK_LENGTH! || 3)
-					.map(path => path.replace(PACKAGE_ROOT + "\\", "").replaceAll("\\", "/"))
-					.join("\n")}`))
+					.map(path => path.replace(PACKAGE_ROOT + '\\', '').replaceAll('\\', '/'))
+					.join('\n')}`))
 	}
 
 	formatFilename () {
@@ -514,7 +513,7 @@ export default class ChiriReader {
 		let newlines = 0
 		let columns = 0
 		for (let j = 0; j < at; j++) {
-			if (this.input[j] === "\n") {
+			if (this.input[j] === '\n') {
 				newlines++
 				columns = 0
 				continue
@@ -537,13 +536,13 @@ export default class ChiriReader {
 		}
 
 		const expected = strings.map(string => string
-			.replace(/\r/g, "\u240D")
-			.replace(/\n/g, "\u240A")
-			.replace(/ /g, "\u00B7")
-			.replace(/\t/g, "\u2192"))
-		throw this.error("Expected "
+			.replace(/\r/g, '\u240D')
+			.replace(/\n/g, '\u240A')
+			.replace(/ /g, '\u00B7')
+			.replace(/\t/g, '\u2192'))
+		throw this.error('Expected '
 			+ (expected.length === 1 ? expected[0]
-				: "any of " + expected.map(string => `"${string}"`).join(", ")))
+				: 'any of ' + expected.map(string => `"${string}"`).join(', ')))
 	}
 
 	consumeOptional<STRING extends string> (...strings: STRING[]) {
@@ -563,7 +562,7 @@ export default class ChiriReader {
 	 * @param  {...string} strings 
 	 */
 	consumeUntil (...strings: string[]) {
-		let consumed = ""
+		let consumed = ''
 		for (; this.i < this.input.length; this.i++) {
 			if (this.peek(...strings))
 				break
@@ -590,31 +589,31 @@ export default class ChiriReader {
 	error (errorPosition: number, message: string): Error
 	error (errorPositionOrMessage: number | string, message?: string) {
 		this.#errorStart = this.i
-		if (typeof errorPositionOrMessage === "number")
+		if (typeof errorPositionOrMessage === 'number')
 			this.i = errorPositionOrMessage
 		else
 			message = errorPositionOrMessage
 
-		return new Error(message ?? "Compilation failed for an unknown reason")
+		return new Error(message ?? 'Compilation failed for an unknown reason')
 	}
 
 	#subError = false
 	subError () {
 		this.#subError = true
-		throw new Error("if this is logged something is very wrong")
+		throw new Error('if this is logged something is very wrong')
 	}
 
 	getLineStart (at = this.i) {
-		return this.input.lastIndexOf("\n", at - 1) + 1
+		return this.input.lastIndexOf('\n', at - 1) + 1
 	}
 
 	getLineEnd (at = this.i, includeNewline = false) {
-		let index = this.input.indexOf("\n", at)
+		let index = this.input.indexOf('\n', at)
 		if (index === -1)
 			return this.input.length
 
 		if (!includeNewline)
-			while (this.input[--index] === "\r");
+			while (this.input[--index] === '\r');
 		return index + 1
 	}
 
@@ -649,7 +648,7 @@ export default class ChiriReader {
 		let newlines = recalc ? 0 : this.#lastLineNumber
 		let j = recalc ? 0 : lastLineNumberPosition
 		for (; j < at; j++)
-			if (this.input[j] === "\n")
+			if (this.input[j] === '\n')
 				newlines++
 
 		this.#lastLineNumber = newlines
@@ -683,4 +682,5 @@ export default class ChiriReader {
 
 	isDigit = (charCode = this.input.charCodeAt(this.i)) => false
 		|| (charCode >= 48 && charCode <= 57) // 0-9
+
 }

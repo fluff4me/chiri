@@ -1,11 +1,11 @@
-import path from "path"
-import args from "../../args"
-import type { ChiriAST } from "../read/ChiriReader"
-import type { ChiriWord } from "../read/consume/consumeWord"
-import type ChiriCompiler from "./ChiriCompiler"
-import type { ResolvedMixin } from "./CSSWriter"
-import type { ChiriWriteConfig } from "./Writer"
-import Writer from "./Writer"
+import path from 'path'
+import args from '../../args'
+import type { ChiriAST } from '../read/ChiriReader'
+import type { ChiriWord } from '../read/consume/consumeWord'
+import type ChiriCompiler from './ChiriCompiler'
+import type { ResolvedMixin } from './CSSWriter'
+import type { ChiriWriteConfig } from './Writer'
+import Writer from './Writer'
 
 export interface ResolvedComponent {
 	selector: ChiriWord
@@ -33,33 +33,34 @@ const UMD_SUFFIX = `
 export default class ESWriter extends Writer {
 
 	constructor (ast: ChiriAST, dest: string, config?: ChiriWriteConfig) {
-		super(ast, dest, { extension: ".js", ...config })
+		super(ast, dest, { extension: '.js', ...config })
 	}
 
 	override createDestPath (outFile: string): string {
-		return typeof args["out-es"] === "string" ? path.resolve(args["out-es"], outFile) : super.createDestPath(outFile)
+		return typeof args['out-es'] === 'string' ? path.resolve(args['out-es'], outFile) : super.createDestPath(outFile)
 	}
 
 	override onCompileStart (compiler: ChiriCompiler): void {
 		this.writeLineStartBlock(UMD_PREFIX)
-		this.writeLineStartBlock("exports.default = {")
+		this.writeLineStartBlock('exports.default = {')
 	}
 
 	emitComponent (compiler: ChiriCompiler, component: ResolvedComponent) {
-		this.write("\"")
+		this.write('"')
 		this.writeWord(component.selector)
-		this.write("\"")
-		this.writeLineStartBlock(": [")
+		this.write('"')
+		this.writeLineStartBlock(': [')
 		for (const mixin of new Set(component.mixins))
 			if (!mixin.skip)
 				this.writeLine(`"${mixin.name.value}",`)
-		this.writeLineEndBlock("],")
+		this.writeLineEndBlock('],')
 	}
 
 	override onCompileEnd (compiler: ChiriCompiler): void {
-		this.writeLineEndBlock("};")
+		this.writeLineEndBlock('};')
 		this.writeLineEndBlock(UMD_SUFFIX)
 
 		this.write(`\n//# sourceMappingURL=data:application/json;base64,${btoa(this.map.toString())}`)
 	}
+
 }

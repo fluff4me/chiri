@@ -1,22 +1,20 @@
-
-
-import { ChiriType } from "../../../type/ChiriType"
-import type ChiriReader from "../../ChiriReader"
-import consumeUnsignedIntegerOptional from "./consumeUnsignedIntegerOptional"
-import type { ChiriLiteralNumeric } from "./Numeric"
+import { ChiriType } from '../../../type/ChiriType'
+import type ChiriReader from '../../ChiriReader'
+import consumeUnsignedIntegerOptional from './consumeUnsignedIntegerOptional'
+import type { ChiriLiteralNumeric } from './Numeric'
 
 export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	const e = reader.i
 	const position = reader.getPosition()
-	const negative = reader.consumeOptional("-") ?? ""
+	const negative = reader.consumeOptional('-') ?? ''
 
 	const int = consumeUnsignedIntegerOptional(reader)
-	if (int === undefined && !reader.peek(".")) {
+	if (int === undefined && !reader.peek('.')) {
 		reader.i = e
 		return undefined
 	}
 
-	if (!reader.consumeOptional(".")) {
+	if (!reader.consumeOptional('.')) {
 		reader.i = e
 		return undefined
 	}
@@ -28,9 +26,9 @@ export default (reader: ChiriReader): ChiriLiteralNumeric | undefined => {
 	}
 
 	return {
-		type: "literal",
-		subType: "dec",
-		valueType: ChiriType.of("dec"),
+		type: 'literal',
+		subType: 'dec',
+		valueType: ChiriType.of('dec'),
 		value: `${negative}${int?.value || 0}.${dec.value}`,
 		position,
 	}

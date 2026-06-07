@@ -1,12 +1,12 @@
-import { STATES_SPECIAL } from "../../../util/componentStates"
-import type ChiriReader from "../../ChiriReader"
-import consumeBody from "../consumeBody"
-import consumeWordOptional from "../consumeWordOptional"
-import type { ChiriComponentStateSpecial } from "./Rule"
+import { STATES_SPECIAL } from '../../../util/componentStates'
+import type ChiriReader from '../../ChiriReader'
+import consumeBody from '../consumeBody'
+import consumeWordOptional from '../consumeWordOptional'
+import type { ChiriComponentStateSpecial } from './Rule'
 
 export default async (reader: ChiriReader): Promise<ChiriComponentStateSpecial | undefined> => {
 	const restore = reader.savePosition()
-	const prefix = reader.consumeOptional(":", "&:")
+	const prefix = reader.consumeOptional(':', '&:')
 	if (!prefix)
 		return
 
@@ -17,14 +17,14 @@ export default async (reader: ChiriReader): Promise<ChiriComponentStateSpecial |
 		return undefined
 	}
 
-	reader.consume(":")
+	reader.consume(':')
 
 	return {
-		type: "component",
-		subType: "state-special",
-		spread: prefix === "&:",
+		type: 'component',
+		subType: 'state-special',
+		spread: prefix === '&:',
 		state,
-		...await consumeBody(reader, "state"),
+		...await consumeBody(reader, 'state'),
 		position,
 	}
 }

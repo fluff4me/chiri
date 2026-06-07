@@ -1,12 +1,12 @@
-import _ from "../../util/_"
-import type ChiriReader from "../ChiriReader"
-import type { ChiriMacroUseContext, MacroResult } from "./consumeMacroUseOptional"
-import consumeWordOptional from "./consumeWordOptional"
-import macroDo from "./macro/macroDo"
-import macroEach from "./macro/macroEach"
-import macroFor from "./macro/macroFor"
-import macroIf, { macroElse, macroIfElse } from "./macro/macroIf"
-import macroWhile from "./macro/macroWhile"
+import _ from '../../util/_'
+import type ChiriReader from '../ChiriReader'
+import type { ChiriMacroUseContext, MacroResult } from './consumeMacroUseOptional'
+import consumeWordOptional from './consumeWordOptional'
+import macroDo from './macro/macroDo'
+import macroEach from './macro/macroEach'
+import macroFor from './macro/macroFor'
+import macroIf, { macroElse, macroIfElse } from './macro/macroIf'
+import macroWhile from './macro/macroWhile'
 
 export default async function consumeMacroBlockUseOptional (reader: ChiriReader, context: ChiriMacroUseContext): Promise<MacroResult | undefined> {
 	const savedPosition = reader.savePosition()
@@ -33,14 +33,14 @@ export default async function consumeMacroBlockUseOptional (reader: ChiriReader,
 
 function consumeLabelOptional (reader: ChiriReader) {
 	const savedPosition = reader.savePosition()
-	if (!reader.consumeOptional("#:"))
+	if (!reader.consumeOptional('#:'))
 		return undefined
 
 	const label = consumeWordOptional(reader)
 	if (!label?.value)
 		return undefined
 
-	if (!reader.consumeOptional(" ")) {
+	if (!reader.consumeOptional(' ')) {
 		reader.restorePosition(savedPosition)
 		return undefined
 	}

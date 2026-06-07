@@ -1,17 +1,17 @@
-import { INTERNAL_POSITION } from "../../../constants"
-import { ChiriType } from "../../type/ChiriType"
-import type ChiriReader from "../ChiriReader"
-import type { ChiriPosition } from "../ChiriReader"
-import consumeBody from "./consumeBody"
-import type { MacroResult } from "./consumeMacroUseOptional"
-import type { ChiriValueText } from "./consumeValueText"
-import type { ChiriWord } from "./consumeWord"
-import consumeWord from "./consumeWord"
-import consumeWordInterpolated from "./consumeWordInterpolated"
-import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
+import { INTERNAL_POSITION } from '../../../constants'
+import { ChiriType } from '../../type/ChiriType'
+import type ChiriReader from '../ChiriReader'
+import type { ChiriPosition } from '../ChiriReader'
+import consumeBody from './consumeBody'
+import type { MacroResult } from './consumeMacroUseOptional'
+import type { ChiriValueText } from './consumeValueText'
+import type { ChiriWord } from './consumeWord'
+import consumeWord from './consumeWord'
+import consumeWordInterpolated from './consumeWordInterpolated'
+import type { ChiriWordInterpolated } from './consumeWordInterpolatedOptional'
 
 export interface ChiriProperty {
-	type: "property"
+	type: 'property'
 	isCustomProperty?: true
 	property: ChiriWordInterpolated
 	value: (ChiriValueText | MacroResult)[]
@@ -19,7 +19,7 @@ export interface ChiriProperty {
 }
 
 export interface ChiriPropertyDefinition {
-	type: "property-definition"
+	type: 'property-definition'
 	syntax: ChiriWord
 	property: ChiriWordInterpolated
 	value: (ChiriValueText | MacroResult)[]
@@ -33,45 +33,45 @@ interface CustomPropertyDefinitionType {
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/@property
 const customPropertyDefinitionTypes = {
-	"*": {
-		syntax: "*",
-		initialValue: "",
+	'*': {
+		syntax: '*',
+		initialValue: '',
 	},
-	"length-percentage": {
-		syntax: "<length-percentage>",
-		initialValue: "0px",
+	'length-percentage': {
+		syntax: '<length-percentage>',
+		initialValue: '0px',
 	},
-	length: {
-		syntax: "<length>",
-		initialValue: "0px",
+	'length': {
+		syntax: '<length>',
+		initialValue: '0px',
 	},
-	percentage: {
-		syntax: "<percentage>",
-		initialValue: "0%",
+	'percentage': {
+		syntax: '<percentage>',
+		initialValue: '0%',
 	},
-	number: {
-		syntax: "<number>",
-		initialValue: "0",
+	'number': {
+		syntax: '<number>',
+		initialValue: '0',
 	},
-	dec: {
-		syntax: "<number>",
-		initialValue: "0",
+	'dec': {
+		syntax: '<number>',
+		initialValue: '0',
 	},
-	int: {
-		syntax: "<integer>",
-		initialValue: "0",
+	'int': {
+		syntax: '<integer>',
+		initialValue: '0',
 	},
-	time: {
-		syntax: "<time>",
-		initialValue: "0s",
+	'time': {
+		syntax: '<time>',
+		initialValue: '0s',
 	},
-	color: {
-		syntax: "<color>",
-		initialValue: "#000",
+	'color': {
+		syntax: '<color>',
+		initialValue: '#000',
 	},
-	colour: {
-		syntax: "<color>",
-		initialValue: "#000",
+	'colour': {
+		syntax: '<color>',
+		initialValue: '#000',
 	},
 } satisfies Record<string, CustomPropertyDefinitionType>
 
@@ -79,54 +79,54 @@ const typeNames = Object.keys(customPropertyDefinitionTypes) as (keyof typeof cu
 
 export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropertyDefinition | undefined> => {
 	const e = reader.i
-	if (!reader.isLetter() && reader.input[reader.i] !== "$" && reader.input[reader.i] !== "#" && reader.input[reader.i] !== "-")
+	if (!reader.isLetter() && reader.input[reader.i] !== '$' && reader.input[reader.i] !== '#' && reader.input[reader.i] !== '-')
 		return undefined
 
-	if (reader.input[reader.i] === "#" && reader.input[reader.i + 1] !== "{")
+	if (reader.input[reader.i] === '#' && reader.input[reader.i + 1] !== '{')
 		return undefined
 
 	const position = reader.getPosition()
-	const isCustomProperty = reader.consumeOptional("$")
+	const isCustomProperty = reader.consumeOptional('$')
 
-	const isCustomPropertyDefinition = isCustomProperty && reader.consumeOptional("$")
-	if (isCustomPropertyDefinition && reader.context.type !== "root")
-		throw reader.error("Custom property definitions must be in the root context")
+	const isCustomPropertyDefinition = isCustomProperty && reader.consumeOptional('$')
+	if (isCustomPropertyDefinition && reader.context.type !== 'root')
+		throw reader.error('Custom property definitions must be in the root context')
 
 	const property = consumeWordInterpolated(reader, true)
 
 	const typeWord = !isCustomPropertyDefinition ? undefined
-		: reader.consume("!") && consumeWord(reader, ...typeNames)
+		: reader.consume('!') && consumeWord(reader, ...typeNames)
 
 	const type = !typeWord ? undefined : customPropertyDefinitionTypes[typeWord.value]
 
 	let consumeValue: boolean
 	if (!isCustomPropertyDefinition || type?.initialValue === undefined)
-		consumeValue = !!reader.consume(":")
+		consumeValue = !!reader.consume(':')
 	else
-		consumeValue = !!reader.consumeOptional(":")
+		consumeValue = !!reader.consumeOptional(':')
 
 	let value: (ChiriValueText | MacroResult)[]
 	if (!consumeValue) {
 		value = [{
-			type: "text",
-			subType: "text",
+			type: 'text',
+			subType: 'text',
 			content: [type!.initialValue],
 			position: INTERNAL_POSITION,
-			valueType: ChiriType.of("string"),
+			valueType: ChiriType.of('string'),
 		}]
-
-	} else {
+	}
+ else {
 		const position = reader.getPosition()
-		const textBody = await consumeBody(reader, "text")
+		const textBody = await consumeBody(reader, 'text')
 		value = textBody.content
 	}
 
 	if (type)
 		return {
-			type: "property-definition",
+			type: 'property-definition',
 			property,
 			syntax: {
-				type: "word",
+				type: 'word',
 				value: type.syntax,
 				position: typeWord!.position,
 			},
@@ -135,7 +135,7 @@ export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropert
 		}
 
 	return {
-		type: "property",
+		type: 'property',
 		isCustomProperty: isCustomProperty ? true : undefined,
 		position,
 		property,

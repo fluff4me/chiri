@@ -1,15 +1,15 @@
-import fsp from "fs/promises"
-import path from "path"
-import { SourceMapGenerator } from "source-map"
-import ansi from "../../ansi"
-import args from "../../args"
-import type { ChiriAST, ChiriPosition } from "../read/ChiriReader"
-import type { ChiriDocumentation } from "../read/consume/consumeDocumentationOptional"
-import type { ChiriBaseText } from "../read/consume/consumeValueText"
-import type { ChiriWord } from "../read/consume/consumeWord"
-import relToCwd from "../util/relToCwd"
-import stringifyText from "../util/stringifyText"
-import type ChiriCompiler from "./ChiriCompiler"
+import fsp from 'fs/promises'
+import path from 'path'
+import { SourceMapGenerator } from 'source-map'
+import ansi from '../../ansi'
+import args from '../../args'
+import type { ChiriAST, ChiriPosition } from '../read/ChiriReader'
+import type { ChiriDocumentation } from '../read/consume/consumeDocumentationOptional'
+import type { ChiriBaseText } from '../read/consume/consumeValueText'
+import type { ChiriWord } from '../read/consume/consumeWord'
+import relToCwd from '../util/relToCwd'
+import stringifyText from '../util/stringifyText'
+import type ChiriCompiler from './ChiriCompiler'
 
 export interface QueuedWrite {
 	output: string
@@ -21,7 +21,7 @@ export interface QueuedWrite {
 
 export namespace QueuedWrite {
 	export function makeQueue (): QueuedWrite[] {
-		return [{ output: "" }]
+		return [{ output: '' }]
 	}
 }
 
@@ -42,7 +42,7 @@ export default class Writer {
 	#indent = 0
 
 	public readonly dest: string
-	private output = ""
+	private output = ''
 	protected outputQueue = QueuedWrite.makeQueue()
 
 	public readonly map: SourceMapGenerator
@@ -64,7 +64,7 @@ export default class Writer {
 	}
 
 	createDestPath (outFile: string): string {
-		if (typeof args.out === "string")
+		if (typeof args.out === 'string')
 			outFile = path.join(args.out, outFile)
 		return path.resolve(outFile)
 	}
@@ -76,14 +76,14 @@ export default class Writer {
 	unindent (amount = 1) {
 		this.#indent -= amount
 		for (let i = 0; i < amount; i++)
-			if (this.currentWrite.output.at(-1) === "\t")
+			if (this.currentWrite.output.at(-1) === '\t')
 				this.currentWrite.output = this.currentWrite.output.slice(0, -1)
 	}
 
 	async writeFile () {
-		this.output = ""
+		this.output = ''
 		for (const queued of this.queue) {
-			if (queued.mapping && queued.mapping.sourcePosition.file !== "internal") {
+			if (queued.mapping && queued.mapping.sourcePosition.file !== 'internal') {
 				this.map.addMapping({
 					generated: this.getPosition(),
 					source: queued.mapping.sourcePosition.file,
@@ -129,15 +129,15 @@ export default class Writer {
 	}
 
 	writeNewLine () {
-		this.currentWrite.output += "\n" + "\t".repeat(this.#indent)
+		this.currentWrite.output += '\n' + '\t'.repeat(this.#indent)
 	}
 
 	getNewLineOptional () {
-		return "\n" + "\t".repeat(this.#indent)
+		return '\n' + '\t'.repeat(this.#indent)
 	}
 
 	getSpaceOptional () {
-		return " "
+		return ' '
 	}
 
 	writeNewLineOptional () {
@@ -151,33 +151,33 @@ export default class Writer {
 	writeBlock (inside: () => any) {
 		const startIndex = this.currentWrite.output.length
 		this.indent()
-		this.writeLine("{")
+		this.writeLine('{')
 		const currentWrite = this.currentWrite
 		const insideStartIndex = this.currentWrite.output.length
 		inside()
 		if (currentWrite === this.currentWrite && this.currentWrite.output.length === insideStartIndex) {
 			this.currentWrite.output = this.currentWrite.output.slice(0, startIndex)
-			this.write("{}")
+			this.write('{}')
 			this.#indent--
 			return
 		}
 
 		this.unindent()
-		this.writeLine("}")
+		this.writeLine('}')
 	}
 
 	writeDocumentation (documentation: ChiriDocumentation) {
-		this.writeLine("/**")
-		const lines = documentation.content.split("\n")
+		this.writeLine('/**')
+		const lines = documentation.content.split('\n')
 		for (const line of lines)
 			this.writeLine(` * ${line}`)
-		this.writeLine(" */")
+		this.writeLine(' */')
 	}
 
 	onCompileStart (compiler: ChiriCompiler) { }
 	onCompileEnd (compiler: ChiriCompiler) { }
 
-	private addMapping (output: string, sourcePosition: ChiriPosition, tokenName?: string | undefined) {
+	private addMapping (output: string, sourcePosition: ChiriPosition, tokenName?: string) {
 		this.queue.push({
 			output,
 			mapping: {
@@ -185,23 +185,23 @@ export default class Writer {
 				tokenName,
 			},
 		})
-		this.queue.push({ output: "" })
+		this.queue.push({ output: '' })
 	}
 
 	getLineStart (at = this.output.length) {
-		return this.output.lastIndexOf("\n", at - 1) + 1
+		return this.output.lastIndexOf('\n', at - 1) + 1
 	}
 
 	getLineEnd (at = this.output.length) {
-		let index = this.output.indexOf("\n", at)
+		let index = this.output.indexOf('\n', at)
 		if (index === -1)
 			return this.output.length
 
-		while (this.output[--index] === "\r");
+		while (this.output[--index] === '\r');
 		return index + 1
 	}
 
-	getPosition (at = this.output.length): Omit<ChiriPosition, "file"> {
+	getPosition (at = this.output.length): Omit<ChiriPosition, 'file'> {
 		return {
 			line: this.getLineNumber(at) + 1,
 			column: this.getColumnNumber(at) + 1,
@@ -213,12 +213,12 @@ export default class Writer {
 	getLineNumber (at = this.output.length) {
 		const recalc = at < this.#lastLineNumberPosition
 		if (recalc)
-			console.warn(ansi.err + "Recalculating line number from start :(")
+			console.warn(ansi.err + 'Recalculating line number from start :(')
 
 		let newlines = recalc ? 0 : this.#lastLineNumber
 		let j = recalc ? 0 : this.#lastLineNumberPosition
 		for (; j < at; j++)
-			if (this.output[j] === "\n")
+			if (this.output[j] === '\n')
 				newlines++
 
 		if (!recalc) {
@@ -232,8 +232,8 @@ export default class Writer {
 	getColumnNumber (at = this.output.length - 1) {
 		return at - this.getLineStart(at)
 	}
+
 }
 export interface ChiriWriteConfig {
 	extension: `.${string}`
 }
-

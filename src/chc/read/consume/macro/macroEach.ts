@@ -1,22 +1,22 @@
-import { ChiriType } from "../../../type/ChiriType"
-import typeList from "../../../type/typeList"
-import typeRecord from "../../../type/typeRecord"
-import typeString from "../../../type/typeString"
-import typeUint from "../../../type/typeUint"
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
-import consumeBody from "../consumeBody"
-import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
-import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
-import consumeWhiteSpace from "../consumeWhiteSpace"
-import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
-import type { ChiriExpressionOperand } from "../expression/consumeExpression"
-import consumeExpression from "../expression/consumeExpression"
-import consumeRangeOptional from "../expression/consumeRangeOptional"
-import type { ChiriMacroBlock } from "./MacroConstruct"
-import MacroConstruct from "./MacroConstruct"
+import { ChiriType } from '../../../type/ChiriType'
+import typeList from '../../../type/typeList'
+import typeRecord from '../../../type/typeRecord'
+import typeString from '../../../type/typeString'
+import typeUint from '../../../type/typeUint'
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader'
+import consumeBody from '../consumeBody'
+import type { ChiriCompilerVariable } from '../consumeCompilerVariableOptional'
+import consumeCompilerVariableOptional from '../consumeCompilerVariableOptional'
+import consumeWhiteSpace from '../consumeWhiteSpace'
+import consumeWhiteSpaceOptional from '../consumeWhiteSpaceOptional'
+import type { ChiriExpressionOperand } from '../expression/consumeExpression'
+import consumeExpression from '../expression/consumeExpression'
+import consumeRangeOptional from '../expression/consumeRangeOptional'
+import type { ChiriMacroBlock } from './MacroConstruct'
+import MacroConstruct from './MacroConstruct'
 
 export interface ChiriEach extends ChiriMacroBlock {
-	type: "each"
+	type: 'each'
 	iterable: ChiriExpressionOperand
 	keyVariable?: ChiriCompilerVariable
 	variable?: ChiriCompilerVariable
@@ -24,11 +24,11 @@ export interface ChiriEach extends ChiriMacroBlock {
 	position: ChiriPosition
 }
 
-export default MacroConstruct("each")
+export default MacroConstruct('each')
 	.consumeParameters(async reader => {
 		consumeWhiteSpace(reader)
 
-		reader.consumeOptional("in ")
+		reader.consumeOptional('in ')
 
 		const e = reader.i
 		const iterable = consumeRangeOptional(reader) ?? consumeExpression.inline(reader, typeList.type, typeRecord.type, typeString.type)
@@ -37,22 +37,22 @@ export default MacroConstruct("each")
 
 		let variable1: ChiriCompilerVariable | undefined
 		let variable2: ChiriCompilerVariable | undefined
-		if (consumeWhiteSpaceOptional(reader) && reader.consumeOptional("as") && consumeWhiteSpaceOptional(reader)) {
+		if (consumeWhiteSpaceOptional(reader) && reader.consumeOptional('as') && consumeWhiteSpaceOptional(reader)) {
 			variable1 = await consumeCompilerVariableOptional(reader, false, true)
 			if (!variable1)
-				throw reader.error("Expected variable declaration")
+				throw reader.error('Expected variable declaration')
 
-			if (reader.consumeOptional(",")) {
+			if (reader.consumeOptional(',')) {
 				consumeWhiteSpaceOptional(reader)
 
 				variable2 = await consumeCompilerVariableOptional(reader, false, true)
 				if (!variable2)
-					throw reader.error("Expected variable declaration")
+					throw reader.error('Expected variable declaration')
 			}
 		}
 
 		if (variable1 && !variable2 && isRecord)
-			throw reader.error("Expected variable declarations for both a key and its associated value")
+			throw reader.error('Expected variable declarations for both a key and its associated value')
 
 		if (variable1 && isRecord && !reader.types.isAssignable(typeString.type, variable1.valueType))
 			throw reader.error(e, `Iterable value of type "${ChiriType.stringify(typeString.type)}" is not assignable to "${ChiriType.stringify(variable1.valueType)}"`)
@@ -76,15 +76,15 @@ export default MacroConstruct("each")
 		}
 	})
 	.consume(async ({ reader, extra: { iterable, variable, keyVariable }, position }): Promise<ChiriEach> => {
-		reader.consume(":")
-		const body = await consumeBody(reader, "inherit", sub => {
+		reader.consume(':')
+		const body = await consumeBody(reader, 'inherit', sub => {
 			if (keyVariable)
 				sub.addOuterStatement(keyVariable)
 			if (variable)
 				sub.addOuterStatement(variable)
 		})
 		return {
-			type: "each",
+			type: 'each',
 			isBlock: true,
 			iterable,
 			keyVariable,

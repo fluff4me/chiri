@@ -1,7 +1,5 @@
-
-
-import type ChiriReader from "../ChiriReader"
-import consumeWordOptional from "../consume/consumeWordOptional"
+import type ChiriReader from '../ChiriReader'
+import consumeWordOptional from '../consume/consumeWordOptional'
 
 export default (reader: ChiriReader) => {
 	const savedPosition = reader.savePosition()
@@ -9,7 +7,7 @@ export default (reader: ChiriReader) => {
 	if (!consumeWordOptional(reader))
 		return false
 
-	const result = reader.consumeOptional("=", "\r\n", " ")
+	const result = reader.consumeOptional('=', '\r\n', ' ')
 	reader.restorePosition(savedPosition)
 	return result
 }

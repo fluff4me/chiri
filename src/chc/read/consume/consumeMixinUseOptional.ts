@@ -1,11 +1,11 @@
-import assertNewLine from "../assert/assertNewLine"
-import type ChiriReader from "../ChiriReader"
-import type { ChiriPosition } from "../ChiriReader"
-import type { ChiriWordInterpolated } from "./consumeWordInterpolatedOptional"
-import consumeWordInterpolatedOptional from "./consumeWordInterpolatedOptional"
+import assertNewLine from '../assert/assertNewLine'
+import type ChiriReader from '../ChiriReader'
+import type { ChiriPosition } from '../ChiriReader'
+import type { ChiriWordInterpolated } from './consumeWordInterpolatedOptional'
+import consumeWordInterpolatedOptional from './consumeWordInterpolatedOptional'
 
 export interface ChiriMixinUse {
-	type: "mixin-use"
+	type: 'mixin-use'
 	name: ChiriWordInterpolated
 	spread?: true
 	// assignments: Record<string, ChiriExpressionOperand>
@@ -16,7 +16,7 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	const position = reader.getPosition()
 	const start = reader.i
 
-	const operator = reader.consumeOptional("%", "..%")
+	const operator = reader.consumeOptional('%', '..%')
 	if (!operator)
 		return undefined
 
@@ -27,9 +27,9 @@ export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	assertNewLine(reader)
 
 	return {
-		type: "mixin-use",
+		type: 'mixin-use',
 		name: word,
-		spread: operator === "..%" ? true : undefined,
+		spread: operator === '..%' ? true : undefined,
 		// assignments: {},
 		position,
 	}

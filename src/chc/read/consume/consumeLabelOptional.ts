@@ -1,13 +1,13 @@
-import type ChiriReader from "../ChiriReader"
-import consumeWhiteSpaceOptional from "./consumeWhiteSpaceOptional"
-import consumeWordOptional from "./consumeWordOptional"
+import type ChiriReader from '../ChiriReader'
+import consumeWhiteSpaceOptional from './consumeWhiteSpaceOptional'
+import consumeWordOptional from './consumeWordOptional'
 
 export default function (reader: ChiriReader) {
 	const i = reader.i
 	if (!consumeWhiteSpaceOptional(reader))
 		return undefined
 
-	if (!reader.consumeOptional(":")) {
+	if (!reader.consumeOptional(':')) {
 		reader.i = i
 		return undefined
 	}

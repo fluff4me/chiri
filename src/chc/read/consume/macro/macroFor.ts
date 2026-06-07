@@ -1,17 +1,17 @@
-import type { ChiriPosition, ChiriStatement } from "../../ChiriReader"
-import consumeBody from "../consumeBody"
-import type { ChiriCompilerVariable } from "../consumeCompilerVariableOptional"
-import consumeCompilerVariableOptional from "../consumeCompilerVariableOptional"
-import consumeInlineMacroUseOptional from "../consumeInlineMacroUseOptional"
-import consumeWhiteSpace from "../consumeWhiteSpace"
-import consumeWhiteSpaceOptional from "../consumeWhiteSpaceOptional"
-import type { ChiriExpressionOperand } from "../expression/consumeExpression"
-import consumeExpression from "../expression/consumeExpression"
-import type { ChiriMacroBlock } from "./MacroConstruct"
-import MacroConstruct from "./MacroConstruct"
+import type { ChiriPosition, ChiriStatement } from '../../ChiriReader'
+import consumeBody from '../consumeBody'
+import type { ChiriCompilerVariable } from '../consumeCompilerVariableOptional'
+import consumeCompilerVariableOptional from '../consumeCompilerVariableOptional'
+import consumeInlineMacroUseOptional from '../consumeInlineMacroUseOptional'
+import consumeWhiteSpace from '../consumeWhiteSpace'
+import consumeWhiteSpaceOptional from '../consumeWhiteSpaceOptional'
+import type { ChiriExpressionOperand } from '../expression/consumeExpression'
+import consumeExpression from '../expression/consumeExpression'
+import type { ChiriMacroBlock } from './MacroConstruct'
+import MacroConstruct from './MacroConstruct'
 
 export interface ChiriFor extends ChiriMacroBlock {
-	type: "for"
+	type: 'for'
 	variable: ChiriCompilerVariable
 	condition: ChiriExpressionOperand
 	update?: ChiriStatement
@@ -19,15 +19,15 @@ export interface ChiriFor extends ChiriMacroBlock {
 	position: ChiriPosition
 }
 
-export default MacroConstruct("for")
+export default MacroConstruct('for')
 	.consumeParameters(async reader => {
 		consumeWhiteSpace(reader)
 
 		const variable = await consumeCompilerVariableOptional(reader, false)
 		if (!variable)
-			throw reader.error("Expected variable declaration")
+			throw reader.error('Expected variable declaration')
 
-		reader.consume(",")
+		reader.consume(',')
 		consumeWhiteSpaceOptional(reader)
 
 		const [condition, update] = await reader
@@ -35,7 +35,7 @@ export default MacroConstruct("for")
 			.do(async () => {
 				const condition = consumeExpression.inline(reader)
 
-				reader.consume(",")
+				reader.consume(',')
 				consumeWhiteSpaceOptional(reader)
 
 				const update = await consumeInlineMacroUseOptional(reader)
@@ -49,10 +49,10 @@ export default MacroConstruct("for")
 		}
 	})
 	.consume(async ({ reader, extra: { variable, condition, update }, position }): Promise<ChiriFor> => {
-		reader.consume(":")
-		const body = await consumeBody(reader, "inherit", sub => sub.addOuterStatement(variable))
+		reader.consume(':')
+		const body = await consumeBody(reader, 'inherit', sub => sub.addOuterStatement(variable))
 		return {
-			type: "for",
+			type: 'for',
 			isBlock: true,
 			variable,
 			condition,
