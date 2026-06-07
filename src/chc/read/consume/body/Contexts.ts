@@ -42,7 +42,7 @@ export interface ContextData {
 	'selectors'?: undefined
 }
 
-type VerifyContexts = ContextData[ChiriContextType]
+type VERIFY_CONTEXTS = ContextData[ChiriContextType]
 
 export type ChiriContextTypeWithoutData = { [CONTEXT in ChiriContextType as ContextData[CONTEXT] extends undefined ? CONTEXT : never]: CONTEXT } extends infer O ? O[keyof O] : never
 export type ChiriContextTypeWithData = { [CONTEXT in ChiriContextType as ContextData[CONTEXT] extends undefined ? never : CONTEXT]: CONTEXT } extends infer O ? O[keyof O] : never

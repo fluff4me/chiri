@@ -44,24 +44,24 @@ type TypeName = keyof typeof types
 
 const binaryNumericOperators = ['**', '+', '-', '*', '/', '%', '==', '!=', '<=', '>=', '<', '>'] as const
 const unaryNumericOperators = ['+', '-'] as const
-const binaryBitwiseOperators = ['&', '|', '^', '<<', '>>', '>>>'] as const
-const unaryBitwiseOperators = ['~'] as const
+const BINARY_BITWISE_OPERATORS = ['&', '|', '^', '<<', '>>', '>>>'] as const
+const UNARY_BITWISE_OPERATORS = ['~'] as const
 const binaryBooleanOperators = ['||', '&&', '==', '!='] as const
 const unaryBooleanOperators = ['!'] as const
 const binaryStringOperators = ['.', 'x', '==', '!='] as const
-const binaryOtherOperators = ['is'] as const
-const unaryOtherOperators = ['exists'] as const
+const BINARY_OTHER_OPERATORS = ['is'] as const
+const UNARY_OTHER_OPERATORS = ['exists'] as const
 
 export type Operator =
 	| (typeof binaryNumericOperators)[number]
 	| (typeof unaryNumericOperators)[number]
-	| (typeof binaryBitwiseOperators)[number]
-	| (typeof unaryBitwiseOperators)[number]
+	| (typeof BINARY_BITWISE_OPERATORS)[number]
+	| (typeof UNARY_BITWISE_OPERATORS)[number]
 	| (typeof binaryBooleanOperators)[number]
 	| (typeof unaryBooleanOperators)[number]
 	| (typeof binaryStringOperators)[number]
-	| (typeof unaryOtherOperators)[number]
-	| (typeof binaryOtherOperators)[number]
+	| (typeof UNARY_OTHER_OPERATORS)[number]
+	| (typeof BINARY_OTHER_OPERATORS)[number]
 
 const minNumericPrecision2 = (typeA: string, typeB: string): 'uint' | 'int' | 'dec' => (typeA === 'dec' || typeB === 'dec') ? 'dec'
 	: (typeA === 'int' || typeB === 'int') ? 'int'
@@ -118,7 +118,7 @@ const operatorPrecedence = [
 	['exists'],
 ] satisfies Operator[][]
 
-type VerifyHasAllOperators = { [KEY in (typeof operatorPrecedence)[number][number]]: true }[Operator]
+type VERIFY_HAS_ALL_OPERATORS = { [KEY in (typeof operatorPrecedence)[number][number]]: true }[Operator]
 
 type BinaryCoercion = readonly [string, undefined] | readonly [undefined, string]
 const binaryOperatorOperandCoercion: Partial<Record<Operator, string | BinaryCoercion>> = {

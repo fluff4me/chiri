@@ -1,5 +1,5 @@
 #!/usr/bin/env node
- 
+
 import type { FSWatcher } from 'chokidar'
 import chokidar from 'chokidar'
 import dotenv from 'dotenv'
@@ -19,15 +19,15 @@ if (process.cwd() === PACKAGE_ROOT)
 Error.stackTraceLimit = Math.max(Error.stackTraceLimit, +process.env.CHIRI_STACK_LENGTH! || 4)
 
 if (process.env.CHIRI_ENV === 'dev')
-	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+	// eslint-disable-next-line @typescript-eslint/consistent-type-imports, @typescript-eslint/no-require-imports
 	(require('source-map-support') as typeof import('source-map-support')).install()
 
 if (process.env.CHIRI_INSPECT)
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 	require('inspector').open(+process.env.CHIRI_INSPECT_PORT! || undefined, process.env.CHIRI_INSPECT_HOST)
 
 if (args.v) {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
 	console.log(require(path.join(PACKAGE_ROOT, 'package.json')).version)
 	process.exit()
 }
@@ -87,7 +87,7 @@ async function compile (filename: string, watcher?: FSWatcher) {
 		if (key.startsWith(CHC_ROOT))
 			delete require.cache[key]
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+	// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
 	const rerequire = <T> (path: string): T => require(path).default as T
 
 	const ChiriReader = rerequire<typeof ChiriReaderType>('./chc/read/ChiriReader.js')
@@ -108,7 +108,7 @@ async function compile (filename: string, watcher?: FSWatcher) {
 		await streamJsonFunction(reader.basename + '.ast.json', ast)
 			.catch(e => { throw prefixError(e, 'Failed to write AST JSON file') })
 	}
-	 
+
 	const ChiriCompilerClass = rerequire<typeof ChiriCompilerType>('./chc/write/ChiriCompiler.js')
 	const compiler = ChiriCompilerClass(ast, reader.basename)
 	compiler.compile()

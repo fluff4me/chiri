@@ -27,7 +27,7 @@ export namespace QueuedWrite {
 
 export default class Writer {
 
-	public static writeBlocks (writers: Writer[], inside: () => any) {
+	public static writeBlocks (writers: Writer[], inside: () => unknown) {
 		writeBlocksRecursive()
 
 		function writeBlocksRecursive () {

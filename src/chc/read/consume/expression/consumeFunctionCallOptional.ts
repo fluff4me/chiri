@@ -27,7 +27,6 @@ export default (reader: ChiriReader, ...expectedTypes: ChiriType[]): ChiriFuncti
 	const position = reader.getPosition()
 	const restore = reader.savePosition()
 
-	const e = reader.i
 	const name = consumeWordOptional(reader)
 	const fn = name && resolveFunctionFromName(reader, name)
 	if (!fn) {
@@ -63,7 +62,7 @@ export function consumePartialFuntionCall (reader: ChiriReader, position: ChiriP
 		for (let i = 0; i < parameters.length; i++) {
 			const parameter = parameters[i]
 			if (i > 0) {
-				if (!parens || !reader.consumeOptional(',') && (parameter.type === 'type' || parameter.assignment !== '??=')) {
+				if (!parens || (!reader.consumeOptional(',') && (parameter.type === 'type' || parameter.assignment !== '??='))) {
 					const missingParameters = parameters.slice(i)
 						.map(param => param.type === 'type' ? ChiriType.stringify(param)
 							: `${param.expression ? '[' : ''}${ChiriType.stringify(param.valueType)} ${param.name.value}${param.expression ? ']?' : ''}`)

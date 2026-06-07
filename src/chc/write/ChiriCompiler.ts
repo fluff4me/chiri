@@ -4,7 +4,6 @@ import type { ChiriAST, ChiriPosition, ChiriStatement } from '../read/ChiriReade
 import type { ChiriCompilerVariable } from '../read/consume/consumeCompilerVariableOptional'
 import type { ChiriMacroUse } from '../read/consume/consumeMacroUseOptional'
 import type { ChiriProperty } from '../read/consume/consumePropertyOptional'
-import type { ChiriBaseText, ChiriValueText } from '../read/consume/consumeValueText'
 import type { ChiriWord } from '../read/consume/consumeWord'
 import type { ChiriWordInterpolated } from '../read/consume/consumeWordInterpolatedOptional'
 import type { ChiriExpressionResult } from '../read/consume/expression/consumeExpression'
@@ -217,13 +216,13 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			for (const writer of writers)
 				writer.onCompileEnd(compiler)
 		}
- catch (err) {
+		catch (err) {
 			logLine(undefined, err as ErrorPositioned)
 		}
 	}
 
 	async function writeFiles () {
-		return Promise.all(writers.map(writer => writer.writeFile())) as Promise<any>
+		await Promise.all(writers.map(writer => writer.writeFile()))
 	}
 
 	////////////////////////////////////
@@ -322,7 +321,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				case 'macro-use':
 					return i + 1
 
-				default: { const assertNever: never = block }
+				default: throw new Error(`Unexpected block type ${(block as { type?: string }).type ?? 'unknown'}`)
 			}
 		}
 	}
@@ -468,7 +467,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				baseMixin.children.push(mixin)
 				return mixin
 			}
- else if (mixin.name.value in usedMixins)
+			else if (mixin.name.value in usedMixins)
 				throw error(mixin.position, `%${mixin.name.value} cannot be redefined after being used`)
 		}
 
@@ -488,7 +487,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			// never used yet, so guaranteed to be after all the other mixins!
 			mixin = { ...preRegisteredMixin, index: ++usedMixinIndex }
 		}
- else {
+		else {
 			const intersectingMixin = after.sort((a, b) => b.index - a.index).find(mixin => mixin.affects.some(affect => baseMixin.affects.includes(affect)))
 			const intersectingMixinIndex = intersectingMixin?.index ?? -1
 			let bump = 1
@@ -1100,7 +1099,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			if (mixin) {
 				mixin.affects = mixinAffects
 			}
- else {
+			else {
 				const name = makeWord(className, selector.class[0].position)
 				setMixin({
 					type: 'mixin',
@@ -1356,7 +1355,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 				const bodyParameter = fn.content.find((statement): statement is ChiriCompilerVariable => statement.type === 'variable' && statement.valueType.name.value === 'body')
 				if (bodyParameter) {
 					assignments.variables ??= {}
-					 
+
 					assignments.variables[bodyParameter.name.value] = {
 						type: bodyParameter.valueType,
 						value: Object.assign([...statement.content], { isBody: true }) as any[],
@@ -1643,7 +1642,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			if (blocks.length - 1 > blockIndex)
 				throw failedToExitBlocksError(blockIndex)
 
-			if (block && blockBroken(block) || blockContinuing())
+			if ((block && blockBroken(block)) || blockContinuing())
 				break
 
 			const macroResult = compileMacros(statement, contextCompiler)
@@ -1662,7 +1661,7 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			if (blocks.length - 1 > blockIndex)
 				throw failedToExitBlocksError(blockIndex)
 
-			if (block && blockBroken(block) || blockContinuing())
+			if ((block && blockBroken(block)) || blockContinuing())
 				break
 
 			const result = contextCompiler(statement)
@@ -1756,16 +1755,6 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 			],
 			position: typeof newSegment === 'string' ? INTERNAL_POSITION : newSegment.position,
 		}, restrictCharacters)))
-	}
-
-	function mergeText (position: ChiriPosition, ...texts: ChiriBaseText[]): ChiriValueText {
-		return {
-			type: 'text',
-			subType: 'text',
-			valueType: ChiriType.of('string'),
-			content: texts.flatMap(text => text.content),
-			position,
-		}
 	}
 
 	function root () {

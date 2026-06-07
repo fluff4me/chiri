@@ -114,7 +114,7 @@ export type ChiriExpressionResult =
 	| ChiriExpressionOperand
 	| ChiriExpressionMatch
 
-type VerifyExpressionResult = ChiriExpressionResult['valueType'] | ChiriExpressionResult['position']
+type VERIFY_EXPRESSION_RESULT = ChiriExpressionResult['valueType'] | ChiriExpressionResult['position']
 
 export type ExpressionOperandConsumer = (reader: ChiriReader, ...expectedTypes: ChiriType[]) => ChiriExpressionOperand
 

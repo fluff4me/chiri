@@ -32,7 +32,7 @@ export type ChiriLiteralValue =
 	| ChiriLiteralRange
 	| ChiriLiteralRecord
 
-type VerifyChiriStatement = ChiriLiteralValue['position']
+type VERIFY_CHIRI_STATEMENT = ChiriLiteralValue['position']
 
 export default (reader: ChiriReader, type?: ChiriType): ChiriLiteralValue | undefined => {
 	if (type !== undefined)

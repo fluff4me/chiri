@@ -23,7 +23,7 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 	switch (expression.type) {
 		case 'literal':
 			if (expression.subType === 'function')
-				return compiler.getFunction(expression.name.value, expression.name.position) as any
+				return compiler.getFunction(expression.name.value, expression.name.position) as unknown as Value
 
 			return resolveLiteralValue(compiler, expression)
 
@@ -139,7 +139,7 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 					const operandB: any = resolveExpression(compiler, expression.operandB)
 					switch (expression.operator) {
 						case '+':
-							return operandA + operandB
+							return operandA + operandB as Value
 						case '-':
 							return operandA - operandB
 						case '*':
@@ -158,9 +158,9 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 						case '!=':
 							return operandA !== operandB
 						case '||':
-							return operandA || operandB
+							return (operandA || operandB) as Value
 						case '&&':
-							return operandA && operandB
+							return (operandA && operandB) as Value
 						case '|':
 							return operandA | operandB
 						case '&':
@@ -180,7 +180,7 @@ function resolveExpression (compiler: ChiriCompiler, expression?: ChiriExpressio
 						case 'x':
 							return `${operandA}`.repeat(+operandB || 1)
 						case '??':
-							return operandA ?? operandB
+							return (operandA ?? operandB) as Value
 						case '<<':
 							return operandA << operandB
 						case '>>':

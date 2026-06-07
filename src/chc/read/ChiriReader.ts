@@ -116,7 +116,7 @@ export type ChiriStatement =
 	// debug
 	| ChiriValueText
 
-type VerifyChiriStatement = ChiriStatement['position']
+type VERIFY_CHIRI_STATEMENT = ChiriStatement['position']
 
 export interface ChiriAST<STATEMENT = ChiriStatement> {
 	source: Record<string, string>
@@ -160,7 +160,6 @@ export default class ChiriReader {
 
 	#outerStatements: ChiriStatement[] = []
 	#statements: ChiriStatement[] = []
-	#blocks: ChiriBlock[] = []
 
 	#errorStart?: number
 

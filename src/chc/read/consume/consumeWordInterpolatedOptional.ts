@@ -9,8 +9,6 @@ export interface ChiriWordInterpolated extends ChiriBaseText {
 }
 
 export default (reader: ChiriReader, skipStartRequirements = false): ChiriWordInterpolated | undefined => {
-	const e = reader.i
-
 	if (!reader.isLetter() && !reader.peek('#{') && (!skipStartRequirements || (!reader.peek('-') && !reader.isDigit())))
 		return undefined
 

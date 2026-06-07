@@ -78,7 +78,6 @@ const customPropertyDefinitionTypes = {
 const typeNames = Object.keys(customPropertyDefinitionTypes) as (keyof typeof customPropertyDefinitionTypes)[]
 
 export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropertyDefinition | undefined> => {
-	const e = reader.i
 	if (!reader.isLetter() && reader.input[reader.i] !== '$' && reader.input[reader.i] !== '#' && reader.input[reader.i] !== '-')
 		return undefined
 
@@ -115,8 +114,7 @@ export default async (reader: ChiriReader): Promise<ChiriProperty | ChiriPropert
 			valueType: ChiriType.of('string'),
 		}]
 	}
- else {
-		const position = reader.getPosition()
+	else {
 		const textBody = await consumeBody(reader, 'text')
 		value = textBody.content
 	}

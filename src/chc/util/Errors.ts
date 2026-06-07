@@ -1,6 +1,6 @@
 namespace Errors {
 	export function stack (skip = 0, truncate = true) {
-		const stackLength = process.env.CHIRI_ENV === 'dev' && +process.env.CHIRI_STACK_LENGTH! || 0
+		const stackLength = (process.env.CHIRI_ENV === 'dev' && +process.env.CHIRI_STACK_LENGTH!) || 0
 		if (!stackLength)
 			return ''
 

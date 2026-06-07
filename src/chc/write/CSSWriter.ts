@@ -235,10 +235,10 @@ export default class CSSWriter extends Writer {
 		if (mixin.specialState)
 			this.writeLineEndBlock('}')
 
-		for (const query of mixin.containerQueries ?? [])
+		for (const _ of mixin.containerQueries ?? [])
 			this.writeLineEndBlock('}')
 
-		for (const query of mixin.mediaQueries ?? [])
+		for (const _ of mixin.mediaQueries ?? [])
 			this.writeLineEndBlock('}')
 
 		//#endregion

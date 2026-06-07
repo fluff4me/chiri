@@ -14,7 +14,6 @@ export interface ChiriMixinUse {
 
 export default (reader: ChiriReader): ChiriMixinUse | undefined => {
 	const position = reader.getPosition()
-	const start = reader.i
 
 	const operator = reader.consumeOptional('%', '..%')
 	if (!operator)

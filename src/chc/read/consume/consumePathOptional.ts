@@ -9,7 +9,7 @@ export interface ChiriPath {
 
 const isValidPathCharacter = {
 	...{},
-	 win32: (c: number) => true // FAT32, NTFS
+	win32: (c: number) => true // FAT32, NTFS
 		&& c !== 0 // NUL
 		&& c !== 92 // \
 		&& c !== 47 // /
@@ -22,24 +22,24 @@ const isValidPathCharacter = {
 		&& c !== 124 // |
 		&& c !== 10 // \n
 		&& c !== 13, // \r
-	 darwin: (c: number) => true // HFS, HFS+ 
+	darwin: (c: number) => true // HFS, HFS+
 		&& c !== 58 // :
 		&& c !== 47 // /
 		&& c !== 10 // \n
 		&& c !== 13, // \r
-	 linux: (c: number) => true // ext[2-4]
+	linux: (c: number) => true // ext[2-4]
 		&& c !== 0 // NUL
 		&& c !== 47 // /
 		&& c !== 10 // \n
 		&& c !== 13, // \r
-	 aix: undefined,
-	 android: undefined,
-	 cygwin: undefined,
-	 freebsd: undefined,
-	 haiku: undefined,
-	 netbsd: undefined,
-	 openbsd: undefined,
-	 sunos: undefined,
+	aix: undefined,
+	android: undefined,
+	cygwin: undefined,
+	freebsd: undefined,
+	haiku: undefined,
+	netbsd: undefined,
+	openbsd: undefined,
+	sunos: undefined,
 }[process.platform]
 
 if (!isValidPathCharacter)
