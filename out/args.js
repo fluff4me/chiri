@@ -13,11 +13,13 @@
     const args = {};
     const allArgs = [];
     exports.allArgs = allArgs;
+    const booleanArgs = new Set(['dry']);
     for (let i = 2; i < process.argv.length; i++) {
         const arg = process.argv[i];
         if (arg[0] === '-' && (arg[2] || arg[1] !== '-')) {
             if (arg[1] === '-') {
-                args[arg.slice(2)] = process.argv[++i];
+                const name = arg.slice(2);
+                args[name] = booleanArgs.has(name) ? true : process.argv[++i];
                 continue;
             }
             args[arg.slice(1)] = true;

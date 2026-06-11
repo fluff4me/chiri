@@ -126,9 +126,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                     es.emitComponent(compiler, component);
                 for (const writer of writers)
                     writer.onCompileEnd(compiler);
+                return true;
             }
             catch (err) {
                 logLine(undefined, err);
+                return false;
             }
         }
         async function writeFiles() {

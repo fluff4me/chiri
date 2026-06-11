@@ -26,7 +26,7 @@ interface ChiriCompiler {
     readonly dts: DTSWriter;
     readonly writers: readonly Writer[];
     readonly pipeValueStack: Value[];
-    compile(): void;
+    compile(): boolean;
     writeFiles(): Promise<void>;
     error(message?: string): ErrorPositioned;
     error(position?: ChiriPosition, message?: string): ErrorPositioned;

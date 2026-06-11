@@ -62,6 +62,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     let queuedCompileAll = false;
     let queuedTryCompile = false;
     async function compileAll(files, watch = false) {
+        let ok = true;
         for (const file of files) {
             let watcher;
             if (watch) {
@@ -81,10 +82,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
                 })
                     .on('error', console.error);
             }
-            await (compilationPromise = tryCompile(file, watcher));
+            ok = await (compilationPromise = tryCompile(file, watcher)) && ok;
             compilationPromise = undefined;
             watcher?.add([file, `${file}.chiri`]);
         }
+        return ok;
     }
     async function tryCompile(filename, watcher) {
         try {
@@ -99,6 +101,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             // stack = enomdl ? message.slice(message.indexOf("\n") + 1) : err.stack?.slice(err.stack.indexOf("\n", err.stack.indexOf("\n") + 1)) ?? "";
             message = enomdl ? message.slice(0, message.indexOf('\n') + 1) : message;
             console.error(ansi_1.default.err + message, ansi_1.default.reset + stack);
+            return false;
         }
     }
     async function compile(filename, watcher) {
@@ -112,23 +115,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         const reader = await ChiriReader.load(filename, undefined, watcher);
         if (!reader) {
             console.log(ansi_1.default.err + 'Failed to load ChiriReader');
-            return;
+            return false;
         }
         reader.setWatcher(watcher);
         const ast = await reader.read();
         if (reader.errored)
-            return;
+            return false;
         if (process.env.CHIRI_AST) {
             const streamJsonFunction = rerequire('./chc/util/streamJson.js');
-            await streamJsonFunction(reader.basename + '.ast.json', ast)
-                .catch(e => { throw (0, prefixError_js_1.default)(e, 'Failed to write AST JSON file'); });
+            if (!args_1.default.dry)
+                await streamJsonFunction(reader.basename + '.ast.json', ast)
+                    .catch(e => { throw (0, prefixError_js_1.default)(e, 'Failed to write AST JSON file'); });
         }
         const ChiriCompilerClass = rerequire('./chc/write/ChiriCompiler.js');
         const compiler = ChiriCompilerClass(ast, reader.basename);
-        compiler.compile();
-        await compiler.writeFiles();
+        if (!compiler.compile())
+            return false;
+        if (!args_1.default.dry)
+            await compiler.writeFiles();
         const elapsed = performance.now() - start;
-        console.log(ansi_1.default.label + 'chiri', ansi_1.default.path + (0, relToCwd_js_1.default)(reader.filename), ansi_1.default.label + formatElapsed(elapsed));
+        console.log(ansi_1.default.label + (args_1.default.dry ? 'chiri dry' : 'chiri'), ansi_1.default.path + (0, relToCwd_js_1.default)(reader.filename), ansi_1.default.label + formatElapsed(elapsed));
+        return true;
     }
     function formatElapsed(elapsed) {
         if (elapsed < 1)
@@ -141,7 +148,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     }
     void (async () => {
         const files = args_1.allArgs.map(file => path_1.default.resolve(file));
-        await compileAll(files, !!args_1.default.w);
+        const ok = await compileAll(files, !!args_1.default.w);
+        if (!args_1.default.w && !ok)
+            process.exitCode = 1;
         if (args_1.default.w && process.env.CHIRI_ENV === 'dev') {
             let lastQueueAttemptId;
             const debounceTime = 100;
