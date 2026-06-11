@@ -113,7 +113,7 @@ interface ChiriCompiler {
 
 	readonly pipeValueStack: Value[]
 
-	compile (): void
+	compile (): boolean
 	writeFiles (): Promise<void>
 	error (message?: string): ErrorPositioned
 	error (position?: ChiriPosition, message?: string): ErrorPositioned
@@ -215,9 +215,12 @@ function ChiriCompiler (ast: ChiriAST, dest: string): ChiriCompiler {
 
 			for (const writer of writers)
 				writer.onCompileEnd(compiler)
+
+			return true
 		}
 		catch (err) {
 			logLine(undefined, err as ErrorPositioned)
+			return false
 		}
 	}
 

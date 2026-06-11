@@ -37,6 +37,7 @@ let queuedCompileAll = false
 let queuedTryCompile = false
 
 async function compileAll (files: string[], watch = false) {
+	let ok = true
 	for (const file of files) {
 		let watcher: FSWatcher | undefined
 		if (watch) {
@@ -57,11 +58,13 @@ async function compileAll (files: string[], watch = false) {
 				.on('error', console.error)
 		}
 
-		await (compilationPromise = tryCompile(file, watcher))
+		ok = await (compilationPromise = tryCompile(file, watcher)) && ok
 		compilationPromise = undefined
 
 		watcher?.add([file, `${file}.chiri`])
 	}
+
+	return ok
 }
 
 async function tryCompile (filename: string, watcher?: FSWatcher) {
@@ -77,6 +80,7 @@ async function tryCompile (filename: string, watcher?: FSWatcher) {
 		// stack = enomdl ? message.slice(message.indexOf("\n") + 1) : err.stack?.slice(err.stack.indexOf("\n", err.stack.indexOf("\n") + 1)) ?? "";
 		message = enomdl ? message.slice(0, message.indexOf('\n') + 1) : message
 		console.error(ansi.err + message, ansi.reset + stack)
+		return false
 	}
 }
 
@@ -94,28 +98,33 @@ async function compile (filename: string, watcher?: FSWatcher) {
 	const reader = await ChiriReader.load(filename, undefined, watcher)
 	if (!reader) {
 		console.log(ansi.err + 'Failed to load ChiriReader')
-		return
+		return false
 	}
 
 	reader.setWatcher(watcher)
 
 	const ast = await reader.read()
 	if (reader.errored)
-		return
+		return false
 
 	if (process.env.CHIRI_AST) {
 		const streamJsonFunction = rerequire<typeof streamJsonType>('./chc/util/streamJson.js')
-		await streamJsonFunction(reader.basename + '.ast.json', ast)
-			.catch(e => { throw prefixError(e, 'Failed to write AST JSON file') })
+		if (!args.dry)
+			await streamJsonFunction(reader.basename + '.ast.json', ast)
+				.catch(e => { throw prefixError(e, 'Failed to write AST JSON file') })
 	}
 
 	const ChiriCompilerClass = rerequire<typeof ChiriCompilerType>('./chc/write/ChiriCompiler.js')
 	const compiler = ChiriCompilerClass(ast, reader.basename)
-	compiler.compile()
-	await compiler.writeFiles()
+	if (!compiler.compile())
+		return false
+
+	if (!args.dry)
+		await compiler.writeFiles()
 
 	const elapsed = performance.now() - start
-	console.log(ansi.label + 'chiri', ansi.path + relToCwd(reader.filename), ansi.label + formatElapsed(elapsed))
+	console.log(ansi.label + (args.dry ? 'chiri dry' : 'chiri'), ansi.path + relToCwd(reader.filename), ansi.label + formatElapsed(elapsed))
+	return true
 }
 
 function formatElapsed (elapsed: number) {
@@ -133,7 +142,9 @@ function formatElapsed (elapsed: number) {
 
 void (async () => {
 	const files = allArgs.map(file => path.resolve(file))
-	await compileAll(files, !!args.w)
+	const ok = await compileAll(files, !!args.w)
+	if (!args.w && !ok)
+		process.exitCode = 1
 
 	if (args.w && process.env.CHIRI_ENV === 'dev') {
 		let lastQueueAttemptId: NodeJS.Timeout | undefined
